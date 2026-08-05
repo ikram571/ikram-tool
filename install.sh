@@ -76,13 +76,48 @@ else
 fi
 ok "Libraries installed"
 
+human() {
+    local B="$1"
+    if [ "$B" -ge 1048576 ] 2>/dev/null; then
+        awk "BEGIN{printf \"%.1f MB\", $B/1048576}"
+    elif [ "$B" -ge 1024 ] 2>/dev/null; then
+        awk "BEGIN{printf \"%.0f KB\", $B/1024}"
+    else
+        printf "%s B" "$B"
+    fi
+}
+
 TARGET="$HOME/Ikram_Tool"
 box "$C_CYAN" "⬇ Downloading tool"
 mkdir -p "$TARGET"
-if curl -sL -o "$TARGET/IkramTool.zip" \
-    "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip" \
-    && [ -s "$TARGET/IkramTool.zip" ]; then
-    ok "Tool downloaded (latest release)"
+TOOL_URL="https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
+TOTAL=$(curl -sIL "$TOOL_URL" 2>/dev/null | grep -i '^content-length' | tail -1 | tr -dc '0-9')
+[ -z "$TOTAL" ] && TOTAL=0
+curl -sL -o "$TARGET/IkramTool.zip" "$TOOL_URL" &
+CPID=$!
+DONE=0
+while kill -0 "$CPID" 2>/dev/null; do
+    DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
+    PCT=$(( TOTAL > 0 ? DONE * 100 / TOTAL : 0 ))
+    FILLED=$(( PCT * 18 / 100 ))
+    BAR=""
+    i=0
+    while [ "$i" -lt "$FILLED" ]; do BAR="${BAR}█"; i=$((i+1)); done
+    i=$FILLED
+    while [ "$i" -lt 18 ]; do BAR="${BAR}░"; i=$((i+1)); done
+    printf "\r${C_CYAN}  ╭──────────────────────────────╮\r${C_RESET}"
+    printf "\r${C_CYAN}  │${C_RESET}  ⬇  Downloading tool       ${C_CYAN}│\r${C_RESET}"
+    printf "\r${C_CYAN}  │${C_RESET}  [${BAR}] %3s%%      ${C_CYAN}│\r${C_RESET}" "$PCT"
+    printf "\r${C_CYAN}  │${C_RESET}  Downloading: $(human "$DONE")         ${C_CYAN}│\r${C_RESET}"
+    printf "\r${C_CYAN}  │${C_RESET}  Size: $(human "$TOTAL")              ${C_CYAN}│\r${C_RESET}"
+    printf "\r${C_CYAN}  ╰──────────────────────────────╯${C_RESET}"
+    sleep 0.2
+done
+wait "$CPID"
+DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
+printf "\n"
+if [ "$DONE" -gt 0 ] 2>/dev/null; then
+    ok "Tool downloaded ($(human "$DONE"))"
 else
     fail "Download failed — internet check karo aur dobara try karo."
     exit 1

@@ -20,6 +20,18 @@ ikram
 
 **KEY REQUIRED** — valid key daalo, tool unlock.
 
+## 🔄 UPDATE (ONE LINE)
+
+Naya version aane par `ikram` khud update ho jata hai. Agar auto-update na ho to
+manually update kar lo:
+
+```
+curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
+```
+
+Installer fresh latest release download karke install kar deta hai — purana sab
+saf ho jata hai, DROP/RESULT mehfooz rehte hain.
+
 ## ▶ OPEN TOOL
 
 Install hone ke baad tool kholne ki direct command:
