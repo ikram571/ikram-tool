@@ -129,8 +129,15 @@ print(p.hex())
 if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     echo ""
     echo "  ⬆ Python purana hai — upgrade kar raha hoon..."
+    pkg update -y >/dev/null 2>&1
     pkg upgrade -y python 2>&1 | tail -3
-    echo "  ✓ Ab dobara try karo: ikram"
+    if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
+        echo "  ✓ Python upgrade ho gaya! Tool khul raha hai..."
+        exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
+    fi
+    echo "  ✗ Python upgrade nahi ho paya. Ye chalayen:"
+    echo "    pkg update -y && pkg upgrade -y"
+    echo "    ikram"
     echo ""
     exit 1
 fi
