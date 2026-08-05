@@ -15,19 +15,20 @@ C_RED='\033[1;38;5;196m'
 C_DIM='\033[2;38;5;244m'
 C_BOLD='\033[1m'
 
-width=52
-line() { printf "${1}%*s${C_RESET}\n" "$width" '' | tr ' ' '═'; }
+W=50
+TOP="${C_PINK}╭$(printf '─%.0s' $(seq 1 $W))╮${C_RESET}"
+MID="${C_PINK}│${C_RESET}"
+BOT="${C_PINK}╰$(printf '─%.0s' $(seq 1 $W))╯${C_RESET}"
 
-step() { printf "\n${C_CYAN}${C_BOLD}▸ %s${C_RESET}\n" "$1"; }
-ok()   { printf "${C_GREEN}${C_BOLD}  ✓ %s${C_RESET}\n" "$1"; }
-fail() { printf "${C_RED}${C_BOLD}  ✗ %s${C_RESET}\n" "$1"; }
+step() { printf "\n${C_CYAN}${C_BOLD}  ▸ %s${C_RESET}\n" "$1"; }
+ok()   { printf "${C_GREEN}${C_BOLD}    ✓ %s${C_RESET}\n" "$1"; }
+fail() { printf "${C_RED}${C_BOLD}    ✗ %s${C_RESET}\n" "$1"; }
 
-printf "\n"
-line "${C_PINK}"
-printf "${C_PINK}${C_BOLD}  ✦  I K R A M   T O O L  ✦${C_RESET}\n"
-printf "${C_GOLD}${C_BOLD}      PAK • LUA  MODDING${C_RESET}\n"
-printf "${C_DIM}   One-line VIP Installer for Termux${C_RESET}\n"
-line "${C_PINK}"
+printf "\n${TOP}\n"
+printf "${MID}${C_PINK}${C_BOLD}     ✦  I K R A M   T O O L  ✦${C_RESET}${MID}\n"
+printf "${MID}${C_GOLD}${C_BOLD}        PAK • LUA  MODDING${C_RESET}${MID}\n"
+printf "${MID}${C_DIM}        One-line VIP Installer${C_RESET}${MID}\n"
+printf "${BOT}\n"
 
 step "Storage permission"
 termux-setup-storage >/dev/null 2>&1 && ok "Storage access granted" || ok "Storage already set / skipped"
@@ -79,10 +80,9 @@ ok "'ikram' command ready"
 
 chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
 
-printf "\n"
-line "${C_GREEN}"
-printf "${C_GREEN}${C_BOLD}  ✅ IKRAM TOOL INSTALLED!${C_RESET}\n"
-printf "${C_GOLD}${C_BOLD}  Run:  ${C_CYAN}ikram${C_RESET}\n"
-printf "${C_DIM}  (KEY REQUIRED — owner se lo)${C_RESET}\n"
-line "${C_GREEN}"
+printf "\n${C_GREEN}╭$(printf '─%.0s' $(seq 1 $W))╮${C_RESET}\n"
+printf "${C_GREEN}│${C_RESET}${C_GREEN}${C_BOLD}      ✅ IKRAM TOOL INSTALLED!${C_RESET}${C_GREEN}│${C_RESET}\n"
+printf "${C_GREEN}│${C_RESET}${C_GOLD}${C_BOLD}      Run: ${C_CYAN}ikram${C_RESET}${C_GREEN}${C_BOLD}${C_RESET}${C_GREEN}│${C_RESET}\n"
+printf "${C_GREEN}│${C_RESET}${C_DIM}      (KEY REQUIRED — owner se lo)${C_RESET}${C_GREEN}│${C_RESET}\n"
+printf "${C_GREEN}╰$(printf '─%.0s' $(seq 1 $W))╯${C_RESET}\n"
 printf "\n"
