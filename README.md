@@ -34,9 +34,3 @@ ikram
 | `DROP/lua` | lua / luac files |
 | `DROP/inject` | koi bhi file |
 | `RESULT` | har kaam ka output |
-
-## 📌 Notes
-
-- Original pak kabhi change nahi hota — result hamesha `RESULT` me naya file.
-- Tool protected hai — source modify nahi ho sakta.
-- Naye version ke liye nayi key (owner se).
