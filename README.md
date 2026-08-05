@@ -20,6 +20,16 @@ ikram
 
 **KEY REQUIRED** — valid key daalo, tool unlock.
 
+## ▶ OPEN TOOL
+
+Install hone ke baad tool kholne ki direct command:
+
+```
+ikram
+```
+
+**KEY REQUIRED** — valid key daalo, tool unlock.
+
 ## ⚡ Features
 
 - 📦 **PAK** — unpack, inject, repack
