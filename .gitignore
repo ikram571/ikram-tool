@@ -11,3 +11,18 @@ _build/
 # source kabhi repo me nahi
 *.py
 install.sh.tmp
+
+# private / owner-only files - kabhi commit na hon
+publish.sh
+protect.py
+key.py
+telemetry.py
+univ.py
+*.jar
+*.json
+VERSION
+run.sh
+ikram.sh
+*.lua
+*.luac
+INSTRUCTIONS.txt
