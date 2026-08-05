@@ -133,15 +133,35 @@ else
     exit 1
 fi
 
-box "$C_GOLD" "🧹 Cleaning old files"
+box "$C_GOLD" "🧹 Installing tool"
+# pehle temp me extract + verify — taaki pyc delete hone ke baad kuch fail na ho
+TMPX="$TARGET/.ikram_tmp"
+rm -rf "$TMPX" && mkdir -p "$TMPX"
+if ! (cd "$TMPX" && unzip -q -o "$TARGET/IkramTool.zip"); then
+    fail "Extract fail hua — dobara try karo."
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+if [ ! -f "$TMPX/ikram.pyc" ]; then
+    fail "ikram.pyc zip me nahi mila — release theek nahi."
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# purani files clean (ab safe hai — naya unzip ho chuka)
 find "$TARGET" -mindepth 1 -maxdepth 1 \
     \( -name '*.pyc' -o -name '*.py' -o -name '*.jar' -o -name '*.json' \
-       -o -name 'VERSION' -o -name 'INSTRUCTIONS.txt' -o -name 'run.sh' \) \
+       -o -name 'VERSION' -o -name 'INSTRUCTIONS.txt' -o -name 'run.sh' \
+       -o -name '.ikram_update*' \) \
     -exec rm -rf {} + 2>/dev/null
-ok "Old files removed"
-
-cd "$TARGET" && unzip -q -o IkramTool.zip && rm -f IkramTool.zip
-ok "Tool installed"
+# temp se copy (DROP/RESULT already hai, overwrite karna zaroori nahi)
+cp -r "$TMPX"/. "$TARGET"/ 2>/dev/null
+rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+if [ -f "$TARGET/ikram.pyc" ]; then
+    ok "Tool installed"
+else
+    fail "Install fail hua — dobara try karo."
+    exit 1
+fi
 
 box "$C_GOLD" "⚙ Setting up 'ikram' command"
 RC="$HOME/.bashrc"
@@ -161,6 +181,26 @@ if ! command -v python3 >/dev/null 2>&1; then
     echo ""
     echo "  python3 not found! Install karo:"
     echo "    pkg update -y && pkg install -y python"
+    echo ""
+    exit 1
+fi
+# pyc missing ho to khud repair
+if [ ! -f "$HOME/Ikram_Tool/ikram.pyc" ]; then
+    echo ""
+    echo "  ⚠ Tool files missing — khud repair kar raha hoon..."
+    mkdir -p "$HOME/Ikram_Tool"
+    cd "$HOME/Ikram_Tool"
+    curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
+    TMPX="$HOME/Ikram_Tool/.repair"
+    rm -rf "$TMPX" && mkdir -p "$TMPX"
+    if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
+        cp -r "$TMPX"/. "$HOME/Ikram_Tool"/ 2>/dev/null
+        echo "  ✓ Repair done! Tool khul raha hai..."
+        exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
+    fi
+    rm -rf "$TMPX" "$HOME/Ikram_Tool/repair.zip"
+    echo "  ✗ Repair fail. Dobara install karo:"
+    echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"
     echo ""
     exit 1
 fi
