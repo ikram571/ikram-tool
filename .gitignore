@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+Memory.md
+OWNER_INFO.txt
+DROP/
+RESULT/
+IkramTool.zip
+.ikram_tool/
+_build/
+
+# source kabhi repo me nahi
+*.py
+install.sh.tmp
