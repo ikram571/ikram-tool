@@ -51,8 +51,21 @@ pkg upgrade -y 2>&1 | tail -5
 ok "Repositories + packages updated (python latest)"
 
 box "$C_CYAN" "⬇ Installing: python, git, curl, unzip, java, lua..."
-pkg install -y python git curl unzip openjdk-17 lua53 2>&1 | tail -8 || \
+for try in 1 2 3; do
     pkg install -y python git curl unzip openjdk-17 lua53 2>&1 | tail -8
+    if command -v python3 >/dev/null 2>&1; then
+        break
+    fi
+    printf "${C_RED}${C_BOLD}    python3 nahi mila (try %s/3) — dobara try kar raha hoon...${C_RESET}\n" "$try"
+    sleep 2
+done
+if ! command -v python3 >/dev/null 2>&1; then
+    printf "\n${C_RED}${C_BOLD}  ✗ python3 install nahi hua!${C_RESET}\n"
+    printf "${C_RED}  Internet check karo, phir ye chalayen:${C_RESET}\n"
+    printf "${C_GOLD}    pkg update -y && pkg install -y python${C_RESET}\n"
+    printf "${C_GOLD}    ikram${C_RESET}\n"
+    exit 1
+fi
 ok "Core packages installed"
 
 box "$C_CYAN" "⬇ Installing: rich, pycryptodome, zstandard, gmalg"
@@ -99,6 +112,13 @@ EOF
 cat > "$PREFIX/bin/ikram" <<'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
 export PYTHONDONTWRITEBYTECODE=1
+if ! command -v python3 >/dev/null 2>&1; then
+    echo ""
+    echo "  python3 not found! Install karo:"
+    echo "    pkg update -y && pkg install -y python"
+    echo ""
+    exit 1
+fi
 exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
 EOF
 chmod +x "$PREFIX/bin/ikram"
