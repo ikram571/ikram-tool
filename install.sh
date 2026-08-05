@@ -76,16 +76,21 @@ ok "Tool installed"
 
 step "Fixing 'ikram' command"
 RC="$HOME/.bashrc"
-sed -i "/^# Ikram Tool launcher$/d" "$RC" 2>/dev/null
-sed -i "/^ikram() { PYTHONDONTWRITEBYTECODE=1 python3 /d" "$RC" 2>/dev/null
-sed -i "/^ikram() { python3 /d" "$RC" 2>/dev/null
-if ! grep -q 'ikram()' "$RC" 2>/dev/null; then
-    cat >> "$RC" <<'EOF'
+sed -i "/# Ikram Tool launcher/d" "$RC" 2>/dev/null
+sed -i "/^ikram *()/d" "$RC" 2>/dev/null
+sed -i "/Ikram_Tool\/ikram\.py/d" "$RC" 2>/dev/null
+cat >> "$RC" <<'EOF'
 
 # Ikram Tool launcher
 ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"; }
 EOF
-fi
+# real executable - bashrc function reload na lage, PATH me hamesha ready
+cat > "$PREFIX/bin/ikram" <<'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+export PYTHONDONTWRITEBYTECODE=1
+exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
+EOF
+chmod +x "$PREFIX/bin/ikram"
 ok "'ikram' command ready (new version)"
 
 chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
