@@ -96,15 +96,6 @@ TOTAL=$(curl -sIL "$TOOL_URL" 2>/dev/null | grep -i '^content-length' | tail -1 
 curl -sL -o "$TARGET/IkramTool.zip" "$TOOL_URL" &
 CPID=$!
 DONE=0
-FIRST=1
-draw_box() {
-    printf "\r${C_CYAN}  ╭──────────────────────────────╮\n${C_RESET}"
-    printf "${C_CYAN}  │${C_RESET}  ⬇  Downloading tool       ${C_CYAN}│\n${C_RESET}"
-    printf "${C_CYAN}  │${C_RESET}  [${BAR}] %3s%%      ${C_CYAN}│\n${C_RESET}" "$PCT"
-    printf "${C_CYAN}  │${C_RESET}  Downloading: $(human "$DONE")         ${C_CYAN}│\n${C_RESET}"
-    printf "${C_CYAN}  │${C_RESET}  Size: $(human "$TOTAL")              ${C_CYAN}│\n${C_RESET}"
-    printf "${C_CYAN}  ╰──────────────────────────────╯${C_RESET}"
-}
 while kill -0 "$CPID" 2>/dev/null; do
     DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
     PCT=$(( TOTAL > 0 ? DONE * 100 / TOTAL : 0 ))
@@ -114,18 +105,12 @@ while kill -0 "$CPID" 2>/dev/null; do
     while [ "$i" -lt "$FILLED" ]; do BAR="${BAR}█"; i=$((i+1)); done
     i=$FILLED
     while [ "$i" -lt 18 ]; do BAR="${BAR}░"; i=$((i+1)); done
-    if [ "$FIRST" = "1" ]; then
-        FIRST=0
-        draw_box
-    else
-        printf "\033[6A"
-        draw_box
-    fi
+    printf "\r${C_CYAN}  ⬇ Downloading: $(human "$DONE") / $(human "$TOTAL") [${BAR}] %3s%%${C_RESET}" "$PCT"
     sleep 0.2
 done
 wait "$CPID"
 DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
-printf "\n"
+printf "\r${C_CYAN}  ⬇ Downloading: $(human "$DONE") / $(human "$TOTAL") ✓ done      ${C_RESET}\n"
 if [ "$DONE" -gt 0 ] 2>/dev/null; then
     ok "Tool downloaded ($(human "$DONE"))"
 else
