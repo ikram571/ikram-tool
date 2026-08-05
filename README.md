@@ -1,7 +1,7 @@
 <p align="center">
   <strong style="color:#ff2d95; font-size:32px;">✦ IKRAM TOOL ✦</strong><br>
   <span style="color:#ffd700;">PAK • LUA Tool</span><br>
-  <span style="color:#2de2ff;">Termux • PUBG / BGMI</span>
+  <span style="color:#2de2ff;">Termux • Pak + Lua Tool</span>
 </p>
 
 ## 🚀 INSTALL (ONE LINE)
