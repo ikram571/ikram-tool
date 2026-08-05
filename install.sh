@@ -24,35 +24,46 @@ step() { printf "\n${C_CYAN}${C_BOLD}  ▸ %s${C_RESET}\n" "$1"; }
 ok()   { printf "${C_GREEN}${C_BOLD}    ✓ %s${C_RESET}\n" "$1"; }
 fail() { printf "${C_RED}${C_BOLD}    ✗ %s${C_RESET}\n" "$1"; }
 
+box() {
+    local COLOR="$1"
+    local TITLE="$2"
+    local BW=$((W - 4))
+    local TITLE_LEN=${#TITLE}
+    local PAD=$((BW - TITLE_LEN - 4))
+    [ $PAD -lt 1 ] && PAD=1
+    local PADDING=$(printf '%*s' $PAD '')
+    printf "\n${COLOR}╭$(printf '─%.0s' $(seq 1 $BW))╮${C_RESET}\n"
+    printf "${COLOR}│${C_RESET}  ${COLOR}${C_BOLD}${TITLE}${C_RESET}${PADDING}${COLOR}│${C_RESET}\n"
+    printf "${COLOR}╰$(printf '─%.0s' $(seq 1 $BW))╯${C_RESET}\n"
+}
+
 printf "\n${TOP}\n"
 printf "${MID}${C_PINK}${C_BOLD}     ✦  I K R A M   T O O L  ✦${C_RESET}${MID}\n"
 printf "${MID}${C_GOLD}${C_BOLD}        PAK • LUA  TOOL${C_RESET}${MID}\n"
 printf "${BOT}\n"
 
-step "Storage permission"
+box "$C_CYAN" "📁 Storage permission"
 termux-setup-storage >/dev/null 2>&1 && ok "Storage access granted" || ok "Storage already set / skipped"
 
-step "Updating packages"
-pkg update -y >/dev/null 2>&1 && ok "Repositories updated" || pkg update -y >/dev/null 2>&1
+box "$C_CYAN" "🔄 Updating packages"
+pkg update -y 2>&1 | tail -5
+ok "Repositories updated"
 
-step "Installing core packages (python, git, java, lua...)"
-if pkg install -y python git curl unzip openjdk-17 lua53 >/dev/null 2>&1; then
-    ok "Core packages installed"
-else
-    pkg install -y python git curl unzip openjdk-17 lua53 >/dev/null 2>&1
-    ok "Core packages installed"
-fi
+box "$C_CYAN" "⬇ Installing: python, git, curl, unzip, java, lua..."
+pkg install -y python git curl unzip openjdk-17 lua53 2>&1 | tail -8 || \
+    pkg install -y python git curl unzip openjdk-17 lua53 2>&1 | tail -8
+ok "Core packages installed"
 
-step "Installing Python libraries"
-if pip install rich pycryptodome zstandard gmalg >/dev/null 2>&1; then
-    ok "Libraries installed"
+box "$C_CYAN" "⬇ Installing: rich, pycryptodome, zstandard, gmalg"
+if pip install rich pycryptodome zstandard gmalg 2>&1 | tail -6; then
+    :
 else
-    pip install --break-system-packages rich pycryptodome zstandard gmalg >/dev/null 2>&1
-    ok "Libraries installed"
+    pip install --break-system-packages rich pycryptodome zstandard gmalg 2>&1 | tail -6
 fi
+ok "Libraries installed"
 
 TARGET="$HOME/Ikram_Tool"
-step "Downloading tool"
+box "$C_CYAN" "⬇ Downloading tool"
 mkdir -p "$TARGET"
 if curl -sL -o "$TARGET/IkramTool.zip" \
     "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip" \
@@ -63,7 +74,7 @@ else
     exit 1
 fi
 
-step "Cleaning old files"
+box "$C_GOLD" "🧹 Cleaning old files"
 find "$TARGET" -mindepth 1 -maxdepth 1 \
     \( -name '*.pyc' -o -name '*.py' -o -name '*.jar' -o -name '*.json' \
        -o -name 'VERSION' -o -name 'INSTRUCTIONS.txt' -o -name 'run.sh' \) \
@@ -73,7 +84,7 @@ ok "Old files removed"
 cd "$TARGET" && unzip -q -o IkramTool.zip && rm -f IkramTool.zip
 ok "Tool installed"
 
-step "Fixing 'ikram' command"
+box "$C_GOLD" "⚙ Setting up 'ikram' command"
 RC="$HOME/.bashrc"
 sed -i "/# Ikram Tool launcher/d" "$RC" 2>/dev/null
 sed -i "/^ikram *()/d" "$RC" 2>/dev/null
