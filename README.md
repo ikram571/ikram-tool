@@ -1,42 +1,42 @@
-# IKRAM TOOL
+<p align="center">
+  <strong style="color:#ff2d95; font-size:32px;">✦ IKRAM TOOL ✦</strong><br>
+  <span style="color:#ffd700;">PAK • LUA Modding Tool</span><br>
+  <span style="color:#2de2ff;">Termux • PUBG / BGMI</span>
+</p>
 
-**PAK / LUA Modding Tool** — Termux ke liye (PUBG / BGMI)
+## 🚀 INSTALL (ONE LINE)
 
-Unpack, inject, repack pak files · Compile/decompile lua.
-
-## Install (ONE LINE)
-
-Termux kholo aur ye **ek line** paste karo — sab kuch khud install ho jayega
-(python, java, lua, git + tool): non-root, koi permission nahi chahiye.
+Termux kholo, bas ye **ek line** paste karo — sab kuch khud ho jayega:
 
 ```
 curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
 ```
 
-📌 Ya phir `ikram` command banane ke baad:
+Phir tool kholo:
 
 ```
 ikram
 ```
 
-Pehli baar valid **KEY** maangi jayegi — owner se lo.
+**KEY REQUIRED** — valid key daalo, tool unlock.
 
-## Auto-update
+## ⚡ Features
 
-Tool har baar kholne par **khud check** karta hai ki naya version aaya hai
-ya nahi. Aaya toh **khud update** ho jata hai — kuch karna nahi padta.
-Naye version ke liye nayi key chahiye hogi (owner se).
+- 📦 **PAK** — unpack, inject, repack
+- 📜 **LUA** — compile, decompile
+- 🔄 **Auto-update** — naya version aata hi khud update ho jata hai
 
-## Folders
+## 📁 Folders
 
 | Folder | Kya daalo |
 |--------|-----------|
 | `DROP/pak` | pak files |
 | `DROP/lua` | lua / luac files |
 | `DROP/inject` | koi bhi file |
-| `RESULT` | har kaam ka output yahan |
+| `RESULT` | har kaam ka output |
 
-## Notes
+## 📌 Notes
 
 - Original pak kabhi change nahi hota — result hamesha `RESULT` me naya file.
-- Tool protected hai — source modify nahi ho sakta, sirf use hota hai.
+- Tool protected hai — source modify nahi ho sakta.
+- Naye version ke liye nayi key (owner se).
