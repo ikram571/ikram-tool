@@ -119,6 +119,21 @@ if ! command -v python3 >/dev/null 2>&1; then
     echo ""
     exit 1
 fi
+# pyc magic check — python purana ho to khud upgrade
+MAGIC_NEEDED=$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)
+MAGIC_HAVE=$(python3 -c "
+import struct
+p = open('$HOME/Ikram_Tool/ikram.pyc','rb').read(4)
+print(p.hex())
+" 2>/dev/null)
+if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
+    echo ""
+    echo "  ⬆ Python purana hai — upgrade kar raha hoon..."
+    pkg upgrade -y python 2>&1 | tail -3
+    echo "  ✓ Ab dobara try karo: ikram"
+    echo ""
+    exit 1
+fi
 exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
 EOF
 chmod +x "$PREFIX/bin/ikram"
