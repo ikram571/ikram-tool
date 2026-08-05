@@ -47,7 +47,8 @@ termux-setup-storage >/dev/null 2>&1 && ok "Storage access granted" || ok "Stora
 
 box "$C_CYAN" "🔄 Updating packages"
 pkg update -y 2>&1 | tail -5
-ok "Repositories updated"
+pkg upgrade -y 2>&1 | tail -5
+ok "Repositories + packages updated (python latest)"
 
 box "$C_CYAN" "⬇ Installing: python, git, curl, unzip, java, lua..."
 pkg install -y python git curl unzip openjdk-17 lua53 2>&1 | tail -8 || \
