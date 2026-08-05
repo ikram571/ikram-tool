@@ -27,7 +27,6 @@ fail() { printf "${C_RED}${C_BOLD}    ✗ %s${C_RESET}\n" "$1"; }
 printf "\n${TOP}\n"
 printf "${MID}${C_PINK}${C_BOLD}     ✦  I K R A M   T O O L  ✦${C_RESET}${MID}\n"
 printf "${MID}${C_GOLD}${C_BOLD}        PAK • LUA  TOOL${C_RESET}${MID}\n"
-printf "${MID}${C_DIM}        Termux me ek line me install${C_RESET}${MID}\n"
 printf "${BOT}\n"
 
 step "Storage permission"
