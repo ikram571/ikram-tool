@@ -64,11 +64,21 @@ else
     exit 1
 fi
 
+step "Cleaning old files"
+find "$TARGET" -mindepth 1 -maxdepth 1 \
+    \( -name '*.pyc' -o -name '*.py' -o -name '*.jar' -o -name '*.json' \
+       -o -name 'VERSION' -o -name 'INSTRUCTIONS.txt' -o -name 'run.sh' \) \
+    -exec rm -rf {} + 2>/dev/null
+ok "Old files removed"
+
 cd "$TARGET" && unzip -q -o IkramTool.zip && rm -f IkramTool.zip
 ok "Tool installed"
 
-step "Adding 'ikram' command"
+step "Fixing 'ikram' command"
 RC="$HOME/.bashrc"
+sed -i "/^# Ikram Tool launcher$/d" "$RC" 2>/dev/null
+sed -i "/^ikram() { PYTHONDONTWRITEBYTECODE=1 python3 /d" "$RC" 2>/dev/null
+sed -i "/^ikram() { python3 /d" "$RC" 2>/dev/null
 if ! grep -q 'ikram()' "$RC" 2>/dev/null; then
     cat >> "$RC" <<'EOF'
 
@@ -76,7 +86,7 @@ if ! grep -q 'ikram()' "$RC" 2>/dev/null; then
 ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"; }
 EOF
 fi
-ok "'ikram' command ready"
+ok "'ikram' command ready (new version)"
 
 chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
 
