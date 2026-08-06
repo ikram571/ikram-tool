@@ -12,6 +12,11 @@ Termux kholo, bas ye **ek line** paste karo — sab kuch khud ho jayega:
 curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
 ```
 
+Installer **sab packages khud install karta hai** (python, git, java, lua +
+sab libraries) — har package alag alag + retry, taaki koi ek package fail
+hone par baaki na ruke. **Live % progress bar** dikhta hai (kitna hua, kitna
+baaki) — install ke dauran stuck nahi lagta.
+
 Phir tool kholo:
 
 ```
