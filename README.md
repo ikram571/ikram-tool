@@ -52,6 +52,7 @@ ikram
 - 📦 **PAK** — unpack, inject, repack
 - 📜 **Compile** — .lua / .py / .java source se compiled file
 - 🔍 **Decompile** — koi bhi compiled file (Lua 5.1–5.4, BGMI, LuaJIT, .pyc, .class, .jar, .dex)
+- 🔐 **Auto decrypt engines** — custom SM4 variant (CHEN), Tencent pak, UE4 AES, XOR detect, magic decode
 - 🔄 **Auto-update** — naya version aata hi khud update ho jata hai
 
 ## 📁 Folders
