@@ -27,13 +27,21 @@ command -v curl >/dev/null 2>&1 || pkg install -y curl
 command -v zip >/dev/null 2>&1  || pkg install -y zip
 
 echo "[*] Step 2: Downloading latest Ikram Tool..."
+command -v unzip >/dev/null 2>&1 || pkg install -y unzip
 rm -rf "$TARGET"
 mkdir -p "$TARGET"
 cd "$TARGET"
-ZIP_NAME=$(curl -sI "$LATEST" | grep -i 'location:' | sed 's/.*tag\///' | tr -d '\r')
-if [ -z "$ZIP_NAME" ]; then ZIP_NAME="v1.0.1"; fi
-curl -sL -o tool.zip "$API/ikram-tool-$ZIP_NAME.zip"
-unzip -o tool.zip -d . >/dev/null
+curl -fsSL -o tool.zip "$API/IkramTool.zip" || {
+    echo ""
+    echo "[X] Download FAIL! Internet check karo ya thodi der baad try karo."
+    echo "    Agar problem bane to owner se rabta karo."
+    exit 1
+}
+if ! unzip -tq tool.zip >/dev/null 2>&1; then
+    echo "[X] Downloaded file corrupt hai. Dobara try karo."
+    exit 1
+fi
+unzip -oq tool.zip -d .
 rm -f tool.zip
 chmod +x ikram.py run.sh ikram.sh install.sh 2>/dev/null || true
 
@@ -46,13 +54,14 @@ pip install --break-system-packages rich pycryptodome zstandard gmalg >/dev/null
 
 echo "[*] Step 4: Adding 'ikram' command..."
 RC="$HOME/.bashrc"
-if ! grep -q 'ikram()' "$RC" 2>/dev/null; then
-    cat >> "$RC" <<'EOF'
+touch "$RC"
+# Purani (broken ya old) ikram() entry hatao
+sed -i '/# Ikram Tool launcher/,+1d' "$RC"
+cat >> "$RC" <<'EOF'
 
 # Ikram Tool launcher
-ikram() { python3 "$HOME/Ikram_Tool/ikram.py" "$@"; }
+ikram() { ( cd "$HOME/Ikram_Tool" && [ -f ikram.pyc ] && exec python3 ikram.pyc "$@" || exec python3 ikram.py "$@" ); }
 EOF
-fi
 
 echo ""
 echo "============================================"
