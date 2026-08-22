@@ -62,6 +62,15 @@ cat >> "$RC" <<'EOF'
 ikram() { ( cd "$HOME/Ikram_Tool" && [ -f ikram.pyc ] && exec python3 ikram.pyc "$@" || exec python3 ikram.py "$@" ); }
 EOF
 
+echo "[*] Step 5: Terminal scrollback optimize..."
+PROP="$HOME/.termux/termux.properties"
+mkdir -p "$HOME/.termux"
+touch "$PROP"
+if ! grep -q 'terminal-transcript-rows' "$PROP"; then
+    echo "terminal-transcript-rows = 50000" >> "$PROP"
+fi
+command -v termux-reload-settings >/dev/null 2>&1 && termux-reload-settings >/dev/null 2>&1 || true
+
 echo ""
 echo "============================================"
 echo "  [+] IKRAM TOOL INSTALLED!"
