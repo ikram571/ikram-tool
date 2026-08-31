@@ -42,6 +42,7 @@ if ! unzip -tq tool.zip >/dev/null 2>&1; then
 fi
 unzip -oq tool.zip -d .
 chmod +x "$TARGET"/luadec "$TARGET"/luajit-dec-v2 "$TARGET"/unluac_rs "$TARGET"/cLuaDecompiler 2>/dev/null || true
+chmod +x "$TARGET"/luac_patched "$TARGET"/lua_patched 2>/dev/null || true
 rm -f tool.zip
 chmod +x ikram.py run.sh ikram.sh install.sh 2>/dev/null || true
 
