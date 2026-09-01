@@ -125,7 +125,16 @@ def compile_any(src, out, progress=None):
 # lua_protect.protect_compile then converts std -> BGMI itself.
 def compile_lua(src, out, version="5.3", strip=False) -> str:
     try:
-        text = Path(src).read_text(encoding="utf-8", errors="replace")
+        src = Path(src)
+        data = src.read_bytes()
+        if not data.strip():
+            return "empty source file"
+        if _mega._detect_dialect(data) or _mega._is_bgmi(data):
+            return (
+                "input is already compiled bytecode. "
+                "Use Decompile (option 2) to get readable source first."
+            )
+        text = data.decode("utf-8", errors="replace")
         std = _mega._compile_std(text)
         out = Path(out)
         out.parent.mkdir(parents=True, exist_ok=True)

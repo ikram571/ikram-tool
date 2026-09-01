@@ -1351,6 +1351,19 @@ def compile_bgmi(src, out, progress=None) -> tuple:
     out = Path(out)
     try:
         data = read_bytes(src)
+        if not data.strip():
+            return False, "empty source file"
+        if _detect_dialect(data) or _is_bgmi(data):
+            return False, (
+                "input is already compiled bytecode. "
+                "Use Decompile (option 2) to get readable source first."
+            )
+        printable = sum(1 for b in data[:4096] if 32 <= b < 127 or b in (9, 10, 13))
+        if len(data) >= 8 and printable / min(len(data), 4096) < 0.7:
+            return False, (
+                "input is not readable Lua source (binary/encrypted). "
+                "Decompile it first or provide plain .lua source."
+            )
         text = data.decode("utf-8", errors="replace")
         _phase(progress, "Compiling with patched luac...")
         std = _compile_std(text)
@@ -1373,14 +1386,44 @@ def compile_bgmi(src, out, progress=None) -> tuple:
 
 
 def _proto_stats(bgmi: bytes) -> dict | None:
-    """Quick best-effort proto register stats using the tool's lua_engine."""
+    """Proto register stats for the compiled BGMI bytecode.
+
+    Walks every nested proto and reports the max maxstacksize, so a file whose
+    compiled output exceeds the game's register cap (255) can be flagged BEFORE
+    the user loads it in-game. Returns None only when the tool's lua_engine is
+    unavailable (stats are a best-effort add-on, never a hard failure)."""
     try:
         import lua_engine as le
         std = lua_bgmi.bgmi_to_std(bgmi)
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td) / "tmp.luac"
             tmp.write_bytes(std)
-            le.pseudo_decompile_file(tmp, Path(td) / "out.lua")
-        return None
+            proto = le.load_std_bytecode_to_proto(str(tmp))
+        if proto is None:
+            return None
+        max_ms = 0
+        max_proto = None
+
+        def walk(p, depth=0):
+            nonlocal max_ms, max_proto
+            ms = getattr(p, "ms", 0) or 0
+            if ms > max_ms:
+                max_ms = ms
+                max_proto = p
+            for s in getattr(p, "subs", ()) or ():
+                walk(s, depth + 1)
+
+        walk(proto)
+        return {"max": max_ms, "protos": _count_protos(proto)}
     except Exception:
         return None
+
+
+def _count_protos(proto) -> int:
+    try:
+        n = 1
+        for s in getattr(proto, "subs", ()) or ():
+            n += _count_protos(s)
+        return n
+    except Exception:
+        return 0
