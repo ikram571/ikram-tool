@@ -1382,12 +1382,20 @@ def _patched_luac() -> Path:
     return LUAC_PATCHED
 
 
-def _compile_std(text: str) -> bytes:
+def _compile_std(text: str, strip: bool = True) -> bytes:
+    # strip=True removes debug/local-name info so the compiled BGMI bytecode is
+    # compact and matches the game's native build (un-stripped luac adds a lot
+    # of register/debug bloat that inflates the file ~30% and can cause in-game
+    # glitches). The game does not need debug info for normal bytecode loading.
     with tempfile.TemporaryDirectory() as td:
         src_f = Path(td) / "src.lua"
         src_f.write_text(text, encoding="utf-8")
         out_f = Path(td) / "out.luac"
-        p = _run([str(_patched_luac()), "-o", str(out_f), str(src_f)])
+        cmd = [str(_patched_luac())]
+        if strip:
+            cmd.append("-s")
+        cmd += ["-o", str(out_f), str(src_f)]
+        p = _run(cmd)
         if p.returncode != 0:
             err = (p.stderr or b"").decode("utf-8", errors="replace").strip()
             raise RuntimeError(err or "luac compile failed")
