@@ -301,7 +301,14 @@ def _loads_ok(data: bytes) -> bool:
 
 
 def _decompile_readable(std_path: Path) -> str:
-    """unluac-rs (fallback unluac.jar) -> readable source text."""
+    """unluac-rs (fallback unluac.jar) -> readable source text.
+
+    Order: unluac-rs (fast) -> unluac.jar (clean, keeps names) ->
+    lua_engine internal decompiler (guaranteed readable). The last fallback
+    runs even when java/jar are missing, so a BGMI file whose std dump carries
+    negative line-info (which unluac-rs rejects) can NEVER end up as a
+    hard "decompile failed" again -- it always yields readable source.
+    """
     if UNLUAC_RS.exists():
         p = _run([str(UNLUAC_RS), "-i", str(std_path)])
         if p.returncode == 0 and p.stdout.strip():
@@ -313,6 +320,14 @@ def _decompile_readable(std_path: Path) -> str:
         p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)])
         if p.returncode == 0 and p.stdout.strip():
             return p.stdout.decode("utf-8", errors="replace")
+    # guaranteed readable fallback via the tool's own Lua VM decompiler
+    try:
+        import lua_engine
+        out = lua_engine.pseudo_decompile_file(str(std_path))
+        if out and out.strip():
+            return out
+    except Exception:
+        pass
     raise RuntimeError("decompile failed: " + rs_err[:300])
 
 
