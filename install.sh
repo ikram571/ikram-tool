@@ -396,7 +396,16 @@ printf "\n"
 ok "'ikram' command ready (new version)"
 
 chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
-chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
+chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" "$TARGET/unluac_rs" 2>/dev/null || true
+
+# terminal scrollback badao — lambe output tak screen me rahe
+PROP="$HOME/.termux/termux.properties"
+mkdir -p "$HOME/.termux"
+touch "$PROP"
+if ! grep -q 'terminal-transcript-rows' "$PROP" 2>/dev/null; then
+    echo "terminal-transcript-rows = 50000" >> "$PROP"
+fi
+command -v termux-reload-settings >/dev/null 2>&1 && termux-reload-settings >/dev/null 2>&1 || true
 
 advance 100 "Setup complete"
 printf "\n${C_GREEN}╭$(printf '─%.0s' $(seq 1 $W))╮${C_RESET}\n"
