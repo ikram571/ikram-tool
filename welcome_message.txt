@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ IKRAM TOOL — PAK & LUA TOOL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 PAK TOOL
+┌───────────────────────────
+│ [1] UNPACK PAK
+│     • Unpack ONE pak, ya
+│       UNPACK ALL (multi paks
+│       ek saath, ek hi bar)
+│     • Saari files folder me
+│       nikal jati hain
+│
+│ [2] INJECT FILE
+│     • Koi bhi file (lua,
+│       uasset, png, json...)
+│       pak ke andar daalo
+│     • Game me add ho jati hai
+│
+│ [3] REPACK PAK
+│     • Unpack wali files edit
+│       karo, phir wapas naya
+│       pak bana lo
+└───────────────────────────
+
+📜 LUA TOOL
+┌───────────────────────────
+│ [1] COMPILE
+│     • Lua file ko game ke
+│       format me convert karo
+│
+│ [2] DECOMPILE
+│     • Pak se nikali Lua files
+│       ko wapas readable code
+│       me kholo
+│     • NOTE: Key-protected /
+│       encrypted files har baar
+│       fully decompile nahi hoti
+└───────────────────────────
+
+💡 TOOL KAISE CHALAN KAREIN
+┌───────────────────────────
+│ Bahut simple — bas 3 steps:
+│
+│ 1) TERMUX me ye ek-line command
+│    likho (INSTALL):
+│
+│ curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
+│
+│ 2) Tool kholo:
+│    ikram
+│
+│ 3) Key daalo:
+│    FREETOOL
+└───────────────────────────
+
+🔗 GitHub:
+https://github.com/ikram571/ikram-tool
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THANK YOU 🙏
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
