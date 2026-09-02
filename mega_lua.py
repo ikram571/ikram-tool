@@ -471,6 +471,48 @@ def _strip_prologue(text: str) -> str:
     return "\n".join(lines[:start] + lines[end + 1 :])
 
 
+# ---- decompiled-output structure quality guard --------------------------
+# A decompiled BGMI Lua file keeps its game table structure (local tables,
+# `.ServerRPC/.ClientRPC/.MulticastRPC` registration, readable `local r0_0`
+# locals). Some external/ripper decompilers emit a FLAT `L0_1/L1_1` style that
+# drops those tables + bindings -> the file loads in game but clicks / RPC /
+# UI registration are dead. We detect that broken signature and warn the user
+# so a bad decompile is never silently accepted as game-ready.
+_LUADEC_LOCAL_RE = re.compile(r"\bL\d+_\d+\b")
+_UNLUAC_LOCAL_RE = re.compile(r"\br\d+_\d+\b")
+_TABLE_RE = re.compile(r"^\s*local\s+[\w\.]+\s*=\s*\{", re.M)
+
+
+def _structure_quality(text: str) -> str:
+    """Return a warning string if `text` looks like a broken flat decompile.
+
+    Returns '' when the output preserves the game structure (unluac-rs style:
+    local tables present, `.RPC` registration present, no L-var naming) OR when
+    the file is a legit flat data/config blob (no tables to begin with).
+
+    We only flag the unmistakable broken-ripper signature: dense `L0_1/L1_1`
+    flat locals with the `return Lxx_1(...)` builder tail AND zero table
+    literals. A normal small config file is left alone (no false positive)."""
+    if not text.strip():
+        return ""
+    table_count = len(_TABLE_RE.findall(text))
+    luadec_locals = len(_LUADEC_LOCAL_RE.findall(text))
+    unluac_locals = len(_UNLUAC_LOCAL_RE.findall(text))
+    # A healthy unluac-rs file has readable locals + (usually) local tables.
+    if unluac_locals > 0 and luadec_locals == 0:
+        return ""
+    # Unmistakable broken-ripper signature: dense L-vars, no table literals,
+    # ends with the builder `return L64_1(L65_1, L66_1, ...)` call-tail.
+    builder_tail = bool(re.search(r"return\s+L\d+_\d+\s*\(", text))
+    if luadec_locals > 8 and table_count == 0 and builder_tail:
+        return (
+            "WARNING: output lost its table/registration structure (flat "
+            "L-var decompile). RPC/click/UI bindings may be broken in game. "
+            "Use a decompile from this tool's unluac-rs engine instead."
+        )
+    return ""
+
+
 UNLUAC_ERR_RE = re.compile(r"-- \[unluac error\].*explicit close semantics")
 
 # ---- repair of unluac-rs "explicit close semantics" blocks --------------
@@ -1320,10 +1362,15 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
         game_path = out_root / (stem + "_GAME.lua")
         game_path.write_text(game_text, encoding="utf-8")
 
+        quality = _structure_quality(game_text)
+
         # single final artifact: remove intermediates so user sees ONE file
         _cleanup((readable_path, clean_path, tmp_std))
+        msg = "readable + editable + game-ready, ready to recompile"
+        if quality:
+            msg += " | " + quality
         return [
-            ("Decompile (game-ready)", True, game_path, "readable + editable + game-ready, ready to recompile"),
+            ("Decompile (game-ready)", True, game_path, msg),
         ]
     except Exception as e:
         return [("Decompile", False, out_root / (stem + "_GAME.lua"), str(e)[:250])]
