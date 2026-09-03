@@ -24,7 +24,7 @@ mkdir -p "$STAGE"
 cp "$SOURCE_DIR"/ikram.py "$SOURCE_DIR"/run.sh "$SOURCE_DIR"/ikram.sh \
    "$SOURCE_DIR"/install.sh "$SOURCE_DIR"/ikram_key.json \
    "$SOURCE_DIR"/README.md "$STAGE/"
-cp "$SOURCE_DIR"/mega_lua.py "$SOURCE_DIR"/univ.py "$STAGE"/
+cp "$SOURCE_DIR"/mega_lua.py "$SOURCE_DIR"/univ.py "$SOURCE_DIR"/ikram_patch.py "$STAGE"/
 # copy the compiled chain from the installed tool (has the surgery-fixed pycs)
 if [ -d "$HOME/Ikram_Tool" ]; then
   cp "$HOME"/Ikram_Tool/*.pyc "$STAGE"/ 2>/dev/null || true

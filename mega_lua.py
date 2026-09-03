@@ -301,14 +301,19 @@ def _loads_ok(data: bytes) -> bool:
 
 
 def _decompile_readable(std_path: Path) -> str:
-    """unluac-rs (fallback unluac.jar) -> readable source text.
+    """Prefer unluac.jar (keeps source variable names) -> readable source.
 
-    Order: unluac-rs (fast) -> unluac.jar (clean, keeps names) ->
-    lua_engine internal decompiler (guaranteed readable). The last fallback
-    runs even when java/jar are missing, so a BGMI file whose std dump carries
-    negative line-info (which unluac-rs rejects) can NEVER end up as a
-    hard "decompile failed" again -- it always yields readable source.
+    Order: unluac.jar (clean, keeps real names like Inventory/PlayerName) ->
+    unluac-rs (fast, register-style r0_0 names) -> lua_engine internal
+    decompiler (guaranteed readable). The last fallback runs even when
+    java/jar are missing, so a BGMI file whose std dump carries negative
+    line-info (which unluac-rs rejects) can NEVER end up as a hard
+    "decompile failed" -- it always yields readable source.
     """
+    if UNLUAC_JAR.exists():
+        p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)])
+        if p.returncode == 0 and p.stdout.strip():
+            return p.stdout.decode("utf-8", errors="replace")
     if UNLUAC_RS.exists():
         p = _run([str(UNLUAC_RS), "-i", str(std_path)])
         if p.returncode == 0 and p.stdout.strip():
@@ -316,10 +321,6 @@ def _decompile_readable(std_path: Path) -> str:
         rs_err = (p.stderr or b"").decode("utf-8", errors="replace")
     else:
         rs_err = "unluac_rs not found"
-    if UNLUAC_JAR.exists():
-        p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)])
-        if p.returncode == 0 and p.stdout.strip():
-            return p.stdout.decode("utf-8", errors="replace")
     # guaranteed readable fallback via the tool's own Lua VM decompiler
     try:
         import lua_engine
@@ -1397,11 +1398,12 @@ def _patched_luac() -> Path:
     return LUAC_PATCHED
 
 
-def _compile_std(text: str, strip: bool = True) -> bytes:
-    # strip=True removes debug/local-name info so the compiled BGMI bytecode is
-    # compact and matches the game's native build (un-stripped luac adds a lot
-    # of register/debug bloat that inflates the file ~30% and can cause in-game
-    # glitches). The game does not need debug info for normal bytecode loading.
+def _compile_std(text: str, strip: bool = False) -> bytes:
+    # strip defaults to FALSE so local-variable names + debug line info are kept
+    # in the bytecode. This makes a later Compile -> Decompile round-trip come
+    # back READABLE (real variable names, full structure) instead of degraded
+    # register output (L1/L2) with missing lines. Keeping debug info is also
+    # fine for the game to load; the bytecode still works normally.
     with tempfile.TemporaryDirectory() as td:
         src_f = Path(td) / "src.lua"
         src_f.write_text(text, encoding="utf-8")
