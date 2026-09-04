@@ -182,6 +182,27 @@ def do_install():
         # CLEAN-SLATE: old tool files delete + fresh copy
         _clean_replace(src)
 
+        # LOOP FIX: VERSION + ikram_key.json PROTECTED hain isliye _clean_replace
+        # unhe preserve karta hai -> isi naye version se stamp karo, warna next
+        # boot pe remote>local rahega aur update-loop chalta rahega.
+        try:
+            ver = "V" + str(info["version"]).lstrip("vV")
+            (TOOL_DIR / "VERSION").write_text(ver)
+            kf = TOOL_DIR / "ikram_key.json"
+            try:
+                d = json.loads(kf.read_text())
+                d["version"] = ver
+                kf.write_text(json.dumps(d, indent=2))
+            except Exception:
+                kf.write_text(
+                    '{\n  "version": "%s",\n'
+                    '  "key_hash": '
+                    '"7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"\n}\n'
+                    % ver
+                )
+        except Exception:
+            pass
+
         print("INSTALLED_OK")
         # fix env + launcher background me (tool restart par hi chahiye)
         threading.Thread(target=_fix_env, daemon=True).start()
