@@ -1,7 +1,8 @@
 __pycache__/
-*.pyc
+!*.pyc
 Memory.md
 OWNER_INFO.txt
 USER_MESSAGE.txt
 DROP/
 RESULT/
+output/

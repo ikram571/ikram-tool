@@ -16,23 +16,24 @@ STAGE="$HOME/.ikram_release"
 # Isliye asset ka EXACT naam "IkramTool.zip" hona chahiye, warna 404.
 ZIP="$STAGE/IkramTool.zip"
 
-# NOTE: The wartah tool = flat runtime installed at $HOME/Ikram_Tool
-# (run.sh -> ikram_patch.py -> compiled .pyc chain). The release zip MUST
-# mirror that exact flat layout. We ship NO modules/ folder and NO ikram.py
-# source (both caused broken updates before). Source = the installed tool.
+# NOTE: Release = SOURCE_DIR (repo) ka flat runtime layout
+# (run.sh -> ikram_patch.py -> compiled .pyc chain). Yehi repo canonical
+# source hai - yahi se install + publish hota hai. Private/derived junk
+# exclude hota hai, compiled .pyc RAKHNA zaroori hai.
 echo "[*] Making release $VERSION ..."
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 
-if [ ! -d "$HOME/Ikram_Tool" ]; then
-  echo "[!] $HOME/Ikram_Tool not found. Install/sync the flat runtime first."
+if [ ! -d "$SOURCE_DIR" ]; then
+  echo "[!] Source dir not found."
   exit 1
 fi
 
-# Copy the whole flat runtime layout, excluding temp/private junk.
-(cd "$HOME/Ikram_Tool" && cp -r . "$STAGE"/)
-rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT
-rm -f "$STAGE"/Memory.md "$STAGE"/activation.json
+# Copy the whole flat layout from the REPO, excluding temp/private junk.
+(cd "$SOURCE_DIR" && cp -r . "$STAGE"/)
+rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT "$STAGE"/output
+rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
+rm -rf "$STAGE"/.git
 
 # Stamp the new version into VERSION + ikram_key.json (key_hash unchanged).
 echo "$VERSION" > "$STAGE/VERSION"

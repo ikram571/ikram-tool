@@ -1,0 +1,117 @@
+============================================================
+   IKRAM TOOL — INSTRUCTIONS (SIMPLE)
+   PAK + LUA Tool for Termux
+============================================================
+
+Ye tool kya karta hai? (EASY WORDS ME)
+------------------------------------------------------------
+- PAK file kholega  ->  (UNPACK)  sab files folder me nikalega
+- Lua file daalega  ->  (INJECT)  pak ke andar
+- Koi bhi file daalega (uasset, png, json)  ->  pak ke andar
+- Edit ki hui files se naya pak banayega  ->  (REPACK)
+- Lua compile/decompile karega  ->  source <-> bytecode
+
+ORIGINAL pak kabhi nahi badalta. Har kaam ka result
+RESULT folder me alag se milta hai.
+
+============================================================
+ INSTALL (PEHLE BAAR — SIRF EK BAAR)
+============================================================
+
+Step 1: Termux kholo aur ye EK LINE paste karo (sab kuch khud install
+    ho jayega — python, java, lua, git + tool):
+    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
+
+Step 2: Tool start karo:
+    ikram
+
+    (pehli baar valid KEY maangi jayegi — owner se lo)
+
+Isko hi har baar kholne ke liye use karna hai:
+    ikram
+
+NOTE: Tool har baar kholne par automatically check karta hai
+ke naya version aaya hai. Aaye to khud update ho jata hai.
+Naye version ke liye nayi KEY chahiye hogi (owner se lo),
+purani key naye version me NAHI chalti.
+
+============================================================
+ FOLDERS (KYA KAHAN DAALNA HAI)
+============================================================
+
+    DROP/pak      ->  .pak files   (unpack / inject ke liye)
+    DROP/lua      ->  .lua / .luac files (compile / decompile)
+    DROP/inject   ->  koi bhi file (uasset, png, json...)
+
+RESULT folder (har kaam ka output):
+    RESULT/extracted/    -> unpack ki hui files
+    RESULT/injected/     -> naye banaye injected pak
+    RESULT/repacked/     -> repack kiye pak
+    RESULT/lua/          -> compiled/decompiled lua
+
+============================================================
+ PAK TOOL (Option 1)
+============================================================
+
+1) Unpack PAK
+   - pak file choose karo (DROP/pak me rakho)
+   - saari files folder me nikal jaati hain
+   - output: RESULT/extracted/<pak_ka_naam>/
+
+2) Inject Lua
+   - lua file choose karo (DROP/lua)
+   - pak choose karo (DROP/pak)
+   - pak ke andar folder choose karo jahan dalna hai
+   - output: RESULT/injected/<pak_ka_naam>_injected.pak
+
+3) Inject File
+   - pak choose karo (DROP/pak)
+   - koi bhi file choose karo (DROP/inject)
+   - pak ke andar folder choose karo
+   - output: RESULT/injected/<pak_ka_naam>_injected.pak
+
+4) Repack PAK (naya pak banane ke liye)
+   - pehle pak ko UNPACK karo (option 1)
+   - RESULT/extracted folder me files edit karo
+   - phir ye option choose karo
+   - tool apne aap extracted folder use karega,
+     naya pak ban jayega. ORIGINAL pak change NAHI hota.
+   - output: RESULT/repacked/<pak_ka_naam>_repacked.pak
+
+   BAS ITNA YAAD RAKHO:
+   Unpack -> files edit -> Repack
+
+============================================================
+ LUA TOOL (Option 2)
+============================================================
+
+1) Compile Lua
+   - .lua file (source) ko .luac bytecode banao
+   - output: RESULT/lua/<name>.luac
+
+2) Decompile Lua
+   - .luac bytecode ko readable .lua banao
+   - unluac.jar ki zaroorat hoti hai (ikram tool folder me,
+     nahi to tool khud download kar leta hai)
+   - output: RESULT/lua/<name>_decompiled.lua
+
+============================================================
+ TIPS (CHHOTI BAATEIN)
+============================================================
+
+- Injected pak ko wapis game me daalne ke liye us file ko
+  game ke Paks folder me replace karo:
+  /storage/emulated/0/Android/data/com.pubg.krmobile/files/
+  UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Paks/
+  (Game ko ek baar close karke karo, aur pehle original pak
+   ka backup zaroor rakho.)
+
+- Agar 'lua5.3' install nahi to:
+    pkg install -y lua53
+
+- Agar 'java' nahi to (decompile ke liye):
+    pkg install -y openjdk-17
+
+- Koi error aaye to error ka text note karke bhejo.
+
+============================================================
