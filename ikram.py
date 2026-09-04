@@ -56,9 +56,22 @@ BANNER = f'''[bold {BRAND}]  ╔════════════════
 
 UNLUAC = lua_ops.find_unluac_jar()
 
-TOOL_VERSION = '1.0.3'
 GITHUB_REPO = 'ikram571/ikram-tool'
 GITHUB_API = f'https://api.github.com/repos/{GITHUB_REPO}/releases/latest'
+
+
+def _version_int(value) -> int:
+    digits = ''.join(ch for ch in str(value) if ch.isdigit())
+    if not digits:
+        return 0
+    return int(digits)
+
+
+def local_version() -> int:
+    try:
+        return _version_int((TOOL_DIR / 'VERSION').read_text().strip())
+    except Exception:
+        return 0
 
 
 def clear_screen():
@@ -70,16 +83,18 @@ def check_for_updates(silent=False):
         req = urllib.request.Request(GITHUB_API, headers={'User-Agent': 'ikram-tool'})
         with urllib.request.urlopen(req, timeout=8) as r:
             data = json.loads(r.read().decode())
-        latest = str(data.get('tag_name', '')).lstrip('v')
-        if not latest:
+        latest_tag = str(data.get('tag_name', '')).lstrip('v')
+        if not latest_tag or not data.get('assets'):
             return
-        if [int(x) for x in latest.split('.')] > [int(x) for x in TOOL_VERSION.split('.')]:
-            console.print(f'[bold {SUCCESS}]Update available: v{latest} (aapke paas v{TOOL_VERSION})[/]')
+        latest = _version_int(latest_tag)
+        current = local_version()
+        if latest > current:
+            console.print(f'[bold {SUCCESS}]Update available: v{latest_tag} (aapke paas v{current})[/]')
             console.print(f'[dim {MUTED}]Downloading...[/dim {MUTED}]')
             _download_and_apply(data)
             return True
         if not silent:
-            console.print(f'[dim {MUTED}]Already latest: v{TOOL_VERSION}[/dim {MUTED}]')
+            console.print(f'[dim {MUTED}]Already latest: v{current}[/dim {MUTED}]')
     except Exception:
         pass
     return False
@@ -96,7 +111,7 @@ def _download_and_apply(data):
         zip_path = Path.home() / '.ikram_tool_update.zip'
         urllib.request.urlretrieve(zip_url, zip_path)
         import zipfile
-        target = Path.home() / 'Ikram_Tool'
+        target = TOOL_DIR
         tmp = Path.home() / '.ikram_tool_update'
         shutil.rmtree(tmp, ignore_errors=True)
         tmp.mkdir(parents=True, exist_ok=True)

@@ -10,6 +10,56 @@ spec = importlib.util.spec_from_file_location("ikram", _TOOL_DIR / "ikram.pyc")
 ikram = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ikram)
 
+# ---- default Unreal Engine AES key for UE4 paks ---------------------------
+# The user's real UE4 AES key. Auto-applied to UE4-standard paks across
+# UNPACK / REPACK / INJECT (Ue4Pak.aes_key drives BOTH extract and repack).
+# A blank AES key input now means "use this default" instead of "no key".
+# Publg/tencent paks are NOT affected (their own SM4/SIMPLE crypto needs no
+# key and runs through the `pak` module, not Ue4Pak). If you get a *different*
+# pak set with its own key, just change this hex to that key.
+DEFAULT_UE4_AES_KEY_HEX = (
+    "8A75AFDF1C74AB55B79DC1DD4ABE4B01360A059D77F243EF4EFADA41A59D71A0"
+)
+
+
+def _ue4_key_bytes(hex_str=None):
+    """Hex string (optionally 0x/- prefixed) -> AES-128/192/256 key bytes."""
+    h = (hex_str or DEFAULT_UE4_AES_KEY_HEX).strip()
+    h = h.replace("0x", "").replace("0X", "").replace("-", "").replace(" ", "")
+    try:
+        b = bytes.fromhex(h)
+    except Exception:
+        return None
+    return b if len(b) in (16, 24, 32) else None
+
+
+def _patch_ue4_default_key():
+    """Make Ue4Pak use DEFAULT_UE4_AES_KEY when no aes_key is passed.
+
+    Covers UNPACK, REPACK and INJECT at a single point because all three build
+    Ue4Pak and Ue4Pak.aes_key drives both extract (read_encoded_entry) and
+    repack (write_entry). The key is only ever applied to *encrypted* entries
+    / encrypted index, so an edited or un-encrypted ue4 pak is untouched and
+    the tencent (PUBG) path is untouched -> nothing breaks.
+    """
+    base = ikram.ue4mod.Ue4Pak
+    if getattr(base, "_ikram_default_key_wrapped", False):
+        return
+
+    class _DefaultKeyUe4Pak(base):
+        def __init__(self, file_path, aes_key=None):
+            if not aes_key:
+                aes_key = _ue4_key_bytes(DEFAULT_UE4_AES_KEY_HEX)
+            super().__init__(file_path, aes_key)
+
+    _DefaultKeyUe4Pak._ikram_default_key_wrapped = True
+    ikram.ue4mod.Ue4Pak = _DefaultKeyUe4Pak
+    # also expose the wrapper under the same module name for any direct use
+    ikram.ue4mod.Ue4Pak._ikram_original = base
+
+
+_patch_ue4_default_key()
+
 
 def _unpack_one(pakf, out, log=None, progress=None):
     """Unpack a single pak -> out. Returns (n, kind)."""
@@ -32,9 +82,11 @@ def _unpack_one(pakf, out, log=None, progress=None):
             n = ikram.pakmod.unpack_pak(pakf, out, log=log, progress=progress)
     else:
         key = ikram.safe_input(
-            "  [bold {}]-> {} AES key (blank = none): [/]".format(ikram.INP, pakf.name)
+            "  [bold {}]-> {} AES key (ENTER = built-in default, or paste your own): [/]".format(
+                ikram.INP, pakf.name
+            )
         )
-        p = ikram.ue4mod.Ue4Pak(pakf, aes_key=(key or None))
+        p = ikram.ue4mod.Ue4Pak(pakf, aes_key=(key.strip() if key and key.strip() else None))
         if log is None or progress is None:
             ui = ikram._ProgressUI(title="📦 {}".format(pakf.name))
             with ui:

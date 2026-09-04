@@ -333,8 +333,8 @@ sed -i "/^ikram *()/d" "$RC" 2>/dev/null
 sed -i "/Ikram_Tool\/ikram\.py/d" "$RC" 2>/dev/null
 cat >> "$RC" <<'EOF'
 
-# Ikram Tool launcher (via run.sh so ikram_patch.py applies -> unpack Mode 1/2)
-ikram() { ( cd "$HOME/Ikram_Tool" && bash run.sh "$@" ); }
+# Ikram Tool launcher (ikram_patch.py = poori files A-to-Z load)
+ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"; }
 EOF
 # real executable - bashrc function reload na lage, PATH me hamesha ready
 cat > "$PREFIX/bin/ikram" <<'EOF'
@@ -347,8 +347,8 @@ if ! command -v python3 >/dev/null 2>&1; then
     echo ""
     exit 1
 fi
-# pyc missing ho to khud repair
-if [ ! -f "$HOME/Ikram_Tool/ikram.pyc" ]; then
+# patch missing ho to khud repair (poori zip fresh download)
+if [ ! -f "$HOME/Ikram_Tool/ikram_patch.py" ]; then
     echo ""
     echo "  ⚠ Tool files missing — khud repair kar raha hoon..."
     mkdir -p "$HOME/Ikram_Tool"
@@ -358,8 +358,9 @@ if [ ! -f "$HOME/Ikram_Tool/ikram.pyc" ]; then
     rm -rf "$TMPX" && mkdir -p "$TMPX"
     if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
         cp -r "$TMPX"/. "$HOME/Ikram_Tool"/ 2>/dev/null
+        chmod +x "$HOME/Ikram_Tool/run.sh" 2>/dev/null
         echo "  ✓ Repair done! Tool khul raha hai..."
-        exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
+        exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"
     fi
     rm -rf "$TMPX" "$HOME/Ikram_Tool/repair.zip"
     echo "  ✗ Repair fail. Dobara install karo:"
@@ -381,7 +382,7 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     pkg upgrade -y python 2>&1 | tail -3
     if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
         echo "  ✓ Python upgrade ho gaya! Tool khul raha hai..."
-        exec python3 "$HOME/Ikram_Tool/ikram.pyc" "$@"
+        exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"
     fi
     echo "  ✗ Python upgrade nahi ho paya. Ye chalayen:"
     echo "    pkg update -y && pkg upgrade -y"
@@ -389,23 +390,14 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     echo ""
     exit 1
 fi
-exec bash "$HOME/Ikram_Tool/run.sh" "$@"
+    exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"
 EOF
 chmod +x "$PREFIX/bin/ikram"
 printf "\n"
 ok "'ikram' command ready (new version)"
 
 chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
-chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" "$TARGET/unluac_rs" 2>/dev/null || true
-
-# terminal scrollback badao — lambe output tak screen me rahe
-PROP="$HOME/.termux/termux.properties"
-mkdir -p "$HOME/.termux"
-touch "$PROP"
-if ! grep -q 'terminal-transcript-rows' "$PROP" 2>/dev/null; then
-    echo "terminal-transcript-rows = 50000" >> "$PROP"
-fi
-command -v termux-reload-settings >/dev/null 2>&1 && termux-reload-settings >/dev/null 2>&1 || true
+chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
 
 advance 100 "Setup complete"
 printf "\n${C_GREEN}╭$(printf '─%.0s' $(seq 1 $W))╮${C_RESET}\n"

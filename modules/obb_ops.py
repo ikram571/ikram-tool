@@ -1,3 +1,4 @@
+import os
 import shutil
 import zipfile
 from pathlib import Path
@@ -11,8 +12,10 @@ def unpack_obb(obb_path, out_dir, log=None):
         for info in zf.infolist():
             if info.is_dir():
                 continue
-            target = out / info.filename
-            if '..' in Path(info.filename).parts or target.resolve() not in out.resolve().parents and target.resolve() != out.resolve():
+            # zip-slip guard: only accept paths that resolve INSIDE the out dir
+            out_res = out.resolve()
+            target = (out_res / info.filename).resolve()
+            if '..' in Path(info.filename).parts or not str(target).startswith(str(out_res) + os.sep):
                 if log:
                     log(f'  [X] skip unsafe path: {info.filename}')
                 continue

@@ -300,27 +300,67 @@ def _loads_ok(data: bytes) -> bool:
         return False
 
 
-def _decompile_readable(std_path: Path) -> str:
-    """Prefer unluac.jar (keeps source variable names) -> readable source.
+def _is_flat_lvar(text: str) -> bool:
+    """True when `text` is the broken flat `L0_1/L1_1` register decompile.
 
-    Order: unluac.jar (clean, keeps real names like Inventory/PlayerName) ->
-    unluac-rs (fast, register-style r0_0 names) -> lua_engine internal
-    decompiler (guaranteed readable). The last fallback runs even when
-    java/jar are missing, so a BGMI file whose std dump carries negative
-    line-info (which unluac-rs rejects) can NEVER end up as a hard
-    "decompile failed" -- it always yields readable source.
+    unluac.jar has no source names for name-stripped bytecode and falls back
+    to a dense flat register dump (`L0_1 = type`, `L0_1 = L0_1(L1_1)`,
+    `goto lbl_11`). That output keeps NO real structure/tables and is not
+    editable or game-ready. unluac-rs handles the same bytecode as clean
+    structured `r0_0` code. We detect the flat signature so the jar result
+    can be rejected in favor of the structured engine.
     """
+    if not text.strip():
+        return False
+    luadec = len(_LUADEC_LOCAL_RE.findall(text))
+    unluac = len(_UNLUAC_LOCAL_RE.findall(text))
+    # Dense L-vars with no readable register (r) locals => flat junk.
+    if luadec >= 50 and unluac == 0:
+        return True
+    builder_tail = bool(re.search(r"return\s+L\d+_\d+\s*\(", text))
+    if luadec > 8 and builder_tail:
+        return True
+    return False
+
+
+def _decompile_readable(std_path: Path) -> str:
+    """Choose the best readable decompile for `std_path`.
+
+    Order of preference:
+      1. unluac.jar ONLY when it keeps source names (not a flat L-var dump).
+      2. unluac-rs (fast, structured register-style r0_0 names, keeps game
+         tables/.RPC bindings -> editable + game-ready).
+      3. lua_engine internal decompiler (guaranteed readable).
+
+    For name-stripped bytecode unluac.jar degrades to a flat `L0_1/L1_1`
+    register dump (dense L-vars, no structure) where unluac-rs produces clean
+    structured code, so a flat jar result is rejected in favor of unluac-rs.
+    The lua_engine fallback runs even when java/jar are missing so a BGMI
+    file can NEVER end up as a hard "decompile failed".
+    """
+    jar_out = None
+    rs_out = None
     if UNLUAC_JAR.exists():
         p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)])
         if p.returncode == 0 and p.stdout.strip():
-            return p.stdout.decode("utf-8", errors="replace")
+            jar_out = p.stdout.decode("utf-8", errors="replace")
     if UNLUAC_RS.exists():
         p = _run([str(UNLUAC_RS), "-i", str(std_path)])
         if p.returncode == 0 and p.stdout.strip():
-            return p.stdout.decode("utf-8", errors="replace")
+            rs_out = p.stdout.decode("utf-8", errors="replace")
         rs_err = (p.stderr or b"").decode("utf-8", errors="replace")
     else:
         rs_err = "unluac_rs not found"
+
+    # unluac.jar only wins when it is NOT a flat L-var dump (it keeps names).
+    if jar_out and jar_out.strip() and not _is_flat_lvar(jar_out):
+        return jar_out
+    # otherwise prefer the structured unluac-rs output when available.
+    if rs_out and rs_out.strip():
+        return rs_out
+    if jar_out and jar_out.strip():
+        return jar_out
+
     # guaranteed readable fallback via the tool's own Lua VM decompiler
     try:
         import lua_engine

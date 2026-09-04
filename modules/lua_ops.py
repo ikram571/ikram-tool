@@ -37,8 +37,8 @@ def compile_lua(src_path, out_path, lua_bin='luac') -> str:
 
 
 def decompile_lua(src_path, out_path, unluac_jar=None) -> str:
-    jar = unluac_jar or str(Path.home() / 'CHETAN_TOOL' / 'LUA_TOOL' / 'unluac.jar')
-    if not os.path.exists(jar):
+    jar = unluac_jar or find_unluac_jar()
+    if not jar or not os.path.exists(jar):
         return f'unluac.jar not found at {jar}'
     java = 'java'
     proc = subprocess.run([java, '-jar', jar, str(src_path)], capture_output=True)
@@ -65,10 +65,13 @@ def compile_batch(src_dir, out_dir, lua_bin='luac') -> (int, list):
 
 
 def find_unluac_jar():
-    candidates = [
+    tool_dir = Path(__file__).resolve().parent.parent
+    candidates = list(dict.fromkeys([
+        str(tool_dir / 'unluac.jar'),
+        str(Path(__file__).resolve().parent / 'unluac.jar'),
         str(Path.home() / 'CHETAN_TOOL' / 'LUA_TOOL' / 'unluac.jar'),
         str(Path.home() / 'unluac.jar'),
-    ]
+    ]))
     for c in candidates:
         if os.path.exists(c):
             return c
