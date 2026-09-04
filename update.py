@@ -24,10 +24,6 @@ from pathlib import Path
 TOOL_DIR = Path(__file__).resolve().parent
 REPO = "ikram571/ikram-tool"
 API = "https://api.github.com/repos/{}/releases/latest".format(REPO)
-# version source jo API rate-limit se FREE hai (raw.githubusercontent.com)
-RAW_VERSION = "https://raw.githubusercontent.com/{}/main/VERSION".format(REPO)
-# direct download — hamesha latest asset ko redirect karta hai (no API)
-DOWNLOAD_URL = "https://github.com/{}/releases/latest/download/IkramTool.zip".format(REPO)
 ZIP_NAME = "IkramTool.zip"
 
 
@@ -40,36 +36,11 @@ def version_tuple(v):
         return [0]
 
 
-def _raw_latest_version():
-    """raw.githubusercontent se latest VERSION le, no API rate-limit."""
-    try:
-        req = urllib.request.Request(RAW_VERSION, headers={"User-Agent": "ikram-tool"})
-        with urllib.request.urlopen(req, timeout=20) as r:
-            txt = r.read().decode("utf-8", "replace").strip()
-        if not txt:
-            return None
-        return txt.lstrip("vV")
-    except Exception:
-        return None
-
-
 def latest_remote():
-    """Latest release ka zip download URL + version. Return dict or None.
-
-    GitHub API ka 60/hr rate-limit bina tootjaata hai, isliye version ko
-    NON-rate-limited raw.githubusercontent.com VERSION file se lete hain,
-    aur download hamesha direct releases/latest/download/IkramTool.zip se
-    (redirect karta hai). Kabhi API pe depend NAHI karte -> update kabhi
-    rate-limit se fail nahi hota.
-    """
-    # 1) try the raw (non-limited) version file first
-    ver = _raw_latest_version()
-    if ver:
-        return {"version": ver, "url": DOWNLOAD_URL}
-    # 2) fallback: github API (agar raw bhi fail ho)
+    """Latest release ka zip download URL + version. Return dict or None."""
     try:
         req = urllib.request.Request(API, headers={"User-Agent": "ikram-tool"})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with urllib.request.urlopen(req, timeout=30) as r:
             d = json.load(r)
         tag = str(d.get("tag_name", "")).lstrip("vV")
         for a in d.get("assets", []):
@@ -78,8 +49,6 @@ def latest_remote():
         for a in d.get("assets", []):
             if str(a.get("name", "")).endswith(".zip"):
                 return {"version": tag, "url": a["browser_download_url"]}
-        if tag:
-            return {"version": tag, "url": DOWNLOAD_URL}
     except Exception:
         pass
     return None
