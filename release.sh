@@ -9,7 +9,8 @@ set -e
 VERSION="${1:?Usage: bash release.sh VERSION (e.g. V86)}"
 
 SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
-STAGE="$HOME/.ikram_release"
+# Release work sirf opencode folder me hota hai (root me ikram junk nahi).
+STAGE="$HOME/opencode/.ikram_release"
 # IMPORTANT: client code (install.sh, update.py ZIP_NAME, bin/ikram repair)
 # sab "IkramTool.zip" download karta hai via
 #   .../releases/latest/download/IkramTool.zip
