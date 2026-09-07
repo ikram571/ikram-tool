@@ -30,6 +30,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+_has_lua_protect = os.path.exists(str(Path(__file__).resolve().parent / "lua_protect.pyc"))
+
 TOOL_DIR = Path(__file__).resolve().parent
 if str(TOOL_DIR) not in sys.path:
     sys.path.insert(0, str(TOOL_DIR))
@@ -200,70 +202,274 @@ def _xor_key_recover(data: bytes, plain: bytes, key_len: int):
     return bytes(key)
 
 
+def _add_key_recover(data: bytes, plain: bytes, key_len: int):
+    """Repeating additive (mod-256) key from a known plaintext prefix:
+    cipher = plain - key.  Same consistency contract as _xor_key_recover."""
+    n = min(len(data), len(plain))
+    if n < key_len:
+        return None
+    key = bytearray(key_len)
+    for i in range(n):
+        p = plain[i]
+        c = data[i]
+        slot = i % key_len
+        k = (c - p) & 0xFF
+        if i < key_len:
+            key[slot] = k
+        elif key[slot] != k:
+            return None
+    return bytes(key)
+
+
+def _outer_variants(data: bytes):
+    """Yield (label, candidate) slices that strip common wrapper junk:
+    trailing zero-padding and a leading byte-prefix before the real Lua blob.
+
+    Many protected game files carry the bytecode after a small header (an
+    encryption key-string, a file version, offsets) or padded with zeros to
+    block size.  Both are cheap to strip and are tried before any key search.
+    """
+    yield ("identity", data)
+    end = len(data)
+    while end > 0 and data[end - 1] == 0:
+        end -= 1
+    if end < len(data):
+        yield ("trailing-zero-trim", data[:end])
+    for i in range(min(512, len(data) - 3)):
+        if data[i:i + 4] in (b"\x1bLua", b"\x1bLJ", b"\x1bul", b"LuaS"):
+            if i > 0:
+                yield ("prefix-%d-trim" % i, data[i:])
+                if end < len(data):
+                    yield ("prefix-%d+trailing-trim" % i, data[i:end])
+            break
+
+
+def _scramble_variants(data: bytes):
+    """Yield (label, candidate) one-pass obfuscations that carry no key.
+
+    Headerless scrambles used by lazy "encryptors": bit-invert, nibble-swap,
+    even/odd byte-swap, add/subtract by position, and rolling (cumulative) XOR.
+    The identity case is skipped by the caller (already tried first).
+    """
+    n = len(data)
+    yield ("invert", bytes((~b) & 0xFF for b in data))
+    yield ("nibble-swap", bytes((((b >> 4) | (b << 4)) & 0xFF) for b in data))
+    sw = bytearray(n)
+    m = n - (n & 1)
+    sw[0:m:2] = data[1:m:2]
+    sw[1:m:2] = data[0:m:2]
+    if n & 1:
+        sw[n - 1] = data[n - 1]
+    yield ("byte-swap", bytes(sw))
+    yield ("pos-add", bytes((b - i) & 0xFF for i, b in enumerate(data)))
+    yield ("pos-sub", bytes((b + i) & 0xFF for i, b in enumerate(data)))
+    diff = bytearray(n)
+    prev = 0
+    for i in range(n):
+        diff[i] = data[i] ^ prev
+        prev = data[i]
+    yield ("rolling-xor", bytes(diff))
+
+
+def _legacy_crypto():
+    """Lazy handle to the legacy engine's cipher helpers (univ.pyc blob)."""
+    global _LEGACY_CACHE
+    if _LEGACY_CACHE is not None:
+        return _LEGACY_CACHE
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "univ", str(Path(__file__).resolve().parent / "univ.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        _LEGACY_CACHE = getattr(m, "_legacy", None)
+    except Exception:
+        _LEGACY_CACHE = None
+    return _LEGACY_CACHE
+
+
+def _luajit_probe_header():
+    """Header the local LuaJIT toolchain actually writes (cached).
+
+    `luajit -b` emits a target-specific header (flags/size bytes differ
+    between builds), so the key-sweep also tries exactly what THIS machine's
+    compiler produces.  Covers files compiled by the tool/its users even when
+    they diverge from the fixed LuaJIT templates above."""
+    global _LJ_PROBE
+    if _LJ_PROBE is not None:
+        return _LJ_PROBE or None
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "_u", str(Path(__file__).resolve().parent / "univ.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        with tempfile.NamedTemporaryFile("w", suffix=".lua", delete=False) as f:
+            f.write("_G._p = 1\n")
+            srcp = f.name
+        out = tempfile.mktemp(suffix=".ljprobe")
+        try:
+            r = m._compile_luajit(srcp, out)
+            if r is None:
+                head = Path(out).read_bytes()[:12]
+                _LJ_PROBE = head if head[:3] == b"\x1bLJ" else False
+        finally:
+            for p in (srcp, out):
+                try:
+                    Path(p).unlink()
+                except Exception:
+                    pass
+    except Exception:
+        _LJ_PROBE = False
+    return _LJ_PROBE or None
+
+
+def _probe_headers(data: bytes) -> "_HEAD_TEMPLATES-like":
+    """Base templates plus (cached) engine-specific LuaJIT header."""
+    h = list(_HEAD_TEMPLATES)
+    lj = _luajit_probe_header()
+    if lj is not None and lj not in h:
+        h.append(lj)
+    return tuple(h)
+
+
 def _auto_decrypt_valid(data: bytes):
-    """Attempt to recover a key that turns `data` into valid Lua 5.3 game
-    (BGMI) bytecode the pipeline can actually decompile.
+    """Attempt to recover a key that turns `data` into valid Lua-family
+    bytecode the pipeline can actually decompile.
 
     Returns (method_label, decrypted_bytes) on success, else (None, None).
-    Tries:
+    Tries, cheapest first:
       * already-valid Lua already present
-      * repeating-key XOR for key lengths 1..8 (validated)
-      * additive mod-256 for lengths 1..8
+      * the tool's own v3 loader (`-- IKRAMPROT`, recoverable only here)
+      * outer wrapper slices (leading prefix, trailing zero padding)
+      * keyless one-pass scrambles (invert, nibble, swap, positional, rolling)
+      * repeating-key XOR / additive mod-256 across every Lua dialect for key
+        lengths 1..64 (validated through the real converter / decompiler)
       * single-byte XOR brute (256)
-    Only candidates that pass _valid_lua53_head AND the real bytes->std
-    converter (_loads_ok) are kept, so a 4-byte-magic-only or LuaJIT-only
-    false positive is rejected and reported as key-unknown.
+      * legacy cipher sweeps: XXTEA over known candidate keys, wide fixed
+        XOR keys
 
-    NOTE: XOR key length is capped at 8.  The Lua headers (13-16 bytes) would
-    otherwise be trivially matched by a key of length == header length
-    (the key is derived FROM the header itself), producing a guaranteed-but-
-    meaningless match that falsely "decrypts" any file into a LuaJIT header
-    with a garbage body.  Real repeating-XOR game encryption uses short keys.
+    Every candidate must pass _loads_ok, which for Lua 5.3/5.4 runs the real
+    bytes->std converter and for other dialects an actual unluac-rs
+    decompile.  A 13-byte header pasted onto a garbage body can therefore
+    never be reported as a successful decryption.
+
+    NOTE: for dialects other than 5.3/5.4 the key length equal to the header
+    length is skipped: there the key is fully derived FROM the header itself
+    and would "decrypt" any file into that dialect's magic with a garbage
+    body (a guaranteed-but-meaningless match that the converter would not
+    catch — Lua 5.3/5.4 are validated too strongly for this to matter).
     """
+    if data is None or len(data) < 16:
+        return (None, None)
+
+    prot = _lua_protect_decrypt(data)
+    if prot is not None:
+        return prot
+
     if _loads_ok(data):
         return ("none (already valid)", data)
 
-    for header in _HEAD_TEMPLATES:
-        for L in range(1, 9):
-            key = _xor_key_recover(data, header, L)
-            if key is None:
-                continue
-            dec = bytes(data[i] ^ key[i % L] for i in range(len(data)))
-            if _loads_ok(dec):
-                return ("XOR key len=%d %s" % (L, key.hex()), dec)
-    # additive mod-256
-    for L in range(1, 9):
-        for header in _HEAD_TEMPLATES:
-            cand = bytearray(L)
-            ok = True
-            n = min(len(data), len(header))
-            for i in range(n):
-                slot = i % L
-                k = (data[i] - header[i]) & 0xFF
-                if i < L:
-                    cand[slot] = k
-                elif cand[slot] != k:
-                    ok = False
-                    break
-            if not ok:
-                continue
-            key = bytes(cand)
-            dec = bytes((data[i] - key[i % L]) & 0xFF for i in range(len(data)))
-            if _loads_ok(dec):
-                return ("ADD key len=%d %s" % (L, key.hex()), dec)
+    for label, cand in _outer_variants(data):
+        if cand is data:
+            continue
+        if _loads_ok(cand):
+            return (label, cand)
 
-    # single-byte XOR brute (256 candidates) -- cheap keeps C xor const
+    for label, cand in _scramble_variants(data):
+        if _loads_ok(cand):
+            return (label, cand)
+
+    for header in _HEAD_TEMPLATES:
+        plain_len = len(header)
+        for L in range(1, 65):
+            if L == plain_len and header is not LUA53_HEAD and header is not LUA54_HEAD:
+                continue  # fully header-derived key => meaningless match
+            key = _xor_key_recover(data, header, L)
+            if key is not None:
+                dec = bytes(data[i] ^ key[i % L] for i in range(len(data)))
+                if _loads_ok(dec):
+                    return ("XOR key len=%d %s" % (L, key.hex()), dec)
+            key = _add_key_recover(data, header, L)
+            if key is not None:
+                dec = bytes((data[i] - key[i % L]) & 0xFF for i in range(len(data)))
+                if _loads_ok(dec):
+                    return ("ADD key len=%d %s" % (L, key.hex()), dec)
+
     for k in range(1, 256):
         dec = bytes(b ^ k for b in data)
         if _loads_ok(dec):
             return ("XOR single-byte 0x%02x" % k, dec)
+
+    leg = _legacy_crypto()
+    if leg is not None:
+        for cand in getattr(leg, "_xor_decrypt_candidates")(data):
+            if _loads_ok(cand):
+                return ("legacy XOR sweep", cand)
+        for tag, dec in getattr(leg, "_xxtea_key_candidates")(data, limit=8):
+            if dec and _loads_ok(dec):
+                return ("XXTEA %s" % tag, dec)
     return (None, None)
 
 
+def _lua_protect_decrypt(data: bytes):
+    """Decrypt a `.lua_protect` v3 loader if `data` is one.
+
+    The loader is a text chunk starting `-- IKRAMPROT v3 protected chunk` with
+    the bytecode stored as base64-encoded LCG-XOR blobs keyed by the bytecode
+    hash.  Only the tool's own lua_protect module knows the key derivation, so
+    this is the single recovery path for that format.
+
+    Returns (method_label, decrypted_bytes) or None when not a loader / decrypt
+    does not yield valid bytecode."""
+    if not _has_lua_protect:
+        return None
+    if b"IKRAMPROT" not in data[:512] and b"-- IKRAMPROT" not in data[:512]:
+        return None
+    try:
+        import importlib.util
+        lp_spec = importlib.util.spec_from_file_location(
+            "_lp", str(Path(__file__).resolve().parent / "lua_protect.pyc"))
+        lp = importlib.util.module_from_spec(lp_spec)
+        lp_spec.loader.exec_module(lp)
+        with tempfile.NamedTemporaryFile(suffix=".lua", delete=False) as tf:
+            tf.write(data)
+            tmp_path = tf.name
+        try:
+            if not getattr(lp, "is_protected")(tmp_path):
+                return None
+            blobs = getattr(lp, "unprotect_blob")(tmp_path)
+        finally:
+            try:
+                Path(tmp_path).unlink()
+            except Exception:
+                pass
+        if not isinstance(blobs, dict):
+            return None
+        for version, blob in blobs.items():
+            if isinstance(blob, (bytes, bytearray)) and _loads_ok(bytes(blob)):
+                return ("lua_protect v3 (key %s)" % version, bytes(blob))
+    except Exception:
+        return None
+    return None
+
+
 LUA53_HEAD = b"\x1bLua\x53\x00" + LUA_MAGIC_TAIL + b"\x04\x04\x04\x08"
-LUA51_HEAD = b"\x1bLua\x51\x00\x00\x00\x04\x04\x04\x08\x00"
-LUALJ_HEAD = b"\x1bLJ\x02\x00" + LUAJIT_MAGIC_TAIL + b"\x04\x04\x04\x08\x00"
-_HEAD_TEMPLATES = (LUA53_HEAD, LUA51_HEAD, LUALJ_HEAD)
+LUA53_STD_HEAD = b"\x1bLua\x53\x00" + LUA_MAGIC_TAIL + b"\x04\x08\x04\x08"
+LUA54_HEAD = b"\x1bLua\x54\x00" + LUA_MAGIC_TAIL + b"\x04\x04\x04\x08"
+LUALJ_HEAD = b"\x1bLJ\x02\x0a\x40\x02\x00\x07\x00\x03\x00\x08"
+LUALJ1_HEAD = b"\x1bLJ\x01\x0a\x40\x02\x00\x07\x00\x03\x00\x08"
+LUALJ3_HEAD = b"\x1bLJ\x03\x0a\x40\x02\x00\x07\x00\x03\x00\x08"
+LUALJ_FR2_HEAD = b"\x1bLJ\x02\x0a\x20\x02\x00\x07\x00\x03\x00\x08"
+LUA50_HEAD = b"\x1bLua\x50\x00\x01\x04\x08\x04\x08\x00"
+LUA51_HEAD = b"\x1bLua\x51\x00\x01\x04\x08\x04\x08\x00"
+LUA52_HEAD = b"\x1bLua\x52\x00\x01\x04\x08\x04\x08\x00"
+LUAU_HEAD = b"\x1bulu\x41\x00\x01\x00\x02\x02\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00"
+_HEAD_TEMPLATES = (
+    LUA53_HEAD, LUA53_STD_HEAD, LUA54_HEAD, LUA51_HEAD, LUA52_HEAD, LUA50_HEAD,
+    LUALJ_HEAD, LUALJ1_HEAD, LUALJ3_HEAD, LUALJ_FR2_HEAD, LUAU_HEAD,
+)
+_LEGACY_CACHE = None
 
 
 def _loads_ok(data: bytes) -> bool:
@@ -274,18 +480,28 @@ def _loads_ok(data: bytes) -> bool:
     actually decompiling them with unluac-rs, so a coincidental LuaJIT header
     pasted onto a garbage body (a false positive from key search) is rejected
     instead of being reported as a successful decryption.
+
+    A standard-headered (non-BGMI) Lua 5.3 chunk is NOT game format, so it
+    falls through to the same real-decompile check as the other dialects.
     """
     if not data or len(data) < 16:
         return False
     dia = _detect_dialect(data)
+    if dia in ("lua50", "lua51", "lua52", "luajit"):
+        return _unluac_probe(data)
     if dia in ("lua53", "lua54"):
         try:
             std = _bgmi_to_std(data)
         except Exception:
-            return False
-        return len(std) > 0
-    if dia not in ("lua50", "lua51", "lua52", "luajit"):
-        return False
+            std = b""
+        if len(std) > 0:
+            return True
+        return _unluac_probe(data)
+    return False
+
+
+def _unluac_probe(data: bytes) -> bool:
+    """Validate a (non-BGMI) chunk by an actual unluac-rs decompile."""
     if not UNLUAC_RS.exists():
         return True  # fall back to header-only if the decompiler is absent
     try:
@@ -525,6 +741,219 @@ def _strip_prologue(text: str) -> str:
     tab, start, end, refs = found
     lines = text.splitlines()
     return "\n".join(lines[:start] + lines[end + 1 :])
+
+
+# ---- readable-promotion pass --------------------------------------------
+# Name-stripped BGMI bytecode decompiles to unique-per-proto register names
+# (`r0_52`, `p2_0`).  The values are correct and game-ready, but dense.  This
+# pass re-introduces real identifiers where the structure guarantees them:
+#   * import("GameApi") aliases  -> the import string IS the API name
+#   * `_ENV._G.MyGlobal = r0_60` + `local function r0_60` -> name the function
+#   * single-use `local r0_N = _G.Foo` / `_ENV.X` aliases -> inline the use
+# Every rename is re-verified by a luac syntax pass; if anything fails the
+# original text is returned untouched (decompile never regresses).
+
+_IMPORT_RE = re.compile(r'^\s*local\s+(r\d+_\d+)\s*=\s*(_ENV\.)?(slua_)?(import)\("([A-Za-z_][A-Za-z0-9_]*)"\)')
+_GLOBAL_FN_RE = re.compile(r"^\s*_ENV\._G\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(r\d+_\d+)")
+_LOCAL_FN_RE = re.compile(r"^\s*local\s+function\s+(r\d+_\d+)\b")
+_ANY_IDENT_RE = re.compile(r"\b([A-Za-z_]\w*)\b")
+
+
+def _code_mask(text: str) -> str:
+    """Blank out string literals + comments so identifier searches don't
+    match inside strings/import names."""
+    s = re.sub(r"--[^\n]*", "", text)
+    s = re.sub(r'"(?:\\.|[^"\\])*"', '""', s, flags=re.S)
+    s = re.sub(r"'(?:\\.|[^'\\])*'", "''", s, flags=re.S)
+    return s
+
+
+def _is_lvalue_use(line: str, reg: str) -> bool:
+    """True when `reg` is used as an assignment TARGET on `line`.
+
+    Parenthesized lvalue bases trip the game's patched luac parser
+    (`(a.b)[k] = v` after certain locals is refused), so a single-use alias
+    must not be inlined when its one use is an lvalue."""
+    i = re.search(r"\b%s\b" % re.escape(reg), line)
+    if not i:
+        return False
+    rest = line[i.end():]
+    # consume a `.name` / `['str']` / `[expr]` indexing chain if present
+    while True:
+        m = re.match(r"\.\s*[A-Za-z_]\w*", rest)
+        if m:
+            rest = rest[m.end():]
+            continue
+        m = re.match(r"\[", rest)
+        if not m:
+            break
+        depth = 1
+        j = 1
+        while j < len(rest) and depth:
+            if rest[j] == "[": depth += 1
+            elif rest[j] == "]": depth -= 1
+            j += 1
+        rest = rest[j:]
+        continue
+    return rest.lstrip()[:1] in ("=", "")
+
+
+def _clean_output(text: str) -> str:
+    """Minimise decompiler junk without changing program meaning.
+
+    * drops `local rN_M = <expr>` declarations that are never referenced
+      again (spilled-but-unused registers are pure noise)
+    * collapses blank-line runs and trims leading/trailing blank lines
+    Returns the original text when the result does not re-verify cleanly.
+    """
+    lines = text.splitlines()
+    if not lines:
+        return text
+    masked = [_code_mask(l) for l in lines]
+    decl_re = re.compile(r"^\s*local\s+(r\d+_\d+)\s*=\s*(.+?)\s*$")
+    regs = {}
+    for i, ln in enumerate(lines):
+        m = decl_re.match(ln)
+        if m:
+            regs[m.group(1)] = i
+    if regs:
+        scan = re.compile(r"\b(%s)\b" % "|".join(sorted(
+            (re.escape(r) for r in regs), key=len, reverse=True)))
+        occs = {}
+        for j, ml in enumerate(masked):
+            for r in scan.findall(ml):
+                occs.setdefault(r, []).append(j)
+        dead = {i for r, i in regs.items() if len(occs.get(r, ())) == 1}
+        if dead:
+            lines = [l for i, l in enumerate(lines) if i not in dead]
+    out = []
+    prev_blank = False
+    for l in lines:
+        blank = not l.strip()
+        if blank and prev_blank:
+            continue
+        out.append(l)
+        prev_blank = blank
+    while out and not out[0].strip():
+        out.pop(0)
+    while out and not out[-1].strip():
+        out.pop()
+    cleaned = "\n".join(out)
+    if text.endswith("\n") and not cleaned.endswith("\n"):
+        cleaned += "\n"
+    if cleaned == text:
+        return text
+    try:
+        _compile_std(cleaned)
+        return cleaned
+    except Exception:
+        return text
+
+
+def _promote_readable(text: str) -> str:
+    """Post-process register-style decompiled text into readable names."""
+    if not _UNLUAC_LOCAL_RE.search(text):
+        return text
+    masked = _code_mask(text)
+    existing = set(_ANY_IDENT_RE.findall(masked))
+    lines = text.splitlines()
+    renames = {}          # register -> readable name
+    inline_targets = []   # (register, rhs) to inline single-use aliases
+
+    for i, ln in enumerate(lines):
+        m = _IMPORT_RE.match(ln)
+        if m:
+            reg, name = m.group(1), m.group(5)
+            if name not in existing:          # API name not already in scope
+                renames[reg] = name
+                existing.add(name)
+            continue
+        m = _GLOBAL_FN_RE.match(ln)
+        if m:
+            gname, reg = m.group(1), m.group(2)
+            # `_ENV._G.Valid` IS the intended name; it is safe to reuse.
+            # The register must be a `local function` declared before it and
+            # must not be re-assigned anywhere after declaration.
+            has_fn = re.search(r"^\s*local\s+function\s+%s\b" % re.escape(reg),
+                               text, re.M)
+            if has_fn and not re.search(
+                    r"^\s*%s\s*=\s*(?!local\s+function)" % re.escape(reg),
+                    text, re.M):
+                renames[reg] = gname
+                existing.add(gname)
+
+    # single-use alias inlining for _G / _ENV field aliases and enums:
+    # `local rN_M = <simple expr>` used exactly once after its declaration.
+    masked_lines = [_code_mask(l) for l in lines]
+    occs: dict = {}
+    regs = {m.group(1) for i, ln in enumerate(lines) if
+            (m := re.match(r"^\s*local\s+(r\d+_\d+)\s*=\s*(.+)$", ln))}
+    if regs:
+        scan = re.compile(r"\b(%s)\b" % "|".join(sorted(
+            (re.escape(r) for r in regs), key=len, reverse=True)))
+        for j, ml in enumerate(masked_lines):
+            for r in scan.findall(ml):
+                occs.setdefault(r, []).append(j)
+    for i, ln in enumerate(lines):
+        m = re.match(r"^\s*local\s+(r\d+_\d+)\s*=\s*(.+)$", ln)
+        if not m:
+            continue
+        reg = m.group(1)
+        if reg in renames:
+            continue
+        occ = occs.get(reg, [])
+        if len(occ) != 2:                    # decl line + exactly one use
+            continue
+        rhs = m.group(2).rstrip()
+        # only inline simple field / _G / _ENV / literal access (no calls)
+        if not re.match(r"^(?:\(.*\)|[A-Za-z_]\w*(?:\.\w+)*)$", rhs) \
+                and not rhs.lstrip("(").rstrip(")").isdecimal():
+            continue
+        # the single use is the other occurrence (the decl is `i`).
+        use_line = next(j for j in occ if j != i)
+        # safe: a dotted path inlines into any position; a bare literal is
+        # fine in rvalue position only (never as an assignment target).
+        is_path = bool(re.match(r"^[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+$", rhs))
+        if not is_path and _is_lvalue_use(lines[use_line], reg):
+            continue
+        inline_targets.append((reg, rhs, i, use_line))
+
+    if not renames and not inline_targets:
+        return text
+
+    out_lines = list(lines)
+    # apply imports / global-function renames (word-boundary, whole file)
+    if renames:
+        pat = re.compile(r"\b(%s)\b" % "|".join(map(re.escape, renames)))
+        for i, ln in enumerate(out_lines):
+            if i % 9 == 0:                    # cheap incremental mask is fine
+                pass
+            out_lines[i] = pat.sub(lambda m: renames[m.group(1)], ln)
+
+    # inline single-use aliases: drop decl line, splice RHS at the one use.
+    if inline_targets:
+        masked_lines = [_code_mask(l) for l in out_lines]
+        for reg, rhs, decl_i, use_line in inline_targets:
+            if not (0 <= decl_i < len(out_lines)) or not (
+                    0 <= use_line < len(out_lines)):
+                continue
+            if not re.search(r"\b%s\b" % re.escape(reg),
+                             masked_lines[use_line]):
+                continue
+            out_lines[decl_i] = None
+            out_lines[use_line] = re.sub(
+                r"\b%s\b" % re.escape(reg), rhs,
+                out_lines[use_line], count=1)
+            masked_lines[use_line] = _code_mask(out_lines[use_line])
+        out_lines = [l for l in out_lines if l is not None]
+
+    promoted = "\n".join(out_lines)
+    # verify the promotion preserves valid syntax; fall back on any doubt.
+    try:
+        _compile_std(promoted)
+        return promoted
+    except Exception:
+        return text
 
 
 # ---- decompiled-output structure quality guard --------------------------
@@ -1371,8 +1800,13 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
     try:
         _phase(progress, "Checking input...")
         if not _loads_ok(data):
-            # encrypted / packed: try to auto-recover the key, then decompile.
-            if not _is_encrypted_lua(data):
+            # the tool's own v3 protected-loader (printable text) must be
+            # decrypted BEFORE the "plain source text" fallback.
+            prot = _lua_protect_decrypt(data)
+            if prot is not None:
+                method, data = prot
+                _phase(progress, "Key found (%s)" % method)
+            elif not _is_encrypted_lua(data):
                 # plain non-Lua input: treat as source text
                 text = data.decode("utf-8", errors="replace")
                 out_p = out_root / (stem + "_GAME.lua")
@@ -1380,15 +1814,16 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                 return [
                     ("Decompile (game-ready)", True, out_p, "readable source (game-ready)"),
                 ]
-            _phase(progress, "Trying auto key-discovery...")
-            method, dec = _auto_decrypt_valid(data)
-            if method is None or dec is None:
-                return [("Decompile", False, out_root / (stem + "_GAME.lua"),
-                         ("Auto key-discovery could not recover a decryption key "
-                          "(sparse/BRPC-protected). Manual decrypt or the modder's "
-                          "key is required for this file."))]
-            _phase(progress, "Key found (%s)" % method)
-            data = dec
+            else:
+                _phase(progress, "Trying auto key-discovery...")
+                method, dec = _auto_decrypt_valid(data)
+                if method is None or dec is None:
+                    return [("Decompile", False, out_root / (stem + "_GAME.lua"),
+                             ("Auto key-discovery could not recover a decryption key "
+                              "(sparse/BRPC-protected). Manual decrypt or the modder's "
+                              "key is required for this file."))]
+                _phase(progress, "Key found (%s)" % method)
+                data = dec
 
         dialect = _detect_dialect(data)
         _phase(progress, "Dialect: %s" % (dialect or "lua53"))
@@ -1415,6 +1850,12 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
         clean_path.write_text(clean_text, encoding="utf-8")
 
         game_text = _strip_prologue(clean_text)
+        # name-stripped register output -> re-introduce readable identifiers
+        if _UNLUAC_LOCAL_RE.search(game_text):
+            _phase(progress, "Cleaning dead registers...")
+            game_text = _clean_output(game_text)
+            _phase(progress, "Promoting readable names...")
+            game_text = _promote_readable(game_text)
         game_path = out_root / (stem + "_GAME.lua")
         game_path.write_text(game_text, encoding="utf-8")
 

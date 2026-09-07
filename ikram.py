@@ -16,7 +16,6 @@ from rich import print as rprint
 
 from modules import pak as pakmod
 from modules import ue4 as ue4mod
-from modules import obb_ops
 from modules import lua_ops
 from modules import key as keymod
 
@@ -41,16 +40,15 @@ RESULT = TOOL_DIR / 'RESULT'
 DROP = TOOL_DIR / 'DROP'
 DROP_PAK = DROP / 'pak'
 DROP_LUA = DROP / 'lua'
-DROP_OBB = DROP / 'obb'
 DROP_INJ = DROP / 'inject'
 
-for d in (RESULT, DROP, DROP_PAK, DROP_LUA, DROP_OBB, DROP_INJ):
+for d in (RESULT, DROP, DROP_PAK, DROP_LUA, DROP_INJ):
     d.mkdir(parents=True, exist_ok=True)
 
 DOWNLOADS = Path('/storage/emulated/0/Download')
 
 BANNER = f'''[bold {BRAND}]  ╔══════════════════════════════════════════════════╗
-  ║  [bold {TITLE}]I K R A M   T O O L[/]  [dim]·[/]  [bold {ACCENT}]PAK[/] [dim]·[/] [bold {SUCCESS}]LUA[/] [dim]·[/] [bold {WARN}]OBB[/]        ║
+  ║  [bold {TITLE}]I K R A M   T O O L[/]  [dim]·[/]  [bold {ACCENT}]PAK[/] [dim]·[/] [bold {SUCCESS}]LUA[/]        ║
   ╚══════════════════════════════════════════════════╝
   [dim {MUTED}]version 1.0  ·  fresh code  ·  by ikram[/]'''
 
@@ -169,7 +167,7 @@ def io_box():
         home = str(Path.home())
         return s.replace(home, '~')
     return Panel(
-        f'[bold {EXAMPLE_LABEL}]INPUT FILES:[/] [{EXAMPLE}]{sh(DROP)} (pak, lua, obb, inject)[/]\n'
+        f'[bold {EXAMPLE_LABEL}]INPUT FILES:[/] [{EXAMPLE}]{sh(DROP)} (pak, lua, inject)[/]\n'
         f'[bold {EXAMPLE_LABEL}]OUTPUT:[/] [{EXAMPLE}]{sh(RESULT)}[/]',
         box=ROUNDED, border_style=EXAMPLE_BORDER, padding=(0, 2))
 
@@ -285,8 +283,6 @@ def main_menu():
     opts = [
         ('1', 'PAK TOOL', 'unpack, inject, repack pak files'),
         ('2', 'LUA TOOL', 'compile / decompile lua files'),
-        ('3', 'OBB TOOL', 'unpack / repack obb files'),
-        ('4', 'REFRESH', 'refresh tool'),
         ('0', 'EXIT', 'close the tool'),
     ]
     t = build_menu_table(opts)
@@ -294,23 +290,6 @@ def main_menu():
     console.print(panel(t, title='◈ IKRAM TOOL — Main Menu ◈', subtitle='choose a number to proceed'))
     choice = safe_input(f'[bold {ACCENT}]-> Select: [/]')
     return choice
-
-
-def refresh_tool():
-    check_for_updates(silent=False)
-    try:
-        src = Path.home() / 'opencode' / 'Ikram_Tool'
-        here = Path(__file__).resolve().parent
-        if src.exists() and src.resolve() != here.resolve():
-            for p in src.rglob('*.py'):
-                dst = here / p.relative_to(src)
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(p, dst)
-            console.print(f'[bold {SUCCESS}]Update done: latest files copied to {here}[/]')
-    except Exception as e:
-        console.print(f'[dim {MUTED}]Update copy failed ({e}) — continuing.[/dim {MUTED}]')
-    keymod.clear_activation()
-    os.execv(sys.executable, [sys.executable, __file__])
 
 
 def pause():
@@ -329,22 +308,18 @@ def pak_tool_menu():
              'WORK: pak file kholo, saari files folder me nikal lo.\n'
              'INPUT: pak file -> DROP/pak\n'
              'OUTPUT: RESULT/extracted/'),
-            ('[2]', 'Inject Lua',
-             'WORK: ek lua file pak ke andar daalo.\n'
-             'INPUT: lua -> DROP/lua  +  pak -> DROP/pak\n'
-             'OUTPUT: RESULT/injected/*_injected.pak'),
-            ('[3]', 'Inject File',
-             'WORK: koi bhi file (uasset, png, json...) pak ke andar daalo.\n'
+            ('[2]', 'Inject File',
+             'WORK: koi bhi file (lua, uasset, png, json...) pak ke\n'
+             '      andar daalo — file type khud detect hota hai.\n'
              'INPUT: pak -> DROP/pak  +  file -> DROP/inject\n'
              'OUTPUT: RESULT/injected/*_injected.pak'),
-             ('[4]', 'Repack PAK',
-              'WORK: pehle unpack karo, files edit karo, phir\n'
-              '      edit wali files se wapas naya pak banao.\n'
-              'INPUT: original pak -> DROP/pak\n'
-              '      phir edited files wale folder ka path batao\n'
-              '      (ENTER = RESULT/extracted khud le lega)\n'
-              'OUTPUT: RESULT/repacked/*_repacked.pak'),
-            ('[5]', 'REFRESH', 'refresh tool'),
+            ('[3]', 'Repack PAK',
+             'WORK: pehle unpack karo, files edit karo, phir\n'
+             '      edit wali files se wapas naya pak banao.\n'
+             'INPUT: original pak -> DROP/pak\n'
+             '      phir edited files wale folder ka path batao\n'
+             '      (ENTER = RESULT/extracted khud le lega)\n'
+             'OUTPUT: RESULT/repacked/*_repacked.pak'),
             ('[0]', 'Back', 'back to main menu'),
         ]
         t = build_menu_table(opts)
@@ -353,13 +328,9 @@ def pak_tool_menu():
         if c == '1':
             pak_extract()
         elif c == '2':
-            pak_inject_lua()
+            pak_inject()
         elif c == '3':
-            pak_inject_file()
-        elif c == '4':
             pak_repack_folder()
-        elif c == '5':
-            refresh_tool()
         elif c == '0':
             return
         else:
@@ -371,9 +342,9 @@ def drop_files(folder, exts):
 
 
 def ensure_input_folder():
-    if drop_files(DROP_PAK, ['.pak', '.obb']):
-        return pick_file(DROP_PAK, f'Choose a PAK file [dim](DROP/pak)[/dim]', ['.pak', '.obb'])
-    f = pick_file(DOWNLOADS if DOWNLOADS.exists() else HOME, 'Choose a PAK file', ['.pak', '.obb'])
+    if drop_files(DROP_PAK, ['.pak']):
+        return pick_file(DROP_PAK, f'Choose a PAK file [dim](DROP/pak)[/dim]', ['.pak', ])
+    f = pick_file(DOWNLOADS if DOWNLOADS.exists() else HOME, 'Choose a PAK file', ['.pak'])
     return f
 
 
@@ -500,50 +471,36 @@ def _inject_into_pak(pakf, target_path, data):
     raise ValueError('Unknown pak type')
 
 
-def pak_inject_lua():
-    lf = pick_file(DROP_LUA, 'Choose a Lua file', ['.lua', '.luac'])
-    if not lf:
-        return
+def pak_inject():
     pakf = ensure_input_folder()
     if not pakf:
         return
-    data = lf.read_bytes()
-    console.print(f'[bold {ACCENT}]Lua detect: [bold bright_white]{lua_ops.detect_lua(lf)}[/][/]')
-    kind = detect_pak_type(pakf)
-    folder = pick_pak_folder(pakf, kind)
-    if folder is None:
-        console.print('[yellow]Cancelled[/yellow]')
-        return
-    name = safe_input(f'-> Lua ka naam (ENTER = {lf.name}): ').strip() or lf.name
-    target_path = f'{folder}/{name}'.strip('/')
-    try:
-        n = _inject_into_pak(pakf, target_path, data)
-        show_success(f'Done: {n} file -> {RESULT / "injected" / (pakf.stem + "_injected.pak")}')
-        console.print(f'[dim {MUTED}]Injected at: {target_path}[/dim {MUTED}]')
-        if n == 0:
-            console.print('[yellow]No file found at that path and add failed too.[/yellow]')
-    except Exception as e:
-        report_error(e)
-    pause()
-
-
-def pak_inject_file():
-    pakf = ensure_input_folder()
-    if not pakf:
-        return
-    if drop_files(DROP_INJ, []):
+    if any(p.is_file() for p in DROP_INJ.rglob('*')):
         f = pick_file(DROP_INJ, 'Choose the file to inject', None)
     else:
         f = pick_file(DOWNLOADS if DOWNLOADS.exists() else HOME, 'Choose the file to inject', None)
     if not f:
         return
     data = f.read_bytes()
-    target_path = safe_input('-> Target path inside pak (e.g. Content/X.uasset): ')
-    if not target_path:
-        return
+    console.print(f'[bold {ACCENT}]File detect: [bold bright_white]{lua_ops.detect_lua(f)}[/][/]')
+    kind = detect_pak_type(pakf)
+    if f.suffix.lower() in ('.lua', '.luac'):
+        folder = pick_pak_folder(pakf, kind)
+        if folder is None:
+            console.print('[yellow]Cancelled[/yellow]')
+            return
+        name = safe_input(f'-> Lua ka naam (ENTER = {f.name}): ').strip() or f.name
+        target_path = f'{folder}/{name}'.strip('/')
+    else:
+        target_path = safe_input('-> Target path inside pak (e.g. Content/X.uasset): ')
+        if not target_path:
+            return
     try:
         n = _inject_into_pak(pakf, target_path, data)
-        console.print(f'[green]Done: {n} file -> {RESULT / "injected" / (pakf.stem + "_injected.pak")}[/green]')
+        show_success(f'Done: {n} file -> {RESULT / "injected" / (pakf.stem + "_injected.pak")}')
+        console.print(f'[dim {MUTED}]Injected at: {target_path}[/dim {MUTED}]')
+        if n == 0:
+            console.print('[yellow]No file found at that path and add failed too.[/yellow]')
     except Exception as e:
         report_error(e)
     pause()
@@ -618,11 +575,6 @@ def lua_tool_menu():
              'WORK: .luac bytecode ko readable source .lua banao.\n'
              'INPUT: .luac file -> DROP/lua\n'
              'OUTPUT: RESULT/lua/*_decompiled.lua'),
-            ('[3]', 'Compile Folder',
-             'WORK: ek folder ke saare .lua ek saath compile karo.\n'
-             'INPUT: folder ka path batao\n'
-             'OUTPUT: RESULT/lua_compiled/'),
-            ('[4]', 'REFRESH', 'refresh tool'),
             ('[0]', 'Back', 'back to main menu'),
         ]
         t = build_menu_table(opts)
@@ -632,10 +584,6 @@ def lua_tool_menu():
             lua_compile_one()
         elif c == '2':
             lua_decompile_one()
-        elif c == '3':
-            lua_compile_folder()
-        elif c == '4':
-            refresh_tool()
         elif c == '0':
             return
         else:
@@ -673,82 +621,6 @@ def lua_decompile_one():
         show_error(err)
     else:
         show_success(f'Decompiled -> {out}')
-    pause()
-
-
-def lua_compile_folder():
-    src_dir = Path(safe_input('-> Lua source folder (ENTER = DROP/lua): ') or DROP_LUA)
-    if not src_dir.is_dir():
-        show_error(f'Folder not found: {src_dir}')
-        return
-    out = RESULT / 'lua_compiled'
-    ok, errors = lua_ops.compile_batch(src_dir, out)
-    show_success(f'Compiled {ok} files -> {out}')
-    for e in errors[:20]:
-        console.print(f'[bold {WARN}]  - {e}[/]')
-    pause()
-
-
-def obb_tool_menu():
-    while True:
-        clear_screen()
-        opts = [
-            ('[1]', 'Unpack OBB',
-             'WORK: obb file kholo, uski files folder me nikalo.\n'
-             'INPUT: .obb file -> DROP/obb\n'
-             'OUTPUT: RESULT/obb/'),
-            ('[2]', 'Repack OBB',
-             'WORK: folder ki files se wapas naya .obb banao.\n'
-             'INPUT: unpack wale folder ka path batao\n'
-             'OUTPUT: RESULT/*.obb'),
-            ('[3]', 'REFRESH', 'refresh tool'),
-            ('[0]', 'Back', 'back to main menu'),
-        ]
-        t = build_menu_table(opts)
-        console.print(panel(t, title='◈ OBB TOOL ◈'))
-        c = safe_input(f'[bold {ACCENT}]-> Select: [/]')
-        if c == '1':
-            obb_unpack()
-        elif c == '2':
-            obb_repack()
-        elif c == '3':
-            refresh_tool()
-        elif c == '0':
-            return
-        else:
-            invalid_choice()
-
-
-def obb_unpack():
-    if drop_files(DROP_OBB, ['.obb', '.zip']):
-        f = pick_file(DROP_OBB, 'Choose an OBB file [dim](DROP/obb)[/dim]', ['.obb', '.zip'])
-    else:
-        f = pick_file(DOWNLOADS if DOWNLOADS.exists() else HOME, 'Choose an OBB file', ['.obb', '.zip'])
-    if not f:
-        return
-    out = RESULT / 'obb' / f.stem
-    console.print('[bold {ACCENT}]Unpacking...[/]')
-    try:
-        n = obb_ops.unpack_obb(f, out, log=lambda s: console.print(s))
-        show_success(f'Done: {n} files -> {out}')
-    except Exception as e:
-        report_error(e)
-    pause()
-
-
-def obb_repack():
-    src = Path(safe_input(f'-> Folder path (ENTER = {RESULT / "obb"}): ') or (RESULT / 'obb'))
-    if not src.is_dir():
-        show_error(f'Folder not found: {src}')
-        return
-    out = RESULT / f'{src.name}.obb'
-    out.parent.mkdir(parents=True, exist_ok=True)
-    console.print('[bold {ACCENT}]Repacking...[/]')
-    try:
-        n = obb_ops.repack_obb(src, out, log=lambda s: console.print(s))
-        show_success(f'Done: {n} files -> {out}')
-    except Exception as e:
-        report_error(e)
     pause()
 
 
@@ -803,10 +675,6 @@ def main():
                 pak_tool_menu()
             elif c == '2':
                 lua_tool_menu()
-            elif c == '3':
-                obb_tool_menu()
-            elif c == '4':
-                refresh_tool()
             elif c == '0':
                 console.print(f'[bold {SUCCESS}]Bye![/]')
                 break

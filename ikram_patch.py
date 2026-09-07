@@ -199,11 +199,27 @@ def _choose_pak_index(n, paks, label):
         ikram.console.print("[bold {}]Invalid number — 1 se {} tak choose karo.[/]".format(ikram.WARN, n))
 
 
-def pak_extract():
-    paks = ikram.drop_files(ikram.DROP_PAK, [".pak", ".obb"])
+def ensure_input_folder():
+    """DROP/pak se sirf .pak files pick karo (OBB support removed)."""
+    paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
     if not paks:
         ikram.show_error(
-            "No PAK files found in DROP/pak.\nAdd your .pak or .obb files there and try again."
+            "No PAK files found in DROP/pak.\nAdd your .pak files there and try again."
+        )
+        ikram.pause()
+        return None
+    return ikram.pick_file(
+        ikram.DROP_PAK,
+        "📦 Choose a PAK file [bold {}](DROP/pak)[/bold {}]".format(ikram.MUTED, ikram.MUTED),
+        [".pak"],
+    )
+
+
+def pak_extract():
+    paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
+    if not paks:
+        ikram.show_error(
+            "No PAK files found in DROP/pak.\nAdd your .pak files there and try again."
         )
         ikram.pause()
         return
@@ -263,6 +279,7 @@ def _finish_report(pakf, n, kind, out):
 
 
 ikram.pak_extract = pak_extract
+ikram.ensure_input_folder = ensure_input_folder
 
 if __name__ == "__main__":
     ikram.main()
