@@ -79,7 +79,8 @@ def decompile_any(src, out, progress=None):
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     kind = detect(src)
-    if kind not in ("Lua source", "Lua 5.3", "LuaJIT", "Lua", "Lua 5.3 (encrypted)"):
+    if kind not in ("Lua source", "Lua", "Lua 5.1", "Lua 5.2", "Lua 5.3",
+                    "Lua 5.4", "LuaJIT", "Lua 5.3 (encrypted)"):
         if _legacy is not None:
             return _legacy.decompile_any(src, out, progress)
         return False, "unsupported"
@@ -101,7 +102,8 @@ def decompile_multi_engines(src, out_root, progress=None):
             return _legacy.decompile_multi_engines(src, out_root, progress)
         return [("Legacy", False, out_root, "unsupported")]
     kind = detect(src)
-    if kind in ("Lua source", "Lua 5.3", "LuaJIT", "Lua", "Lua 5.3 (encrypted)"):
+    if kind in ("Lua source", "Lua", "Lua 5.1", "Lua 5.2", "Lua 5.3",
+                "Lua 5.4", "LuaJIT", "Lua 5.3 (encrypted)"):
         return _mega.decompile_bgmi(src, out_root, progress)
     if _legacy is not None:
         return _legacy.decompile_multi_engines(src, out_root, progress)

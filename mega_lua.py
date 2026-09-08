@@ -28,6 +28,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import zlib
 from pathlib import Path
 
 _has_lua_protect = os.path.exists(str(Path(__file__).resolve().parent / "lua_protect.pyc"))
@@ -88,6 +89,103 @@ def read_bytes(src) -> bytes:
         return f.read()
 
 
+# ---------------------------------------------------------------------------
+# Multi-section zlib container.  Some BGMI builds ship the bytecode as a pack
+# of 64KiB raw-deflate sections (mostly the game's own archive format), not as
+# a single flat .luac. Anything downstream that wants the real chunk must pull
+# them through here first.
+# ---------------------------------------------------------------------------
+_ZLIB_SECTION_MAGIC2 = (0xDA, 0x9C, 0x01, 0x5E)
+
+
+def _zlib_section_at(data: bytes, i: int):
+    """Inflate one raw-deflate ('deflate', wbits=-15) section at offset `i`.
+
+    Returns (next_offset_after_cargo, inflated_bytes) on success, else None.
+    `next_offset` is computed from `unused_data`/`unconsumed_tail` so the
+    caller can keep walking past trailing bytes/two-byte sync headers between
+    sections.
+    """
+    if i + 2 > len(data):
+        return None
+    try:
+        do = zlib.decompressobj(-15)
+        rest = data[i + 2:]
+        chunk = do.decompress(rest) + do.flush()
+    except Exception:
+        return None
+    if len(chunk) < 4096:
+        return None
+    used = i + 2 + (len(rest) - len(do.unused_data) - len(do.unconsumed_tail))
+    return used, chunk
+
+
+def _reconstruct_zlib_sections(data: bytes):
+    """Greedily concatenate every consecutive raw-deflate section.
+
+    Walks 78xx magics (78 da / 78 9c / 78 01 / 78 5e), drops false positives,
+    skips inter-section padding (0e / 00s / CLMM markers). Returns the joined
+    reflate as bytes, or None when nothing section-like is present.
+    """
+    n = len(data)
+    if n < 4096:
+        return None
+    parts = []
+    i = 0
+    guard = 0
+    while i < n - 1:
+        guard += 1
+        if guard > len(data):
+            break
+        # find next plausible section magic within a window
+        start = i
+        while start < n - 1 and (
+            data[start] != 0x78 or data[start + 1] not in _ZLIB_SECTION_MAGIC2
+        ):
+            start += 1
+        if start >= n - 1:
+            break
+        r = _zlib_section_at(data, start)
+        if r is None:
+            i = start + 2
+            continue
+        next_off, chunk = r
+        parts.append(chunk)
+        i = next_off
+    if not parts:
+        return None
+    total = b"".join(parts)
+    if len(total) < 4096:
+        return None
+    return total
+
+
+def _looks_like_zlib_container(data: bytes) -> bool:
+    """Cheap pre-check: the file is NOT a plain Lua header and shows dense
+    raw-deflate traffic (starts with a 78xx magic or heavy 0e padding).
+
+    Deliberately skips anything that already carries a Lua-family header, so
+    normal BGMI chunks (whose instruction streams can contain 0x78/0x0e bytes)
+    are never fed to the section walker.
+    """
+    if len(data) < 4096:
+        return False
+    if data[:4] in (b"\x1bLua", b"\x1bLJ", b"\x1bul"):
+        return False
+    n = len(data)
+    if data[0] == 0x78 and data[1] in _ZLIB_SECTION_MAGIC2:
+        return True
+    zero_run = 0
+    for b in data[: max(4096, n // 64)]:
+        if b == 0x0E:
+            zero_run += 1
+            if zero_run > 16:
+                return True
+        else:
+            zero_run = 0
+    return False
+
+
 def detect_lua(src) -> str:
     """Classify a Lua-ish file the same way univ.detect would."""
     try:
@@ -101,6 +199,13 @@ def detect_lua(src) -> str:
         return "LuaJIT"
     if dia:
         return "Lua %s" % (".".join(dia[3:]) if dia.startswith("lua") else dia)
+    # multi-section zlib container (BGMI archive form): reconstruct first
+    if _looks_like_zlib_container(data):
+        recon = _reconstruct_zlib_sections(data)
+        if recon is not None:
+            dia = _detect_dialect(recon)
+            if dia in ("lua53", "lua54") or _is_bgmi(recon):
+                return "Lua 5.3"
     if _is_bgmi(data):
         return "Lua 5.3"
     # text heuristics
@@ -143,10 +248,15 @@ def _detect_dialect(data: bytes):
         return None
     if data[:4] == b"\x1bLua":
         ver = data[4]
-        if data[6:12] != LUA_MAGIC_TAIL:
-            return None
         if ver in (0x50, 0x51, 0x52, 0x53, 0x54):
-            return "lua%d%d" % ((ver >> 4) & 0x0F, ver & 0x0F)
+            # Lua 5.1/5.2 have no LUAC_DATA magic tail (version byte + format
+            # byte identify them); 5.3/5.4 require the \x19\x93\r\n\x1a\n tail.
+            if ver in (0x50, 0x51, 0x52):
+                if len(data) < 6 or data[5] != 0x00:
+                    return None
+                return "lua%d%d" % ((ver >> 4) & 0x0F, ver & 0x0F)
+            if data[6:12] == LUA_MAGIC_TAIL:
+                return "lua%d%d" % ((ver >> 4) & 0x0F, ver & 0x0F)
         return None
     if data[:4] == b"\x1bul":
         return "luau"
@@ -472,6 +582,34 @@ _HEAD_TEMPLATES = (
 _LEGACY_CACHE = None
 
 
+def _std_has_payload(std: bytes) -> bool:
+    """True when a standard-chunk `std` parses to a proto tree with at least
+    one real code instruction. A Lua header pasted onto a garbage body
+    converts to a length-nonzero lump with zero instructions; real BGMI
+    converts to a tree with >0 instructions even when the chunk is too large
+    for unluac-rs to fully decompile."""
+    try:
+        import lua_engine as _le
+        tmp = None
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td) / "payload_check.luac"
+            tmp.write_bytes(std)
+            p = _le.load_std_bytecode_to_proto(str(tmp))
+            total = 0
+            stack = [p]
+            while stack:
+                cur = stack.pop()
+                ins = getattr(cur, "ins", None)
+                if ins:
+                    total += len(ins)
+                subs = getattr(cur, "subs", None)
+                if subs:
+                    stack.extend(subs)
+        return total > 0
+    except Exception:
+        return False
+
+
 def _loads_ok(data: bytes) -> bool:
     """True only if `data` is genuine, decompilable Lua-family bytecode.
 
@@ -486,6 +624,10 @@ def _loads_ok(data: bytes) -> bool:
     """
     if not data or len(data) < 16:
         return False
+    if _looks_like_zlib_container(data):
+        recon = _reconstruct_zlib_sections(data)
+        if recon is not None:
+            data = recon
     dia = _detect_dialect(data)
     if dia in ("lua50", "lua51", "lua52", "luajit"):
         return _unluac_probe(data)
@@ -494,8 +636,12 @@ def _loads_ok(data: bytes) -> bool:
             std = _bgmi_to_std(data)
         except Exception:
             std = b""
-        if len(std) > 0:
+        if len(std) > 0 and _std_has_payload(std):
             return True
+        if len(std) > 0:
+            # converted lump has no real code: header-pasted garbage. Reject
+            # unless a real decompile still succeeds on the source chunk.
+            return _unluac_probe(data)
         return _unluac_probe(data)
     return False
 
@@ -966,6 +1112,10 @@ def _promote_readable(text: str) -> str:
 _LUADEC_LOCAL_RE = re.compile(r"\bL\d+_\d+\b")
 _UNLUAC_LOCAL_RE = re.compile(r"\br\d+_\d+\b")
 _TABLE_RE = re.compile(r"^\s*local\s+[\w\.]+\s*=\s*\{", re.M)
+# signature of the tool's own lua_engine pseudo-decompiler fallback
+# (register-style `R0/R1`, `-- SETLIST A=..`, unresolvable `goto line_NNN`):
+# such output is readable but not guaranteed recompilable on heavy files.
+_PSEUDO_SIGN_RE = re.compile(r"^\s*local\s+R\d+\s*=\s*\{\s*\}$", re.M)
 
 
 def _structure_quality(text: str) -> str:
@@ -1789,6 +1939,12 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
     data = read_bytes(src)
     stem = Path(src).stem
 
+    if _looks_like_zlib_container(data):
+        _phase(progress, "Multi-section container detected, reconstructing...")
+        recon = _reconstruct_zlib_sections(data)
+        if recon is not None and (_detect_dialect(recon) or _is_bgmi(recon)):
+            data = recon
+
     def _cleanup(extra=()):
         for p in extra:
             try:
@@ -1828,8 +1984,11 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
         dialect = _detect_dialect(data)
         _phase(progress, "Dialect: %s" % (dialect or "lua53"))
 
-        # non-BGMI dialects (LuaJIT / 5.1 / 5.2 / 5.4): readable via unluac-rs.
+        # non-BGMI dialects (LuaJIT / 5.1 / 5.2 / 5.4) AND standard
+        # size_t=8 chunks of otherwise-BGMI versions: readable via unluac-rs.
         if dialect not in ("lua53", "lua54", None):
+            return _decompile_other_dialect(data, dialect, out_root, stem, progress)
+        if dialect in ("lua53", "lua54") and not _is_bgmi(data):
             return _decompile_other_dialect(data, dialect, out_root, stem, progress)
 
         _phase(progress, "Converting BGMI -> standard bytecode...")
@@ -1863,9 +2022,15 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
 
         # single final artifact: remove intermediates so user sees ONE file
         _cleanup((readable_path, clean_path, tmp_std))
-        msg = "readable + editable + game-ready, ready to recompile"
-        if quality:
-            msg += " | " + quality
+        if _PSEUDO_SIGN_RE.search(game_text):
+            msg = ("readable register-style (engine fallback); may lose "
+                   "structure / not recompile cleanly on heavy files")
+            if quality:
+                msg += " | " + quality
+        else:
+            msg = "readable + editable + game-ready, ready to recompile"
+            if quality:
+                msg += " | " + quality
         return [
             ("Decompile (game-ready)", True, game_path, msg),
         ]
