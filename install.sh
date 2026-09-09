@@ -249,38 +249,47 @@ TARGET="$HOME/Ikram_Tool"
 box "$C_CYAN" "⬇ Downloading tool"
 mkdir -p "$TARGET"
 TOOL_URL="https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
-_pbar "$((PW_UPDATE + PW_PKGS + PW_PIP))" "Downloading tool"
+DL_BASE=$((PW_UPDATE + PW_PKGS + PW_PIP))
+_pbar "$DL_BASE" "Downloading tool"
 TOTAL=$(curl -sIL "$TOOL_URL" 2>/dev/null | grep -i '^content-length' | tail -1 | tr -dc '0-9')
 [ -z "$TOTAL" ] && TOTAL=0
-curl -sL -o "$TARGET/IkramTool.zip" "$TOOL_URL" &
-CPID=$!
 DONE=0
-DL_BASE=$((PW_UPDATE + PW_PKGS + PW_PIP))
-while kill -0 "$CPID" 2>/dev/null; do
+ATT=0
+while [ "$ATT" -lt 3 ] && [ "$DONE" -eq 0 ]; do
+    ATT=$((ATT + 1))
+    rm -f "$TARGET/IkramTool.zip"
+    curl -fL -s -o "$TARGET/IkramTool.zip" "$TOOL_URL" &
+    CPID=$!
+    while kill -0 "$CPID" 2>/dev/null; do
+        CUR=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
+        FRAC=$(( TOTAL > 0 ? CUR * 100 / TOTAL : 0 ))
+        [ "$FRAC" -gt 100 ] && FRAC=100
+        PCT=$(( DL_BASE + FRAC * PW_DL / 100 ))
+        [ "$PCT" -gt $((DL_BASE + PW_DL)) ] && PCT=$((DL_BASE + PW_DL))
+        if [ "$TTY_MODE" -eq 0 ]; then
+            printf "  ▸ Downloading (try $ATT): $(human "$CUR") / $(human "$TOTAL") ... %3s%%\n" "$FRAC"
+            sleep 1
+            continue
+        fi
+        FILLED=$(( PCT * PB_W / 100 ))
+        BAR=""
+        i=0
+        while [ "$i" -lt "$FILLED" ]; do BAR="${BAR}█"; i=$((i+1)); done
+        while [ "$i" -lt "$PB_W" ]; do BAR="${BAR}░"; i=$((i+1)); done
+        printf "\r${C_CYAN}  ⬇ Downloading (try $ATT): $(human "$CUR") / $(human "$TOTAL") [${C_GREEN}${BAR}${C_RESET}] %3s%%${C_RESET}   " "$FRAC"
+        sleep 0.2
+    done
+    wait "$CPID"
     DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
-    FRAC=$(( TOTAL > 0 ? DONE * 100 / TOTAL : 0 ))
-    PCT=$(( DL_BASE + FRAC * PW_DL / 100 ))
-    [ "$PCT" -gt $((DL_BASE + PW_DL)) ] && PCT=$((DL_BASE + PW_DL))
-    if [ "$TTY_MODE" -eq 0 ]; then
-        printf "  ▸ Downloading: $(human "$DONE") / $(human "$TOTAL") ... %3s%%\n" "$PCT"
-        sleep 1
-        continue
+    MAGIC=$(head -c2 "$TARGET/IkramTool.zip" 2>/dev/null | tr -d '\0')
+    if [ "$MAGIC" != "PK" ] || { [ "$TOTAL" -gt 0 ] && [ "$DONE" -lt "$TOTAL" ]; }; then
+        DONE=0
+        if [ "$ATT" -lt 3 ]; then
+            printf "\r${C_GOLD}  ⬇ Download incomplete — retry ${ATT}/3...${C_RESET}\n"
+        fi
     fi
-    FILLED=$(( PCT * PB_W / 100 ))
-    BAR=""
-    i=0
-    while [ "$i" -lt "$FILLED" ]; do BAR="${BAR}█"; i=$((i+1)); done
-    while [ "$i" -lt "$PB_W" ]; do BAR="${BAR}░"; i=$((i+1)); done
-    printf "\r${C_CYAN}  ⬇ Downloading: $(human "$DONE") / $(human "$TOTAL") [${C_GREEN}${BAR}${C_RESET}] %3s%%${C_RESET}   " "$PCT"
-    sleep 0.2
 done
-wait "$CPID"
-DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
-if [ "$TTY_MODE" -eq 0 ]; then
-    printf "  ▸ Downloading: $(human "$DONE") / $(human "$TOTAL") ✓ done\n"
-else
-    printf "\r${C_CYAN}  ⬇ Downloading: $(human "$DONE") / $(human "$TOTAL") ✓ done      ${C_RESET}\n"
-fi
+printf "\r${C_CYAN}  ⬇ Downloading: $(human "$DONE") / $(human "$TOTAL") ✓ done      ${C_RESET}\n"
 if [ "$DONE" -gt 0 ] 2>/dev/null; then
     ok "Tool downloaded ($(human "$DONE"))"
     advance "$((DL_BASE + PW_DL))" "Tool downloaded"

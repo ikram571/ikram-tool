@@ -1963,7 +1963,18 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                 method, data = prot
                 _phase(progress, "Key found (%s)" % method)
             elif not _is_encrypted_lua(data):
-                # plain non-Lua input: treat as source text
+                # Only genuinely text-only input is plain source. Lua-family
+                # bytecode (recognised dialect) that fails the real decompile
+                # must NOT be dumped raw as if it were readable source --
+                # report it honestly instead of faking a success.
+                dia = _detect_dialect(data)
+                if dia is not None:
+                    return [("Decompile", False, out_root / (stem + "_GAME.lua"),
+                             ("This is %s Lua bytecode, but the decompiler "
+                              "could not parse it (incomplete/truncated or "
+                              "custom-protected format). No readable source "
+                              "was produced.") % (dia.upper()))]
+                # Plain unsignatured text (no Lua header): treat as source.
                 text = data.decode("utf-8", errors="replace")
                 out_p = out_root / (stem + "_GAME.lua")
                 out_p.write_text(text, encoding="utf-8")

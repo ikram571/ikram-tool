@@ -5,6 +5,4 @@ if [ -f ikram_patch.py ]; then
     python3 ikram_patch.py "$@"
 elif [ -f ikram.pyc ]; then
     python3 ikram.pyc "$@"
-elif [ -f ikram.py ]; then
-    python3 ikram.py "$@"
 fi
