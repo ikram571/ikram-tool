@@ -12,6 +12,17 @@ spec.loader.exec_module(ikram)
 
 import engines as _engines
 
+for _d in (
+    ikram.DROP,
+    ikram.DROP_INJ,
+    ikram.DROP_LUA,
+    ikram.DROP_PAK,
+    ikram.RESULT,
+):
+    _d.mkdir(parents=True, exist_ok=True)
+for _sub in ("injected", "extracted", "lua", "repacked"):
+    (ikram.RESULT / _sub).mkdir(parents=True, exist_ok=True)
+
 # ---- default Unreal Engine AES key for UE4 paks ---------------------------
 # The user's real UE4 AES key. Auto-applied to UE4-standard paks across
 # UNPACK / REPACK / INJECT (Ue4Pak.aes_key drives BOTH extract and repack).

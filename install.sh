@@ -325,6 +325,10 @@ find "$TARGET" -mindepth 1 -maxdepth 1 \
 # temp se copy (DROP/RESULT already hai, overwrite karna zaroori nahi)
 cp -r "$TMPX"/. "$TARGET"/ 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+# DROP/RESULT skeleton — hamesha banayein (fresh install pe khali hota hai)
+mkdir -p "$TARGET/DROP/inject" "$TARGET/DROP/lua" "$TARGET/DROP/pak" \
+         "$TARGET/RESULT/injected" "$TARGET/RESULT/extracted" \
+         "$TARGET/RESULT/lua" "$TARGET/RESULT/repacked"
 if [ -f "$TARGET/ikram.pyc" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
