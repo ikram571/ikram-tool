@@ -282,18 +282,21 @@ def pak_repack_folder():
     pakf = ensure_input_folder()
     if not pakf:
         return
-    edit_dir = Path(
-        ikram.safe_input("-> Edited files folder (ENTER = RESULT/extracted): ")
-        or (ikram.RESULT / "extracted")
-    )
+    edit_dir = ikram.RESULT / "extracted" / pakf.stem
     if not edit_dir.is_dir():
-        ikram.show_error("Folder not found: {}".format(edit_dir))
+        ikram.show_error(
+            "Extracted folder nahi mili: RESULT/extracted/{}\n"
+            "Pehle is pak ka UNPACK karo, phir REPACK karo.".format(pakf.stem)
+        )
+        ikram.pause()
         return
     out = ikram.RESULT / "repacked" / "{}_repacked.pak".format(pakf.stem)
     out.parent.mkdir(parents=True, exist_ok=True)
-    ikram.console.print('[bold {}]Repacking... (this can take a while on big paks)'.format(ikram.WARN))
+    ikram.console.print('[bold {}]Repacking {} -> {} (auto folder: RESULT/extracted/{})'.format(
+        ikram.WARN, pakf.name, out.name, pakf.stem))
     try:
         kind = ikram.detect_pak_type(pakf)
+        aes_key = None
         if kind == "ue4":
             key = ikram.safe_input(
                 "  [bold {}]-> {} AES key (ENTER = built-in default): [/]".format(
@@ -301,11 +304,9 @@ def pak_repack_folder():
                 )
             )
             aes_key = (key.strip() if key and key.strip() else None)
-        else:
-            aes_key = None
         n = _engines.repack_folder(pakf, edit_dir, out, kind=kind, aes_key=aes_key,
                                    log=ikram.console.print)
-        ikram.show_success("Done: {} files repacked -> {}".format(n, out))
+        ikram.show_success("✔ {} files repacked -> {}".format(n, out))
     except Exception as e:
         ikram.report_error(e)
     ikram.pause()
