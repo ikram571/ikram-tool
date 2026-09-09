@@ -10,7 +10,7 @@ Unpack, inject, repack pak files · Compile/decompile lua.
 Sirf ye ek command Termux me paste karo:
 
 ```
-curl -sL -o install.sh https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh && bash install.sh
+curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash
 ```
 
 Ya phir `install.sh` file download karo aur:

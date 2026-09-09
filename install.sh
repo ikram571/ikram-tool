@@ -373,7 +373,7 @@ if [ ! -f "$HOME/Ikram_Tool/ikram_patch.py" ]; then
     fi
     rm -rf "$TMPX" "$HOME/Ikram_Tool/repair.zip"
     echo "  ✗ Repair fail. Dobara install karo:"
-    echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"
+    echo "    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash"
     echo ""
     exit 1
 fi

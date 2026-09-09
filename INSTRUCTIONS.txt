@@ -20,7 +20,7 @@ RESULT folder me alag se milta hai.
 
 Step 1: Termux kholo aur ye EK LINE paste karo (sab kuch khud install
     ho jayega — python, java, lua, git + tool):
-    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
+    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash
 
 Step 2: Tool start karo:
     ikram
