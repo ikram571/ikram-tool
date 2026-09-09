@@ -62,13 +62,13 @@ RESULT folder (har kaam ka output):
    - lua file choose karo (DROP/lua)
    - pak choose karo (DROP/pak)
    - pak ke andar folder choose karo jahan dalna hai
-   - output: RESULT/injected/<pak_ka_naam>_injected.pak
+   - output: RESULT/injected/<pak_ka_naam>.pak
 
 3) Inject File
    - pak choose karo (DROP/pak)
    - koi bhi file choose karo (DROP/inject)
    - pak ke andar folder choose karo
-   - output: RESULT/injected/<pak_ka_naam>_injected.pak
+   - output: RESULT/injected/<pak_ka_naam>.pak
 
 4) Repack PAK (naya pak banane ke liye)
    - pehle pak ko UNPACK karo (option 1)
