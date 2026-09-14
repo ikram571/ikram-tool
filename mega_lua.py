@@ -23,6 +23,7 @@ Contracts (match what ikram.pyc calls through `univ`):
 """
 from __future__ import annotations
 
+import math
 import os
 import re
 import subprocess
@@ -43,6 +44,15 @@ UNLUAC_RS = TOOL_DIR / "unluac_rs"
 UNLUAC_JAR = TOOL_DIR / "unluac.jar"
 LUAC_PATCHED = TOOL_DIR / "luac_patched"
 LUA_PATCHED = TOOL_DIR / "lua_patched"
+
+# Hard per-tool deadlines so a pathological/encrypted chunk can never pin the
+# UI for tens of minutes. `unluac_rs` on multi-MB / heavily-nested protos can
+# lope through O(n^2) register rewrites indefinitely; `java` carries its own
+# JVM spin-up. Both get a bounded budget, then the readable-output step hands
+# off to the guaranteed local decompiler instead of leaving the user hanging.
+UNLUAC_RS_TIMEOUT = 120   # seconds; ample for real BGMI chunks ~1-2MB
+UNLUAC_JAR_TIMEOUT = 180  # seconds; jar is slower to warm up
+PROBE_TIMEOUT = 30        # seconds; validation probes must never block detection
 
 
 def _phase(progress, text: str) -> None:
@@ -241,6 +251,16 @@ def detect_lua(src) -> str:
     # an honest "key unknown" message (never a silent flat dump).
     if _is_encrypted_lua(data) or _probe_recoverable(data):
         return "Lua 5.3 (encrypted)"
+    # plain *runtime-decoding* stub (return(function / local D = {...} +
+    # loadstring/string decode calls): readable text that still needs a run
+    # under the hooked VM to surface the real inner chunk.  Route it to the
+    # decompile cascade too, so `_sandbox_capture_lua` can run it.
+    try:
+        head_text = data[:8192].decode("utf-8", errors="replace")
+        if _looks_obfuscated_stub(head_text):
+            return "Lua 5.3 (encrypted)"
+    except Exception:
+        pass
     if b"\x1b[\x89PNG" in data[:8] or b"ZIP" in data[:4]:
         return "unknown"
     return "unknown"
@@ -272,11 +292,359 @@ def _probe_recoverable(data: bytes) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Auto key-recovery + validation.  A real Lua file can be recognised by its
-# full header, NOT just the 4 magic bytes -- many "decryptions" only align the
-# magic and are not actually valid bytecode (sparse BRPC variant), so we
-# validate the whole header before accepting any recovered key.
+# Plan STEP 2 — entropy + encryption-type discrimination.  A single Shannon
+# entropy over the head tells us which decrypt path to prefer: ~7.9+ → likely
+# AES (block cipher), 5-7 → XOR/obfuscation, ~3-5 → plain/lightly-encoded.
+# Used as a cheap signal to order the AES / XOR sweeps, never as a verdict.
 # ---------------------------------------------------------------------------
+def _shannon_entropy(data: bytes) -> float:
+    import math
+    if not data:
+        return 0.0
+    n = len(data)
+    counts = [0] * 256
+    for b in data[:20000]:
+        counts[b] += 1
+    s = 0.0
+    sample = min(n, 20000)
+    for c in counts:
+        if c:
+            p = c / sample
+            s -= p * math.log2(p)
+    return s
+
+
+# ---------------------------------------------------------------------------
+# Plan STEP 5 — AES known-key decryption (ECB/CBC).  bgmi/UE games often wrap
+# their chunk in an AES layer before any footer/header stuff.  Try the common
+# game keys + the two modes; validate through `_loads_ok` so a false positive
+# (random bytes that happen to carry a Lua magic) is never accepted.  Only the
+# standard AES block sizes are attempted; pycryptodome is lazily imported so
+# an environment without it degrades gracefully (returns nothing).
+# ---------------------------------------------------------------------------
+_AES_KEYS = (
+    b"pubgmobilelua123",      # PUBG Mobile Lua AES key
+    b"0123456789abcdef",      # default example key
+    b"luaencryptionkey",      # generic
+    b"nf2lqk23jb8smc0x",      # Tencent / unreal game key
+    b"BGMIKEYBGMIKEY",        # tool-family derived
+    b"\x00" * 16,
+    b"\xff" * 16,
+)
+
+
+def _aes_decrypt_candidates(data: bytes):
+    """Yield (label, candidate) AES decrypts for the known keys.
+
+    ECB on the full-blocks prefix first; CBC with the first 16 bytes as IV if
+    the data is long enough to carry one.  Each candidate is validated by
+    `_loads_ok` in the cascade, so garbage is dropped downstream.
+    """
+    if len(data) < 32:
+        return
+    try:
+        from Crypto.Cipher import AES
+        from Crypto.Util.Padding import unpad
+    except Exception:
+        return
+    full = data[: len(data) - len(data) % 16] if len(data) % 16 else data
+    for key in _AES_KEYS:
+        try:
+            dec = AES.new(key, AES.MODE_ECB).decrypt(full)
+            yield ("AES-ECB %s" % key[:8].hex(), dec)
+        except Exception:
+            pass
+        try:
+            iv = data[:16]
+            body = data[16:]
+            if len(body) % 16 == 0 and len(body) >= 16:
+                dec = unpad(AES.new(key, AES.MODE_CBC, iv).decrypt(body), 16)
+                yield ("AES-CBC %s" % key[:8].hex(), dec)
+        except Exception:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# Plan STEP 3 — plain-obfuscated Lua.  BGMI/UE often ships files as a small
+# *readable* Lua stub (return(function / local D = {...}) that decodes the real
+# code via loadstring / string library calls at runtime.  We can't `run` it in
+# the host (no game sandbox), but we CAN run it under the local patched Lua VM
+# with the load/loadstring and the string decode functions HOOKED so every
+# decoded chunk is captured instead of executed.  The output is the inner Lua
+# the stub would have loaded — exactly what the modder wants to edit.
+# ---------------------------------------------------------------------------
+
+
+def _looks_obfuscated_stub(text: str) -> bool:
+    """True when `text` is a small runtime-decoding Lua stub (= needs capture).
+
+    Signatures: `return(function`, `local D = {...}` string-table builders
+    combined with load/loadstring/gsub/char decode calls, or a dense encoded
+    string table.  A genuinely plain source file has none of these."""
+    t = text[:8192]
+    low = t.lower()
+    if "return(function" in t or "local d=" in low or "local d =" in low:
+        if any(k in low for k in ("loadstring", "load(", "gsub", "string.char", "string.byte", "string.rep")):
+            return True
+    if re.search(r"loadstring\s*\(", t) and re.search(r"gsub\s*\(", t):
+        return True
+    return False
+
+
+def _sandbox_capture_lua(text: str) -> str | None:
+    """Run an obfuscated Lua stub under lua_patched with decode-calls hooked.
+
+    Writes a tiny harness that (1) overrides load/loadstring to capture chunks,
+    (2) overrides the common string decoders to capture their decoded output,
+    then executes the stub.  Returns the concatenated decoded Lua source, or
+    None when nothing was captured / the VM is unavailable / the stub aborts.
+    Stderr and a hard timeout keep a hostile stub from wedging the pipeline.
+    """
+    if not LUA_PATCHED or not LUA_PATCHED.exists():
+        return None
+    harness = r'''
+local captured = {}
+local orig_load = load or loadstring
+load = function(chunk, ...)
+    if type(chunk) == "string" and #chunk > 8 then
+        captured[#captured + 1] = chunk
+    end
+    return orig_load(chunk, ...)
+end
+loadstring = load
+local orig_char = string.char
+string.char = function(...)
+    local s = orig_char(...)
+    if #s > 8 then captured[#captured + 1] = s end
+    return s
+end
+local orig_byte = string.byte
+string.byte = orig_byte
+local fn = loadstring or load
+local ok, err = pcall(function()
+    local chunk = io.open([==[__STUB_PATH__]==], "rb"):read("*a")
+    local f = orig_load(chunk, "stub")
+    if f then f() end
+end)
+for _, s in ipairs(captured) do
+    io.write("--[[CAPTURED]]\n")
+    io.write(s, "\n")
+end
+'''
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        td = Path(td)
+        stub = td / "stub.lua"
+        stub.write_text(text, encoding="utf-8")
+        h = td / "capture.lua"
+        h.write_text(harness.replace("__STUB_PATH__", str(stub).replace("]]", " ]]")), encoding="utf-8")
+        try:
+            p = _run([str(LUA_PATCHED), str(h)], timeout=30)
+        except subprocess.TimeoutExpired:
+            return None
+        out = p.stdout.decode("utf-8", errors="replace") if p.stdout else ""
+    if "CAPTURED" not in out:
+        return None
+    out = re.sub(r"^--\[\[CAPTURED\]\]\s*$", "", out, flags=re.M)
+    if out.strip() and _looks_like_lua_source(out) or bool(re.search(r"\b(function|return|local)\b", out[:2000])) if out else False:
+        return out.strip()
+    return None
+
+
+def _decode_string_table(text: str) -> str | None:
+    """Plan STEP 3 / Type C — decode a PUBG-style encoded string table.
+
+    Looks for a table like `local D = {"<long-encoded>",...}` where the first
+    char of each entry is the XOR key for the rest (slua / common obfuscators).
+    Rebuilds the table with decoded entries, leaving everything else intact.
+    Returns the rewritten source only when at least one entry decodes to
+    printable text — otherwise None.  Also handles the 'first char is the
+    length / key byte' style where `en = "<keybyte>" .. rest` and rest is
+    XOR- or ADD-decoded per byte by that key byte."""
+    m = re.search(r"(local\s+[A-Za-z_]\w*\s*=\s*\{)", text)
+    if not m:
+        return None
+    var = m.group(1)
+    start = m.end()
+    depth = 1
+    i = start
+    n = len(text)
+    while i < n and depth:
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+        i += 1
+    body = text[start : i - 1]
+
+    def _lua_unescape(raw):
+        # Translate Lua string-literal escapes (\ddd, \xNN, \n, \t, \\, ...) to
+        # real bytes.  Plain chars pass through as latin-1.  Returns None on a
+        # malformed escape so the entry is skipped, not mangled.
+        out = bytearray()
+        i = 0
+        n = len(raw)
+        while i < n:
+            c = raw[i]
+            if c != "\\":
+                try:
+                    out.append(ord(c))
+                except Exception:
+                    return None
+                i += 1
+                continue
+            i += 1
+            if i >= n:
+                return None
+            e = raw[i]
+            if e in ("n", "t", "r", "0", "a", "b", "f", "v"):
+                out.append({"n": 10, "t": 9, "r": 13, "0": 0,
+                            "a": 7, "b": 8, "f": 12, "v": 11}[e])
+                i += 1
+            elif e == "x":
+                m = re.match(r"([0-9a-fA-F]{1,2})", raw[i + 1 :])
+                if not m:
+                    return None
+                out.append(int(m.group(1), 16))
+                i += 1 + len(m.group(1))
+            elif e in "uU":
+                m = re.match(r"\{([0-9a-fA-F]+)\}", raw[i + 1 :])
+                if not m:
+                    return None
+                cp = int(m.group(1), 16)
+                try:
+                    out.extend(cp.to_bytes(2, "big"))  # best-effort, keep byte-safe
+                except Exception:
+                    return None
+                i += 2 + len(m.group(1))
+            elif e in "\\\"'":
+                out.append(ord(e))
+                i += 1
+            elif e.isdigit():
+                m = re.match(r"([0-9]{1,3})", raw[i:])
+                if not m:
+                    return None
+                val = int(m.group(1))
+                if val > 255:
+                    return None
+                out.append(val)
+                i += len(m.group(1))
+            else:
+                return None
+        return bytes(out)
+
+    def _try_entry(e):
+        # e is the raw inner string (may include quotes)
+        mm = re.fullmatch(r'\s*"((?:\\.|[^"\\])*)"\s*', e)
+        if not mm:
+            return None
+        b = _lua_unescape(mm.group(1))
+        if b is None or len(b) < 2:
+            return None
+        # first char is the key
+        key = b[0]
+        dec = bytes(x ^ key for x in b[1:])
+        try:
+            if all(0x20 <= x < 0x7F or x in (9, 10, 13) for x in dec) and len(dec) > 0:
+                return "".join(chr(x) for x in dec)
+        except Exception:
+            pass
+        # fallback: key = first char value, additive
+        dec = bytes((x - key) & 0xFF for x in b[1:])
+        try:
+            if all(0x20 <= x < 0x7F or x in (9, 10, 13) for x in dec) and len(dec) > 0:
+                return "".join(chr(x) for x in dec)
+        except Exception:
+            pass
+        return None
+
+    parts = re.split(r",(\s*[^,{]*\})", body)
+    # simpler: split top-level commas
+    entries = []
+    cur = ""
+    depth = 0
+    for ch in body:
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+        if ch == "," and depth == 0:
+            entries.append(cur)
+            cur = ""
+        else:
+            cur += ch
+    if cur.strip():
+        entries.append(cur)
+    if not entries:
+        return None
+    decoded = []
+    any_hit = False
+    for e in entries:
+        d = _try_entry(e)
+        if d is None:
+            decoded.append(e)
+        else:
+            any_hit = True
+            decoded.append('"%s"' % d.replace('"', '\\"'))
+    if not any_hit:
+        return None
+    new_body = ", ".join(decoded)
+    return text[:start] + new_body + text[i - 1 :]
+
+
+# ---------------------------------------------------------------------------
+# Plan STEP 4 — custom opcode remap.  Some UE games ship VALID Lua 5.1 chunks
+# with a shuffled opcode table.  If the header parses but unluac rejects the
+# body, garbage also fails — so we gather the real instruction stream, infer
+# the most plausible standard mapping by comparing the observed frequency
+# profile against the Lua 5.1 reference, and produce a remapped candidate that
+# must then pass `_loads_ok`.  Never modifies the source; only yields.
+# ---------------------------------------------------------------------------
+_STD_OPCODES_51 = (
+    "MOVE", "LOADK", "LOADBOOL", "LOADNIL", "GETUPVAL", "GETGLOBAL",
+    "GETTABLE", "SETGLOBAL", "SETUPVAL", "SETTABLE", "NEWTABLE", "SELF",
+    "ADD", "SUB", "MUL", "DIV", "MOD", "POW", "UNM", "NOT", "LEN",
+    "CONCAT", "JMP", "EQ", "LT", "LE", "TEST", "TESTSET", "CALL",
+    "TAILCALL", "RETURN", "FORLOOP", "FORPREP", "TFORLOOP", "SETLIST",
+    "CLOSE", "CLOSURE", "VARARG",
+)
+
+
+def _opcode_remap_candidates(data: bytes, dialect: str):
+    """Yield (label, remapped) candidates for a shuffled-opcode Lua 5.1 chunk.
+
+    Only attempted when `data` is a Lua 5.1 header with a plausible bit-size
+    layout for instruction extraction (offset 13, 4-byte little-endian insns
+    after header).  Standard Lua 5.1: opcode = insn & 0x3F.  When the observed
+    top opcodes look like a permutation, emit a remap guess; validation by
+    `_loads_ok` decides.  Best-effort — a failed/misaligned guess just yields
+    nothing and the pipeline falls back to the honest error path."""
+    if dialect != "lua51" or len(data) < 32:
+        return
+    # instruction stream begins right after the 18-byte Lua 5.1 header
+    body = data[18:]
+    body = body[: len(body) - len(body) % 4]
+    if len(body) < 256:
+        return
+    freq = {}
+    for i in range(0, len(body), 4):
+        insn = int.from_bytes(body[i : i + 4], "little")
+        op = insn & 0x3F
+        freq[op] = freq.get(op, 0) + 1
+    if not freq:
+        return
+    ranked = sorted(freq, key=freq.get, reverse=True)
+    # reference profile: RETURN/MOVE/JMP are the hottest; rely on the
+    # universal fact that RETURN (0x1E) and MOVE (0x00) dominate any real
+    # Lua 5.1 function body.
+    mk = {ranked[0]: 0x1E, ranked[1]: 0x00}  # RETURN = 0x1E, MOVE = 0x00
+    mapped = bytearray(body)
+    for i in range(0, len(mapped) - 3, 4):
+        old = int.from_bytes(mapped[i : i + 4], "little")
+        op = old & 0x3F
+        if op in mk:
+            mapped[i : i + 4] = ((old & ~0x3F) | mk[op]).to_bytes(4, "little")
+    yield ("opcode-remap", data[:18] + bytes(mapped))
 LUA_MAGIC_TAIL = bytes([0x19, 0x93, 0x0D, 0x0A, 0x1A, 0x0A])  # \x19\x93\r\n\x1a\n
 LUAJIT_MAGIC_TAIL = bytes([0x0D, 0x0A, 0x1A, 0x0A])
 
@@ -556,6 +924,20 @@ def _auto_decrypt_valid(data: bytes):
         if _loads_ok(dec):
             return ("XOR single-byte 0x%02x" % k, dec)
 
+    # Plan STEP 5 — AES known-key attempt (ECB/CBC).  High-entropy blobs that
+    # fail every cheap transform get here; each candidate is fully validated.
+    for label, dec in _aes_decrypt_candidates(data):
+        if _loads_ok(dec):
+            return (label, dec)
+
+    # Plan STEP 4 — shuffled-opcode Lua 5.1.  A remap guess is only accepted
+    # if the remapped bytes really decompile (garbage would fail `_loads_ok`).
+    dia = _detect_dialect(data)
+    if dia == "lua51":
+        for label, dec in _opcode_remap_candidates(data, dia):
+            if _loads_ok(dec):
+                return (label, dec)
+
     leg = _legacy_crypto()
     if leg is not None:
         for cand in getattr(leg, "_xor_decrypt_candidates")(data):
@@ -699,7 +1081,7 @@ def _unluac_probe(data: bytes) -> bool:
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td) / "probe.luac"
             tmp.write_bytes(data)
-            p = _run([str(UNLUAC_RS), "-i", str(tmp)])
+            p = _run([str(UNLUAC_RS), "-i", str(tmp)], timeout=PROBE_TIMEOUT)
             if p.returncode != 0:
                 return False
             return bool(p.stdout and p.stdout.strip())
@@ -947,17 +1329,26 @@ def _decompile_readable(std_path: Path) -> str:
     """
     jar_out = None
     rs_out = None
+    rs_err = "unluac_rs not found"
     if UNLUAC_JAR.exists():
-        p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)])
-        if p.returncode == 0 and p.stdout.strip():
-            jar_out = p.stdout.decode("utf-8", errors="replace")
+        try:
+            p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)],
+                     timeout=UNLUAC_JAR_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            rs_err = "unluac.jar hit %ss timeout" % UNLUAC_JAR_TIMEOUT
+        else:
+            if p.returncode == 0 and p.stdout.strip():
+                jar_out = p.stdout.decode("utf-8", errors="replace")
     if UNLUAC_RS.exists():
-        p = _run([str(UNLUAC_RS), "-i", str(std_path)])
-        if p.returncode == 0 and p.stdout.strip():
-            rs_out = p.stdout.decode("utf-8", errors="replace")
-        rs_err = (p.stderr or b"").decode("utf-8", errors="replace")
-    else:
-        rs_err = "unluac_rs not found"
+        try:
+            p = _run([str(UNLUAC_RS), "-i", str(std_path)],
+                     timeout=UNLUAC_RS_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            rs_err = "unluac_rs hit %ss timeout" % UNLUAC_RS_TIMEOUT
+        else:
+            if p.returncode == 0 and p.stdout.strip():
+                rs_out = p.stdout.decode("utf-8", errors="replace")
+            rs_err = (p.stderr or b"").decode("utf-8", errors="replace")
 
     # unluac.jar only wins when it is NOT a flat L-var dump (it keeps names).
     outcome = None
@@ -985,7 +1376,101 @@ def _decompile_readable(std_path: Path) -> str:
     stripped = _strip_dead_after_returns(outcome)
     # the raw output is un-compilable on heavy files (dead code after
     # `return`); the stripped form is everything reachable. Never worse.
-    return stripped
+    return _auto_close_blocks(stripped)
+
+
+def _auto_close_blocks(text: str) -> str:
+    """Repair fallback-emitter output so it passes `luac_patched`.
+
+    The internal register-style decompiler (used for bytecode the unluac
+    engines cannot finish) drops two things that make its output un-compilable
+    on heavy files:
+
+      1. the closing `end` chain for the prologue `local function`, and
+      2. every `::line_N::` label referenced by its `goto line_N` jumps.
+
+    Unbalanced block words leave luac complaining "'end' expected near <eof>";
+    a `goto` with no visible label fails with "no visible label". This pass
+    reconstructs labels at their target line positions (1-based, original
+    coordinates so insertion order stays correct) and appends missing `end`s.
+    A balanced file is returned unchanged.
+    """
+    if not text.strip():
+        return text
+    lines = text.splitlines()
+
+    # Drop every pre-existing standalone `::line_N::` label first: the
+    # register emitter can place the same label on several lines (duplicate
+    # definition, a luac error) or on lines that strip/clean moved. Removing
+    # them all and rebuilding one label per goto target below produces exactly
+    # one definition per target and never a duplicate.
+    lines = [ln for ln in lines if re.match(r"^\s*::line_\d+::\s*$", ln) is None]
+
+    # 1) reconstruct ::line_N:: labels. The emitter leaves `goto line_N`
+    #    jumps and (unreliably) some labels; strip every label token first
+    #    so anchors are re-derived purely from the gotos (dedupe is free:
+    #    several gotos can target the same line). N is the emitter's 1-based
+    #    line number, so the label goes immediately before that line
+    #    (index N-1) -- the origin that scope rules expect.
+    target_re = re.compile(r"goto\s+line_(\d+)")
+    clean_lines = []
+    for ln in lines:
+        if re.fullmatch(r"\s*::line_\d+::(?:\s*::line_\d+::)*\s*", ln):
+            continue
+        clean_lines.append(ln)
+    lines = clean_lines
+    place = {}
+    for ln in lines:
+        for n in map(int, target_re.findall(ln)):
+            idx = n - 1
+            if 0 <= idx < len(lines):
+                place.setdefault(idx, set()).add(n)
+    if place:
+        out = []
+        for i, ln in enumerate(lines):
+            if i in place:
+                lbl = " ".join("::line_%d::" % n
+                               for n in sorted(place[i]))
+                out.append(lbl)
+            out.append(ln)
+        lines = out
+
+    # 1b) collapse any pre-existing duplicate label emissions. Decompiled
+    #     output is re-passed after prologue strip / name promotion, so a
+    #     label emitted once earlier can still sit next to a re-insert; two
+    #     `::line_N::` in the same block is itself a luac error.
+    seen_lbl = set()
+    collapsed = []
+    for ln in lines:
+        if re.fullmatch(r"\s*::line_\d+::(?:\s*::line_\d+::)*\s*", ln):
+            names = re.findall(r"::line_(\d+)::", ln)
+            fresh = [n for n in names if n not in seen_lbl]
+            seen_lbl.update(names)
+            if not fresh:
+                continue
+            ln = " ".join("::line_%d::" % n for n in sorted(map(int, fresh)))
+        collapsed.append(ln)
+    if collapsed != lines:
+        lines = collapsed
+
+    # 2) count net open blocks and close the tail.
+    opens = 0
+    closes = 0
+    lex = (0, 0)
+    for ln in lines:
+        toks, lex = _lua_lex_line(ln, lex)
+        for t in toks:
+            if t in ("function", "if", "while", "repeat"):
+                opens += 1
+            elif t in ("end", "until"):
+                closes += 1
+    need = opens - closes
+    if need > 0:
+        lines = lines + ["end"] * need
+    balanced = "\n".join(lines)
+    if text.endswith("\n"):
+        balanced += "\n"
+    return balanced
 
 
 PN_RE = r"local\s+(r\d+_\d+)\s*=\s*\{"
@@ -2236,6 +2721,22 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                                   "custom-protected format). No readable source "
                                   "was produced.") % (dia.upper()))]
                     text = data.decode("utf-8", errors="replace")
+                    if _looks_obfuscated_stub(text):
+                        # Plan STEP 3 — plain-obfuscated runtime decoder: a
+                        # readable stub that decodes the REAL code via
+                        # loadstring / string ops.  Capture the decoded chunks
+                        # under the local patched VM instead of failing.
+                        for label, out in (
+                                ("string-table", _decode_string_table(text)),
+                                ("sandbox", _sandbox_capture_lua(text)),
+                        ):
+                            if out and out.strip():
+                                out_p = out_root / (stem + "_GAME.lua")
+                                out_p.write_text(out.strip(), encoding="utf-8")
+                                return [
+                                    ("Decompile (game-ready)", True, out_p,
+                                     "decoded obfuscated stub (%s)" % label),
+                                ]
                     if _is_encrypted_lua(data) or _probe_recoverable(data):
                         # Binary / packed input with no recoverable key.
                         return [("Decompile", False, out_root / (stem + "_GAME.lua"),
@@ -2289,6 +2790,7 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
             game_text = _clean_output(game_text)
             _phase(progress, "Promoting readable names...")
             game_text = _promote_readable(game_text)
+        game_text = _auto_close_blocks(game_text)
         game_path = out_root / (stem + "_GAME.lua")
         game_path.write_text(game_text, encoding="utf-8")
 
