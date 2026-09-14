@@ -22,8 +22,12 @@ for _d in (
     ikram.RESULT,
 ):
     _d.mkdir(parents=True, exist_ok=True)
-for _sub in ("injected", "extracted", "lua", "processed", "CostomPak"):
+for _sub in ("injected", "extracted", "lua", "processed", "CostomPak", "Repacked"):
     (ikram.RESULT / _sub).mkdir(parents=True, exist_ok=True)
+
+# ENTER (nothing typed) in Costom Pak -> full skeleton (all folders + all
+# file names, zero-byte bodies). Sentinel returned by _pick_folders.
+_SKELETON = "\x00_COSTOM_SKELETON_"
 
 # ---- default Unreal Engine AES key for UE4 paks ---------------------------
 # The user's real UE4 AES key. Auto-applied to UE4-standard paks across
@@ -417,7 +421,7 @@ def pak_repack_folder():
         )
         ikram.pause()
         return
-    out = ikram.RESULT / "CostomPak" / "{}.pak".format(pakf.stem)
+    out = ikram.RESULT / "Repacked" / "{}.pak".format(pakf.stem)
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()
@@ -511,8 +515,12 @@ def _pick_folders(pakf):
         "[bold {}]number = choose folder · 0 = cancel · type new path = auto under ShadowTrackerExtra[/bold {}]".format(ikram.MUTED, ikram.MUTED)
     )
     c = ikram.safe_input("[bold {}]> Select: [/]".format(ikram.INP)).strip()
-    if not c or ikram.eof_exit():
+    if ikram.eof_exit():
         return None
+    if not c:
+        # ENTER (nothing typed) -> FULL SKELETON mode: all folders + all
+        # file names, every file EMPTY (engine-valid, for inject-into pak).
+        return _SKELETON, False
     if c == "0":
         return None
     if c.isdigit():
@@ -719,6 +727,48 @@ def _inject_subtree_copy(r, out, target, log):
     return len(r.dirs), len(sel)
 
 
+def _inject_skeleton(r, out, target, log):
+    """COSTOM Pak ENTER-mode: index me source pak ke SAARE folder paths +
+    SAARE file NAMES, but har file ka body EMPTY (engine-valid zero entries).
+    Templates source mein same-suffix entry se (warna corpus) — taki
+    skeleton pak real game me load ho, phir user usme inject kare."""
+    import hashlib
+    fp_map = r.full_paths()
+    chain = _chain_dirs(target)
+    all_dirs = {d: {} for d in chain}
+    for fp in fp_map:
+        d, _, nm = fp.rpartition("/")
+        key = (d + "/") if d else ""
+        all_dirs.setdefault(key, {})
+    version = getattr(r, "version", None)
+    if version is None:
+        version = getattr(r, "version_num", 14)
+    mount = r.mount_point
+    edits = []
+    all_files = []
+    for fp, e in sorted(fp_map.items()):
+        d, _, nm = fp.rpartition("/")
+        key = (d + "/") if d else ""
+        stem_p = Path(fp).stem
+        tmpl = e
+        suffix = Path(fp).suffix.lower()
+        if tmpl is None:
+            tmpl = _corpus_templates(log).get(suffix)
+        ne = _make_empty_entry(tmpl, version)
+        ne.stem = stem_p
+        if tmpl is None:
+            path_hash = hashlib.sha1((str(mount) + fp).lower().encode("utf-8")).digest()
+            ne.unk2 = path_hash
+        all_dirs.setdefault(key, {})[nm] = ne
+        all_files.append(ne)
+        edits.append((fp, (b"", None, stem_p)))
+    r.dirs = all_dirs
+    r.files = all_files
+    _engines.pakmod().PakWriter(r).inject_files(edits, str(out), force_add=False)
+    _trim_tencent_pad(out, log)
+    return len(all_dirs), len(edits)
+
+
 def _trim_tencent_pad(path, log=None):
     """COSTOM pak me inject_files ke baad writer zero-pad daal deta hai taaki
     output = source pak size (pak.py:645-648 'total < orig_size' branch). Woh
@@ -801,6 +851,9 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
             if version is None:
                 version = getattr(r, "version_num", 14)
             mount = r.mount_point
+            if target == _SKELETON:
+                # ENTER pressed: ALL folders + ALL file names, EMPTY bodies.
+                return _inject_skeleton(r, out, mount, log)
             if empty_name is not None:
                 got = _inject_empty_file(
                     r, out, target, empty_name, mount, version, log
@@ -872,7 +925,9 @@ def pak_costom_pak():
                 ikram.pause()
                 return
             target, target_exists = picked
-            if not target_exists:
+            if target == _SKELETON:
+                pass
+            elif not target_exists:
                 empty_name = _prompt_empty_file_name(target)
                 if empty_name is None:
                     ikram.console.print("[bold {}]Cancelled.[/]".format(ikram.MUTED))
@@ -889,7 +944,13 @@ def pak_costom_pak():
                 ikram.CYAN, pakf.name, kind, out
             )
         )
-        if target:
+        if target == _SKELETON:
+            ikram.console.print(
+                "    [bold {}]•[/] ALL folders + all file names, EMPTY bodies".format(
+                    ikram.MUTED
+                )
+            )
+        elif target:
             for d in _chain_dirs(target):
                 ikram.console.print("    [bold {}]•[/] {}".format(ikram.MUTED, d))
         if empty_name is not None:
@@ -898,7 +959,7 @@ def pak_costom_pak():
                     ikram.MUTED, Path(empty_name).name
                 )
             )
-        elif nfiles:
+        elif nfiles and target != _SKELETON:
             ikram.console.print(
                 "    [bold {}]•[/] {} file(s) copied byte-identical".format(
                     ikram.MUTED, nfiles
@@ -925,9 +986,9 @@ def pak_tool_menu():
             ("[2]", "📦 Inject File",
              "WORK: put any file (lua/uasset/asset) into the pak —\ntype is found automatically and added to the game.\n1 file or all files at once — auto or manual path.\nPUT FILE IN: DROP/inject + DROP/pak\nOUTPUT: RESULT/injected/"),
             ("[3]", "📦 Repack PAK",
-             "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\nOUTPUT: RESULT/CostomPak/"),
+             "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\n3) old pak files are NEVER touched\nOUTPUT: RESULT/Repacked/"),
             ("[4]", "📦 Costom Pak",
-             "WORK: make an EMPTY pak — keep only\nthe FOLDER paths you pick from the\nsource pak, or type your own path\n(auto under ShadowTrackerExtra).\nnumber = pick folder · 0 = cancel.\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
+             "WORK: make an empty pak.\nENTER (no typing) = ALL folders +\nall file names but EMPTY files\n(real in game when you inject into it).\nnumber = pick 1 folder · typed path = only\nthat path + its files copied (not empty).\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
             ("[0]", "Back", "back to main menu"),
         ]
         t = ikram.build_menu_table(opts)
