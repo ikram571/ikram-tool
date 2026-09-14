@@ -708,6 +708,35 @@ def _inject_empty_file(r, out, target, fname, mount, version, log):
     return len(chain), 1
 
 
+def _align_block_windows(r, sel, log):
+    """Reuse-path safety (single-block entries only). pak.pyc inject_files
+    compresse/encrypted single-block entry ka sirf block span splice karta hai,
+    lekin reader align_encrypted_size(size) bytes decrypt karta hai — span <
+    aligned window ho to last ciphertext block me agle entry ke bytes bleed →
+    content tail corrupt (verified: .uexp ka 16-byte tail field badal jata).
+    Last block ka end aligned window tak extend karo taaki splice full window
+    le. Multi-block entries skip: unke blocks khud-se aligned splice hote hain,
+    block-end fiddle karne se boundary shifts + content corrupt ho jata hai."""
+    pc = _engines.pakmod().pc
+    fixed = 0
+    for fp, e in sel.items():
+        blocks = getattr(e, "compressed_blocks", None)
+        if not (blocks and getattr(e, "encrypted", False)):
+            continue
+        if len(blocks) != 1:
+            continue
+        em = getattr(e, "encryption_method", None)
+        if not em:
+            continue
+        want = pc.align_encrypted_size(e.size, em)
+        span = sum(b.end - b.start for b in blocks)
+        if span < want:
+            blocks[-1].end += want - span
+            fixed += 1
+    if fixed and log:
+        log(f"  block-window aligned entries: {fixed}")
+
+
 def _inject_subtree_copy(r, out, target, log):
     """Target folder ke files — source index entries hi copy hote hain
     (read_entry → edits), inject_files compressed/encrypted reuse path
@@ -722,6 +751,7 @@ def _inject_subtree_copy(r, out, target, log):
         key = (d + "/") if d else ""
         r.dirs.setdefault(key, {})[nm] = e
     r.files = [e for _, e in sorted(sel.items())]
+    _align_block_windows(r, sel, log)
     edits = [(fp, (r.read_entry(e), None, e.stem)) for fp, e in sorted(sel.items())]
     _engines.pakmod().PakWriter(r).inject_files(edits, str(out), force_add=False)
     return len(r.dirs), len(sel)
