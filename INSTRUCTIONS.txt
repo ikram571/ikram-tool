@@ -1,18 +1,31 @@
 ============================================================
    IKRAM TOOL — INSTRUCTIONS (SIMPLE)
-   PAK + LUA Tool for Termux
+   PAK + LUA Tool for Termux  (V108)
 ============================================================
 
 Ye tool kya karta hai? (EASY WORDS ME)
 ------------------------------------------------------------
 - PAK file kholega  ->  (UNPACK)  sab files folder me nikalega
-- Lua file daalega  ->  (INJECT)  pak ke andar
-- Koi bhi file daalega (uasset, png, json)  ->  pak ke andar
+- Koi bhi file daalega (lua, uasset, png, json)  ->  (INJECT)
+  pak ke andar
 - Edit ki hui files se naya pak banayega  ->  (REPACK)
+- COSTOM PAK banayega  ->  apna khali pak (folders + file names,
+  empty files), phir usme inject karke game me daalo
 - Lua compile/decompile karega  ->  source <-> bytecode
 
 ORIGINAL pak kabhi nahi badalta. Har kaam ka result
 RESULT folder me alag se milta hai.
+
+============================================================
+  KEY (HAR BAAR — SIRF FREETOOL)
+============================================================
+
+Tool kholne par KEY maangta hai. Har version me yahi key:
+
+    FREETOOL
+
+Sab versions me yahi key chalti hai — koi nayi key nahi
+mangni padti.
 
 ============================================================
  INSTALL (PEHLE BAAR — SIRF EK BAAR)
@@ -25,29 +38,29 @@ Step 1: Termux kholo aur ye EK LINE paste karo (sab kuch khud install
 Step 2: Tool start karo:
     ikram
 
-    (pehli baar valid KEY maangi jayegi — owner se lo)
+    (pehli baar KEY  `FREETOOL`  daalo)
 
-Isko hi har baar kholne ke liye use karna hai:
+Isi ko har baar kholne ke liye use karo:
     ikram
 
 NOTE: Tool har baar kholne par automatically check karta hai
 ke naya version aaya hai. Aaye to khud update ho jata hai.
-Naye version ke liye nayi KEY chahiye hogi (owner se lo),
-purani key naye version me NAHI chalti.
 
 ============================================================
  FOLDERS (KYA KAHAN DAALNA HAI)
 ============================================================
 
-    DROP/pak      ->  .pak files   (unpack / inject ke liye)
-    DROP/lua      ->  .lua / .luac files (compile / decompile)
-    DROP/inject   ->  koi bhi file (uasset, png, json...)
+    DROP/pak      ->  .pak files   (unpack / inject / repack / costom pak ke liye)
+    DROP/lua      ->  .lua / .luac files (compile / decompile ke liye)
+    DROP/inject   ->  jo bhi file pak ke andar daalni hai (lua, uasset, png...)
 
 RESULT folder (har kaam ka output):
-    RESULT/extracted/    -> unpack ki hui files
-    RESULT/injected/     -> naye banaye injected pak
-    RESULT/repacked/     -> repack kiye pak
-    RESULT/lua/          -> compiled/decompiled lua
+    RESULT/extracted/    -> UNPACK ki hui files
+    RESULT/injected/     -> INJECT ke baad ka naya pak
+    RESULT/Repacked/     -> REPACK ke baad ka naya pak
+    RESULT/CostomPak/    -> COSTOM PAK se banaya apna khali pak
+    RESULT/lua/          -> compiled / decompiled lua
+    RESULT/processed/    -> doosre processed files
 
 ============================================================
  PAK TOOL (Option 1)
@@ -55,51 +68,62 @@ RESULT folder (har kaam ka output):
 
 1) Unpack PAK
    - pak file choose karo (DROP/pak me rakho)
-   - saari files folder me nikal jaati hain
+   - saari files folder me nikal jaati hain (1 ya sab)
    - output: RESULT/extracted/<pak_ka_naam>/
 
-2) Inject Lua
-   - lua file choose karo (DROP/lua)
+2) Inject File
+   - DROP/inject me woh file rakho jo pak ke andar daalni hai
    - pak choose karo (DROP/pak)
    - pak ke andar folder choose karo jahan dalna hai
+     (ENTER = auto laga dega)
    - output: RESULT/injected/<pak_ka_naam>.pak
 
-3) Inject File
-   - pak choose karo (DROP/pak)
-   - koi bhi file choose karo (DROP/inject)
-   - pak ke andar folder choose karo
-   - output: RESULT/injected/<pak_ka_naam>.pak
-
-4) Repack PAK (naya pak banane ke liye)
+3) Repack PAK (naya pak banane ke liye)
    - pehle pak ko UNPACK karo (option 1)
-   - RESULT/extracted folder me files edit karo
+   - RESULT/extracted/<pak_ka_naam>/ folder me files edit karo
    - phir ye option choose karo
    - tool apne aap extracted folder use karega,
      naya pak ban jayega. ORIGINAL pak change NAHI hota.
-   - output: RESULT/repacked/<pak_ka_naam>_repacked.pak
+   - output: RESULT/Repacked/<pak_ka_naam>.pak
 
    BAS ITNA YAAD RAKHO:
    Unpack -> files edit -> Repack
+
+4) Costom Pak (apna khali pak banane ke liye)
+   - source pak choose karo (DROP/pak)
+   - ENTER (kuch mat type karo) = pura pak jaisa structure:
+     saare folders + saare file names, lekin har file EMPTY (0 bytes).
+     Ye pak game me chalta hai jab usme files inject karo. 🧩
+   - folder number = sirf woh folder chain, uski files COPY hoti hain
+     (empty nahi, asli files byte-identical)
+   - apna path type karo = sirf woh path + uske andar ki files copy
+   - output: RESULT/CostomPak/<pak_ka_naam>.pak
 
 ============================================================
  LUA TOOL (Option 2)
 ============================================================
 
-1) Compile Lua
-   - .lua file (source) ko .luac bytecode banao
-   - output: RESULT/lua/<name>.luac
+1) Compile (+ PROTECT)
+   - .lua source file DROP/lua me rakho
+   - compiled + protected game bytecode banta hai
+   - output: RESULT/lua/
 
-2) Decompile Lua
-   - .luac bytecode ko readable .lua banao
-   - unluac.jar ki zaroorat hoti hai (ikram tool folder me,
-     nahi to tool khud download kar leta hai)
-   - output: RESULT/lua/<name>_decompiled.lua
+2) Decompile
+   - compiled .luac / .lua DROP/lua me rakho
+   - readable source banta hai
+   - output: RESULT/lua/<name>_GAME.lua
+
+⚠️ AGAR file asli me encrypted/protected hai (poora code locked hai)
+   to tool honestly batata hai:
+   "This file is encrypted and can't be decompiled by this tool."
+   Ye ERROR NAHI hai — modder ne code lock kar diya, padha nahi
+   ja sakta. Tab *GAME.lua file nahi banti.
 
 ============================================================
  TIPS (CHHOTI BAATEIN)
 ============================================================
 
-- Injected pak ko wapis game me daalne ke liye us file ko
+- Injected/Costom pak ko wapis game me daalne ke liye us file ko
   game ke Paks folder me replace karo:
   /storage/emulated/0/Android/data/com.pubg.krmobile/files/
   UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Paks/
