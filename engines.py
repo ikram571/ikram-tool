@@ -1,0 +1,352 @@
+"""Engine dispatch layer for the shipped IkramTool PAK TOOL.
+
+Loads the SAME flat compiled runtime modules the tool already runs on
+(pak.pyc / ue4.pyc via importlib) and implements the fallback chains
+from paktoolproject.txt behind the three PAK TOOL options:
+
+  UNPACK : tencent -> ikram-custom
+           ue4     -> repak -> python-ue4 (Ue4Pak + AES key)
+  INJECT : tencent -> ikram-custom (PakWriter.inject_files)
+           ue4     -> repak-inject (v10+) -> python-ue4 (Ue4Pak.repack)
+  REPACK : tencent -> ikram-custom (PakWriter full-tree)
+           ue4     -> repak-pack -> python-ue4 (Ue4Pak.repack)
+
+Works in the shipped flat runtime (ikram_patch.py entry) with no
+.pyc recompile needed -- engines.py ships as source.
+"""
+import importlib.util
+import os
+import shutil
+import tempfile
+from pathlib import Path
+
+MAGIC_BYTES = b"\xe1\x12\x6f\x5a"
+REPAK_TIMEOUT = 1800
+TOOL_DIR = Path(__file__).resolve().parent
+
+REPAK_CANDIDATES = [
+    Path.home() / ".cargo" / "bin" / "repak",
+    TOOL_DIR / "repak",
+    TOOL_DIR / "engines" / "repak",
+]
+QUICKBMS_CANDIDATES = [
+    Path.home() / "quickbms" / "quickbms",
+    Path.home() / "bin" / "quickbms",
+]
+U4PAK_CANDIDATES = [
+    Path.home() / ".local" / "bin" / "u4pak",
+    Path.home() / "bin" / "u4pak",
+]
+
+_pakmod = None
+_ue4mod = None
+
+
+def _load_flat(name):
+    """Load a flat compiled module (pak.pyc / ue4.pyc) like ikram_patch does."""
+    spec = importlib.util.spec_from_file_location(name, TOOL_DIR / f"{name}.pyc")
+    if spec is None or spec.loader is None:
+        raise ImportError(f"{name}.pyc not found in {TOOL_DIR}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def pakmod():
+    global _pakmod
+    if _pakmod is None:
+        _pakmod = _load_flat("pak")
+    return _pakmod
+
+
+def ue4mod():
+    global _ue4mod
+    if _ue4mod is None:
+        _ue4mod = _load_flat("ue4")
+        _patch_ue4module(_ue4mod)
+    return _ue4mod
+
+
+def _patch_ue4module(mod):
+    """Fix compiled ue4.pyc flaws without recompiling:
+
+    1. _parse_full_directory_index read the FDI blob RAW and never
+       decrypted it when the pak index is encrypted -> crash on
+       v10+ encrypted paks. Mirror repak: seek fdi_off, read
+       fdi_size, AES-ECB decrypt when footer.encrypted.
+    2. Same method joined paths as dir_name.strip('/') + fname,
+       wiping the trailing '/' -> 'ContentLuagame.lua'. Mirror
+       repak: prefix-strip only, keep the separator.
+    """
+    try:
+        aes_ecb_decrypt = mod.aes_ecb_decrypt
+        orig = mod.Ue4Pak._parse_full_directory_index
+    except Exception:
+        return
+    import struct as _st
+
+    def _parse_full_directory_index(self, fdi_off, fdi_size, non_encoded, encoded_blob):
+        blob = bytes(self.content[fdi_off:fdi_off + fdi_size])
+        if self.encrypted_index:
+            if not self.aes_key:
+                raise ValueError("Index encrypted — AES key chahiye (FDI)")
+            blob = aes_ecb_decrypt(blob, self.aes_key)
+        r = mod.Reader(blob)
+        dir_count = r.u4()
+        for _ in range(dir_count):
+            dir_name = r.fstring()
+            file_count = r.u4()
+            for _ in range(file_count):
+                file_name = r.fstring()
+                encoded_offset = _st.unpack_from("<i", blob, r.c)[0]
+                r.c += 4
+                d = dir_name
+                if d.startswith("/"):
+                    d = d[1:]
+                path = d + file_name
+                if encoded_offset == -2147483648:
+                    continue
+                if encoded_offset >= 0:
+                    er = mod.Reader(encoded_blob, encoded_offset)
+                    self.entries[path] = mod.read_encoded_entry(er, self.version)
+                else:
+                    self.entries[path] = non_encoded[(-encoded_offset) - 1]
+        return None
+
+    mod.Reader_original_fdi = orig
+    mod.Ue4Pak._parse_full_directory_index = _parse_full_directory_index
+
+
+def _which_try(first, *extra):
+    for cmd in (first,) + extra:
+        p = shutil.which(cmd)
+        if p:
+            return Path(p)
+    return None
+
+
+def find_repak():
+    p = _which_try("repak")
+    if p:
+        return p
+    for c in REPAK_CANDIDATES:
+        if c.is_file() and os.access(c, os.X_OK):
+            return c
+    return None
+
+
+def find_quickbms():
+    p = _which_try("quickbms")
+    if p:
+        return p
+    for c in QUICKBMS_CANDIDATES:
+        if c.is_file() and os.access(c, os.X_OK):
+            return c
+    return None
+
+
+def find_u4pak():
+    p = _which_try("u4pak")
+    if p:
+        return p
+    for c in U4PAK_CANDIDATES:
+        if c.is_file() and os.access(c, os.X_OK):
+            return c
+    return None
+
+
+def repak_hint():
+    return ("repak install: pkg install rust && cargo install repak_cli "
+            "--git https://github.com/trumank/repak --no-default-features --locked")
+
+
+def detect_kind(path):
+    """'ue4' | 'tencent' | None from magic bytes."""
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            size = f.tell()
+            f.seek(max(0, size - 4096))
+            tail = f.read(4096)
+    except Exception:
+        return None
+    if MAGIC_BYTES in tail:
+        return "ue4"
+    if size >= 45 and len(tail) >= 44:
+        try:
+            import struct
+            magic = struct.unpack_from("<I", tail[-44:-40])[0]
+            if magic ^ pakmod().pc.zuc_keystream()[2] == 0x4C515443:
+                return "tencent"
+        except Exception:
+            return None
+    return None
+
+
+def _run(args, log=None, timeout=REPAK_TIMEOUT):
+    import subprocess as sp
+    log = log or (lambda *a, **k: None)
+    log("  engine: {} ...".format(" ".join(str(a) for a in args[:3])))
+    r = sp.run([str(a) for a in args], capture_output=True, timeout=timeout)
+    if r.stdout:
+        log("  " + r.stdout.decode(errors="replace").strip())
+    if r.returncode != 0:
+        raise RuntimeError(
+            "repak failed: "
+            + (r.stderr.decode(errors="replace").strip()[-300:] or f"exit {r.returncode}")
+        )
+    return r
+
+
+def _ue4_meta(pakf, aes_key=None):
+    p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+    v = getattr(p, "version", None) or getattr(p, "version_num", None)
+    mount = getattr(p, "mount_point", None) or "../../../"
+    comp = getattr(p, "compression_u8", None)
+    return v, mount, comp
+
+
+def _repak_version_str(version, compression_u8):
+    if version == 8:
+        return "V8A" if compression_u8 else "V8B"
+    if isinstance(version, int) and 1 <= version <= 11:
+        return f"V{version}"
+    return "V8B"
+
+
+def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
+    """Unpack any pak -> out_dir. Returns file count."""
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    kind = kind or detect_kind(pakf)
+
+    if kind == "tencent":
+        log("  engine: ikram-custom (tencent)")
+        out_dir = Path(out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        return pakmod().unpack_pak(pakf, out_dir, log=log)
+
+    if kind == "ue4":
+        out = Path(out_dir)
+        out.mkdir(parents=True, exist_ok=True)
+        repak = find_repak()
+        if repak is not None:
+            aes_args = ["-a", aes_key] if aes_key else []
+            try:
+                _run([repak] + aes_args + ["unpack", pakf, "--output", out, "-f"], log)
+                return sum(1 for p in out.rglob("*") if p.is_file())
+            except Exception as e:
+                log(f"  repak tried, python fallback: {e}")
+        p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        if p.files() and getattr(p, "encrypted_index", False) and not aes_key:
+            log("  (pak index encrypted -- pass AES key)")
+        log("  engine: python-ue4 (standard UE4)")
+        return p.extract_all(str(out))
+
+    raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
+
+
+def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
+    """Repack a whole edited folder tree into a pak. Returns file count."""
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    edit_dir = Path(edit_dir)
+    kind = kind or detect_kind(pakf)
+
+    if kind == "tencent":
+        log("  engine: ikram-custom (tencent)")
+        with pakmod().PakReader(pakf) as pak:
+            existing = pak.full_paths()
+            # The extracted tree carries the mount-point path (e.g.
+            # ShadowTrackerExtra/...) while full_paths() keys are
+            # mount-relative. Normalise before matching so exact path
+            # lookup wins and duplicate basenames don't collide.
+            mount_rel = str(getattr(pak, "mount_point", "") or "")
+            mount_dir = ""
+            if mount_rel.count("/") >= 2:
+                mount_dir = mount_rel.rstrip("/").rsplit("/", 1)[-1] + "/"
+            edits = []
+            for p in sorted(edit_dir.rglob("*")):
+                if not p.is_file() or p.name.startswith("."):
+                    continue
+                rel = str(p.relative_to(edit_dir)).replace("\\", "/")
+                rel = rel.lstrip("/")
+                if rel.startswith(mount_dir):
+                    rel = rel[len(mount_dir):]
+                target = None
+                if rel in existing:
+                    target = rel
+                else:
+                    for fp in existing:
+                        if fp.lower() == rel.lower():
+                            target = fp
+                            break
+                if target is None:
+                    for fp in existing:
+                        if Path(fp).name.lower() == p.name.lower():
+                            target = fp
+                            break
+                if target is None:
+                    target = rel
+                edits.append((target, (p.read_bytes(), None, p.stem)))
+            return pakmod().PakWriter(pak).inject_files(edits, str(out), force_add=True)
+
+    if kind == "ue4":
+        version, mount_point, compression_u8 = _ue4_meta(pakf, aes_key=aes_key)
+        repak = find_repak()
+        if repak is not None:
+            log("  engine: repak-pack (standard UE4)")
+            with tempfile.TemporaryDirectory(prefix="ikram_repack_") as tmp:
+                stage = Path(tmp) / "tree"
+                stage.mkdir(parents=True, exist_ok=True)
+                aes_args = ["-a", aes_key] if aes_key else []
+                try:
+                    _run([repak] + aes_args + ["unpack", pakf, "--output", stage, "-f"], log)
+                except Exception as e:
+                    log(f"  repak unpack failed ({e}) -- python fallback")
+                    p0 = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+                    p0.extract_all(str(stage))
+                for p in sorted(edit_dir.rglob("*")):
+                    if not p.is_file() or p.name.startswith("."):
+                        continue
+                    rel = str(p.relative_to(edit_dir)).replace("\\", "/")
+                    dst = stage / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    dst.write_bytes(p.read_bytes())
+                out = Path(out)
+                out.parent.mkdir(parents=True, exist_ok=True)
+                if out.exists():
+                    out.unlink()
+                _run([repak, "pack", stage, "--mount-point", mount_point,
+                      "--version", _repak_version_str(version, compression_u8),
+                      "--compression", "Zlib", out], log)
+            return sum(1 for p in edit_dir.rglob("*") if p.is_file())
+
+        log("  engine: python-ue4 (standard UE4)")
+        p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        existing = p.files()
+        repl, adds = {}, {}
+        for fp in sorted(edit_dir.rglob("*")):
+            if not fp.is_file() or fp.name.startswith("."):
+                continue
+            rel = str(fp.relative_to(edit_dir)).replace("\\", "/")
+            data = fp.read_bytes()
+            if rel in existing:
+                repl[rel] = data
+            else:
+                adds[rel] = data
+        return p.repack(str(out), replacements=repl, add_files=adds)
+
+    raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
+
+
+def engine_status():
+    out = []
+    out.append(f"custom-tencent: ready (pak.pyc)")
+    r = find_repak()
+    out.append(f"repak: {r.name if r else 'MISSING -- ' + repak_hint()}")
+    q = find_quickbms()
+    out.append(f"quickbms: {q.name if q else 'not installed (optional fallback)'}")
+    u = find_u4pak()
+    out.append(f"u4pak: {u.name if u else 'not installed (optional fallback)'}")
+    return "\n".join(out)
