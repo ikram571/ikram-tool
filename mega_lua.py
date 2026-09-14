@@ -706,6 +706,59 @@ def _is_encrypted_lua(data: bytes) -> bool:
     return True
 
 
+# NADEEM's protector leaves a plaintext ASCII footer even though the embedded
+# Lua payload is ciphertext: `-- THIS LUA IS ENCRYPTED BY @OFFICIAL_NADEEM896211
+# -- YOU CAN JOIN MY CHANNEL :- ASSET_FINDER`. The marks below are the exact
+# strings found in the real protected files, so the scan is a plain byte-match
+# with practically zero false positives (a legit game string is never this).
+_NADEEM_MARKS = (
+    b"@OFFICIAL_NADEEM896211",
+    b"OFFICIAL_NADEEM896211",
+    b"ASSET_FINDER",
+    b"THIS LUA IS ENCRYPTED BY",
+)
+
+
+def _is_nadeem_protected(data: bytes) -> bool:
+    """True when `data` carries a NADEEM plaintext protection footer.
+
+    Cheap whole-file byte scan (footer lands ~the final 300 bytes of the real
+    706k sample).  A true positive means: only the loader shell is recoverable,
+    the real code was removed/encrypted at protect time — nothing the
+    decompiler can produce will be game-ready, so the caller must say so
+    instead of issuing the old crash-and-burn "ready to recompile" label.
+    """
+    if not data or len(data) < 64:
+        return False
+    tail = data[-4096:]
+    if any(m in tail for m in _NADEEM_MARKS):
+        return True
+    return any(m in data for m in _NADEEM_MARKS)
+
+
+# NADEEM / stripped-name shells decompile to unbound `upval_0/1/2` idents
+# (the invoked upvalue names were removed at protect time) plus anti-tamper
+# goto plumbing.  Legit BGMI chunks in this pipeline decompile with upval=0 /
+# _ENV=0 / goto=0 (calibrated against the real 25k ground truth).  This is the
+# post-decompile belt that catches shell outputs whose footer was truncated.
+_NADEEM_SHELL_RE = re.compile(r"\bupval_\d+\b")
+_NADEEM_ANTI_RE = re.compile(r"goto\s+\S+|\b_ENV\b")
+
+
+def _is_nadeem_shell(text: str) -> bool:
+    """True when a decompiled source is a recoverable-but-hollow loader shell
+    (stripped/encrypted NADEEM-style protection) rather than real game code.
+
+    Requires >=3 unbound `upval_N` idents AND >=1 anti-tamper marker (_ENV /
+    goto), which the calibrated legit outputs never satisfy.
+    """
+    if not text:
+        return False
+    if len(_NADEEM_SHELL_RE.findall(text)) < 3:
+        return False
+    return len(_NADEEM_ANTI_RE.findall(text)) >= 1
+
+
 def _xor_key_recover(data: bytes, plain: bytes, key_len: int):
     """Try recovering a repeating-XOR key from a known plaintext prefix.
     Returns the key bytes if consistent across `key_len`, else None."""
@@ -1589,7 +1642,7 @@ def _decrypt_prologue(text: str) -> str:
             "f:close()",
         ]
         ev.write_text("\n".join(prologue + dump_lines), encoding="utf-8")
-        p = _run([str(LUA_PATCHED), str(ev)])
+        p = _run([str(LUA_PATCHED), str(ev)], timeout=PROBE_TIMEOUT)
         if p.returncode != 0:
             raise RuntimeError("prologue eval failed: %s" % (p.stderr or b"").decode("utf-8", errors="replace")[:200])
         if not dmp.exists():
@@ -2678,6 +2731,14 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
     data = read_bytes(src)
     stem = Path(src).stem
 
+    if _is_nadeem_protected(data):
+        _phase(progress, "Encrypted file detected")
+        return [("Decompile", False, out_root / (stem + "_GAME.lua"),
+                 ("This file is encrypted and can't be decompiled by this "
+                  "tool. The Lua code was packed by an external protector and "
+                  "only a loader shell is present — no decompilable code was "
+                  "recovered, so no *_GAME.lua was written."))]
+
     if _looks_like_zlib_container(data):
         _phase(progress, "Multi-section container detected, reconstructing...")
         recon = _reconstruct_zlib_sections(data)
@@ -2791,6 +2852,14 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
             _phase(progress, "Promoting readable names...")
             game_text = _promote_readable(game_text)
         game_text = _auto_close_blocks(game_text)
+        if _is_nadeem_shell(game_text):
+            _phase(progress, "Encrypted file detected")
+            _cleanup((readable_path, clean_path, tmp_std))
+            return [("Decompile", False, out_root / (stem + "_GAME.lua"),
+                     ("This file is encrypted and can't be decompiled by this "
+                      "tool. The Lua code was packed by an external protector "
+                      "and only a loader shell is present — no decompilable "
+                      "code was recovered, so no *_GAME.lua was written."))]
         game_path = out_root / (stem + "_GAME.lua")
         game_path.write_text(game_text, encoding="utf-8")
 
@@ -2834,7 +2903,7 @@ def _compile_std(text: str, strip: bool = False) -> bytes:
         if strip:
             cmd.append("-s")
         cmd += ["-o", str(out_f), str(src_f)]
-        p = _run(cmd)
+        p = _run(cmd, timeout=UNLUAC_JAR_TIMEOUT)
         if p.returncode != 0:
             err = (p.stderr or b"").decode("utf-8", errors="replace").strip()
             raise RuntimeError(err or "luac compile failed")

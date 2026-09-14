@@ -22,7 +22,7 @@ for _d in (
     ikram.RESULT,
 ):
     _d.mkdir(parents=True, exist_ok=True)
-for _sub in ("injected", "extracted", "lua", "repacked"):
+for _sub in ("injected", "extracted", "lua", "processed", "CostomPak"):
     (ikram.RESULT / _sub).mkdir(parents=True, exist_ok=True)
 
 # ---- default Unreal Engine AES key for UE4 paks ---------------------------
@@ -372,11 +372,26 @@ def pak_extract():
     ikram.pause()
 
 
+def _notify_tg(operation, msg, limit=800):
+    """Graceful (non-raising) failure -> owner Telegram, same lazy-load as
+    telemetry.pyc. Exceptions elsewhere already reach TG via report_error."""
+    try:
+        import importlib.util as _ilu
+        _s = _ilu.spec_from_file_location("_tel_pak", _TOOL_DIR / "telemetry.pyc")
+        _m = _ilu.module_from_spec(_s)
+        _s.loader.exec_module(_m)
+        _m.send_error(RuntimeError(msg[:limit]), extra=operation)
+    except Exception:
+        pass
+
+
 def _finish_report(pakf, n, kind, out):
     if n == 0:
         ikram.show_error(
             "{}: 0 files extracted (may be encrypted or unsupported)".format(pakf.name)
         )
+        _notify_tg("pak unpack (0 files)",
+                   "{}({}): 0 files extracted".format(pakf.name, kind))
     else:
         ikram.show_success("✔ {} files unpacked -> {}".format(n, out))
 
@@ -402,7 +417,7 @@ def pak_repack_folder():
         )
         ikram.pause()
         return
-    out = ikram.RESULT / "repacked" / "{}.pak".format(pakf.stem)
+    out = ikram.RESULT / "CostomPak" / "{}.pak".format(pakf.stem)
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()
@@ -910,7 +925,7 @@ def pak_tool_menu():
             ("[2]", "📦 Inject File",
              "WORK: put any file (lua/uasset/asset) into the pak —\ntype is found automatically and added to the game.\n1 file or all files at once — auto or manual path.\nPUT FILE IN: DROP/inject + DROP/pak\nOUTPUT: RESULT/injected/"),
             ("[3]", "📦 Repack PAK",
-             "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\nOUTPUT: RESULT/repacked/"),
+             "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\nOUTPUT: RESULT/CostomPak/"),
             ("[4]", "📦 Costom Pak",
              "WORK: make an EMPTY pak — keep only\nthe FOLDER paths you pick from the\nsource pak, or type your own path\n(auto under ShadowTrackerExtra).\nnumber = pick folder · 0 = cancel.\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
             ("[0]", "Back", "back to main menu"),
