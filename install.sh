@@ -193,8 +193,13 @@ install_pip() {  # install_pip BASE_PCT PCT_STEP "LABEL_PREFIX" lib...
 
 # 1) tool splash (matches the tool)
 tool_splash
-step "Press Enter to start the installation..."
-read -r dummy 2>/dev/null || true
+# Press-Enter prompt ONLY if stdin is a real TTY. Under `curl ... | bash`
+# stdin is the script pipe — an inner `read` there can swallow the next
+# chunk of the script (bash hasn't buffered it yet) = "starts, stops mid-way".
+if [ -t 0 ]; then
+    step "Press Enter to start the installation..."
+    read -r dummy 2>/dev/null || true
+fi
 
 # phase weights (total 100)
 PW_STORAGE=4
@@ -339,11 +344,11 @@ rm -rf "$TMPX" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — hamesha banayein (fresh install pe khali hota hai)
 mkdir -p "$TARGET/.engine" "$TARGET/drop/inject" "$TARGET/drop/lua" "$TARGET/drop/pak" \
          "$TARGET/result/injected" "$TARGET/result/extracted" \
-         "$TARGET/result/lua" "$TARGET/result/repacked"
+         "$TARGET/result/lua" "$TARGET/result/Repacked" "$TARGET/result/CostomPak"
 # engine ab .engine/ me — DROP/RESULT symlink (engine __file__-relative me root drop/result)
 ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
 ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"
-if [ -f "$TARGET/ikram.pyc" ]; then
+if [ -f "$TARGET/.engine/ikram.pyc" ] || [ -f "$TARGET/ikram.pyc" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else
@@ -385,7 +390,7 @@ if [ ! -f "$HOME/Ikram_Tool/.engine/ikram_patch.py" ]; then
     rm -rf "$TMPX" && mkdir -p "$TMPX"
     if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
         cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null
-        chmod +x "$HOME/Ikram_Tool/run.sh" 2>/dev/null
+        chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/run.sh" 2>/dev/null
         echo "  ✓ Repair done! Tool khul raha hai..."
         exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
     fi
@@ -423,14 +428,16 @@ chmod +x "$PREFIX/bin/ikram"
 printf "\n"
 ok "'ikram' command ready (new version)"
 
-chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
-chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
-chmod +x "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
+chmod +x "$TARGET/.engine/run.sh" "$TARGET/.engine/install.sh" "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
+chmod +x "$TARGET/.engine/luac_patched" "$TARGET/.engine/lua_patched" "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
+chmod +x "$TARGET/.engine/repak" "$TARGET/.engine/unluac_rs" "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
 
 # 7B) post-install boot test (shows key prompt + main menu once)
 box "$C_GOLD" "🚀 Final boot test"
 _pbar "$((DL_BASE + PW_DL + PW_EXTRACT))" "Booting tool once"
-if [ -f "$TARGET/ikram_patch.py" ]; then
+if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; then
+    IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
+    [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
     BOOT_PLAN="$TARGET/.boot_plan.$$"
     BOOT_PY="$TARGET/.boot_drv.$$.py"
     printf 'FREETOOL\n0\n' > "$BOOT_PLAN"
@@ -466,7 +473,7 @@ else:
     except Exception:
         pass
 PY
-    IKRAM_PATCH="$TARGET/ikram_patch.py" \
+    IKRAM_PATCH="$IKRAM_SRC" \
     IKRAM_PLAN="$BOOT_PLAN" \
     IKRAM_TB="$TARGET/.boot_tb.log" \
     IKRAM_OK="$TARGET/.boot_ok.$$" \
@@ -485,7 +492,7 @@ fi
 advance 100 "Boot test"
 
 advance 100 "Setup complete"
-V_VER=$(cat "$TARGET/VERSION" 2>/dev/null || echo "latest")
+V_VER=$(cat "$TARGET/.engine/VERSION" 2>/dev/null || cat "$TARGET/VERSION" 2>/dev/null || echo "latest")
 BW=$((W - 2))
 # right-pad each line so the box closes flush (tool-style VIP finish)
 pad_line() { local txt="$1"; local L="${#txt}"; local P=$((BW - L)); [ $P -lt 1 ] && P=1; printf '%s%s%s' "$txt" "$(printf '%*s' $P '')" "${C_GREEN}│${C_RESET}"; }

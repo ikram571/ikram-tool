@@ -33,6 +33,7 @@ fi
 # Copy the whole flat layout from the REPO, excluding temp/private junk.
 (cd "$SOURCE_DIR" && cp -r . "$STAGE"/)
 rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT "$STAGE"/output
+rm -rf "$STAGE"/original "$STAGE"/logs
 rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
 rm -rf "$STAGE"/.git
 

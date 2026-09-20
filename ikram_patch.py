@@ -1,6 +1,7 @@
 import importlib.util
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 _TOOL_DIR = Path(__file__).resolve().parent
@@ -440,6 +441,16 @@ def pak_repack_folder():
             aes_key = key or DEFAULT_UE4_AES_KEY_HEX
         n = _engines.repack_folder(pakf, edit_dir, out, kind=kind, aes_key=aes_key,
                                    log=ikram.console.print)
+        # Double-repack fix: older releases wrote the result to the lowercase
+        # RESULT/repacked/ twin; on case-sensitive Android both then coexist
+        # ("Result/ shows TWO repacked files"). Purge the legacy twin so one
+        # repack == exactly one output.
+        _legacy = ikram.RESULT / "repacked" / "{}.pak".format(pakf.stem)
+        if _legacy.exists():
+            try:
+                _legacy.unlink()
+            except OSError:
+                pass
         ikram.show_success("✔ {} files repacked -> {}".format(n, out))
     except Exception as e:
         ikram.report_error(e)
@@ -902,10 +913,28 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
             _trim_tencent_pad(out, log)
             return len(chain), 0
     if kind == "ue4":
-        log("  engine: python-ue4 (standard UE4)")
-        p = _engines.ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        log("  engine: repak-pack (standard UE4)")
+        repak = _engines.find_repak()
+        if repak is None:
+            raise RuntimeError(
+                "repak missing — can't build an empty UE4 pak (install repak)"
+            )
+        version, mount_point, compression_u8 = _engines._ue4_meta(
+            pakf, aes_key=aes_key
+        )
         out.parent.mkdir(parents=True, exist_ok=True)
-        p.repack(str(out), replacements={}, add_files={})
+        if out.exists():
+            out.unlink()
+        with tempfile.TemporaryDirectory(prefix="ikram_costom_") as tmp:
+            _engines._run(
+                [
+                    repak, "pack", tmp,
+                    "--mount-point", mount_point,
+                    "--version", _engines._repak_version_str(version, compression_u8),
+                    "--compression", "Zlib", out,
+                ],
+                log,
+            )
         if not out.exists() or out.stat().st_size == 0:
             raise RuntimeError("UE4 empty-pak write produced no output")
         return 0, 0
