@@ -50,9 +50,21 @@ LUA_PATCHED = TOOL_DIR / "lua_patched"
 # lope through O(n^2) register rewrites indefinitely; `java` carries its own
 # JVM spin-up. Both get a bounded budget, then the readable-output step hands
 # off to the guaranteed local decompiler instead of leaving the user hanging.
-UNLUAC_RS_TIMEOUT = 120   # seconds; ample for real BGMI chunks ~1-2MB
-UNLUAC_JAR_TIMEOUT = 180  # seconds; jar is slower to warm up
+# Budgets scale with the actual input size so a legit 100k-line (or larger)
+# file gets minutes, never a mid-run kill. `probe` stays tight: validation
+# probes must never block detection.
+UNLUAC_RS_TIMEOUT = 120   # base seconds; ample for real BGMI chunks ~1-2MB
+UNLUAC_JAR_TIMEOUT = 180  # base seconds; jar is slower to warm up
 PROBE_TIMEOUT = 30        # seconds; validation probes must never block detection
+MAX_SCALED_TIMEOUT = 3600 # absolute ceiling so nothing pins the UI forever
+
+
+def _scaled_timeout(base: int, size: int) -> int:
+    """Timeout that grows with the input so no line-count / byte-count wall
+    exists: base + ~5s per extra MB, capped at MAX_SCALED_TIMEOUT."""
+    if size <= 0:
+        return base
+    return min(MAX_SCALED_TIMEOUT, int(base + max(0.0, (size - (2 << 20)) / (1 << 20)) * 5.0))
 
 
 def _phase(progress, text: str) -> None:
@@ -202,6 +214,25 @@ _LUA_SOURCE_TEXT_RE = re.compile(
     r"^\s*\[\[|^\s*return\s+\{",
     re.M,
 )
+
+
+def _compiles_as_lua(text: str) -> bool:
+    """Ground-truth check: is `text` genuine Lua source?
+
+    Used as the authoritative fallback over heuristics at the plain-source
+    branch. Pure data/config scripts (table + string concatenation only, no
+    `function`/`end`/`if` keywords) are valid, compilable Lua but defeat every
+    keyword-ratio heuristic — real-world case: PUBG pak `pubgm_patch.lua`.
+    luac_patched emitting a clean compile proves it is source, not packed
+    binary / encrypted blob (those already failed the earlier cascade).
+    """
+    if not text.strip() or len(text) < 3:
+        return False
+    try:
+        _compile_std(text)
+        return True
+    except Exception:
+        return False
 
 
 def _looks_like_lua_source(text: str) -> bool:
@@ -671,7 +702,7 @@ def _detect_dialect(data: bytes):
             if data[6:12] == LUA_MAGIC_TAIL:
                 return "lua%d%d" % ((ver >> 4) & 0x0F, ver & 0x0F)
         return None
-    if data[:4] == b"\x1bul":
+    if data[:3] == b"\x1bul":
         return "luau"
     return None
 
@@ -1134,7 +1165,8 @@ def _unluac_probe(data: bytes) -> bool:
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td) / "probe.luac"
             tmp.write_bytes(data)
-            p = _run([str(UNLUAC_RS), "-i", str(tmp)], timeout=PROBE_TIMEOUT)
+            p = _run([str(UNLUAC_RS), "-i", str(tmp)],
+                     timeout=min(PROBE_TIMEOUT + _scaled_timeout(0, len(data)), MAX_SCALED_TIMEOUT))
             if p.returncode != 0:
                 return False
             return bool(p.stdout and p.stdout.strip())
@@ -1383,21 +1415,24 @@ def _decompile_readable(std_path: Path) -> str:
     jar_out = None
     rs_out = None
     rs_err = "unluac_rs not found"
+    _sz = Path(std_path).stat().st_size if Path(std_path).exists() else 0
+    _jar_budget = _scaled_timeout(UNLUAC_JAR_TIMEOUT, _sz)
+    _rs_budget = _scaled_timeout(UNLUAC_RS_TIMEOUT, _sz)
     if UNLUAC_JAR.exists():
         try:
             p = _run(["java", "-jar", str(UNLUAC_JAR), str(std_path)],
-                     timeout=UNLUAC_JAR_TIMEOUT)
+                     timeout=_jar_budget)
         except subprocess.TimeoutExpired:
-            rs_err = "unluac.jar hit %ss timeout" % UNLUAC_JAR_TIMEOUT
+            rs_err = "unluac.jar hit %ss timeout" % _jar_budget
         else:
             if p.returncode == 0 and p.stdout.strip():
                 jar_out = p.stdout.decode("utf-8", errors="replace")
     if UNLUAC_RS.exists():
         try:
             p = _run([str(UNLUAC_RS), "-i", str(std_path)],
-                     timeout=UNLUAC_RS_TIMEOUT)
+                     timeout=_rs_budget)
         except subprocess.TimeoutExpired:
-            rs_err = "unluac_rs hit %ss timeout" % UNLUAC_RS_TIMEOUT
+            rs_err = "unluac_rs hit %ss timeout" % _rs_budget
         else:
             if p.returncode == 0 and p.stdout.strip():
                 rs_out = p.stdout.decode("utf-8", errors="replace")
@@ -1405,13 +1440,17 @@ def _decompile_readable(std_path: Path) -> str:
 
     # unluac.jar only wins when it is NOT a flat L-var dump (it keeps names).
     outcome = None
+    outcome_src = None
     if jar_out and jar_out.strip() and not _is_flat_lvar(jar_out):
         outcome = jar_out
+        outcome_src = "jar"
     # otherwise prefer the structured unluac-rs output when available.
     if outcome is None and rs_out and rs_out.strip():
         outcome = rs_out
+        outcome_src = "rs"
     if outcome is None and jar_out and jar_out.strip():
         outcome = jar_out
+        outcome_src = "jar"
 
     # guaranteed readable fallback via the tool's own Lua VM decompiler
     if outcome is None:
@@ -1425,11 +1464,19 @@ def _decompile_readable(std_path: Path) -> str:
     if outcome is None:
         raise RuntimeError("decompile failed: " + rs_err[:300])
 
-    # strip the unluac dead-region dumps so the output actually recompiles.
-    stripped = _strip_dead_after_returns(outcome)
-    # the raw output is un-compilable on heavy files (dead code after
-    # `return`); the stripped form is everything reachable. Never worse.
-    return _auto_close_blocks(stripped)
+    # strip the unluac RS dead-region dumps so the output actually recompiles.
+    # NOTE: only the register-style rs/lua_engine emitters produce dead code
+    # after a `return` (their output is not real source structure anyway).
+    # Name-preserving jar output is already valid structure and must NOT pass
+    # through _strip_dead_after_returns unbounded: a `return` inside a nested
+    # `if`/`for` at the same indent as its own closing `end` makes that pass
+    # skip past the block boundary and drop 100+ valid lines (verified real
+    # case: PUBG UGC_Assistant_Define.lua — jar emits `end`+`end` correctly,
+    # rs merges them into `end,` which fails luac).
+    if outcome_src in ("rs", None):
+        outcome = _strip_dead_after_returns(outcome)
+    # the final pass appends any missing `end`s from the register emitters.
+    return _auto_close_blocks(outcome)
 
 
 def _auto_close_blocks(text: str) -> str:
@@ -2804,7 +2851,7 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                                  ("Auto key-discovery could not recover a decryption "
                                   "key for this file (sparse/BRPC/unknown protection). "
                                   "The modder's key is required to make it readable."))]
-                    if _looks_like_lua_source(text):
+                    if _looks_like_lua_source(text) or _compiles_as_lua(text):
                         # Plain unsignatured text (no Lua header): real source.
                         out_p = out_root / (stem + "_GAME.lua")
                         out_p.write_text(text, encoding="utf-8")
@@ -2903,9 +2950,17 @@ def _compile_std(text: str, strip: bool = False) -> bytes:
         if strip:
             cmd.append("-s")
         cmd += ["-o", str(out_f), str(src_f)]
-        p = _run(cmd, timeout=UNLUAC_JAR_TIMEOUT)
+        p = _run(cmd, timeout=_scaled_timeout(UNLUAC_JAR_TIMEOUT, len(text)))
         if p.returncode != 0:
             err = (p.stderr or b"").decode("utf-8", errors="replace").strip()
+            if not err:
+                err = "luac compile failed (unknown error)"
+            # luac_patched prints "<tooldir>/luac_patched: /tmp/<rand>/src.lua:LINE: msg"
+            # — both paths are noise to the user on device. Strip the binary
+            # prefix and keep line:msessage as-is.
+            err = err.split("\n", 1)[0]
+            err = err.replace(str(_patched_luac()) + ":", "").strip()
+            err = err.replace(str(src_f), "src.lua")
             raise RuntimeError(err or "luac compile failed")
         return out_f.read_bytes()
 
@@ -2921,8 +2976,14 @@ def compile_bgmi(src, out, progress=None) -> tuple:
                 "input is already compiled bytecode. "
                 "Use Decompile (option 2) to get readable source first."
             )
-        printable = sum(1 for b in data[:4096] if 32 <= b < 127 or b in (9, 10, 13))
-        if len(data) >= 8 and printable / min(len(data), 4096) < 0.7:
+        # Binary, not unicode: reject on NUL bytes or dense C0-control bytes.
+        # UTF-8 source carries 2-4 byte sequences (0x80-0xBF/0xC0-0xF4) that the
+        # old ASCII-only "printable" ratio mistook for binary — a valid unicode
+        # .lua (Devanagari, CJK, emoji strings) must compile, not bounce.
+        sample = data[:4096]
+        nul = sample.count(0)
+        ctl = sum(1 for b in sample if b < 0x20 and b not in (9, 10, 13))
+        if len(data) >= 8 and (nul > 0 or ctl / min(len(data), 4096) > 0.3):
             return False, (
                 "input is not readable Lua source (binary/encrypted). "
                 "Decompile it first or provide plain .lua source."
