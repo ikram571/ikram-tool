@@ -63,7 +63,58 @@ def ue4mod():
     global _ue4mod
     if _ue4mod is None:
         _ue4mod = _load_flat("ue4")
+        _patch_ue4module(_ue4mod)
     return _ue4mod
+
+
+def _patch_ue4module(mod):
+    """Fix compiled ue4.pyc flaws without recompiling:
+
+    1. _parse_full_directory_index read the FDI blob RAW and never
+       decrypted it when the pak index is encrypted -> crash on
+       v10+ encrypted paks. Mirror repak: seek fdi_off, read
+       fdi_size, AES-ECB decrypt when footer.encrypted.
+    2. Same method joined paths as dir_name.strip('/') + fname,
+       wiping the trailing '/' -> 'ContentLuagame.lua'. Mirror
+       repak: prefix-strip only, keep the separator.
+    """
+    try:
+        aes_ecb_decrypt = mod.aes_ecb_decrypt
+        orig = mod.Ue4Pak._parse_full_directory_index
+    except Exception:
+        return
+    import struct as _st
+
+    def _parse_full_directory_index(self, fdi_off, fdi_size, non_encoded, encoded_blob):
+        blob = bytes(self.content[fdi_off:fdi_off + fdi_size])
+        if self.encrypted_index:
+            if not self.aes_key:
+                raise ValueError("Index encrypted — AES key chahiye (FDI)")
+            blob = aes_ecb_decrypt(blob, self.aes_key)
+        r = mod.Reader(blob)
+        dir_count = r.u4()
+        for _ in range(dir_count):
+            dir_name = r.fstring()
+            file_count = r.u4()
+            for _ in range(file_count):
+                file_name = r.fstring()
+                encoded_offset = _st.unpack_from("<i", blob, r.c)[0]
+                r.c += 4
+                d = dir_name
+                if d.startswith("/"):
+                    d = d[1:]
+                path = d + file_name
+                if encoded_offset == -2147483648:
+                    continue
+                if encoded_offset >= 0:
+                    er = mod.Reader(encoded_blob, encoded_offset)
+                    self.entries[path] = mod.read_encoded_entry(er, self.version)
+                else:
+                    self.entries[path] = non_encoded[(-encoded_offset) - 1]
+        return None
+
+    mod.Reader_original_fdi = orig
+    mod.Ue4Pak._parse_full_directory_index = _parse_full_directory_index
 
 
 def _which_try(first, *extra):
@@ -147,8 +198,8 @@ def _run(args, log=None, timeout=REPAK_TIMEOUT):
     return r
 
 
-def _ue4_meta(pakf):
-    p = ue4mod().Ue4Pak(pakf)
+def _ue4_meta(pakf, aes_key=None):
+    p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
     v = getattr(p, "version", None) or getattr(p, "version_num", None)
     mount = getattr(p, "mount_point", None) or "../../../"
     comp = getattr(p, "compression_u8", None)
@@ -177,11 +228,12 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
 
     if kind == "ue4":
         out = Path(out_dir)
+        out.mkdir(parents=True, exist_ok=True)
         repak = find_repak()
         if repak is not None:
             aes_args = ["-a", aes_key] if aes_key else []
             try:
-                _run([repak, "unpack", pakf, "--output", out, "-f"] + aes_args, log)
+                _run([repak] + aes_args + ["unpack", pakf, "--output", out, "-f"], log)
                 return sum(1 for p in out.rglob("*") if p.is_file())
             except Exception as e:
                 log(f"  repak tried, python fallback: {e}")
@@ -240,7 +292,7 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
             return pakmod().PakWriter(pak).inject_files(edits, str(out), force_add=True)
 
     if kind == "ue4":
-        version, mount_point, compression_u8 = _ue4_meta(pakf)
+        version, mount_point, compression_u8 = _ue4_meta(pakf, aes_key=aes_key)
         repak = find_repak()
         if repak is not None:
             log("  engine: repak-pack (standard UE4)")
@@ -249,7 +301,7 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
                 stage.mkdir(parents=True, exist_ok=True)
                 aes_args = ["-a", aes_key] if aes_key else []
                 try:
-                    _run([repak, "unpack", pakf, "--output", stage, "-f"] + aes_args, log)
+                    _run([repak] + aes_args + ["unpack", pakf, "--output", stage, "-f"], log)
                 except Exception as e:
                     log(f"  repak unpack failed ({e}) -- python fallback")
                     p0 = ue4mod().Ue4Pak(pakf, aes_key=aes_key)

@@ -13,6 +13,7 @@ Usage:
   python3 update.py             -> latest zip download + clean install
 """
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -25,6 +26,50 @@ TOOL_DIR = Path(__file__).resolve().parent
 REPO = "ikram571/ikram-tool"
 API = "https://api.github.com/repos/{}/releases/latest".format(REPO)
 ZIP_NAME = "IkramTool.zip"
+
+# ------------------- ANSI palette (matches Ikram Tool UI) --------------------
+_TTY = 1 if (hasattr(sys.stdout, "isatty") and sys.stdout.isatty()) else 0
+_R = "\033[0m"
+_PINK = "\033[1;38;5;201m"
+_CYAN = "\033[1;38;5;51m"
+_GOLD = "\033[1;38;5;220m"
+_GREEN = "\033[1;38;5;82m"
+_RED = "\033[1;38;5;196m"
+_DIM = "\033[2;38;5;244m"
+_BOLD = "\033[1m"
+
+
+def _pcol(content, width=30):
+    """Pretty-print a line inside a colored box (pink border)."""
+    text = content.ljust(width)
+    return "{}{}{}{}{}".format(_PINK, "│", _R, text, _PINK)
+
+
+def _box_top(width=30):
+    return "{}{}{}".format(_PINK, "╭" + "─" * width + "╮", _R)
+
+
+def _box_bot(width=30):
+    return "{}{}{}".format(_PINK, "╰" + "─" * width + "╯", _R)
+
+
+def _splash():
+    """Premium update splash (matches the tool's startup panel)."""
+    w = 50
+    sep = "{}{}{}".format(_GOLD, "✦" * w, _R)
+    title = "{}{}IKRAM TOOL UPDATE{}".format(_BOLD, _CYAN, _R)
+    sub = "{}📦 PAK  •  📜 LUA{}".format(_CYAN, _R)
+    pad_t = (w - 13) // 2
+    pad_s = (w - 14) // 2
+    lines = [
+        "",
+        sep,
+        " " * pad_t + title,
+        " " * pad_s + sub,
+        sep,
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def version_tuple(v):
@@ -63,14 +108,10 @@ def _fmt_size(n):
 
 
 class _Progress:
-    """Download ke waqt chhota sa live box - kitna download hua + total size."""
+    """Premium colored live download box (matches the tool's progress UI)."""
 
     def __init__(self):
         self._drawn = False
-
-    def _line(self, content):
-        inner = 30
-        return "│" + content.ljust(inner) + "│"
 
     def show(self, done, total):
         sz_done = _fmt_size(done)
@@ -78,16 +119,19 @@ class _Progress:
         pct = int(done / total * 100) if total else 0
         bar_w = 18
         filled = pct * bar_w // 100
-        bar = "█" * filled + "░" * (bar_w - filled)
+        bar = "{}{}{}{}".format(
+            _GREEN, "█" * filled, _DIM, "░" * (bar_w - filled)
+        )
+        pct_color = _GREEN if pct >= 100 else _CYAN
         lines = [
-            "╭──────────────────────────────╮",
-            self._line("  ⬇  Downloading update"),
-            self._line("  [{}] {:>3}%".format(bar, pct)),
-            self._line("  Downloading: {}".format(sz_done)),
-            self._line("  Size: {}".format(sz_total)),
-            "╰──────────────────────────────╯",
+            _box_top(30),
+            _pcol("  ⬇  Downloading update"),
+            _pcol("  [{}] {}{:>3}{}%".format(bar, pct_color, pct, _R)),
+            _pcol("  Downloaded: {}".format(sz_done)),
+            _pcol("  Total: {}".format(sz_total)),
+            _box_bot(30),
         ]
-        if self._drawn:
+        if _TTY and self._drawn:
             print("\x1b[{}A".format(len(lines)), end="")
         for l in lines:
             print(l)
@@ -133,13 +177,28 @@ def _clean_replace(src):
         else:
             shutil.copy2(f, dst)
     # sabka execute bit sahi rakho
-    for name in ("run.sh", "install.sh", "lua_patched", "luac_patched", "unluac_rs"):
+    for name in ("run.sh", "install.sh", "lua_patched", "luac_patched", "unluac_rs", "repak"):
         p = TOOL_DIR / name
         if p.exists():
             try:
                 p.chmod(0o755)
             except Exception:
                 pass
+
+
+def _show_complete():
+    """Premium update-complete box (matches the tool's exit panel)."""
+    w = 50
+    green_bar = "{}{}{}".format(_GREEN, "✦" * w, _R)
+    if _TTY:
+        print("")
+        print(green_bar)
+        print("{}{}{}{}".format(_GREEN, "  ✅  UPDATE INSTALLED SUCCESSFULLY!", _R))
+        print("{}{}{}{}".format(_GREEN, "      Restart the tool to continue...", _R))
+        print(green_bar)
+        print("")
+    else:
+        print("UPDATE_INSTALLED_SUCCESS")
 
 
 def do_install():
@@ -157,6 +216,7 @@ def do_install():
         req = urllib.request.Request(
             info["url"], headers={"User-Agent": "ikram-tool"}
         )
+        print(_splash())
         prog = _Progress()
         with urllib.request.urlopen(req, timeout=120) as r:
             total = int(r.headers.get("Content-Length") or 0)
@@ -168,23 +228,17 @@ def do_install():
                 data += chunk
                 prog.show(len(data), total)
         zip_path.write_bytes(data)
-        print("  ✓ Downloaded. Installing...")
 
         with zipfile.ZipFile(zip_path) as z:
             z.extractall(tmp)
 
         src = tmp
         nested = [p for p in tmp.iterdir() if p.is_dir()]
-        # agar zip me ek single nested folder ho (ikram.py ke saath) to usme jao
-        if len(nested) == 1 and (nested[0] / "ikram.py").exists():
+        if len(nested) == 1 and (nested[0] / "ikram.pyc").exists():
             src = nested[0]
 
-        # CLEAN-SLATE: old tool files delete + fresh copy
         _clean_replace(src)
 
-        # LOOP FIX: VERSION + ikram_key.json PROTECTED hain isliye _clean_replace
-        # unhe preserve karta hai -> isi naye version se stamp karo, warna next
-        # boot pe remote>local rahega aur update-loop chalta rahega.
         try:
             ver = "V" + str(info["version"]).lstrip("vV")
             (TOOL_DIR / "VERSION").write_text(ver)
@@ -203,8 +257,8 @@ def do_install():
         except Exception:
             pass
 
+        _show_complete()
         print("INSTALLED_OK")
-        # fix env + launcher background me (tool restart par hi chahiye)
         threading.Thread(target=_fix_env, daemon=True).start()
     except Exception as e:
         print("FAIL: {}".format(e))
@@ -262,23 +316,20 @@ def _fix_env():
                     break
                 except Exception:
                     pass
-    except Exception:
-        pass
-    try:
         # ---- 'ikram' launcher -> ikram_patch.py (poora tool A-to-Z load) ----
         launcher = (
             "ikram() { PYTHONDONTWRITEBYTECODE=1 MAGIC_NEEDED=$(python3 -c "
             "'import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())' "
             "2>/dev/null); if ! python3 -c \"import sys; "
             "from pathlib import Path; "
-            "p=Path('$HOME/Ikram_Tool/ikram_patch.py'); print(p.exists())\" "
+            "p=Path('$HOME/Ikram_Tool/.engine/ikram_patch.py'); print(p.exists())\" "
             "2>/dev/null | grep -q True; then echo '  Tool files missing - reinstall karo: install.sh'; return 1; fi; "
             "MAGIC_HAVE=$(python3 -c \"import struct; "
-            "p=open('$HOME/Ikram_Tool/ikram.pyc','rb').read(4); print(p.hex())\" "
+            "p=open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4); print(p.hex())\" "
             "2>/dev/null); if [ -n \"$MAGIC_HAVE\" ] && [ \"$MAGIC_HAVE\" != \"$MAGIC_NEEDED\" ]; then "
             "echo ''; echo '  ⬆ Python purana hai — upgrade kar raha hoon...'; "
             "pkg upgrade -y python 2>&1 | tail -3; echo '  ✓ Ab dobara try karo: ikram'; "
-            "echo ''; return 1; fi; python3 \"$HOME/Ikram_Tool/ikram_patch.py\" \"$@\"; }"
+            "echo ''; return 1; fi; python3 \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" \"$@\"; }"
         )
         suffix = "\n\n# Ikram Tool launcher\n{}\n".format(launcher)
         rc = home / ".bashrc"
@@ -299,8 +350,6 @@ def _fix_env():
                 pass
         # ---- real executable: $PREFIX/bin/ikram -> ikram_patch.py ----
         try:
-            import os
-
             prefix = os.environ.get(
                 "PREFIX", "/data/data/com.termux/files/usr"
             )
@@ -316,37 +365,37 @@ def _fix_env():
             '  echo ""\n  echo "  python3 not found! Install karo:"\n'
             '  echo "    pkg update -y && pkg install -y python"\n'
             '  echo ""\n  exit 1\nfi\n'
-            "if [ ! -f \"$HOME/Ikram_Tool/ikram_patch.py\" ]; then\n"
+            "if [ ! -f \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" ]; then\n"
             '  echo ""\n'
             '  echo "  ⚠ Tool files missing — khud repair kar raha hoon..."\n'
-            '  mkdir -p "$HOME/Ikram_Tool"\n'
-            '  cd "$HOME/Ikram_Tool"\n'
+            '  mkdir -p "$HOME/Ikram_Tool/.engine"\n'
+            '  cd "$HOME/Ikram_Tool/.engine"\n'
             '  curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"\n'
-            '  TMPX="$HOME/Ikram_Tool/.repair"\n'
+            '  TMPX="$HOME/Ikram_Tool/.engine/.repair"\n'
             '  rm -rf "$TMPX" && mkdir -p "$TMPX"\n'
-            '  if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n'
-            '    cp -r "$TMPX"/. "$HOME/Ikram_Tool"/ 2>/dev/null\n'
-            '    chmod +x "$HOME/Ikram_Tool/run.sh" "$HOME/Ikram_Tool/ikram_patch.py" 2>/dev/null\n'
+            '  if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n'
+            '    cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null\n'
+            '    chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/.engine/ikram_patch.py" 2>/dev/null\n'
             '    echo "  ✓ Repair done! Tool khul raha hai..."\n'
-            '    exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\n'
+            '    exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
             '  fi\n'
-            '  rm -rf "$TMPX" "$HOME/Ikram_Tool/repair.zip"\n'
+            '  rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"\n'
             '  echo "  ✗ Repair fail. Dobara install karo:"\n'
             '  echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"\n'
             '  echo ""\n  exit 1\nfi\n'
             "MAGIC_NEEDED=$(python3 -c "
             '"import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)\n'
             'MAGIC_HAVE=$(python3 -c "\nimport struct\n'
-            "p = open('$HOME/Ikram_Tool/ikram.pyc','rb').read(4)\nprint(p.hex())\n"
+            "p = open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4)\nprint(p.hex())\n"
             '" 2>/dev/null)\n'
             'if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then\n'
             '  echo ""\n'
             '  echo "  ⬆ Python purana hai — upgrade kar raha hoon..."\n'
             '  pkg update -y >/dev/null 2>&1\n'
             '  pkg upgrade -y python 2>&1 | tail -3\n'
-            '  exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\n'
+            '  exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
             'fi\n'
-            'exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\n'
+            'exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
         )
         binpath.write_text(binlauncher)
         binpath.chmod(0o755)

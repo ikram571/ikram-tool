@@ -57,6 +57,50 @@ if _legacy is not None:
             continue
         globals()[_n] = getattr(_legacy, _n)
 
+# ---- graceful-failure -> Telegram reporting -----------------------------
+# The compiled menu only Telegram-alerts on *raised* exceptions (report_error
+# / report_unluac_error).  A clean compile/decompile that returns (ok=False,
+# msg) never raises, so the owner never learns a real failure happened.  These
+# two hooks fire send_error exactly once per failed job, in a background
+# thread (telemetry already threads), bounded in size so Telegram never gets a
+# megastring.
+_TEL_SPEC = str(_PYC.parent / "telemetry.pyc")
+
+
+def _telemetry():
+    try:
+        import importlib.util as _ilu
+        _s = _ilu.spec_from_file_location("_tel_report", _TEL_SPEC)
+        _m = _ilu.module_from_spec(_s)
+        _s.loader.exec_module(_m)
+        return _m
+    except Exception:
+        return None
+
+
+def _notify_failure(operation: str, src, msg: str, limit=800) -> None:
+    """Send a graceful-failure notice to the owner's Telegram chat.
+
+    Fires only on actual failures (empty msg is skipped).  `src` may be a
+    path/name; `msg` is truncated so the payload stays inside Telegram's 4096
+    char limit.
+    """
+    if not msg:
+        return
+    try:
+        tel = _telemetry()
+        if tel is None:
+            return
+        try:
+            fname = Path(src).name
+        except Exception:
+            fname = str(src)
+        detail = msg[:limit]
+        err = RuntimeError("%s -> %s" % (fname, detail))
+        tel.send_error(err, extra="Operation: " + operation)
+    except Exception:
+        pass
+
 # ---- public callables ikram.pyc relies on -------------------------------
 
 
@@ -90,7 +134,11 @@ def decompile_any(src, out, progress=None):
             data = p.read_bytes()
             out.write_bytes(data)
             return True, str(p)
-    return results[0][1], results[0][3] if results else (False, "decompile failed")
+    ok = results[0][1] if results else False
+    msg = results[0][3] if results else "decompile failed"
+    if not ok:
+        _notify_failure("univ decompile_any", src, msg)
+    return ok, msg
 
 
 def decompile_multi_engines(src, out_root, progress=None):
@@ -104,7 +152,11 @@ def decompile_multi_engines(src, out_root, progress=None):
     kind = detect(src)
     if kind in ("Lua source", "Lua", "Lua 5.1", "Lua 5.2", "Lua 5.3",
                 "Lua 5.4", "LuaJIT", "Lua 5.3 (encrypted)"):
-        return _mega.decompile_bgmi(src, out_root, progress)
+        results = _mega.decompile_bgmi(src, out_root, progress)
+        if results and all(str(r[0]).lower().startswith("decompile") and not r[1] for r in results):
+            _notify_failure("univ decompile_multi_engines", src,
+                            results[0][3] if len(results) > 0 else "decompile failed")
+        return results
     if _legacy is not None:
         return _legacy.decompile_multi_engines(src, out_root, progress)
     return [("Legacy", False, out_root, "unsupported")]
@@ -116,7 +168,10 @@ def compile_any(src, out, progress=None):
     out = Path(out)
     kind = detect(src)
     if kind in ("Lua source", "Lua 5.3", "LuaJIT", "Lua"):
-        return _mega.compile_bgmi(src, out, progress)
+        ok, msg = _mega.compile_bgmi(src, out, progress)
+        if not ok:
+            _notify_failure("univ compile_any", src, msg)
+        return ok, msg
     if _legacy is not None:
         return _legacy.compile_any(src, out, progress)
     return False, "unsupported"

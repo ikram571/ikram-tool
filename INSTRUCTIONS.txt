@@ -1,117 +1,156 @@
-============================================================
-   IKRAM TOOL — INSTRUCTIONS (SIMPLE)
-   PAK + LUA Tool for Termux
-============================================================
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     IKRAM TOOL (V109) 
+   THE EASY USER GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Ye tool kya karta hai? (EASY WORDS ME)
-------------------------------------------------------------
-- PAK file kholega  ->  (UNPACK)  sab files folder me nikalega
-- Lua file daalega  ->  (INJECT)  pak ke andar
-- Koi bhi file daalega (uasset, png, json)  ->  pak ke andar
-- Edit ki hui files se naya pak banayega  ->  (REPACK)
-- Lua compile/decompile karega  ->  source <-> bytecode
+👋 Hello! Thank you for using IKRAM TOOL.
+(New in V109: COSTOM PAK for UE4-standard
+paks now builds a real empty pak, and fresh
+installs verify correctly on first run —
+REPACK/UNPACK/INJECT output unchanged.)
+This guide tells you EVERYTHING you need:
+where to put files, what to press, and
+where your result will be found.
+Just read slowly and follow the steps. ✅
 
-ORIGINAL pak kabhi nahi badalta. Har kaam ka result
-RESULT folder me alag se milta hai.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 1)  KEY
 
-============================================================
- INSTALL (PEHLE BAAR — SIRF EK BAAR)
-============================================================
+When the tool first opens, it will ask:
 
-Step 1: Termux kholo aur ye EK LINE paste karo (sab kuch khud install
-    ho jayega — python, java, lua, git + tool):
-    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash
+   🔑 Enter key:
 
-Step 2: Tool start karo:
-    ikram
+Type this EXACTLY:
 
-    (pehli baar valid KEY maangi jayegi — owner se lo)
+   FREETOOL
 
-Isko hi har baar kholne ke liye use karna hai:
-    ikram
+Then press ENTER.
+The tool says "Tool unlocked!" and opens. ✅
+(Every version uses the same key — FREE! 💯)
 
-NOTE: Tool har baar kholne par automatically check karta hai
-ke naya version aaya hai. Aaye to khud update ho jata hai.
-Naye version ke liye nayi KEY chahiye hogi (owner se lo),
-purani key naye version me NAHI chalti.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📂 2) THE FOLDERS (VERY IMPORTANT)
 
-============================================================
- FOLDERS (KYA KAHAN DAALNA HAI)
-============================================================
+In your IKRAM TOOL folder you will see:
 
-    DROP/pak      ->  .pak files   (unpack / inject ke liye)
-    DROP/lua      ->  .lua / .luac files (compile / decompile)
-    DROP/inject   ->  koi bhi file (uasset, png, json...)
+   📥 DROP        = put your INPUT files here
+   📤 RESULT      = your OUTPUT files appear here
 
-RESULT folder (har kaam ka output):
-    RESULT/extracted/    -> unpack ki hui files
-    RESULT/injected/     -> naye banaye injected pak
-    RESULT/repacked/     -> repack kiye pak
-    RESULT/lua/          -> compiled/decompiled lua
+Inside DROP:
+   ├─ pak/     ➜ put your .pak game files here
+   ├─ lua/     ➜ put your .lua files here
+   └─ inject/  ➜ put files you want to inject here
 
-============================================================
- PAK TOOL (Option 1)
-============================================================
+Inside RESULT:
+   ├─ extracted/  ➜ files after you UNPACK a pak
+   ├─ injected/   ➜ files after you INJECT
+   ├─ lua/        ➜ files after COMPILE / DECOMPILE
+   ├─ CostomPak/  ➜ the pak you build with COSTOM PAK
+   ├─ Repacked/   ➜ the pak you get after REPACK
+   └─ processed/  ➜ other processed files
 
-1) Unpack PAK
-   - pak file choose karo (DROP/pak me rakho)
-   - saari files folder me nikal jaati hain
-   - output: RESULT/extracted/<pak_ka_naam>/
+Rule 📌: DROP = in, RESULT = out. Easy!
 
-2) Inject Lua
-   - lua file choose karo (DROP/lua)
-   - pak choose karo (DROP/pak)
-   - pak ke andar folder choose karo jahan dalna hai
-   - output: RESULT/injected/<pak_ka_naam>.pak
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 3) PAK TOOL — all 4 options
 
-3) Inject File
-   - pak choose karo (DROP/pak)
-   - koi bhi file choose karo (DROP/inject)
-   - pak ke andar folder choose karo
-   - output: RESULT/injected/<pak_ka_naam>.pak
+Press 1 in the main menu to open PAK TOOL.
 
-4) Repack PAK (naya pak banane ke liye)
-   - pehle pak ko UNPACK karo (option 1)
-   - RESULT/extracted folder me files edit karo
-   - phir ye option choose karo
-   - tool apne aap extracted folder use karega,
-     naya pak ban jayega. ORIGINAL pak change NAHI hota.
-   - output: RESULT/repacked/<pak_ka_naam>_repacked.pak
+➡️ OPTION 1 — UNPACK PAK
+   • Put your .pak in DROP/pak
+   • Pick it from the list, press ENTER
+   • Wait — it unpacks
+   • 👍 RESULT: look in RESULT/extracted
 
-   BAS ITNA YAAD RAKHO:
-   Unpack -> files edit -> Repack
+➡️ OPTION 2 — INJECT FILE
+   • Put the file you want to add in DROP/inject
+   • The tool asks where to put it in the pak
+   • Pick a folder number or press ENTER for auto
+   • 👍 RESULT: the modified pak is saved
 
-============================================================
- LUA TOOL (Option 2)
-============================================================
+➡️ OPTION 3 — REPACK PAK
+   • First UNPACK a pak (option 1)
+   • Edit the files in RESULT/extracted
+   • Pick the pak again and it rebuilds it
+   • 👍 RESULT: your finished pak is in
+     RESULT/Repacked/  ✅
+   • Your original .pak in DROP is NEVER
+     changed or overwritten. 🔒
 
-1) Compile Lua
-   - .lua file (source) ko .luac bytecode banao
-   - output: RESULT/lua/<name>.luac
+➡️ OPTION 4 — COSTOM PAK
+   • Pick a source pak in DROP/pak
+   • Press ENTER without typing → builds a
+     pak with ALL folders + all file names,
+     but every file EMPTY (0 bytes) — this
+     pak works in the real game once you
+     inject files into it. 🧩
+   • Pick a folder number → ONLY that folder
+     chain goes in, and its files are
+     COPIED real (not empty).
+   • Type your own path → ONLY that path,
+     and every file under it copied real.
+   • 👍 RESULT: RESULT/CostomPak/
 
-2) Decompile Lua
-   - .luac bytecode ko readable .lua banao
-   - unluac.jar ki zaroorat hoti hai (ikram tool folder me,
-     nahi to tool khud download kar leta hai)
-   - output: RESULT/lua/<name>_decompiled.lua
+💡 TIP: long paks take a little time —
+    just wait for the green ✔ message. ⏳
 
-============================================================
- TIPS (CHHOTI BAATEIN)
-============================================================
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📜 4) LUA TOOL — compile & decompile
 
-- Injected pak ko wapis game me daalne ke liye us file ko
-  game ke Paks folder me replace karo:
-  /storage/emulated/0/Android/data/com.pubg.krmobile/files/
-  UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Saved/Paks/
-  (Game ko ek baar close karke karo, aur pehle original pak
-   ka backup zaroor rakho.)
+Press 2 in the main menu to open LUA TOOL.
 
-- Agar 'lua5.3' install nahi to:
-    pkg install -y lua53
+➡️ OPTION 1 — COMPILE (+ PROTECT)
+   • Put your .lua source in DROP/lua
+   • Pick the file, press ENTER
+   • Makes a compiled + protected working file
+   • 👍 RESULT: RESULT/lua/
 
-- Agar 'java' nahi to (decompile ke liye):
-    pkg install -y openjdk-17
+➡️ OPTION 2 — DECOMPILE
+   • Put a compiled .lua in DROP/lua
+   • Pick the file, press ENTER
+   • Makes readable source code from it
+   • 👍 RESULT: RESULT/lua/ (name_GAME.lua)
 
-- Koi error aaye to error ka text note karke bhejo.
+⚠️ NOTE: if a file is fully DECRYPTED /
+   PROPERLY ENCRYPTED by its owner, the tool
+   honestly says "This file is encrypted and
+   can't be decompiled by this tool." That is
+   NOT an error — it means the file's code was
+   locked by the modder and cannot be read. 🔒
+   (No *GAME.lua file is created for it.)
 
-============================================================
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 5) HOW TO INSTALL & RUN
+
+🔸 INSTALL (in Termux):
+   Open Termux and paste:
+
+      bash install.sh
+
+   Wait until it finishes. (It downloads the
+   latest version automatically.)
+
+🔸 Or download the zip here:
+   https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip
+
+🔸 RUN:
+   In Termux folder of the tool, type:
+
+      bash run.sh
+
+   (After install you can also just type:  ikram )
+
+🔸 PROJECT / REPO:
+   https://github.com/ikram571/ikram-tool
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ QUICK CHECKLIST
+   [ ] Run in Termux:ikram
+   [ ] Type key: FREETOOL
+   [ ] Put .pak in DROP/pak
+   [ ] Put .lua in DROP/lua
+   [ ] Put inject files in DROP/inject
+   [ ] Find results in RESULT/...
+
+Enjoy, and stay golden! ❤😄
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
