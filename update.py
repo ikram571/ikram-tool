@@ -280,11 +280,26 @@ def _fix_env():
             ("git", "git"),
             ("curl", "curl"),
             ("unzip", "unzip"),
-            ("javac", "openjdk-17"),
             ("lua5.3", "lua53"),
         ):
             if not shutil.which(tool):
                 need.append(pkg)
+        if not shutil.which("javac"):
+            # openjdk ka naam repo/mirror ke hisaab se badalta hai — try 17/21/25
+            for jp in ("openjdk-17", "openjdk-21", "openjdk-25"):
+                for _ in range(3):
+                    try:
+                        subprocess.run(
+                            ["pkg", "install", "-y", jp],
+                            capture_output=True,
+                            timeout=600,
+                        )
+                        if shutil.which("javac"):
+                            break
+                    except Exception:
+                        pass
+                if shutil.which("javac"):
+                    break
         if need:
             for pkg in need:
                 for _ in range(3):

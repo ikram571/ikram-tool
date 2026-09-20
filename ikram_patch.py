@@ -26,6 +26,29 @@ for _d in (
 for _sub in ("injected", "extracted", "lua", "processed", "CostomPak", "Repacked"):
     (ikram.RESULT / _sub).mkdir(parents=True, exist_ok=True)
 
+
+def _purge_legacy_repacked_folders():
+    """Double-repack bug, folder side: older releases + the stale one-liner
+    install.sh created the LOWERCASE RESULT/repacked/ twin (compiled engine
+    era wrote RESULT+'repacked'). Android's case-sensitive FS then keeps
+    BOTH 'Repacked' and 'repacked' forever -> "Result/ me 2 folders". Remove
+    every leftover file under the legacy twin, then the empty folder."""
+    legacy = ikram.RESULT / "repacked"
+    if not legacy.is_dir():
+        return
+    try:
+        for p in list(legacy.iterdir()):
+            if p.is_file():
+                p.unlink(missing_ok=True)
+            elif p.is_dir():
+                shutil.rmtree(p, ignore_errors=True)
+        legacy.rmdir()
+    except OSError:
+        pass
+
+
+_purge_legacy_repacked_folders()
+
 # ENTER (nothing typed) in Costom Pak -> full skeleton (all folders + all
 # file names, zero-byte bodies). Sentinel returned by _pick_folders.
 _SKELETON = "\x00_COSTOM_SKELETON_"
@@ -451,6 +474,7 @@ def pak_repack_folder():
                 _legacy.unlink()
             except OSError:
                 pass
+        _purge_legacy_repacked_folders()
         ikram.show_success("✔ {} files repacked -> {}".format(n, out))
     except Exception as e:
         ikram.report_error(e)

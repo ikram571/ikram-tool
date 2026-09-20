@@ -233,9 +233,35 @@ ok "Packages upgraded"
 advance "$PW_UPGRADE" "pkg upgrade"
 
 # 4) core packages — EK EK KARKE
-box "$C_CYAN" "⬇ Installing core packages (python, git, java, lua...)"
+box "$C_CYAN" "⬇ Installing core packages (python, git, curl, unzip, java, lua...)"
+# openjdk ka naam har Termux repo state pe same nahi hota: candidate-chain
+# try karo (17 -> 21 -> 25), jo bhi us mirror pe mile use karo. Java cfr.jar
+# / unluac.jar ke liye chahiye; Lua native (luac_patched) java ke bina chalega.
 install_pkgs "$PW_UPDATE" "$PW_PKGS" "Installing" \
-    python git curl unzip openjdk-17 lua53
+    python git curl unzip lua53
+
+JAVA_PKG=""
+if ! command -v javac >/dev/null 2>&1; then
+    for jp in openjdk-17 openjdk-21 openjdk-25; do
+        _pbar "$((PW_UPDATE + PW_PKGS))" "Installing ${jp}"
+        if pkg install -y "$jp" >$LOG 2>&1; then
+            if command -v javac >/dev/null 2>&1; then
+                JAVA_PKG="$jp"
+                printf "\n"
+                ok "Java ready (${jp})"
+                break
+            fi
+        fi
+        printf "\n"
+        warn "${jp} is repo me nahi mila — next try."
+    done
+    if [ -z "$JAVA_PKG" ]; then
+        warn "Java install fail — jar-based decompile kuch limited (Lua native still chalta hai)."
+    fi
+else
+    JAVA_PKG=$(javac --version 2>/dev/null | head -1)
+    ok "Java already present (${JAVA_PKG})"
+fi
 advance "$((PW_UPDATE + PW_PKGS))" "Core packages"
 
 if ! command -v python3 >/dev/null 2>&1; then
