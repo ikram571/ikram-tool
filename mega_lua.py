@@ -940,6 +940,30 @@ def _probe_headers(data: bytes) -> "_HEAD_TEMPLATES-like":
     return tuple(h)
 
 
+_DECRYPT_METHODS = (
+    "lua_protect v3 loader",
+    "wrapper slice (leading prefix / trailing zero pad)",
+    "keyless scrambles (invert / nibble / swap / positional / rolling)",
+    "repeating-key XOR + additive mod-256, key len 1-64, every Lua dialect",
+    "single-byte XOR brute (0x00-0xFF)",
+    "XXTEA + wide fixed-key sweeps",
+    "AES known-key check",
+)
+
+
+def _decrypt_fail_box(src, reason: str) -> str:
+    """Phase-4 honest failure box: name the file, the methods already tried,
+    and what the user can actually do next. Never dumps garbage as source."""
+    return (
+        "File: %s\n"
+        "%s\n"
+        "Methods already tried on this file:\n  - %s\n"
+        "What to try: obtain the modder's original key, or feed me an "
+        "already-decrypted .lua / .luac instead."
+        % (Path(src).name, reason, "\n  - ".join(_DECRYPT_METHODS))
+    )
+
+
 def _auto_decrypt_valid(data: bytes):
     """Attempt to recover a key that turns `data` into valid Lua-family
     bytecode the pipeline can actually decompile.
@@ -2848,9 +2872,9 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                     if _is_encrypted_lua(data) or _probe_recoverable(data):
                         # Binary / packed input with no recoverable key.
                         return [("Decompile", False, out_root / (stem + "_GAME.lua"),
-                                 ("Auto key-discovery could not recover a decryption "
-                                  "key for this file (sparse/BRPC/unknown protection). "
-                                  "The modder's key is required to make it readable."))]
+                                 _decrypt_fail_box(src, "Auto key-discovery found no "
+                                 "decryption key (sparse/BRPC/unknown protection). "
+                                 "The modder's key is required to make it readable."))]
                     if _looks_like_lua_source(text) or _compiles_as_lua(text):
                         # Plain unsignatured text (no Lua header): real source.
                         out_p = out_root / (stem + "_GAME.lua")
@@ -2860,9 +2884,9 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                              "readable source (game-ready)"),
                         ]
                     return [("Decompile", False, out_root / (stem + "_GAME.lua"),
-                             ("This file is not readable Lua source and no "
-                              "decryption key could be recovered. The modder's "
-                              "key is required to make it readable."))]
+                             _decrypt_fail_box(src, "This file is not readable Lua "
+                             "source and no decryption key could be recovered. "
+                             "The modder's key is required to make it readable."))]
 
         dialect = _detect_dialect(data)
         _phase(progress, "Dialect: %s" % (dialect or "lua53"))
@@ -2965,7 +2989,7 @@ def _compile_std(text: str, strip: bool = False) -> bytes:
         return out_f.read_bytes()
 
 
-def compile_bgmi(src, out, progress=None) -> tuple:
+def compile_bgmi(src, out, progress=None, strip=False) -> tuple:
     out = Path(out)
     try:
         data = read_bytes(src)
@@ -2990,12 +3014,15 @@ def compile_bgmi(src, out, progress=None) -> tuple:
             )
         text = data.decode("utf-8", errors="replace")
         _phase(progress, "Compiling with patched luac...")
-        std = _compile_std(text)
+        std = _compile_std(text, strip=strip)
         _phase(progress, "Converting to BGMI bytecode...")
         bgmi = _std_to_bgmi(std)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(bgmi)
-        msg = "OK -> BGMI bytecode (%d B)" % len(bgmi)
+        msg = "OK -> BGMI bytecode (%d B" % len(bgmi)
+        if strip:
+            msg += ", debug-info stripped"
+        msg += ")"
         try:
             stats = _proto_stats(bgmi)
             if stats is not None and stats.get("max") and stats["max"] > 255:

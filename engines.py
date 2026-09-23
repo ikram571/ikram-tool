@@ -199,6 +199,7 @@ def _run(args, log=None, timeout=REPAK_TIMEOUT):
 
 
 def _ue4_meta(pakf, aes_key=None):
+    aes_key = _resolve_ue4_key(pakf, aes_key or None, (lambda *a, **k: None))
     p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
     v = getattr(p, "version", None) or getattr(p, "version_num", None)
     mount = getattr(p, "mount_point", None) or "../../../"
@@ -214,6 +215,132 @@ def _repak_version_str(version, compression_u8):
     return "V8B"
 
 
+# ---------------------------------------------------------------------------
+# V111 — multi-AES-key auto-try + working-key persistence (PakEngine keys).
+# Keys are stored OUTSIDE the tool dir (~/.config/ikramtool/pak_keys.json) so
+# a clean-replace update never wipes a key the user already made to work.
+# ---------------------------------------------------------------------------
+DEFAULT_UE4_KEYS = [
+    # PUBG/BGMI global UE4 AES key (shipped default).
+    "8A75AFDF1C74AB55B79DC1DD4ABE4B01360A059D77F243EF4EFADA41A59D71A0",
+]
+
+KEY_STORE = Path(
+    os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config")
+) / "ikramtool" / "pak_keys.json"
+
+
+def _khex(key):
+    """Hex key (0x/-/space tolerant) -> lowercase hex, or None."""
+    if key is None:
+        return None
+    h = str(key).strip().replace("0x", "").replace("0X", "").replace("-", "").replace(" ", "")
+    try:
+        b = bytes.fromhex(h)
+    except Exception:
+        return None
+    return b.hex().lower() if len(b) in (16, 24, 32) else None
+
+
+def _load_saved_keys():
+    try:
+        import json
+        if KEY_STORE.is_file():
+            d = json.loads(KEY_STORE.read_text(errors="ignore"))
+            return [_khex(k) for k in dict.fromkeys(d.get("keys", ())) if _khex(k)]
+    except Exception:
+        pass
+    return []
+
+
+def _save_keys(keys):
+    try:
+        import json
+        KEY_STORE.parent.mkdir(parents=True, exist_ok=True)
+        KEY_STORE.write_text(json.dumps({"keys": keys}, indent=1))
+    except Exception:
+        pass
+
+
+def _key_candidates(aes_key=None):
+    """Ordered, deduped key list: explicit > saved > shipped defaults."""
+    out = []
+    if aes_key:
+        out.append(_khex(aes_key))
+    for k in _load_saved_keys() + DEFAULT_UE4_KEYS:
+        h = _khex(k)
+        if h and h not in out:
+            out.append(h)
+    return out
+
+
+def _try_ue4_key(pakf, key_hex):
+    """True when this key parses the pak AND its first entries read back."""
+    key = bytes.fromhex(key_hex)
+    p = ue4mod().Ue4Pak(pakf, aes_key=key)
+    ents = list(p.files())
+    if not ents:
+        return False
+    checked = 0
+    for path in ents[:3]:
+        try:
+            data = p.read_file(path)
+        except Exception:
+            return False
+        if not data:
+            return False
+        checked += 1
+    return checked > 0
+
+
+def _resolve_ue4_key(pakf, aes_key=None, log=None):
+    """AES key for a UE4 pak. None given -> auto-try saved-then-default keys,
+    persist whichever one works first. Falls back to the shipped default so
+    existing behaviour is never a regression."""
+    log = log or (lambda *a, **k: None)
+    if _khex(aes_key):
+        return aes_key
+    if not _khex(DEFAULT_UE4_KEYS[0]):
+        return aes_key
+    cands = _key_candidates(aes_key)
+    tried = []
+    for h in cands[1:] if aes_key else cands:
+        tried.append(h)
+        try:
+            if _try_ue4_key(pakf, h):
+                saved = _load_saved_keys()
+                if not saved or saved[0] != h:
+                    _save_keys([h] + [s for s in saved if s != h])
+                log("  ue4 key: auto -> %s… (saved)" % h[:8])
+                return h
+        except Exception:
+            continue
+    log("  ue4 key: none matched (%d tried) — default fallback" % len(tried))
+    return _khex(aes_key) or DEFAULT_UE4_KEYS[0]
+
+
+def _oodle_stats(pakf, aes_key=None):
+    """Count Oodle-compressed (method slot) entries.
+    0 for uncompressed/none; -1 when the whole pak is unreadable."""
+    try:
+        p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        n = 0
+        for e in __import__("itertools").chain(
+            getattr(p, "entries", {}).values(), ()
+        ):
+            slot = getattr(e, "compression_slot", None)
+            if slot is None:
+                continue
+            try:
+                if p._compression_method(slot) == "oodle":
+                    n += 1
+            except Exception:
+                continue
+        return n
+    except Exception:
+        return -1
+
+
 def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
     """Unpack any pak -> out_dir. Returns file count."""
     log = log or (lambda *a, **k: None)
@@ -227,6 +354,17 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
         return pakmod().unpack_pak(pakf, out_dir, log=log)
 
     if kind == "ue4":
+        aes_key = _resolve_ue4_key(pakf, aes_key or None, log)
+        try:
+            oodle = _oodle_stats(pakf, aes_key)
+            if oodle:
+                log(
+                    "  ⚠ %d Oodle-compressed entries — repak/python are "
+                    "Zlib-only, wo entries partial/dropped ho sakti hain"
+                    % oodle
+                )
+        except Exception:
+            pass
         out = Path(out_dir)
         out.mkdir(parents=True, exist_ok=True)
         repak = find_repak()
@@ -292,6 +430,7 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
             return pakmod().PakWriter(pak).inject_files(edits, str(out), force_add=True)
 
     if kind == "ue4":
+        aes_key = _resolve_ue4_key(pakf, aes_key or None, log)
         version, mount_point, compression_u8 = _ue4_meta(pakf, aes_key=aes_key)
         repak = find_repak()
         if repak is not None:

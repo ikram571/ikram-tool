@@ -117,11 +117,9 @@ def _unpack_one(pakf, out, log=None, progress=None):
     )
     n = 0
     if kind == "ue4":
-        # Encrypted-index UE4 paks need the AES key for repak AND the python
-        # fallback. _patch_ue4_default_key() only wraps ikram.ue4mod.Ue4Pak;
-        # the engines layer loads ue4.pyc independently, so pass the default
-        # key explicitly here or encrypted paks abort with "AES key chahiye".
-        aes_key = DEFAULT_UE4_AES_KEY_HEX
+        # V111: engines layer auto-tries saved/shipped AES keys now; passing
+        # None (instead of the default) lets a user's working key win first.
+        aes_key = None
     else:
         aes_key = None
     if log is None or progress is None:
@@ -461,7 +459,7 @@ def pak_repack_folder():
                 )
             )
             key = (key.strip() if key and key.strip() else "")
-            aes_key = key or DEFAULT_UE4_AES_KEY_HEX
+            aes_key = key or None
         n = _engines.repack_folder(pakf, edit_dir, out, kind=kind, aes_key=aes_key,
                                    log=ikram.console.print)
         # Double-repack fix: older releases wrote the result to the lowercase
@@ -1000,7 +998,7 @@ def pak_costom_pak():
                 )
             )
             key = (key.strip() if key and key.strip() else "")
-            aes_key = key or DEFAULT_UE4_AES_KEY_HEX
+            aes_key = key or None
         else:
             picked = _pick_folders(pakf)
             if picked is None:

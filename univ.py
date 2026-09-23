@@ -162,13 +162,13 @@ def decompile_multi_engines(src, out_root, progress=None):
     return [("Legacy", False, out_root, "unsupported")]
 
 
-def compile_any(src, out, progress=None):
+def compile_any(src, out, progress=None, strip=False):
     """Compile readable Lua -> BGMI bytecode; returns (ok, msg)."""
     src = Path(src)
     out = Path(out)
     kind = detect(src)
     if kind in ("Lua source", "Lua 5.3", "LuaJIT", "Lua"):
-        ok, msg = _mega.compile_bgmi(src, out, progress)
+        ok, msg = _mega.compile_bgmi(src, out, progress, strip=strip)
         if not ok:
             _notify_failure("univ compile_any", src, msg)
         return ok, msg
@@ -192,7 +192,7 @@ def compile_lua(src, out, version="5.3", strip=False) -> str:
                 "Use Decompile (option 2) to get readable source first."
             )
         text = data.decode("utf-8", errors="replace")
-        std = _mega._compile_std(text)
+        std = _mega._compile_std(text, strip=strip)
         out = Path(out)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(std)

@@ -10,9 +10,20 @@
 # =============================================
 set -u
 
-# TTY check — agar terminal nahi hai (pipe se chala rahe hain) to spinner
-# \r spam na kare, sirf plain line print kare (koi crash/stuck nahi)
-if [ -t 1 ] && [ -t 0 ]; then
+# `curl ... | bash` phone-fail fixes (V111):
+#  1) PREFIX guard (set -u ke liye) + apt NONINTERACTIVE — conffile/dpkg
+#     prompt kabhi piped script bytes na khaye (wo "mid-way ruk jata hai"
+#     wala phone-fail tha).
+#  2) har pkg/pip/unzip call `</dev/null` — koi bhi prompt stdin (jo pipe
+#     hai) se jawab na le sake.
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+export DEBIAN_FRONTEND=noninteractive
+
+# TTY check — sirf STDOUT dekhte hain (bar/print format decide karta hai).
+# Pehle `[ -t 0 ]` bhi tha → `curl|bash` me stdin pipe hota hi TTY_MODE=0
+# ho jata tha → slow phones pe minutes ki SILENT gap = "install stuck".
+# `read` ka apna alag `[ -t 0 ]` guard neeche hai.
+if [ -t 1 ]; then
     TTY_MODE=1
 else
     TTY_MODE=0
@@ -65,6 +76,57 @@ box() {
     printf "${COLOR}╰$(printf '─%.0s' $(seq 1 $BW))╯${C_RESET}\n"
 }
 
+# ---------------- system info / checks (V111) ----------------
+sys_info() {
+    local arch cpu android storage_ok
+    arch=$(uname -m 2>/dev/null || echo "unknown")
+    cpu=$(getprop ro.product.cpu.abi 2>/dev/null)
+    [ -z "$cpu" ] && cpu=$(getprop ro.product.cpu.abilist0 2>/dev/null)
+    [ -z "$cpu" ] && cpu="termux-native"
+    android=$(getprop ro.build.version.release 2>/dev/null)
+    [ -z "$android" ] && android=$(getprop ro.build.version.sdk 2>/dev/null)
+    [ -z "$android" ] && android="n/a"
+    box "$C_GOLD" "⚙ SYSTEM (V111)"
+    printf "${C_BOLD}  • Arch    : ${C_CYAN}%s${C_RESET}\n" "$arch"
+    printf "${C_BOLD}  • CPU ABI : ${C_CYAN}%s${C_RESET}\n" "$cpu"
+    printf "${C_BOLD}  • Android : ${C_CYAN}%s${C_RESET}\n" "$android"
+    case "$arch" in
+        armv7l|armv8l|armv6l|arm)
+            printf "${C_DIM}  • Note    : 32-bit phone — Termux ab officially sirf\n"
+            printf "${C_DIM}              64-bit (aarch64) support karta hai. Python\n"
+            printf "${C_DIM}              mirror me na mile to tool nahi chalega.\n"
+            printf "${C_CYAN}              Best-effort install jaari hai...${C_RESET}\n"
+            ;;
+    esac
+    local space_kb
+    space_kb=$(df -P "$PREFIX" 2>/dev/null | awk 'NR==2{print $4}')
+    if [ -n "$space_kb" ] && [ "${space_kb:-0}" -lt 204800 ]; then
+        printf "${C_GOLD}  • Storage : SPACE KAM HAI (<200MB free) — python/java\n"
+        printf "${C_GOLD}             install fail ho sakta hai. Pehle space karo.${C_RESET}\n"
+    else
+        printf "${C_DIM}  • Space   : ~%s GB free ($PREFIX)${C_RESET}\n" \
+            "$(awk -v k="${space_kb:-0}" 'BEGIN{printf "%.1f", k/1048576}')"
+    fi
+    storage_ok=0
+    if [ -d "$HOME/storage/shared" ] && [ -w "$HOME/storage/shared" ]; then
+        storage_ok=1
+    fi
+    if [ "$storage_ok" -eq 1 ]; then
+        printf "${C_BOLD}  • Storage : ${C_GREEN}ok — shared writable${C_RESET}\n"
+    else
+        printf "${C_BOLD}  • Storage : ${C_GOLD}termux-setup-storage dena padega (step 1)${C_RESET}\n"
+    fi
+    printf "\n"
+}
+
+_boot_pct() {
+    if [ -n "${DL_BASE:-}" ] && [ -n "${PW_DL:-}" ] && [ -n "${PW_EXTRACT:-}" ]; then
+        echo $((DL_BASE + PW_DL + PW_EXTRACT))
+    else
+        echo 100
+    fi
+}
+
 # ---------------- overall progress bar ----------------
 # Har step ek % deta hai. Pkg update/install jaise lambi cheezein
 # spinner se chalti hain (stuck nahi lagta), bar us step par jata hai.
@@ -95,6 +157,9 @@ _spin() {  # _spin PCT LABEL PID
     while kill -0 "$SPID" 2>/dev/null; do
         if [ "$TTY_MODE" -eq 1 ]; then
             _pbar "$PCT" "${LABEL} ${FR[$((k % 4))]}"
+        elif [ $((k % 20)) -eq 0 ]; then
+            # non-tty (log capture) — 4s heartbeat, warna minutes SILENT
+            printf "  ▸ %s ... (%ss)\n" "$LABEL" "$((k / 5))"
         fi
         k=$((k + 1))
         sleep 0.2
@@ -104,7 +169,8 @@ _spin() {  # _spin PCT LABEL PID
 run_spin() {  # run_spin PCT LABEL cmd...
     local PCT="$1" LABEL="$2"; shift 2
     _pbar "$PCT" "$LABEL"
-    "$@" >$LOG 2>&1 &
+    # </dev/null — apt/dpkg prompt kabhi piped script (stdin) na khaye
+    "$@" >$LOG 2>&1 </dev/null &
     local SPID=$!
     _spin "$PCT" "$LABEL" "$SPID"
     wait "$SPID"
@@ -123,42 +189,12 @@ advance() {  # advance PCT "LABEL" — ek step finish, bar update
     CUR_LABEL=""
 }
 
-# ---------------- package install (individual + retry) ----------------
-install_pkgs() {  # install_pkgs BASE_PCT PCT_STEP "LABEL_PREFIX" pkg...
-    local BASE="$1" PCT_STEP="$2" LP="$3"; shift 3
-    local total=$# i=1 p
-    for p in "$@"; do
-        local pct=$(( BASE + (i - 1) * PCT_STEP / total ))
-        _pbar "$pct" "${LP} ${p} (${i}/${total})"
-        local rc=1 try=1
-        while [ "$try" -le 3 ] && [ "$rc" -ne 0 ]; do
-            [ "$try" -gt 1 ] && _pbar "$pct" "${LP} ${p} retry ${try}/3"
-            pkg install -y "$p" >$LOG 2>&1 &
-            local SPID=$!
-            _spin "$pct" "${LP} ${p} (${i}/${total})" "$SPID"
-            wait "$SPID"
-            rc=$?
-            try=$((try + 1))
-        done
-        if [ "$rc" -eq 0 ]; then
-            _pbar "$pct" "${LP} ${p} ✓ (${i}/${total})"
-            printf "\n"
-        else
-            _pbar "$pct" "${LP} ${p} ✗"
-            printf "\n"
-            tail -6 $LOG 2>/dev/null | sed 's/^/    /'
-            warn "$p install fail hua — dusre packages jaari rahe."
-        fi
-        i=$((i + 1))
-    done
-}
-
 # ---------------- pip install (individual + retry) ----------------
 pip_try() {  # pip_try "lib" — break-system-packages ke saath/na ke retry
     local lib="$1"
-    pip install "$lib" >$LOG 2>&1 && return 0
-    pip install --break-system-packages "$lib" >$LOG 2>&1 && return 0
-    pip install --user "$lib" >$LOG 2>&1 && return 0
+    pip install "$lib" >$LOG 2>&1 </dev/null && return 0
+    pip install --break-system-packages "$lib" >$LOG 2>&1 </dev/null && return 0
+    pip install --user "$lib" >$LOG 2>&1 </dev/null && return 0
     return 1
 }
 
@@ -191,6 +227,166 @@ install_pip() {  # install_pip BASE_PCT PCT_STEP "LABEL_PREFIX" lib...
     done
 }
 
+# ------------ dpk/apT heal — broken package state ae theek karo ------------
+_heal_dpkg() {  # half-configured dpkg ya broken dependencies = "pkg fail" ka
+    # sabse bada phone-killer. Non-fatal, har retry se pehle chalta hai.
+    dpkg --configure -a >$LOG 2>&1 </dev/null || true
+    apt-get -f install -y >$LOG 2>&1 </dev/null || true
+}
+
+# pakage install (individual + retry) — ab HAR phone pe lagega:
+#   pkg fail 3x  ->  heal + apt-get direct fallback  ->  post-check
+install_pkgs() {  # install_pkgs BASE_PCT PCT_STEP "LABEL_PREFIX" pkg...
+    local BASE="$1" PCT_STEP="$2" LP="$3"; shift 3
+    local total=$# i=1 p
+    for p in "$@"; do
+        local pct=$(( BASE + (i - 1) * PCT_STEP / total ))
+        _pbar "$pct" "${LP} ${p} (${i}/${total})"
+        if command -v "$p" >/dev/null 2>&1; then
+            _pbar "$pct" "${LP} ${p} ✓ (${i}/${total})"
+            printf "\n"
+            i=$((i + 1))
+            continue
+        fi
+        local rc=1 try=1
+        while [ "$try" -le 3 ] && [ "$rc" -ne 0 ]; do
+            [ "$try" -gt 1 ] && _pbar "$pct" "${LP} ${p} retry ${try}/3"
+            _heal_dpkg
+            pkg install -y "$p" >$LOG 2>&1 </dev/null &
+            local SPID=$!
+            _spin "$pct" "${LP} ${p} (${i}/${total})" "$SPID"
+            wait "$SPID"
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+                pkg update -y >$LOG 2>&1 </dev/null || true
+            fi
+            try=$((try + 1))
+        done
+        if [ "$rc" -ne 0 ]; then
+            # pkg wrapper fail -> apt-get direct (Termux me dono same hain,
+            # par apt ke pass --fix-broken + conf options zyada hain)
+            _pbar "$pct" "${LP} ${p} (apt-get fallback)"
+            _heal_dpkg
+            apt-get install -y -o Dpkg::Options::=--force-confdef \
+                -o Dpkg::Options::=--force-confold "$p" >$LOG 2>&1 </dev/null
+            rc=$?
+        fi
+        if [ "$rc" -eq 0 ]; then
+            _pbar "$pct" "${LP} ${p} ✓ (${i}/${total})"
+            printf "\n"
+        else
+            _pbar "$pct" "${LP} ${p} ✗"
+            printf "\n"
+            tail -6 $LOG 2>/dev/null | sed 's/^/    /'
+            warn "$p install fail hua — dusre packages jaari rahe."
+        fi
+        i=$((i + 1))
+    done
+}
+
+# python sna wese zaroori hai (tool python me hai). 3 retry + apt-get fallback
+# phir bhi fail -> ek FINAL repair round (update + heal + space check).
+python_repair() {
+    printf "\n${C_GOLD}${C_BOLD}  ⚠ python nahi laga — final repair round...${C_RESET}\n"
+    pkg update -y >$LOG 2>&1 </dev/null || true
+    _heal_dpkg
+    pkg install -y python >$LOG 2>&1 </dev/null || true
+    if ! command -v python3 >/dev/null 2>&1; then
+        apt-get install -y -o Dpkg::Options::=--force-confdef \
+            -o Dpkg::Options::=--force-confold python \
+            >$LOG 2>&1 </dev/null || true
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        printf "\n"
+        ok "python3 laga diya"
+        return 0
+    fi
+    printf "\n${C_RED}${C_BOLD}  ✗ python3 install nahi hua!${C_RESET}\n"
+    printf "${C_GOLD}  Sabse pehle space check karo:${C_RESET}\n"
+    df -h "$PREFIX" 2>/dev/null | sed 's/^/    /'
+    printf "${C_GOLD}  Phir ye manually chalayen:${C_RESET}\n"
+    printf "${C_GOLD}    pkg update -y && pkg upgrade -y${C_RESET}\n"
+    printf "${C_GOLD}    pkg install -y python${C_RESET}\n"
+    printf "${C_GOLD}    ikram${C_RESET}\n"
+    return 1
+}
+
+# boot test — key prompt + main menu once (shared by install finish + --test)
+boot_test() {  # boot_test IKRAM_SRC
+    local IKRAM_SRC="$1"
+    box "$C_GOLD" "🚀 Final boot test"
+    _pbar "$(_boot_pct)" "Booting tool once"
+    BOOT_PLAN="$TARGET/.boot_plan.$$"
+    BOOT_PY="$TARGET/.boot_drv.$$.py"
+    printf 'FREETOOL\n0\n' > "$BOOT_PLAN"
+    cat > "$BOOT_PY" <<'PY'
+import os, builtins, traceback
+path = os.environ["IKRAM_PATCH"]
+src = open(path, encoding="utf-8").read()
+g = {"__name__": "ikram_patch_boot", "__file__": path}
+exec(compile(src, path, "exec"), g)
+plan = [ln.rstrip("\n") for ln in open(os.environ["IKRAM_PLAN"])]
+idx = {"i": 0}
+def _inp(p=""):
+    if idx["i"] < len(plan):
+        a = plan[idx["i"]]; idx["i"] += 1
+    else:
+        a = ""
+    return a
+builtins.input = _inp
+try:
+    g["ikram"].main()
+except SystemExit:
+    pass
+except Exception:
+    tb = os.environ.get("IKRAM_TB")
+    if tb:
+        try:
+            open(tb, "a").write(traceback.format_exc())
+        except Exception:
+            pass
+else:
+    try:
+        open(os.environ.get("IKRAM_OK", ""), "a").close()
+    except Exception:
+        pass
+PY
+    IKRAM_PATCH="$IKRAM_SRC" \
+    IKRAM_PLAN="$BOOT_PLAN" \
+    IKRAM_TB="$TARGET/.boot_tb.log" \
+    IKRAM_OK="$TARGET/.boot_ok.$$" \
+    python3 "$BOOT_PY"
+    if [ -f "$TARGET/.boot_ok.$$" ]; then
+        printf "\n"
+        ok "Boot test passed - Key prompt + Main menu OK"
+    else
+        printf "\n"
+        fail "Boot test FAILED - $TARGET/.boot_tb.log me error dekho"
+    fi
+    rm -f "$BOOT_PLAN" "$BOOT_PY" "$TARGET/.boot_ok.$$" "$TARGET/.boot_tb.log" 2>/dev/null
+    advance 100 "Boot test"
+}
+
+# ---------------- --test self-test mode (V111) ----------------
+# install.sh --test  ->  system checks + boot test only (no reinstall).
+# Exit code 0 = PASS, 1 = FAIL. Not a TTY pe bhi clean output.
+SELF_TEST="${1:-}"
+if [ "$SELF_TEST" = "--test" ] || [ "$SELF_TEST" = "-t" ]; then
+    tool_splash
+    sys_info
+    TARGET="$HOME/Ikram_Tool"
+    if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; then
+        IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
+        [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
+        boot_test "$IKRAM_SRC"
+        ok "SELF-TEST DONE"
+        exit 0
+    fi
+    fail "Tool installed nahi hai — pehle install karo, phir --test karo:"
+    printf "${C_GOLD}    curl -fL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash${C_RESET}\n"
+    exit 1
+fi
+
 # 1) tool splash (matches the tool)
 tool_splash
 # Press-Enter prompt ONLY if stdin is a real TTY. Under `curl ... | bash`
@@ -200,6 +396,9 @@ if [ -t 0 ]; then
     step "Press Enter to start the installation..."
     read -r dummy 2>/dev/null || true
 fi
+
+# system info — arch / android / storage (V111)
+sys_info
 
 # phase weights (total 100)
 PW_STORAGE=4
@@ -211,13 +410,20 @@ PW_DL=16
 PW_EXTRACT=6
 PW_SETUP=6
 
-# 1) storage
+# 1) storage — BACKGROUND me chalao (kuch phones pe dialog ke aage ruk jata
+# tha = "install stuck"); install ke pkg steps ke time user grant de sakta
+# hai, end me check karenge. pipe kabhi block nahi hoga.
 box "$C_CYAN" "📁 Storage permission"
 _pbar 0 "Storage permission"
-termux-setup-storage >/dev/null 2>&1
+printf "${C_DIM}    (Agar popup aaye to ALLOW dabao)${C_RESET}\n"
+termux-setup-storage >/dev/null 2>&1 </dev/null &
 printf "\n"
-ok "Storage access granted"
+ok "Storage request bheji (popup ALLOW karo)"
 advance "$PW_STORAGE" "Storage permission"
+
+# 0.5) broken dpkg heal — pehle se half-updated phone pe yahi
+# "baar baar fail" wala case tha. best-effort, non-fatal.
+dpkg --configure -a >$LOG 2>&1 </dev/null || true
 
 # 2) update
 box "$C_CYAN" "🔄 Updating packages"
@@ -226,10 +432,14 @@ printf "\n"
 ok "Repositories updated"
 advance "$PW_UPDATE" "pkg update"
 
-# 3) upgrade (python latest ke liye)
+# 3) upgrade (python latest ke liye) — slow phones pe 2-5 min, bar chalta hai
+box "$C_CYAN" "⬆ Upgrading packages (slow phone pe 2-5 min lag sakte hain)"
 run_spin "$PW_UPGRADE" "pkg upgrade" pkg upgrade -y
 printf "\n"
 ok "Packages upgraded"
+# upgrade beech me toot gaya to dpkg half-aadha rahega = uske baad har
+# python/java install FAIL hoga. YAHIN heal karo, phir installs shuru karo.
+_heal_dpkg
 advance "$PW_UPGRADE" "pkg upgrade"
 
 # 4) core packages — EK EK KARKE
@@ -244,7 +454,7 @@ JAVA_PKG=""
 if ! command -v javac >/dev/null 2>&1; then
     for jp in openjdk-17 openjdk-21 openjdk-25; do
         _pbar "$((PW_UPDATE + PW_PKGS))" "Installing ${jp}"
-        if pkg install -y "$jp" >$LOG 2>&1; then
+        if     pkg install -y "$jp" >$LOG 2>&1 </dev/null; then
             if command -v javac >/dev/null 2>&1; then
                 JAVA_PKG="$jp"
                 printf "\n"
@@ -265,12 +475,13 @@ fi
 advance "$((PW_UPDATE + PW_PKGS))" "Core packages"
 
 if ! command -v python3 >/dev/null 2>&1; then
-    printf "\n${C_RED}${C_BOLD}  ✗ python3 install nahi hua!${C_RESET}\n"
-    printf "${C_RED}  Internet check karo, phir ye chalayen:${C_RESET}\n"
-    printf "${C_GOLD}    pkg update -y && pkg install -y python${C_RESET}\n"
-    printf "${C_GOLD}    ikram${C_RESET}\n"
-    exit 1
+    python_repair
+    if ! command -v python3 >/dev/null 2>&1; then
+        exit 1
+    fi
 fi
+PY_VER=$(python3 -c 'import sys;print(".".join(map(str,sys.version_info[:3])))' 2>/dev/null)
+ok "python3 ready (${PY_VER:-unknown})"
 
 # 5) pip libraries — EK EK KARKE
 box "$C_CYAN" "⬇ Installing libraries (rich, crypto, zstd...)"
@@ -436,8 +647,8 @@ print(p.hex())
 if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     echo ""
     echo "  ⬆ Python purana hai — upgrade kar raha hoon..."
-    pkg update -y >/dev/null 2>&1
-    pkg upgrade -y python 2>&1 | tail -3
+    pkg update -y >/dev/null 2>&1 </dev/null
+    DEBIAN_FRONTEND=noninteractive pkg upgrade -y python 2>&1 </dev/null | tail -3
     if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
         echo "  ✓ Python upgrade ho gaya! Tool khul raha hai..."
         exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
@@ -459,65 +670,19 @@ chmod +x "$TARGET/.engine/luac_patched" "$TARGET/.engine/lua_patched" "$TARGET/l
 chmod +x "$TARGET/.engine/repak" "$TARGET/.engine/unluac_rs" "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
 
 # 7B) post-install boot test (shows key prompt + main menu once)
-box "$C_GOLD" "🚀 Final boot test"
-_pbar "$((DL_BASE + PW_DL + PW_EXTRACT))" "Booting tool once"
 if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; then
     IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
     [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
-    BOOT_PLAN="$TARGET/.boot_plan.$$"
-    BOOT_PY="$TARGET/.boot_drv.$$.py"
-    printf 'FREETOOL\n0\n' > "$BOOT_PLAN"
-    cat > "$BOOT_PY" <<'PY'
-import os, builtins, traceback
-path = os.environ["IKRAM_PATCH"]
-src = open(path, encoding="utf-8").read()
-g = {"__name__": "ikram_patch_boot", "__file__": path}
-exec(compile(src, path, "exec"), g)
-plan = [ln.rstrip("\n") for ln in open(os.environ["IKRAM_PLAN"])]
-idx = {"i": 0}
-def _inp(p=""):
-    if idx["i"] < len(plan):
-        a = plan[idx["i"]]; idx["i"] += 1
-    else:
-        a = ""
-    return a
-builtins.input = _inp
-try:
-    g["ikram"].main()
-except SystemExit:
-    pass
-except Exception:
-    tb = os.environ.get("IKRAM_TB")
-    if tb:
-        try:
-            open(tb, "a").write(traceback.format_exc())
-        except Exception:
-            pass
-else:
-    try:
-        open(os.environ.get("IKRAM_OK", ""), "a").close()
-    except Exception:
-        pass
-PY
-    IKRAM_PATCH="$IKRAM_SRC" \
-    IKRAM_PLAN="$BOOT_PLAN" \
-    IKRAM_TB="$TARGET/.boot_tb.log" \
-    IKRAM_OK="$TARGET/.boot_ok.$$" \
-    python3 "$BOOT_PY"
-    if [ -f "$TARGET/.boot_ok.$$" ]; then
-        printf "\n"
-        ok "Boot test passed - Key prompt + Main menu OK"
-    else
-        printf "\n"
-        fail "Boot test FAILED - $TARGET/.boot_tb.log me error dekho"
-    fi
-    rm -f "$BOOT_PLAN" "$BOOT_PY" "$TARGET/.boot_ok.$$" "$TARGET/.boot_tb.log" 2>/dev/null
+    boot_test "$IKRAM_SRC"
 else
     warn "Boot test skipped (ikram_patch.py nahi mili)"
 fi
-advance 100 "Boot test"
 
 advance 100 "Setup complete"
+# storage end-check — background request ab tak settle hui honi chahiye
+if [ ! -d "$HOME/storage/shared" ]; then
+    warn "Storage share abhi bhi nahi mila — baad me chalao: termux-setup-storage"
+fi
 V_VER=$(cat "$TARGET/.engine/VERSION" 2>/dev/null || cat "$TARGET/VERSION" 2>/dev/null || echo "latest")
 BW=$((W - 2))
 # right-pad each line so the box closes flush (tool-style VIP finish)
