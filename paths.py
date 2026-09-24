@@ -22,18 +22,33 @@ import shutil
 import time
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+_F = Path(__file__).resolve().parent
 
-DROP_PAK = BASE_DIR / "DROP" / "pak"
-DROP_LUA = BASE_DIR / "DROP" / "lua"
-DROP_INJECT = BASE_DIR / "DROP" / "inject"
+# Engine kaha se chal raha hai:
+#   - .engine/  -> installed layout: DROP/RESULT parent me (drop/result lowercase)
+#   - repo root -> dev layout: DROP/RESULT yahin (uppercase, release layout)
+if _F.name == ".engine":
+    BASE_DIR = _F.parent
+    _DROP = BASE_DIR / "drop"
+    _RESULT = BASE_DIR / "result"
+else:
+    BASE_DIR = _F
+    _DROP = BASE_DIR / "DROP"
+    _RESULT = BASE_DIR / "RESULT"
 
-RESULT_EXTRACTED = BASE_DIR / "RESULT" / "extracted"
-RESULT_INJECTED = BASE_DIR / "RESULT" / "injected"
-RESULT_LUA = BASE_DIR / "RESULT" / "lua"
-RESULT_PROCESSED = BASE_DIR / "RESULT" / "processed"
-RESULT_CUSTOMPAK = BASE_DIR / "RESULT" / "CostomPak"
-RESULT_REPACKED = BASE_DIR / "RESULT" / "Repacked"
+DROP_PAK = _DROP / "pak"
+DROP_LUA = _DROP / "lua"
+DROP_INJECT = _DROP / "inject"
+
+RESULT_EXTRACTED = _RESULT / "extracted"
+RESULT_INJECTED = _RESULT / "injected"
+RESULT_LUA = _RESULT / "lua"
+RESULT_PROCESSED = _RESULT / "processed"
+RESULT_CUSTOMPAK = _RESULT / "CostomPak"
+RESULT_REPACKED = _RESULT / "Repacked"
+
+DROP_DIR = _DROP
+RESULT_DIR = _RESULT
 
 ALL_DIRS = (
     DROP_PAK, DROP_LUA, DROP_INJECT,
@@ -101,7 +116,7 @@ def unique_path(path, avoid=None):
     """Original never-overwrite rule (Section G): if the target exists,
     append ' (1)', ' (2)' ... to the *stem* (space + parentheses). This is
     the exact same rule the original tool uses for extracted/injected/
-    CostomPak outputs — kabhi overwrite nahi."""
+    CostomPak outputs — never overwrites."""
     path = Path(path)
     avoid = avoid or ()
     avoid = {Path(a) for a in avoid}

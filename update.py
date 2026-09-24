@@ -1,16 +1,16 @@
 """IKRAM TOOL - GitHub auto-update (client core).
 
-GitHub release se sabse naya zip (IkramTool.zip) download karta hai,
-extract karta hai, aur installed tool folder me CLEAN-SLATE replace karta
-hai: purani tool files delete, phir poori nayi files fresh copy. Isliye koi
-file kabhi missing nahi rehti — tool hamesha A-to-Z complete milta hai.
+Downloads the latest zip (IkramTool.zip) from the GitHub release,
+extracts it, and CLEAN-SLATE replaces the installed tool folder:
+old tool files are deleted, then the full fresh set is copied. So no
+file is ever missing — the tool is always A-to-Z complete.
 
-ikram.py har start pe `update.py --check` chala ke decide karta hai update
-chahiye ya nahi.
+`ikram.py` runs `update.py --check` at every start to decide whether
+an update is needed.
 
 Usage:
-  python3 update.py --check     -> remote|local  (sirf version compare)
-  python3 update.py             -> latest zip download + clean install
+  python3 update.py --check     -> remote|local  (version compare only)
+  python3 update.py             -> download latest zip + clean install
 """
 import json
 import os
@@ -138,7 +138,7 @@ class _Progress:
         self._drawn = True
 
 
-# update replace ke waqt PRESERVE karna hai (user data + version state)
+# keep these during an update replace (user data + version state)
 PROTECTED = {
     "DROP",
     "RESULT",
@@ -152,8 +152,8 @@ PROTECTED = {
 
 
 def _clean_replace(src):
-    """Purani tool files delete (DROP/RESULT/VERSION/activation CHHOD ke),
-    phir nayi files src se fresh copy. => koi file missing nahi rehti."""
+    """Delete old tool files (EXCEPT DROP/RESULT/VERSION/activation),
+    then fresh-copy the new files from src. => no file is ever missing."""
     if not TOOL_DIR.exists():
         TOOL_DIR.mkdir(parents=True, exist_ok=True)
     new_names = {f.name for f in src.iterdir()}
@@ -161,12 +161,12 @@ def _clean_replace(src):
         if old.name in PROTECTED:
             continue
         if old.name not in new_names:
-            # stale file jo naye zip me nahi -> hata do (clean slate)
+            # stale file not in the new zip -> remove it (clean slate)
             if old.is_dir():
                 shutil.rmtree(old, ignore_errors=True)
             else:
                 old.unlink(missing_ok=True)
-    # ab naye files copy karo (existing same-name ko overwrite)
+    # now copy the new files (overwrite existing same-name)
     for f in src.iterdir():
         if f.name in PROTECTED:
             continue
@@ -176,7 +176,7 @@ def _clean_replace(src):
             shutil.copytree(f, dst)
         else:
             shutil.copy2(f, dst)
-    # sabka execute bit sahi rakho
+    # keep the execute bit right on all of these
     for name in ("run.sh", "install.sh", "lua_patched", "luac_patched", "unluac_rs", "repak"):
         p = TOOL_DIR / name
         if p.exists():
@@ -285,7 +285,7 @@ def _fix_env():
             if not shutil.which(tool):
                 need.append(pkg)
         if not shutil.which("javac"):
-            # openjdk ka naam repo/mirror ke hisaab se badalta hai — try 17/21/25
+            # openjdk package name varies by repo/mirror — try 17/21/25
             for jp in ("openjdk-17", "openjdk-21", "openjdk-25"):
                 for _ in range(3):
                     try:
@@ -338,12 +338,12 @@ def _fix_env():
             "2>/dev/null); if ! python3 -c \"import sys; "
             "from pathlib import Path; "
             "p=Path('$HOME/Ikram_Tool/.engine/ikram_patch.py'); print(p.exists())\" "
-            "2>/dev/null | grep -q True; then echo '  Tool files missing - reinstall karo: install.sh'; return 1; fi; "
+            "2>/dev/null | grep -q True; then echo '  Tool files missing - reinstall with: install.sh'; return 1; fi; "
             "MAGIC_HAVE=$(python3 -c \"import struct; "
             "p=open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4); print(p.hex())\" "
             "2>/dev/null); if [ -n \"$MAGIC_HAVE\" ] && [ \"$MAGIC_HAVE\" != \"$MAGIC_NEEDED\" ]; then "
-            "echo ''; echo '  ⬆ Python purana hai — upgrade kar raha hoon...'; "
-            "pkg upgrade -y python 2>&1 | tail -3; echo '  ✓ Ab dobara try karo: ikram'; "
+            "echo ''; echo '  ⬆ Python is outdated — upgrading...'; "
+            "pkg upgrade -y python 2>&1 | tail -3; echo '  ✓ Now try again: ikram'; "
             "echo ''; return 1; fi; python3 \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" \"$@\"; }"
         )
         suffix = "\n\n# Ikram Tool launcher\n{}\n".format(launcher)
@@ -377,12 +377,12 @@ def _fix_env():
             "#!/data/data/com.termux/files/usr/bin/bash\n"
             "export PYTHONDONTWRITEBYTECODE=1\n"
             "if ! command -v python3 >/dev/null 2>&1; then\n"
-            '  echo ""\n  echo "  python3 not found! Install karo:"\n'
+            '  echo ""\n  echo "  python3 not found! Install it:"\n'
             '  echo "    pkg update -y && pkg install -y python"\n'
             '  echo ""\n  exit 1\nfi\n'
             "if [ ! -f \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" ]; then\n"
             '  echo ""\n'
-            '  echo "  ⚠ Tool files missing — khud repair kar raha hoon..."\n'
+            '  echo "  ⚠ Tool files missing — self-repairing..."\n'
             '  mkdir -p "$HOME/Ikram_Tool/.engine"\n'
             '  cd "$HOME/Ikram_Tool/.engine"\n'
             '  curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"\n'
@@ -391,11 +391,11 @@ def _fix_env():
             '  if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n'
             '    cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null\n'
             '    chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/.engine/ikram_patch.py" 2>/dev/null\n'
-            '    echo "  ✓ Repair done! Tool khul raha hai..."\n'
+            '    echo "  ✓ Repair done! Tool is starting..."\n'
             '    exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
             '  fi\n'
             '  rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"\n'
-            '  echo "  ✗ Repair fail. Dobara install karo:"\n'
+            '  echo "  ✗ Repair failed. Reinstall with:"\n'
             '  echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"\n'
             '  echo ""\n  exit 1\nfi\n'
             "MAGIC_NEEDED=$(python3 -c "
@@ -405,7 +405,7 @@ def _fix_env():
             '" 2>/dev/null)\n'
             'if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then\n'
             '  echo ""\n'
-            '  echo "  ⬆ Python purana hai — upgrade kar raha hoon..."\n'
+            '  echo "  ⬆ Python is outdated — upgrading..."\n'
             '  pkg update -y >/dev/null 2>&1\n'
             '  pkg upgrade -y python 2>&1 | tail -3\n'
             '  exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'

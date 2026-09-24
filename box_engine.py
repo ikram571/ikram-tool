@@ -11,7 +11,7 @@ Styles (Phase 8):
 Internal divider rows: a content row equal to the SEP sentinel renders a
 full-width divider (╠═╣ / ├─┤ ...) per the box style.
 """
-from theme_engine import Theme, terminal_width, strip_ansi
+from theme_engine import Theme, terminal_width, strip_ansi, display_width
 
 SEP = "__SEP__"
 
@@ -32,7 +32,7 @@ _BOXES = {
 
 
 def visible_len(s: str) -> int:
-    return len(strip_ansi(s))
+    return display_width(s)
 
 
 def _truncate(line: str, inner_w: int) -> str:
@@ -74,7 +74,7 @@ class BoxEngine:
         lines = self._resolve(content)
         w = self._resolve_width(width)
         b = _BOXES.get(style, _BOXES["heavy"])
-        inner_w = w - 2
+        inner_w = w - 4
         body = []
 
         if title is not None:
@@ -83,12 +83,12 @@ class BoxEngine:
             if subtitle is not None:
                 body.append(self._row(b, self.theme.apply(str(subtitle), "secondary"),
                                       inner_w, "center"))
-            body.append(self._divider(b, inner_w, color_role))
+            body.append(self._divider(b, inner_w + 2, color_role))
 
         pad = max(0, int(padding or 0))
         for ln in lines:
             if ln == SEP:
-                body.append(self._divider(b, inner_w, color_role))
+                body.append(self._divider(b, inner_w + 2, color_role))
                 continue
             chunk = _truncate(str(ln), inner_w)
             body.append(self._row(b, chunk, inner_w, align))
@@ -96,8 +96,15 @@ class BoxEngine:
             rows = body
 
         if style == "minimal":
-            out = [self.theme.apply(b["tl"] + " ", color_role) + l.rstrip()
-                   for l in body[1:] if visible_len(l) > len(b["tl"])]
+            out = []
+            for l in body[1:]:
+                if visible_len(l) <= len(b["tl"]):
+                    continue
+                if "\x1b[" in l:
+                    out.append(l.rstrip())
+                else:
+                    out.append(self.theme.apply(b["tl"] + " ", color_role)
+                              + l.rstrip())
             return "\n".join(out or [" "])
 
         top = self.theme.apply(b["tl"] + b["h"] * (w - 2) + b["tr"], color_role)
@@ -109,11 +116,11 @@ class BoxEngine:
                       title="Working..."):
         w = self._resolve_width(width)
         b = _BOXES.get(style, _BOXES["heavy"])
-        inner_w = w - 2
+        inner_w = w - 4
         lines = []
         hdr = self.theme.apply(str(title), "title")
         lines.append(self._row(b, _truncate(hdr, inner_w), inner_w, "center"))
-        lines.append(self._divider(b, inner_w, "border"))
+        lines.append(self._divider(b, inner_w + 2, "border"))
 
         if isinstance(pct, (int, float)):
             lines.append(self._row(b, self._bar.render(pct), inner_w, "left"))
@@ -154,11 +161,17 @@ class BoxEngine:
         width = int(width or 80)
         return max(50, min(width, 100))
 
-    def _row(self, b, inner, inner_w, align):
+    def _row(self, b, inner, inner_w, align, color_role="border"):
         inner = self._align(inner, inner_w, align)
         if not b["v"]:
-            return self.theme.apply(b["v"] + " " + inner, "border")
-        return self.theme.apply(b["v"] + " " + inner + " " + b["v"], "border")
+            if "\x1b[" in inner:
+                return inner
+            return self.theme.apply(b["v"] + " " + inner, color_role)
+        if "\x1b[" in inner:
+            return (self.theme.apply(b["v"] + " ", color_role)
+                    + inner + " "
+                    + self.theme.apply(b["v"], color_role))
+        return self.theme.apply(b["v"] + " " + inner + " " + b["v"], color_role)
 
     def _divider(self, b, inner_w, color_role):
         return self.theme.apply(b["jt"] + b["h"] * inner_w + b["je"], color_role)

@@ -89,7 +89,7 @@ def _patch_ue4module(mod):
         blob = bytes(self.content[fdi_off:fdi_off + fdi_size])
         if self.encrypted_index:
             if not self.aes_key:
-                raise ValueError("Index encrypted — AES key chahiye (FDI)")
+                raise ValueError("Index encrypted — AES key required (FDI)")
             blob = aes_ecb_decrypt(blob, self.aes_key)
         r = mod.Reader(blob)
         dir_count = r.u4()
@@ -360,7 +360,7 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
             if oodle:
                 log(
                     "  ⚠ %d Oodle-compressed entries — repak/python are "
-                    "Zlib-only, wo entries partial/dropped ho sakti hain"
+                    "Zlib-only, those entries may be partial/dropped"
                     % oodle
                 )
         except Exception:

@@ -1,28 +1,28 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # =============================================
 #  Ikram Tool - One-line Installer (VIP UI)
-#  Fresh Termux me sab kuch khud install karta hai
-#  (non-root, koi permission nahi chahiye)
-#  - Har package ALAG install hota hai (ek fail to
-#    baaki nahi rukte) + retry 3x
-#  - Overall % progress bar (kitna hua, kitna baaki)
-#    taaki lagta nahi ke tool stuck hai
+#  Installs everything by itself on a fresh Termux
+#  (non-root, no permissions needed)
+#  - Every package installs SEPARATELY (one fails, the
+#    others continue) + retry 3x
+#  - Overall % progress bar (how much done, how much left)
+#    so the tool never looks stuck
 # =============================================
 set -u
 
-# `curl ... | bash` phone-fail fixes (V112):
-#  1) PREFIX guard (set -u ke liye) + apt NONINTERACTIVE — conffile/dpkg
-#     prompt kabhi piped script bytes na khaye (wo "mid-way ruk jata hai"
-#     wala phone-fail tha).
-#  2) har pkg/pip/unzip call `</dev/null` — koi bhi prompt stdin (jo pipe
-#     hai) se jawab na le sake.
+# `curl ... | bash` phone-fail fixes (V113):
+#  1) PREFIX guard (for set -u) + apt NONINTERACTIVE — conffile/dpkg
+#     prompts must never eat the piped script bytes (that was the
+#     "stops halfway" phone-fail).
+#  2) every pkg/pip/unzip call gets `</dev/null` — no prompt can take an
+#     answer from the (piped) stdin.
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 export DEBIAN_FRONTEND=noninteractive
 
-# TTY check — sirf STDOUT dekhte hain (bar/print format decide karta hai).
-# Pehle `[ -t 0 ]` bhi tha → `curl|bash` me stdin pipe hota hi TTY_MODE=0
-# ho jata tha → slow phones pe minutes ki SILENT gap = "install stuck".
-# `read` ka apna alag `[ -t 0 ]` guard neeche hai.
+# TTY check — only STDOUT is looked at (decides bar/print format).
+# There used to be `[ -t 0 ]` too → with `curl|bash` stdin is always a pipe,
+# so TTY_MODE=0 → silent multi-minute gap on slow phones = "install stuck".
+# The `read` call has its own separate `[ -t 0 ]` guard below.
 if [ -t 1 ]; then
     TTY_MODE=1
 else
@@ -76,7 +76,7 @@ box() {
     printf "${COLOR}╰$(printf '─%.0s' $(seq 1 $BW))╯${C_RESET}\n"
 }
 
-# ---------------- system info / checks (V112) ----------------
+# ---------------- system info / checks (V113) ----------------
 sys_info() {
     local arch cpu android storage_ok
     arch=$(uname -m 2>/dev/null || echo "unknown")
@@ -86,23 +86,23 @@ sys_info() {
     android=$(getprop ro.build.version.release 2>/dev/null)
     [ -z "$android" ] && android=$(getprop ro.build.version.sdk 2>/dev/null)
     [ -z "$android" ] && android="n/a"
-    box "$C_GOLD" "⚙ SYSTEM (V112)"
+    box "$C_GOLD" "⚙ SYSTEM (V113)"
     printf "${C_BOLD}  • Arch    : ${C_CYAN}%s${C_RESET}\n" "$arch"
     printf "${C_BOLD}  • CPU ABI : ${C_CYAN}%s${C_RESET}\n" "$cpu"
     printf "${C_BOLD}  • Android : ${C_CYAN}%s${C_RESET}\n" "$android"
     case "$arch" in
         armv7l|armv8l|armv6l|arm)
-            printf "${C_DIM}  • Note    : 32-bit phone — Termux ab officially sirf\n"
-            printf "${C_DIM}              64-bit (aarch64) support karta hai. Python\n"
-            printf "${C_DIM}              mirror me na mile to tool nahi chalega.\n"
-            printf "${C_CYAN}              Best-effort install jaari hai...${C_RESET}\n"
+            printf "${C_DIM}  • Note    : 32-bit phone — Termux now officially supports\n"
+            printf "${C_DIM}              only 64-bit (aarch64). If Python is not on the\n"
+            printf "${C_DIM}              mirror, the tool will not run.\n"
+            printf "${C_CYAN}              Best-effort install continuing...${C_RESET}\n"
             ;;
     esac
     local space_kb
     space_kb=$(df -P "$PREFIX" 2>/dev/null | awk 'NR==2{print $4}')
     if [ -n "$space_kb" ] && [ "${space_kb:-0}" -lt 204800 ]; then
-        printf "${C_GOLD}  • Storage : SPACE KAM HAI (<200MB free) — python/java\n"
-        printf "${C_GOLD}             install fail ho sakta hai. Pehle space karo.${C_RESET}\n"
+        printf "${C_GOLD}  • Storage : LOW SPACE (<200MB free) — python/java\n"
+        printf "${C_GOLD}             install may fail. Free up space first.${C_RESET}\n"
     else
         printf "${C_DIM}  • Space   : ~%s GB free ($PREFIX)${C_RESET}\n" \
             "$(awk -v k="${space_kb:-0}" 'BEGIN{printf "%.1f", k/1048576}')"
@@ -128,8 +128,8 @@ _boot_pct() {
 }
 
 # ---------------- overall progress bar ----------------
-# Har step ek % deta hai. Pkg update/install jaise lambi cheezein
-# spinner se chalti hain (stuck nahi lagta), bar us step par jata hai.
+# Each step reports a %. Long things like pkg update/install run under a
+# spinner (never looks stuck), and the bar moves while that step runs.
 PB_W=22
 CUR_PCT=0
 LAST_PCT=-1
@@ -149,7 +149,7 @@ _pbar() {  # _pbar PCT LABEL
     printf "\r${C_CYAN}  ⬇ ${LABEL}${C_RESET} [${C_GREEN}${BAR}${C_RESET}] ${C_BOLD}%3s%%${C_RESET}   " "$PCT"
 }
 
-# spinner + bar — long command ke dauran animate karta hai
+# spinner + bar — animates during long commands
 _spin() {  # _spin PCT LABEL PID
     local PCT="$1" LABEL="$2" SPID="$3"
     local FR=('|' '/' '-' '\\')
@@ -158,7 +158,7 @@ _spin() {  # _spin PCT LABEL PID
         if [ "$TTY_MODE" -eq 1 ]; then
             _pbar "$PCT" "${LABEL} ${FR[$((k % 4))]}"
         elif [ $((k % 20)) -eq 0 ]; then
-            # non-tty (log capture) — 4s heartbeat, warna minutes SILENT
+            # non-tty (log capture) — 4s heartbeat, otherwise minutes of SILENCE
             printf "  ▸ %s ... (%ss)\n" "$LABEL" "$((k / 5))"
         fi
         k=$((k + 1))
@@ -169,7 +169,7 @@ _spin() {  # _spin PCT LABEL PID
 run_spin() {  # run_spin PCT LABEL cmd...
     local PCT="$1" LABEL="$2"; shift 2
     _pbar "$PCT" "$LABEL"
-    # </dev/null — apt/dpkg prompt kabhi piped script (stdin) na khaye
+    # </dev/null — apt/dpkg prompts must never eat the piped script (stdin)
     "$@" >$LOG 2>&1 </dev/null &
     local SPID=$!
     _spin "$PCT" "$LABEL" "$SPID"
@@ -227,14 +227,14 @@ install_pip() {  # install_pip BASE_PCT PCT_STEP "LABEL_PREFIX" lib...
     done
 }
 
-# ------------ dpk/apT heal — broken package state ae theek karo ------------
-_heal_dpkg() {  # half-configured dpkg ya broken dependencies = "pkg fail" ka
-    # sabse bada phone-killer. Non-fatal, har retry se pehle chalta hai.
+# ------------ dpkg/apt heal — fix broken package state ------------
+_heal_dpkg() {  # half-configured dpkg or broken dependencies = the #1
+    # cause of "pkg fail". Non-fatal, runs before every retry.
     dpkg --configure -a >$LOG 2>&1 </dev/null || true
     apt-get -f install -y >$LOG 2>&1 </dev/null || true
 }
 
-# pakage install (individual + retry) — ab HAR phone pe lagega:
+# package install (individual + retry) — works on every phone now:
 #   pkg fail 3x  ->  heal + apt-get direct fallback  ->  post-check
 install_pkgs() {  # install_pkgs BASE_PCT PCT_STEP "LABEL_PREFIX" pkg...
     local BASE="$1" PCT_STEP="$2" LP="$3"; shift 3
@@ -263,8 +263,8 @@ install_pkgs() {  # install_pkgs BASE_PCT PCT_STEP "LABEL_PREFIX" pkg...
             try=$((try + 1))
         done
         if [ "$rc" -ne 0 ]; then
-            # pkg wrapper fail -> apt-get direct (Termux me dono same hain,
-            # par apt ke pass --fix-broken + conf options zyada hain)
+            # pkg wrapper fail -> apt-get direct (both are the same in Termux,
+            # but apt has --fix-broken + more conf options)
             _pbar "$pct" "${LP} ${p} (apt-get fallback)"
             _heal_dpkg
             apt-get install -y -o Dpkg::Options::=--force-confdef \
@@ -284,10 +284,10 @@ install_pkgs() {  # install_pkgs BASE_PCT PCT_STEP "LABEL_PREFIX" pkg...
     done
 }
 
-# python sna wese zaroori hai (tool python me hai). 3 retry + apt-get fallback
-# phir bhi fail -> ek FINAL repair round (update + heal + space check).
+# python is obviously essential (the tool runs on python). If 3 retries + apt-get
+# fallback still fail -> one FINAL repair round (update + heal + space check).
 python_repair() {
-    printf "\n${C_GOLD}${C_BOLD}  ⚠ python nahi laga — final repair round...${C_RESET}\n"
+    printf "\n${C_GOLD}${C_BOLD}  ⚠ python did not install — final repair round...${C_RESET}\n"
     pkg update -y >$LOG 2>&1 </dev/null || true
     _heal_dpkg
     pkg install -y python >$LOG 2>&1 </dev/null || true
@@ -298,13 +298,13 @@ python_repair() {
     fi
     if command -v python3 >/dev/null 2>&1; then
         printf "\n"
-        ok "python3 laga diya"
+        ok "python3 installed"
         return 0
     fi
-    printf "\n${C_RED}${C_BOLD}  ✗ python3 install nahi hua!${C_RESET}\n"
-    printf "${C_GOLD}  Sabse pehle space check karo:${C_RESET}\n"
+    printf "\n${C_RED}${C_BOLD}  ✗ python3 failed to install!${C_RESET}\n"
+    printf "${C_GOLD}  First check free space:${C_RESET}\n"
     df -h "$PREFIX" 2>/dev/null | sed 's/^/    /'
-    printf "${C_GOLD}  Phir ye manually chalayen:${C_RESET}\n"
+    printf "${C_GOLD}  Then run these manually:${C_RESET}\n"
     printf "${C_GOLD}    pkg update -y && pkg upgrade -y${C_RESET}\n"
     printf "${C_GOLD}    pkg install -y python${C_RESET}\n"
     printf "${C_GOLD}    ikram${C_RESET}\n"
@@ -367,9 +367,9 @@ PY
     advance 100 "Boot test"
 }
 
-# ---------------- --test self-test mode (V112) ----------------
+# ---------------- --test self-test mode (V113) ----------------
 # install.sh --test  ->  system checks + boot test only (no reinstall).
-# Exit code 0 = PASS, 1 = FAIL. Not a TTY pe bhi clean output.
+# Exit code 0 = PASS, 1 = FAIL. Clean output even when not on a TTY.
 SELF_TEST="${1:-}"
 if [ "$SELF_TEST" = "--test" ] || [ "$SELF_TEST" = "-t" ]; then
     tool_splash
@@ -382,7 +382,7 @@ if [ "$SELF_TEST" = "--test" ] || [ "$SELF_TEST" = "-t" ]; then
         ok "SELF-TEST DONE"
         exit 0
     fi
-    fail "Tool installed nahi hai — pehle install karo, phir --test karo:"
+    fail "Tool is not installed — install it first, then run --test:"
     printf "${C_GOLD}    curl -fL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash${C_RESET}\n"
     exit 1
 fi
@@ -397,7 +397,7 @@ if [ -t 0 ]; then
     read -r dummy 2>/dev/null || true
 fi
 
-# system info — arch / android / storage (V112)
+# system info — arch / android / storage (V113)
 sys_info
 
 # phase weights (total 100)
@@ -410,19 +410,19 @@ PW_DL=16
 PW_EXTRACT=6
 PW_SETUP=6
 
-# 1) storage — BACKGROUND me chalao (kuch phones pe dialog ke aage ruk jata
-# tha = "install stuck"); install ke pkg steps ke time user grant de sakta
-# hai, end me check karenge. pipe kabhi block nahi hoga.
+# 1) storage — run it in BACKGROUND (on some phones the dialog blocks ahead =
+# "install stuck"); the user can grant it during the pkg steps, checked at
+# the end. The pipe will never block.
 box "$C_CYAN" "📁 Storage permission"
 _pbar 0 "Storage permission"
-printf "${C_DIM}    (Agar popup aaye to ALLOW dabao)${C_RESET}\n"
+printf "${C_DIM}    (If a popup appears, press ALLOW)${C_RESET}\n"
 termux-setup-storage >/dev/null 2>&1 </dev/null &
 printf "\n"
-ok "Storage request bheji (popup ALLOW karo)"
+ok "Storage request sent (press ALLOW on popup)"
 advance "$PW_STORAGE" "Storage permission"
 
-# 0.5) broken dpkg heal — pehle se half-updated phone pe yahi
-# "baar baar fail" wala case tha. best-effort, non-fatal.
+# 0.5) broken dpkg heal — this was the case on already half-updated phones
+# that failed "again and again". best-effort, non-fatal.
 dpkg --configure -a >$LOG 2>&1 </dev/null || true
 
 # 2) update
@@ -432,23 +432,23 @@ printf "\n"
 ok "Repositories updated"
 advance "$PW_UPDATE" "pkg update"
 
-# 3) upgrade (python latest ke liye) — slow phones pe 2-5 min, bar chalta hai
-box "$C_CYAN" "⬆ Upgrading packages (slow phone pe 2-5 min lag sakte hain)"
+# 3) upgrade (for latest python) — 2-5 min on slow phones, bar keeps moving
+box "$C_CYAN" "⬆ Upgrading packages (may take 2-5 min on slow phones)"
 run_spin "$PW_UPGRADE" "pkg upgrade" pkg upgrade -y
 printf "\n"
 ok "Packages upgraded"
-# upgrade beech me toot gaya to dpkg half-aadha rahega = uske baad har
-# python/java install FAIL hoga. YAHIN heal karo, phir installs shuru karo.
+# if the upgrade broke halfway, dpkg is left half-configured = every
+# python/java install after it FAILS. Heal here, then start the installs.
 _heal_dpkg
 advance "$PW_UPGRADE" "pkg upgrade"
 
-# 4) core packages — EK EK KARKE
+# 4) core packages — ONE BY ONE
 box "$C_CYAN" "⬇ Installing core packages (python, git, curl, unzip, java, lua...)"
-# openjdk ka naam har Termux repo state pe same nahi hota: candidate-chain
-# try karo (17 -> 21 -> 25), jo bhi us mirror pe mile use karo. Java cfr.jar
-# / unluac.jar ke liye chahiye; Lua native (luac_patched) java ke bina chalega.
-# clang = sm4_custom ke runtime C self-repair fallback ke liye (agar shippped
-#         ikram_sm4_fast.so kabhi corrupt/missing ho to device par recompile).
+# openjdk package name differs across Termux repo states: try a candidate-chain
+# (17 -> 21 -> 25), use whichever exists on that mirror. Needed for java cfr.jar
+# / unluac.jar; Lua native (luac_patched) runs without java. clang = the
+#         runtime C self-repair fallback of sm4_custom (if the shipped
+#         ikram_sm4_fast.so is ever corrupt/missing, recompile on device).
 install_pkgs "$PW_UPDATE" "$PW_PKGS" "Installing" \
     python git curl unzip lua53 clang
 
@@ -465,10 +465,10 @@ if ! command -v javac >/dev/null 2>&1; then
             fi
         fi
         printf "\n"
-        warn "${jp} is repo me nahi mila — next try."
+        warn "${jp} not found in this repo — trying next."
     done
     if [ -z "$JAVA_PKG" ]; then
-        warn "Java install fail — jar-based decompile kuch limited (Lua native still chalta hai)."
+        warn "Java install failed — jar-based decompile somewhat limited (Lua native still works)."
     fi
 else
     JAVA_PKG=$(javac --version 2>/dev/null | head -1)
@@ -553,7 +553,7 @@ if [ "$DONE" -gt 0 ] 2>/dev/null; then
     ok "Tool downloaded ($(human "$DONE"))"
     advance "$((DL_BASE + PW_DL))" "Tool downloaded"
 else
-    fail "Download failed — internet check karo aur dobara try karo."
+    fail "Download failed — check your internet and try again."
     exit 1
 fi
 
@@ -566,39 +566,39 @@ if (cd "$TMPX" && unzip -q -o "$TARGET/IkramTool.zip"); then
     printf "\n"
 else
     printf "\n"
-    fail "Extract fail hua — dobara try karo."
+    fail "Extract failed — try again."
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
 if [ ! -f "$TMPX/ikram.pyc" ]; then
-    fail "ikram.pyc zip me nahi mila — release theek nahi."
+    fail "ikram.pyc not found in zip — release is broken."
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# purani files clean (ab safe hai — naya unzip ho chuka)
+# clean old files (safe now — the new unzip has finished)
 rm -rf "$TARGET/.engine"
-# drop/result hamesha real — kabhi delete NAHI (user files hain)
+# drop/result are always real — NEVER deleted (they hold user files)
 mkdir -p "$TARGET/drop" "$TARGET/result"
-# temp se copy -> .engine/ (engine hidden; drop/result root pe real)
+# copy from temp -> .engine/ (engine hidden; drop/result real at root)
 cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
-# DROP/RESULT skeleton — hamesha banayein (fresh install pe khali hota hai)
-# V112 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
+# DROP/RESULT skeleton — always created (fresh install starts empty)
+# V113 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
 # (Section G frozen — original lowercase/mixed-case spellings).
-# paths.py ensure_dirs() bhi launcher pe banata hai; yahan bana do taaki
-# pehli boot pe 'FOLDERS CREATED' box na dikhe.
+# paths.py ensure_dirs() also creates these at launcher time; creating them
+# here too so the first boot shows no 'FOLDERS CREATED' box.
 mkdir -p "$TARGET/drop/pak" "$TARGET/drop/lua" "$TARGET/drop/inject" \
          "$TARGET/result/extracted" "$TARGET/result/injected" \
          "$TARGET/result/lua" "$TARGET/result/processed" \
          "$TARGET/result/CostomPak" "$TARGET/result/Repacked"
-# engine ab .engine/ me — DROP/RESULT symlink (engine __file__-relative me root drop/result)
+# engine now lives in .engine/ — DROP/RESULT symlink (engine __file__-relative to root drop/result)
 ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
 ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"
 if [ -f "$TARGET/.engine/ikram.pyc" ] || [ -f "$TARGET/ikram.pyc" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else
-    fail "Install fail hua — dobara try karo."
+    fail "Install failed — try again."
     exit 1
 fi
 
@@ -611,24 +611,24 @@ sed -i "/^ikram *()/d" "$RC" 2>/dev/null
 sed -i "/Ikram_Tool\/ikram\.py/d" "$RC" 2>/dev/null
 cat >> "$RC" <<'EOF'
 
-# Ikram Tool launcher (ikram_patch.py = poori files A-to-Z load)
+# Ikram Tool launcher (ikram_patch.py = full A-to-Z file load)
 ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"; }
 EOF
-# real executable - bashrc function reload na lage, PATH me hamesha ready
+# real executable - won't reload from bashrc function, always ready in PATH
 cat > "$PREFIX/bin/ikram" <<'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
 export PYTHONDONTWRITEBYTECODE=1
 if ! command -v python3 >/dev/null 2>&1; then
     echo ""
-    echo "  python3 not found! Install karo:"
+    echo "  python3 not found! Install it:"
     echo "    pkg update -y && pkg install -y python"
     echo ""
     exit 1
 fi
-# patch missing ho to khud repair (poori zip fresh download)
+# if the patch is missing, self-repair (fresh full zip download)
 if [ ! -f "$HOME/Ikram_Tool/.engine/ikram_patch.py" ]; then
     echo ""
-    echo "  ⚠ Tool files missing — khud repair kar raha hoon..."
+    echo "  ⚠ Tool files missing — self-repairing..."
     mkdir -p "$HOME/Ikram_Tool/.engine"
     cd "$HOME/Ikram_Tool"
     curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
@@ -641,12 +641,12 @@ if [ ! -f "$HOME/Ikram_Tool/.engine/ikram_patch.py" ]; then
         exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
     fi
     rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"
-    echo "  ✗ Repair fail. Dobara install karo:"
+    echo "  ✗ Repair failed. Reinstall with:"
     echo "    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash"
     echo ""
     exit 1
 fi
-# pyc magic check — python purana ho to khud upgrade
+# pyc magic check — if python is outdated, upgrade it ourselves
 MAGIC_NEEDED=$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)
 MAGIC_HAVE=$(python3 -c "
 import struct
@@ -659,10 +659,10 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     pkg update -y >/dev/null 2>&1 </dev/null
     DEBIAN_FRONTEND=noninteractive pkg upgrade -y python 2>&1 </dev/null | tail -3
     if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
-        echo "  ✓ Python upgrade ho gaya! Tool khul raha hai..."
+        echo "  ✓ Python upgraded! The tool is starting..."
         exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
     fi
-    echo "  ✗ Python upgrade nahi ho paya. Ye chalayen:"
+    echo "  ✗ Python upgrade failed. Run these:"
     echo "    pkg update -y && pkg upgrade -y"
     echo "    ikram"
     echo ""
@@ -684,13 +684,13 @@ if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; t
     [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
     boot_test "$IKRAM_SRC"
 else
-    warn "Boot test skipped (ikram_patch.py nahi mili)"
+    warn "Boot test skipped (ikram_patch.py not found)"
 fi
 
 advance 100 "Setup complete"
-# storage end-check — background request ab tak settle hui honi chahiye
+# storage end-check — the background request should have settled by now
 if [ ! -d "$HOME/storage/shared" ]; then
-    warn "Storage share abhi bhi nahi mila — baad me chalao: termux-setup-storage"
+    warn "Storage share not found yet — run later: termux-setup-storage"
 fi
 V_VER=$(cat "$TARGET/.engine/VERSION" 2>/dev/null || cat "$TARGET/VERSION" 2>/dev/null || echo "latest")
 BW=$((W - 2))

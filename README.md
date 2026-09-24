@@ -1,12 +1,12 @@
 # IkramTool
-![Version](https://img.shields.io/badge/version-v112-blue)
+![Version](https://img.shields.io/badge/version-v113-blue)
 ![Platform](https://img.shields.io/badge/platform-Termux-green)
 ![Status](https://img.shields.io/badge/status-stable-success)
 
-**PAK / LUA Modding Tool** — Termux ke liye (PUBG / BGMI)
+**PAK / LUA Modding Tool** — built for Termux (PUBG / BGMI)
 
 Unpack, inject, repack, costom-pak files · Compile/decompile lua.
-**V112 — VIP Rebuild:** 10 colour themes, boxed menus + live progress,
+**V113 — VIP Rebuild:** 10 colour themes, boxed menus + live progress,
 fixed DROP/RESULT folder system, and the original compiled pak/lua
 engines kept intact (delegated 1:1, verified byte-exact).
 
@@ -14,101 +14,102 @@ engines kept intact (delegated 1:1, verified byte-exact).
 
 ## INSTALL (Termux)
 
-Sirf ye ek command Termux me paste karo (naya terminal / fresh Termux):
+Paste this one command into Termux (new terminal / fresh Termux):
 
 ```
 curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash
 ```
 
-Ye command install karta hai: python, git, curl, unzip, openjdk-17, lua53,
-sab pip libraries (rich, pycryptodome, zstandard...), tool files, aur `ikram`
-command — sab khud, sirf ek baar.
+This installs: python, git, curl, unzip, openjdk-17, lua53,
+all pip libraries (rich, pycryptodome, zstandard...), the tool files, and
+the `ikram` command — everything automatically, just once.
 
-Ya phir `install.sh` file download karo aur:
+Or download `install.sh` and run:
 ```
 bash install.sh
 ```
 
-Install hone ke baad **naya terminal kholo** aur likho:
+After install, **open a new terminal** and type:
 ```
 ikram
 ```
 
-> Install pipeline non-blocking (only piped runner) hai: `curl | bash` ke
-> dauraan Enter nahi poochta, har package alag + retry 3x, progress % ke saath.
+> The install pipeline is non-blocking: `curl | bash` never waits for Enter
+> during install, every package installs separately with 3 retries, and a
+> progress % is shown.
 
 ---
 
-## USE KAISE KARNA HAI
+## HOW TO USE
 
-Tool ke **DROP** folder me files daalo, phir option choose karo. Kuch type
-karna nahi — sirf list me se number chuno.
+Put files into the tool's **DROP** folder, then choose an option. No typing
+needed — just pick a number from the list.
 
-| Folder | Kya daalo |
-|--------|-----------|
+| Folder | What to put in it |
+|--------|-------------------|
 | `DROP/pak` | pak files (unpack / inject / repack) |
 | `DROP/lua` | lua / luac files (compile / decompile) |
-| `DROP/inject` | koi bhi file jo inject ya pack me daalni hai |
+| `DROP/inject` | any file you want to inject or pack |
 
-Result har kaam ke baad **RESULT** folder me milta hai:
+The result of every job lands in the **RESULT** folder:
 
-| Folder | Kya milta hai |
-|--------|---------------|
-| `RESULT/extracted/<name>/` | Unpack hone ke baad ki files — edit yahin karo (raw tree clean rehti hai; unpacked copies sidecar me) |
-| `RESULT/processed/<name>/` | Unpack ke sidecar files (game-processable lua/asset copies) |
-| `RESULT/injected/<name>.pak` | Inject hone ke baad ka pak |
-| `RESULT/Repacked/<name>.pak` | Repack ka naya pak (original DROP pak kabhi nahi badalta) |
+| Folder | What you get |
+|--------|--------------|
+| `RESULT/extracted/<name>/` | Files after unpack — edit them here (raw tree stays clean; unpacked copies go to sidecar) |
+| `RESULT/processed/<name>/` | Unpack sidecar files (game-processable lua/asset copies) |
+| `RESULT/injected/<name>.pak` | The pak after inject |
+| `RESULT/Repacked/<name>.pak` | The new pak from repack (the original DROP pak is never changed) |
 | `RESULT/CostomPak/<name>.pak` | Costom Pak (fresh pak skeleton) |
-| `RESULT/lua/` | compile ke `.luac`, decompile ke `.lua` / `.FAILED.txt` |
+| `RESULT/lua/` | compiled `.luac`, decompiled `.lua` / `.FAILED.txt` |
 
-> Folder names **case-sensitive** hain (Android FS): lowercase `DROP/pak`,
-> `DROP/lua`, `DROP/inject` hi likho.
+> Folder names are **case-sensitive** (Android FS): always write lowercase
+> `DROP/pak`, `DROP/lua`, `DROP/inject`.
 
 ### PAK TOOL (4 operations + clear)
-- **1 Unpack** — pak kholo, saari files `RESULT/extracted/<name>/` me nikal lo
-- **2 Inject** — `DROP/inject/` ki files ek pak ke andar daalo (auto put /
+- **1 Unpack** — open the pak, take all files out to `RESULT/extracted/<name>/`
+- **2 Inject** — put `DROP/inject/` files into a pak (auto put /
   one-by-one mode) → `RESULT/injected/<name>.pak`
-- **3 Repack** — extracted files edit karke naya pak banao →
+- **3 Repack** — edit the extracted files, then build a new pak →
   `RESULT/Repacked/<name>.pak`
-- **4 Costom Pak** — extracted tree se ek naya pak banao →
+- **4 Costom Pak** — build a new pak from the extracted tree →
   `RESULT/CostomPak/<name>.pak`
-- `C` / `R` — `DROP/pak` ya `RESULT` clear karo
+- `C` / `R` — clear `DROP/pak` or `RESULT`
 
 ### LUA TOOL (2 operations + intelligence engine)
-- **1 Compile** — source `.lua` ko protected game bytecode banao →
+- **1 Compile** — turn source `.lua` into protected game bytecode →
   `RESULT/lua/`
-- **2 Decompile** — game bytecode ko readable source banao. Success →
-  `<name>_decompiled.lua` + quality score. Encrypted/unreadable →
-  `<name>_FAILED.txt` me reason likha milta hai.
+- **2 Decompile** — turn game bytecode back into readable source. On
+  success → `<name>_decompiled.lua` + quality score. If encrypted /
+  unreadable → `<name>_FAILED.txt` with the reason.
 
-### THEMES (3)
-10 themes — Rainbow (har character colored), Cyber Blue, Blood Red, Matrix
+### THEMES
+10 themes — Neon Pink, Cyber Blue, Blood Red, Matrix
 Green, Gold VIP, Purple Reign, Ice White, Sunset Orange, Ocean Teal, Lava.
-Theme save hota hai aur next launch pe yaad bhi rehta hai.
+The theme is saved and remembered on the next launch.
 
 ---
 
 ## KEY
 
-Tool unlock karne ke liye key chahiye: **FREETOOL** (same har version,
-free). Key valid ho to "Tool unlocked!" milta hai.
+You need a key to unlock the tool: **FREETOOL** (same for every version,
+free). When the key is valid you get "Tool unlocked!".
 
 ---
 
 ## UPDATE
 
-Tool har baar start hote hi **naya version automatically check** karta hai —
-naya ho to khud download+install ho jata hai. Kuch nahi karna.
+At every start the tool **automatically checks for a new version** — if
+one exists it downloads and installs itself. Nothing to do.
 
 ---
 
 ## ISSUES
 
-- **Decompile FAILED.txt mila?** — File properly encrypted hai ya owner ne
-  lock kiya hai. Tool har decompiler try karke honest report deta hai.
-- **AES key puchta hai?** — Encrypted pak hai, AES key chahiye.
-- **unluac.jar nahi?** — bundled hai (unluac_rs + unluac.jar + ljd.zip tool
-  ke saath). Decompile me dikkat aaye to `lua_patched`/`unluac_rs` ek hi
-  folder me hain.
-- **Permission problem?** — Termux ko storage access do: `termux-setup-storage`
-- **Python purana?** — launcher khud `pkg upgrade -y python` karke repack kar leta hai.
+- **Got a Decompile FAILED.txt?** — The file is properly encrypted or the
+  owner locked it. The tool tries every decompiler and reports honestly.
+- **It asks for an AES key?** — It's an encrypted pak; it needs the AES key.
+- **unluac.jar missing?** — It's bundled (unluac_rs + unluac.jar + ljd.zip
+  included). If decompile struggles, `lua_patched`/`unluac_rs` are in the
+  same folder.
+- **Permission problem?** — Give Termux storage access: `termux-setup-storage`
+- **Python outdated?** — the launcher itself runs `pkg upgrade -y python` and repairs itself.

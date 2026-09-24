@@ -9,8 +9,6 @@ clean-slate auto-update never wipes the user's chosen theme).
 Rules (Phase 8):
   - ROLE, not hardcoded colour. Callers say "success" / "error" / "title".
   - Every theme defines every role.
-  - Rainbow paints EVERY character (titles, text and box borders alike)
-    through the full spectrum RED -> YELLOW -> GREEN -> CYAN -> BLUE -> MAGENTA.
   - No ANSI is emitted when the stream is not a real terminal.
 """
 import json
@@ -29,73 +27,71 @@ RESET = C + "0m"
 BOLD = "1"
 DIM = "2"
 
+# Fallback roles when a palette omits one (Red is a sane default accent).
 ROLES = (
     "border", "title", "secondary", "text", "dim", "number", "prompt",
     "separator", "success", "error", "warn", "accent", "primary", "info",
 )
 
-# Red, Yellow, Green, Cyan, Blue, Magenta — the Rainbow cycle.
-RAINBOW_HUE = (196, 220, 46, 51, 27, 201)
-
 _PALETTES = {
     "Cyber Blue": dict(
-        primary=33, secondary=117, accent=45, border=32, title=51, number=39,
-        text=231, dim=245, prompt=51, separator=32, success=48, error=196,
-        warn=214, info=123,
+        primary=117, secondary=159, accent=81, border=117, title=87, number=117,
+        text=231, dim=253, prompt=87, separator=117, success=48, error=196,
+        warn=214, info=159,
     ),
-    "RAINBOW": dict(  # template only; Rainbow paints every char, ignores roles
-        primary=141, secondary=215, accent=57, border=51, title=213, number=214,
-        text=231, dim=245, prompt=51, separator=141, success=48, error=196,
-        warn=220, info=123,
+    "Neon Pink": dict(
+        primary=213, secondary=218, accent=205, border=213, title=213,
+        number=213, text=231, dim=253, prompt=213, separator=177, success=48,
+        error=196, warn=220, info=218,
     ),
     "Blood Red": dict(
-        primary=52, secondary=203, accent=196, border=88, title=196, number=196,
-        text=231, dim=244, prompt=196, separator=88, success=48, error=196,
-        warn=208, info=210,
+        primary=210, secondary=216, accent=203, border=210, title=203, number=210,
+        text=231, dim=253, prompt=203, separator=167, success=48, error=196,
+        warn=208, info=222,
     ),
     "Matrix Green": dict(
-        primary=22, secondary=84, accent=82, border=28, title=46, number=118,
-        text=231, dim=243, prompt=46, separator=28, success=46, error=124,
-        warn=220, info=114,
+        primary=114, secondary=158, accent=82, border=114, title=46, number=154,
+        text=231, dim=253, prompt=46, separator=114, success=46, error=196,
+        warn=220, info=159,
     ),
     "Gold VIP": dict(
-        primary=94, secondary=178, accent=220, border=136, title=220, number=214,
-        text=231, dim=244, prompt=220, separator=136, success=48, error=196,
-        warn=208, info=186,
+        primary=220, secondary=229, accent=220, border=220, title=229, number=220,
+        text=231, dim=253, prompt=220, separator=178, success=48, error=196,
+        warn=208, info=229,
     ),
     "Purple Reign": dict(
-        primary=129, secondary=141, accent=141, border=96, title=207, number=99,
-        text=231, dim=245, prompt=207, separator=96, success=48, error=196,
-        warn=220, info=182,
+        primary=183, secondary=189, accent=147, border=183, title=207, number=183,
+        text=231, dim=253, prompt=207, separator=140, success=48, error=196,
+        warn=220, info=189,
     ),
     "Ice White": dict(
-        primary=66, secondary=152, accent=117, border=66, title=231, number=117,
-        text=231, dim=247, prompt=231, separator=66, success=48, error=196,
+        primary=152, secondary=195, accent=117, border=152, title=231, number=152,
+        text=231, dim=255, prompt=231, separator=152, success=48, error=196,
         warn=214, info=159,
     ),
     "Sunset Orange": dict(
-        primary=130, secondary=208, accent=209, border=166, title=214, number=215,
-        text=231, dim=245, prompt=214, separator=166, success=48, error=196,
+        primary=215, secondary=216, accent=209, border=215, title=222, number=215,
+        text=231, dim=253, prompt=214, separator=172, success=48, error=196,
         warn=202, info=216,
     ),
     "Ocean Teal": dict(
-        primary=30, secondary=80, accent=44, border=36, title=45, number=39,
-        text=231, dim=244, prompt=45, separator=36, success=48, error=196,
-        warn=220, info=116,
+        primary=80, secondary=123, accent=44, border=80, title=87, number=45,
+        text=231, dim=253, prompt=45, separator=80, success=48, error=196,
+        warn=220, info=159,
     ),
     "Lava": dict(
-        primary=58, secondary=179, accent=214, border=94, title=208, number=196,
-        text=231, dim=244, prompt=208, separator=94, success=48, error=196,
+        primary=215, secondary=216, accent=214, border=215, title=226, number=215,
+        text=231, dim=253, prompt=208, separator=172, success=48, error=196,
         warn=172, info=222,
     ),
 }
 
 THEMES = (
-    "Rainbow", "Cyber Blue", "Blood Red", "Matrix Green", "Gold VIP",
+    "Neon Pink", "Cyber Blue", "Blood Red", "Matrix Green", "Gold VIP",
     "Purple Reign", "Ice White", "Sunset Orange", "Ocean Teal", "Lava",
 )
 THEME_NAMES = {
-    "Rainbow": "Rainbow",
+    "Neon Pink": "Neon Pink",
     "Cyber Blue": "Cyber Blue",
     "Blood Red": "Blood Red",
     "Matrix Green": "Matrix Green",
@@ -108,7 +104,7 @@ THEME_NAMES = {
 }
 
 _EMOJI = {
-    "Rainbow": "🌈", "Cyber Blue": "💙", "Blood Red": "❤️",
+    "Neon Pink": "🌸", "Cyber Blue": "💙", "Blood Red": "❤️",
     "Matrix Green": "💚", "Gold VIP": "💛", "Purple Reign": "💜",
     "Ice White": "🤍", "Sunset Orange": "🧡", "Ocean Teal": "🩵",
     "Lava": "🔴",
@@ -158,30 +154,20 @@ def _fansi(code: int, bold=False, dim=False) -> str:
     return C + ";".join(parts) + "m"
 
 
-def _rainbow_char(ch: str, idx: int) -> str:
-    fg = _fansi(RAINBOW_HUE[idx % len(RAINBOW_HUE)])
-    if not fg:
-        return ch
-    return fg + ch + RESET
-
-
 class Theme:
     def __init__(self, name):
         if name not in THEMES:
-            name = "Rainbow" if name == "RAINBOW" else "Cyber Blue"
+            name = "Cyber Blue"
         self.name = name
         pal = _PALETTES.get(name, _PALETTES["Cyber Blue"])
         self._pal = dict(pal)
         for r in ROLES:
             self._pal.setdefault(r, 231)
-        self.rainbow = (name == "Rainbow")
 
     def apply(self, text, role="text", bold=None):
         if role not in ROLES:
             role = "text"
         text = "" if text is None else str(text)
-        if self.rainbow:
-            return "".join(_rainbow_char(ch, i) for i, ch in enumerate(text))
         code = self._pal[role]
         if bold is None:
             bold = role in ("title", "success", "error", "accent", "warn",
@@ -199,7 +185,7 @@ class Theme:
         return _EMOJI.get(self.name, "")
 
     def numbers(self, text):
-        """Number slots: Rainbow -> rainbow, else the theme's number colour."""
+        """Number slots: the theme's number colour."""
         return self.apply(text, "number")
 
 
@@ -231,3 +217,20 @@ def save_theme(name: str) -> None:
 def strip_ansi(text: str) -> str:
     import re
     return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
+
+def display_width(text: str) -> int:
+    """True terminal column width: ANSI stripped, wide chars (emoji/CJK) = 2,
+    combining marks = 0. Used by the box engine so every row lines up edge
+    to edge even with emoji in the title lines."""
+    import unicodedata
+    w = 0
+    for ch in strip_ansi(str(text)):
+        o = ord(ch)
+        if unicodedata.combining(ch) or o in (0x200B, 0x00AD, 0xFEFF):
+            continue
+        if unicodedata.east_asian_width(ch) in ("W", "F"):
+            w += 2
+        else:
+            w += 1
+    return w

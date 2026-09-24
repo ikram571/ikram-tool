@@ -1,10 +1,10 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     IKRAM TOOL v112
+     IKRAM TOOL v113
    THE EASY USER GUIDE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 👋 Hello! Thank you for using IKRAM TOOL.
-(V112 is a full VIP rebuild: 10 colour
+(V113 is a full VIP rebuild: 10 colour
 themes, boxed menus with live progress,
 a fixed DROP/RESULT folder system, and a
 new Lua Intelligence Engine that honestly
@@ -46,15 +46,15 @@ Inside DROP (LOWERCASE — case matters!):
 
 Inside RESULT:
    ├─ extracted/   ➜ files after you UNPACK (edit here)
-   ├─ processed/   ➜ unpack ke sidecar copies
+   ├─ processed/   ➜ unpack sidecar copies
    ├─ injected/    ➜ <name>.pak after you INJECT
    ├─ Repacked/    ➜ <name>.pak after you REPACK
    ├─ CostomPak/   ➜ <name>.pak after COSTOM PAK
    └─ lua/         ➜ .luac, .lua or .FAILED.txt
 
 Rule 📌: DROP = in, RESULT = out. Easy!
-(Kuch bhi type/choose karna nahi hota —
-tool khud files list karke dikhata hai.)
+(You never have to type or choose anything by
+hand — the tool lists the files for you.)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📦 3) PAK TOOL — 4 operations
@@ -63,37 +63,37 @@ Press 1 in the main menu to open PAK TOOL.
 
 ➡️ OPTION 1 — UNPACK
    • Put your .pak in DROP/pak
-   • Press 1, PROCEED pe Y
-   • Wait — live progress dikhta hai
+   • Press 1, then press Y to PROCEED
+   • Wait — live progress is shown
    • 👍 RESULT: RESULT/extracted/<name>/
 
 ➡️ OPTION 2 — INJECT
    • Put the file(s) to add in DROP/inject
    • Put the target .pak in DROP/pak
-   • Press 2 — pak select, phir mode chuno:
+   • Press 2 — select the pak, then choose a mode:
      1 = INJECT ONE FILE (pick its path)
-     2 = INJECT ALL — auto-put (bas naya file
-         ke liye poochta hai)
+     2 = INJECT ALL — auto-put (only asks for
+         the new file's path)
    • 👍 RESULT: RESULT/injected/<name>.pak
 
 ➡️ OPTION 3 — REPACK
    • First UNPACK a pak (option 1)
    • Edit the files in RESULT/extracted/<name>/
-   • Press 3, extracted folder + DROP/pak chuno
+   • Press 3, choose the extracted folder + DROP/pak
    • 👍 RESULT: RESULT/Repacked/<name>.pak
    • Your original .pak in DROP is NEVER
      changed or overwritten. 🔒
-   • Agar RESULT/Repacked/<name>.pak already hai,
-     to overwrite hota hai (yehi folder aisa hai).
+   • If RESULT/Repacked/<name>.pak already exists,
+     it gets overwritten (this folder is the only one).
 
 ➡️ OPTION 4 — COSTOM PAK
-   • Press 4, extracted folder chuno
-   • Ek naya pak skeleton ban jaata hai
+   • Press 4, choose the extracted folder
+   • A new pak skeleton is created
    • 👍 RESULT: RESULT/CostomPak/<name>.pak
 
 💡 TIP: long paks take a little time —
    just wait for the box to finish. ⏳
-   (C = DROP/pak clear, R = RESULT clear.)
+   (C = clear DROP/pak, R = clear RESULT.)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📜 4) LUA TOOL — 2 operations
@@ -102,34 +102,33 @@ Press 2 in the main menu to open LUA TOOL.
 
 ➡️ OPTION 1 — COMPILE
    • Put your .lua source in DROP/lua
-   • Press 1, PROCEED pe Y
+   • Press 1, then press Y to PROCEED
    • Makes a compiled + protected .luac
    • 👍 RESULT: RESULT/lua/
 
 ➡️ OPTION 2 — DECOMPILE
    • Put a compiled .luac in DROP/lua
-   • Press 2, PROCEED pe Y
-   • Tool file ka format + encryption level pehle
-     detect karta hai, phir har decompiler try
-     karta hai aur sabse readable output leta hai
+   • Press 2, then press Y to PROCEED
+   • The tool first detects the file's format and
+     encryption level, then tries every decompiler
+     and keeps the most readable output
    • 👍 SUCCESS: RESULT/lua/<name>_decompiled.lua
      + quality score (Excellent/Poor)
    • 👍 LOCKED: RESULT/lua/<name>_FAILED.txt —
-     isme exactly likha hota hai file kyu nahi
-     khuli (properly encrypted / locked by owner).
-     Ye error NAHI hai — bas file band hai. 🔒
+     it says exactly why the file could not be
+     opened (properly encrypted / locked by owner).
+     This is NOT an error — the file is just sealed. 🔒
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎨 5) THEMES
 
 Press 3 in the main menu for themes.
-Choose any of the 10 themes — Rainbow
-(har character rainbow), Cyber Blue,
-Blood Red, Matrix Green, Gold VIP,
+Choose any of the 10 themes — Neon Pink,
+Cyber Blue, Blood Red, Matrix Green, Gold VIP,
 Purple Reign, Ice White, Sunset Orange,
 Ocean Teal, Lava.
-Theme turant lagta hai aur next launch pe
-yaad rehta hai (saved in ~/.ikramtool/config).
+The theme applies instantly and is remembered
+on the next launch (saved in ~/.ikramtool/config).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 6) HOW TO INSTALL & RUN
@@ -146,7 +145,7 @@ yaad rehta hai (saved in ~/.ikramtool/config).
    https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip
 
 🔸 RUN:
-   In Termux folder of the tool, type:
+   In the tool's Termux folder, type:
 
       bash run.sh
 

@@ -57,13 +57,13 @@ try:
         th = Theme(name)
         s = th.apply("hello", "title") + th.apply("x", "error")
         check("theme %s roles ansi" % name, "\x1b[" in s)
-    rbow = Theme("Rainbow")
-    long_rbow = rbow.apply("ABCDEFGHIJKL", "border")            # rainbow everywhere
+    pink = Theme("Neon Pink")
+    long_pink = pink.apply("ABCDEFGHIJKL", "border")            # solid border colour
     import re as _re
-    codes = set(_re.findall(r"38;5;([0-9]+)", long_rbow))
-    check("rainbow border colors >=4", len(codes) >= 4, str(sorted(codes)))
-    check("rainbow every char colored", len(strip_ansi(long_rbow)) == 12
-          and "ABCDEFGHIJKL" == strip_ansi(long_rbow))
+    codes = set(_re.findall(r"38;5;([0-9]+)", long_pink))
+    check("neon pink border color present", len(codes) >= 1, str(sorted(codes)))
+    check("neon pink every char colored", len(strip_ansi(long_pink)) == 12
+          and "ABCDEFGHIJKL" == strip_ansi(long_pink))
     check("theme apply None empty",
           strip_ansi(Theme("Ice White").apply(None, "primary")) == "")
     check("all 10 theme names", len(THEMES) == 10)

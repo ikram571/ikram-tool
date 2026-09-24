@@ -17,11 +17,11 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v112"
+VERSION = "v113"
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
-CLS = C + "2J" + C + "H" + C + "0m"
+CLS = C + "3J" + C + "2J" + C + "H" + C + "0m"
 
 CLEAR_PAK_DROP = "CLEAR DROP FOLDER"
 CLEAR_RESULT = "CLEAR RESULT FOLDER"
@@ -30,6 +30,38 @@ CLEAR_RESULT = "CLEAR RESULT FOLDER"
 def _w(text):
     sys.stdout.write(text)
     sys.stdout.flush()
+
+
+def _markup(code: int) -> str:
+    """Compiled engine markup colour `color(N)` from a theme palette code."""
+    return "color(%d)" % code
+
+
+# compiled ikram module attributes -> theme roles (A-to-Z theming)
+_ATTR_ROLE = {
+    "INP": "prompt", "ACCENT": "accent", "VIP": "accent", "VIP2": "secondary",
+    "CYAN": "secondary", "MUTED": "dim", "SUCCESS": "success",
+    "ERROR": "error", "ERROR_TITLE": "error", "WARN": "warn",
+    "BORDER": "border", "BORDER_DARK": "border", "LINE": "border",
+    "TITLE": "title", "GOLD": "secondary", "GOLD_BRIGHT": "primary",
+    "MATRIX": "accent",
+}
+
+
+def _sync_compiled_theme(vip):
+    """Push the active theme into the compiled engine's global colour attrs,
+    so the WHOLE tool — welcome, key screen, wizards, numbers, every menu —
+    follows the chosen theme."""
+    ik = vip.ikram
+    if ik is None:
+        return
+    pal = vip.theme._pal
+    for attr, role in _ATTR_ROLE.items():
+        if hasattr(ik, attr):
+            setattr(ik, attr, _markup(pal.get(role, 231)))
+    if hasattr(ik, "_vip"):
+        codes = [pal.get(r, 231) for r in ("number", "accent", "secondary")]
+        ik._vip = lambda i, _c=codes: "bold color(%d)" % _c[i % len(_c)]
 
 
 class ProgressFrame:
@@ -60,6 +92,7 @@ class Vip:
         self.theme = load_theme()
         self.box = BoxEngine(self.theme)
         self._frame_no = 0
+        _sync_compiled_theme(self)
 
     # ------------------------------------------------------ io primitives
     def write(self, text):
@@ -74,11 +107,17 @@ class Vip:
     def _ask(self, prompt):
         """Read one line. Overridable in tests."""
         try:
-            return input(prompt)
+            ans = input(prompt)
         except EOFError:
             return ""
         except KeyboardInterrupt:
             return ""
+        if is_tty():
+            # Termux doesn't echo the Enter newline — advance the cursor so
+            # the next screen/panel starts on a fresh line, never glued to
+            # the "Choose ..." prompt.
+            self.write("\n")
+        return ans
 
     def cls(self):
         if is_tty():
@@ -135,56 +174,117 @@ class Vip:
         return rows
 
     def main_menu(self):
-        rows = [
-            self._opt("1", "PAK Tool"),
-            self._opt("2", "Lua Tool"),
-            self._opt("3", "Themes"),
-            SEP,
-        ] + self.folder_rows() + [
-            SEP,
-            self._opt("0", "Exit"),
+        blocks = [
+            self.header(),
+            self.box.draw_box([
+                self._opt("1", "PAK Tool", "primary"),
+                "    " + self.theme.apply("unpack · inject · repack · costom pak", "dim"),
+                SEP,
+                self._opt("2", "Lua Tool", "primary"),
+                "    " + self.theme.apply("compile · decompile", "dim"),
+                SEP,
+                self._opt("3", "Themes", "primary"),
+                "    " + self.theme.apply("switch the color theme of the whole tool", "dim"),
+                SEP,
+            ] + self.folder_rows() + [
+                SEP,
+                self._opt("0", "Exit", "primary"),
+            ], "light", title="MAIN MENU"),
         ]
-        return rows
+        return blocks
 
     def pak_menu(self):
-        return [
-            self._opt("1", "Unpack"),
-            self._opt("2", "Inject"),
-            self._opt("3", "Repack"),
-            self._opt("4", "Costom Pak"),
-            SEP,
+        opts = [
+            ("1", "📦 Unpack PAK",
+             ["WORK: take all files out of the pak.",
+              "PUT FILE IN: DROP/pak",
+              "OUTPUT: RESULT/extracted/"]),
+            ("2", "📦 Inject File",
+             ["WORK: put any file (lua/uasset/asset) into the pak —",
+              "type is found automatically and added to the game.",
+              "1 file or all files at once — auto or manual path.",
+              "PUT FILE IN: DROP/inject + DROP/pak",
+              "OUTPUT: RESULT/injected/"]),
+            ("3", "📦 Repack PAK",
+             ["WORK: build the pak again.",
+              "1) first UNPACK the pak",
+              "2) edit files in RESULT/extracted",
+              "3) old pak files are NEVER touched",
+              "OUTPUT: RESULT/Repacked/"]),
+            ("4", "📦 Costom Pak",
+             ["WORK: make an empty pak.",
+              "ENTER (no typing) = ALL folders + all file names",
+              "but EMPTY files (real in game when injected).",
+              "number = pick 1 folder · typed path = only that",
+              "path + its files copied (not empty).",
+              "PUT FILE IN: DROP/pak",
+              "OUTPUT: RESULT/CostomPak/"]),
+        ]
+        rows = []
+        for digit, name, help_lines in opts:
+            rows.append(self._opt(digit, name, "primary"))
+            for h in help_lines:
+                rows.append("    " + self.theme.apply(h, "dim"))
+            rows.append(SEP)
+        rows += [
             self._opt("C", "Clear DROP/pak/"),
             self._opt("R", "Clear RESULT/"),
             SEP,
             self._opt("0", "← Back"),
         ]
+        return [self.box.draw_box(rows, "heavy",
+                                  title="IkramTool · PAK TOOL")]
 
     def lua_menu(self):
-        return [
-            self._opt("1", "Compile"),
-            self._opt("2", "Decompile"),
-            SEP,
+        opts = [
+            ("1", "📜 Compile",
+             ["WORK: make a game-ready compiled file from source.",
+              "PUT FILE IN: DROP/lua",
+              "OUTPUT: RESULT/lua/"]),
+            ("2", "📜 Decompile",
+             ["WORK: make readable source from a compiled file.",
+              "accepts any compiled file type (lua, uasset, uexp, ir, bin, dat).",
+              "PUT FILE IN: DROP/lua",
+              "OUTPUT: RESULT/lua/"]),
+        ]
+        rows = []
+        for digit, name, help_lines in opts:
+            rows.append(self._opt(digit, name, "primary"))
+            for h in help_lines:
+                rows.append("    " + self.theme.apply(h, "dim"))
+            rows.append(SEP)
+        rows += [
             self._opt("C", "Clear DROP/lua/"),
             self._opt("R", "Clear RESULT/lua/"),
             SEP,
             self._opt("0", "← Back"),
         ]
+        return [self.box.draw_box(rows, "heavy",
+                                  title="IkramTool · LUA TOOL")]
 
     def themes_menu(self):
         rows = []
-        for name in THEMES:
+        for i, name in enumerate(THEMES, 1):
             th = Theme(name)
-            mark = "   ← ✓" if name == self.theme.name else ""
-            row = "  " + th.emoji() + " " + th.apply(name, "primary")
-            if mark:
-                row += self.theme.apply(mark, "success")
-            rows.append(row)
+            line = (self._opt(str(i), "") + " " + th.emoji() + " "
+                    + th.apply(name, "primary"))
+            if name == self.theme.name:
+                line += self.theme.apply("   ← ✓", "success")
+            rows.append(line)
         rows.append(SEP)
         rows.append(self._opt("0", "← Back"))
-        return rows
+        return [self.box.draw_box(rows, "heavy",
+                                  title="IkramTool · THEMES")]
 
     def _opt(self, digit, label, role="text"):
         return "  " + self.theme.apply(digit, "number") + "  " + self.theme.apply(label, role)
+
+    def _opt_box(self, opt, style="light"):
+        digit, name, help_lines = opt
+        rows = [self._opt(digit, name, "primary")]
+        for h in help_lines:
+            rows.append("    " + self.theme.apply(h, "dim"))
+        return self.box.draw_box(rows, style)
 
     # ------------------------------------------------------------- flows
     def prompt_in(self, choices, label):
@@ -281,12 +381,12 @@ class Vip:
         try:
             while True:
                 self.cls()
-                self.write(self.box.draw_box(self.main_menu(),
-                                             "heavy", title="%s  %s" % (BRAND, VERSION)) + "\n")
+                self.write("\n\n".join(self.main_menu()) + "\n")
                 got = self.prompt_in(("1", "2", "3", "0"), "Choose")
                 if got == "0":
                     self.exit_screen()
                     return
+                self.cls()
                 if got == "1":
                     self.run_pak()
                 elif got == "2":
@@ -308,11 +408,11 @@ class Vip:
         import menus
         while True:
             self.cls()
-            self.write(self.box.draw_box(self.pak_menu(),
-                                         "heavy", title="PAK TOOL") + "\n")
+            self.write("\n\n".join(self.pak_menu()) + "\n")
             got = self.prompt_in(("1", "2", "3", "4", "c", "r", "0"), "Choose")
             if got == "0":
                 return
+            self.cls()
             if got == "1":
                 menus.pak_unpack(self)
             elif got == "2":
@@ -352,11 +452,11 @@ class Vip:
                     self.pause(1.5)
         while True:
             self.cls()
-            self.write(self.box.draw_box(self.lua_menu(),
-                                         "heavy", title="LUA TOOL") + "\n")
+            self.write("\n\n".join(self.lua_menu()) + "\n")
             got = self.prompt_in(("1", "2", "c", "r", "0"), "Choose")
             if got == "0":
                 return
+            self.cls()
             if got == "1":
                 menus.lua_compile(self)
             elif got == "2":
@@ -369,8 +469,7 @@ class Vip:
     def run_themes(self):
         while True:
             self.cls()
-            self.write(self.box.draw_box(self.themes_menu(),
-                                         "heavy", title="THEMES") + "\n")
+            self.write("\n\n".join(self.themes_menu()) + "\n")
             got = self.prompt_in(
                 tuple(str(i) for i in range(1, len(THEMES) + 1)) + ("0",),
                 "Choose theme")
@@ -381,6 +480,7 @@ class Vip:
                 save_theme(name)
                 self.theme = Theme(name)
                 self.box = BoxEngine(self.theme)
+                _sync_compiled_theme(self)
             self.cls()
             self.write(self.box.draw_box([
                 self.theme.apply(name, "primary"),

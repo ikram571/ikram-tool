@@ -15,6 +15,19 @@ spec.loader.exec_module(ikram)
 import engines as _engines
 import assetprocs as _assets
 
+# ---- real DROP/RESULT override (installed layout: .engine/ ke PARENT me
+# drop/result lowercase; repo layout: DROP/RESULT. compiled module points at
+# its own __file__ dir = .engine/DROP, which must NEVER have user data).
+import paths as _paths
+for _name, _val in (
+    ("DROP", _paths.DROP_DIR),
+    ("DROP_PAK", _paths.DROP_PAK),
+    ("DROP_LUA", _paths.DROP_LUA),
+    ("DROP_INJ", _paths.DROP_INJECT),
+    ("RESULT", _paths.RESULT_DIR),
+):
+    setattr(ikram, _name, _val)
+
 for _d in (
     ikram.DROP,
     ikram.DROP_INJ,
@@ -138,7 +151,7 @@ def _PakName(pakf):
 
 
 def _unique_out_dir(base):
-    """base, base (1), base (2) ... — kabhi overwrite nahi."""
+    """base, base (1), base (2) ... — existing files are never overwritten."""
     out = Path(base)
     if not out.exists():
         return out
@@ -152,7 +165,7 @@ def _unique_out_dir(base):
 
 def _unique_out_file(path):
     """Same as _unique_out_dir but for a single file — keep original name,
-    suffix (1), (2) ... — kabhi overwrite nahi."""
+    suffix (1), (2) ... — existing files are never overwritten."""
     if not path.exists():
         return path
     i = 1
@@ -241,11 +254,11 @@ def _choose_pak_index(n, paks, label):
                 return i
         except ValueError:
             pass
-        ikram.console.print("[bold {}]Invalid number — 1 se {} tak choose karo.[/]".format(ikram.WARN, n))
+        ikram.console.print("[bold {}]Invalid number — choose a number from 1 to {}.[/]".format(ikram.WARN, n))
 
 
 def ensure_input_folder():
-    """DROP/pak se sirf .pak files pick karo (OBB support removed)."""
+    """Pick only .pak files from DROP/pak (OBB support removed)."""
     paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
     if not paks:
         ikram.show_error(
@@ -268,7 +281,7 @@ def _is_pak(p):
 
 
 def _drop_items():
-    """DROP/pak ke SAARE files — .pak pak hain, baaki sab assets/raw."""
+    """ALL files in DROP/pak — .pak files are paks, everything else is assets/raw."""
     base = Path(ikram.DROP_PAK)
     if not base.is_dir():
         return []
@@ -294,7 +307,7 @@ def _process_standalone(f):
 
 
 def _auto_process_tree(out_dir, pakstem):
-    """Pak unpack ke baad under ki files auto-process:
+    """After pak unpack, the inner files are auto-processed:
     RESULT/extracted/<pak> -> sidecars RESULT/processed/<pak> (raw tree clean)."""
     proc_root = ikram.RESULT / "processed" / pakstem
     ui = ikram._ProgressUI(title="⚙ PROCESSING FILES")
@@ -438,8 +451,8 @@ def pak_repack_folder():
     edit_dir = ikram.RESULT / "extracted" / pakf.stem
     if not edit_dir.is_dir():
         ikram.show_error(
-            "Extracted folder nahi mili: RESULT/extracted/{}\n"
-            "Pehle is pak ka UNPACK karo, phir REPACK karo.".format(pakf.stem)
+            "Extracted folder not found: RESULT/extracted/{}\n"
+            "First UNPACK this pak, then REPACK it.".format(pakf.stem)
         )
         ikram.pause()
         return
@@ -489,11 +502,11 @@ def _chain_dirs(target):
 
 
 def _sanitize_custom_path(p, mount):
-    """Custom path type karo — auto source-mount ke under.
-    Mount pehle se ShadowTrackerExtra khatam hota hai (jaise
-    '../../../ShadowTrackerExtra/') toh path uske under hi rehta hai,
-    warna 'ShadowTrackerExtra/' prefix auto add hota hai.
-    'Content/Lua/...' isliye kabhi bhi double ShadowTrackerExtra nahi banata."""
+    """Custom path — resolved under the auto source-mount.
+    If the mount already ends with 'ShadowTrackerExtra' (e.g.
+    '../../../ShadowTrackerExtra/'), the path stays under it,
+    otherwise the 'ShadowTrackerExtra/' prefix is added automatically.
+    'Content/Lua/...' never creates a doubled ShadowTrackerExtra."""
     s = str(p).strip().strip("'\"`")
     s = s.replace("\\", "/")
     segs = s.split("/")
@@ -516,9 +529,9 @@ def _sanitize_custom_path(p, mount):
 
 
 def _pick_folders(pakf):
-    """Pak ke andar ke saare FOLDER paths — number se choose, 0 = cancel,
-    ya khud ka path type karo (auto under ShadowTrackerExtra).
-    Returns (mount-relative target dir, exists_in_source), ya None on cancel."""
+    """All FOLDER paths inside the pak — choose by number, 0 = cancel,
+    or type your own path (auto under ShadowTrackerExtra).
+    Returns (mount-relative target dir, exists_in_source), or None on cancel."""
     with _engines.pakmod().PakReader(pakf) as r:
         mount = r.mount_point
         all_paths = [k.rstrip("/") for k in r.dirs if k.strip("/")]
@@ -573,10 +586,10 @@ def _pick_folders(pakf):
 
 
 def _prompt_empty_file_name(target):
-    """Target folder source me nahi hai — empty file ke liye naam mangwao.
-    '0' ya khaali = cancel. Path separators / '..' reject."""
+    """Target folder not found in source — ask for a name for the empty file.
+    '0' or empty = cancel. Path separators / '..' rejected."""
     ikram.console.print(
-        "[bold {}]Folder '{}' source pak me nahi hai → empty file banega.[/bold {}]".format(
+        "[bold {}]Folder '{}' not found in source pak → an empty file will be created.[/bold {}]".format(
             ikram.WARN, target, ikram.WARN
         )
     )
@@ -607,7 +620,7 @@ _CORPUS_TEMPLATES = None
 
 
 def _candidate_paks():
-    """Accessible pak corpus: tool ke bagal Paks/, DROP/pak, home — jab bhi.
+    """Accessible pak corpus: Paks/ next to the tool, DROP/pak, home — whenever.
     Returns sorted list of .pak paths, deduped, no double scans."""
     seen = set()
     out = []
@@ -638,9 +651,9 @@ def _candidate_paks():
 
 
 def _corpus_templates(log=None):
-    """Har file-extension ka pehla entry (a→z order) corpus se template —
-    taaki koi bhi extension ka empty file engine-valid ban sake.
-    Lazy memoised: first empty-file need pe scan hota hai, phir cached."""
+    """First entry per file-extension (a→z order) from corpus as template —
+    so an empty file of ANY extension can be engine-valid.
+    Lazy memoised: scanned on first empty-file need, then cached."""
     global _CORPUS_TEMPLATES
     if _CORPUS_TEMPLATES is not None:
         return _CORPUS_TEMPLATES
@@ -670,10 +683,10 @@ def _corpus_templates(log=None):
 
 
 def _make_empty_entry(tmpl, version):
-    """Engine-valid empty entry. Template clone (agar mila) woh compression
-    fields inherit karta hai apne extension ke liye; warna raw CM_NONE entry.
-    compressed_blocks/offset/size zero — taki write phase kuch bhi na likhe
-    aur reuse-copy path source/another-pak data na chape."""
+    """Engine-valid empty entry. Template clone (if found) inherits the
+    compression fields for its extension; otherwise a raw CM_NONE entry.
+    compressed_blocks/offset/size zero — so the write phase writes nothing
+    and the reuse-copy path never stamps source/another-pak data."""
     pak = _engines.pakmod()
     if tmpl is not None:
         ne = tmpl.clone()
@@ -699,8 +712,8 @@ def _make_empty_entry(tmpl, version):
 
 
 def _subtree_files(r, target):
-    """Target folder ke under saare files: {full_path: entry}.
-    target khud ek file ho toh usko bhi le aata hai."""
+    """All files under the target folder: {full_path: entry}.
+    If target itself is a file, it is also included."""
     target_r = target.rstrip("/")
     prefix = target_r + "/"
     fp_map = r.full_paths()
@@ -712,8 +725,8 @@ def _subtree_files(r, target):
 
 
 def _inject_empty_file(r, out, target, fname, mount, version, log):
-    """Chain + ek empty file (engine-valid entry). Template = source/same-suffix
-    entry, warna corpus scan ka template, warna raw CM_NONE."""
+    """Chain + one empty file (engine-valid entry). Template = source/same-suffix
+    entry, else a corpus scan template, else a raw CM_NONE."""
     import hashlib
     target_r = target.rstrip("/")
     fname_p = Path(fname)
@@ -743,13 +756,14 @@ def _inject_empty_file(r, out, target, fname, mount, version, log):
 
 def _align_block_windows(r, sel, log):
     """Reuse-path safety (single-block entries only). pak.pyc inject_files
-    compresse/encrypted single-block entry ka sirf block span splice karta hai,
-    lekin reader align_encrypted_size(size) bytes decrypt karta hai — span <
-    aligned window ho to last ciphertext block me agle entry ke bytes bleed →
-    content tail corrupt (verified: .uexp ka 16-byte tail field badal jata).
-    Last block ka end aligned window tak extend karo taaki splice full window
-    le. Multi-block entries skip: unke blocks khud-se aligned splice hote hain,
-    block-end fiddle karne se boundary shifts + content corrupt ho jata hai."""
+    splices only the block span of a compressed/encrypted single-block entry,
+    but the reader decrypts align_encrypted_size(size) bytes — when span is
+    smaller than the aligned window, the last ciphertext block bleeds bytes
+    from the next entry → the content tail corrupts (verified: .uexp 16-byte
+    tail field gets changed). Extend the last block end to the aligned window
+    so the splice takes the full window. Multi-block entries are skipped:
+    their blocks already splice self-aligned, and fiddling block ends shifts
+    boundaries + corrupts content."""
     pc = _engines.pakmod().pc
     fixed = 0
     for fp, e in sel.items():
@@ -771,9 +785,9 @@ def _align_block_windows(r, sel, log):
 
 
 def _inject_subtree_copy(r, out, target, log):
-    """Target folder ke files — source index entries hi copy hote hain
+    """Files of the target folder — the source index entries are copied as-is
     (read_entry → edits), inject_files compressed/encrypted reuse path
-    original bytes splice karta hai → byte-identical content."""
+    splices the original bytes → byte-identical content."""
     sel = _subtree_files(r, target)
     if not sel:
         return None
@@ -791,10 +805,10 @@ def _inject_subtree_copy(r, out, target, log):
 
 
 def _inject_skeleton(r, out, target, log):
-    """COSTOM Pak ENTER-mode: index me source pak ke SAARE folder paths +
-    SAARE file NAMES, but har file ka body EMPTY (engine-valid zero entries).
-    Templates source mein same-suffix entry se (warna corpus) — taki
-    skeleton pak real game me load ho, phir user usme inject kare."""
+    """COSTOM Pak ENTER-mode: the index gets ALL folder paths + ALL file NAMES
+    from the source pak, but every file body is EMPTY (engine-valid zero entries).
+    Templates come from a same-suffix entry in source (else corpus) — so the
+    skeleton pak loads in the real game, and the user injects into it later."""
     import hashlib
     fp_map = r.full_paths()
     chain = _chain_dirs(target)
@@ -833,11 +847,11 @@ def _inject_skeleton(r, out, target, log):
 
 
 def _trim_tencent_pad(path, log=None):
-    """COSTOM pak me inject_files ke baad writer zero-pad daal deta hai taaki
-    output = source pak size (pak.py:645-648 'total < orig_size' branch). Woh
-    ulle-pulle bytes sirf index se pehle waste hoti hain — data ke theek baad
-    index+footer shift karo aur footer ka index_offset field re-key karo
-    (keystream XOR, wahi saare bytes jo writer use karta hai)."""
+    """After inject_files in a COSTOM pak, the writer appends a zero-pad so the
+    output = source pak size (pak.py:645-648 'total < orig_size' branch). Those
+    wasted bytes only sit before the index — shift the index+footer right after
+    the data and re-key the footer's index_offset field (keystream XOR, the same
+    bytes the writer uses)."""
     log = log or (lambda *a, **k: None)
     pak = _engines.pakmod()
     path = Path(path)
@@ -890,16 +904,16 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                      empty_name=None):
     """Build a COSTOM pak from source pakf:
 
-      empty_name None  + target in source → chain-dir rako + chosen folder
-                                     ke files byte-identical copy (real pak)
-      empty_name None  + target missing  → foldeless / structure-only pak
-                                     (chain-dirs hi, files = 0, tencent)
-      empty_name set   + target missing  → chain + ek empty file (valid entry)
+      empty_name None  + target in source → keep chain-dir + copy the chosen
+                                     folder's files byte-identical (real pak)
+      empty_name None  + target missing  → folderless / structure-only pak
+                                     (chain-dirs only, files = 0, tencent)
+      empty_name set   + target missing  → chain + one empty file (valid entry)
 
-    tencent: source mount_point rakho, index me only the chosen chain +
+    tencent: keep the source mount_point, index only the chosen chain +
     files. PakWriter.inject_files recomputes sha1/CRC footer fields.
 
-    ue4: standard UE4 pak me folder-only records exist nahi karte — build an
+    ue4: standard UE4 pak has no folder-only records — build an
     empty twin (mount + version preserved, zero records)."""
     log = log or (lambda *a, **k: None)
     pakf = Path(pakf)

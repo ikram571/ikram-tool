@@ -6,8 +6,8 @@
 - **Brand lock:** IkramTool v112 is the only name used anywhere in the tool.
 - **Premium UI engine:** every screen is a styled box (heavy/rounded/thick on
   your terminal, minimal on pipes) with live progress frames on operations.
-- **10 colour themes:** Rainbow, Cyber Blue, Blood Red, Matrix Green, Gold
-  VIP, Purple Reign, Ice White, Sunset Orange, Ocean Teal, Lava. Rainbow
+- **10 colour themes:** Neon Pink, Cyber Blue, Blood Red, Matrix Green, Gold
+  VIP, Purple Reign, Ice White, Sunset Orange, Ocean Teal, Lava. Neon Pink
   paints every single character of the UI. Theme saved to `~/.ikramtool/config`,
   applied instantly from the Themes menu.
 - **Terminal restore on exit** — Ctrl+C anywhere leaves the terminal clean.

@@ -45,7 +45,7 @@ _XOR_LENGTHS = (1, 2, 4, 8, 16, 32, 64, 128)
 _LUA_MAGICS = (b"\x1bLuaQ", b"\x1bLuaR", b"\x1bLuaS", b"\x1bLuaT",
                b"\x1bLua", b"\x1bLJ")
 
-VERSION = "v112"
+VERSION = "v113"
 
 
 # ---------------------------------------------------------------- detection
