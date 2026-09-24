@@ -66,7 +66,7 @@ try:
           and "ABCDEFGHIJKL" == strip_ansi(long_pink))
     check("theme apply None empty",
           strip_ansi(Theme("Ice White").apply(None, "primary")) == "")
-    check("all 10 theme names", len(THEMES) == 10)
+    check("all 11 theme names", len(THEMES) == 11)
 finally:
     _te.is_tty = _orig_is_tty
 

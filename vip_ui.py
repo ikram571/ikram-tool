@@ -17,7 +17,7 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v113"
+VERSION = "v114"
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
@@ -42,10 +42,22 @@ _ATTR_ROLE = {
     "INP": "prompt", "ACCENT": "accent", "VIP": "accent", "VIP2": "secondary",
     "CYAN": "secondary", "MUTED": "dim", "SUCCESS": "success",
     "ERROR": "error", "ERROR_TITLE": "error", "WARN": "warn",
-    "BORDER": "border", "BORDER_DARK": "border", "LINE": "border",
+    "BORDER": "border", "BORDER_DARK": "border_dark", "LINE": "border",
     "TITLE": "title", "GOLD": "secondary", "GOLD_BRIGHT": "primary",
     "MATRIX": "accent",
 }
+
+
+def _vip_num_cycle(pal, theme_name="Original Color"):
+    """V111 number colour cycle: 0→183, 1→45, 2→51, 3→39, 4→118, 5→119.
+    Other themes map the same six slots through their own palette so the
+    UI shape stays byte-identical everywhere."""
+    if theme_name == "Original Color":
+        return {"0": 183, "1": 45, "2": 51, "3": 39, "4": 118, "5": 119}
+    base = pal.get("number", 45)
+    return {"0": base, "1": base, "2": pal.get("secondary", 51),
+            "3": pal.get("accent", 141), "4": pal.get("warn", 214),
+            "5": pal.get("primary", 228)}
 
 
 def _sync_compiled_theme(vip):
@@ -62,6 +74,10 @@ def _sync_compiled_theme(vip):
     if hasattr(ik, "_vip"):
         codes = [pal.get(r, 231) for r in ("number", "accent", "secondary")]
         ik._vip = lambda i, _c=codes: "bold color(%d)" % _c[i % len(_c)]
+    if hasattr(ik, "_vip_num"):
+        cyc = _vip_num_cycle(pal, vip.theme.name)
+        ik._vip_num = lambda n, _m=cyc: "bold color(%d)" % _m.get(
+            str(n), _m.get("5", 228))
 
 
 class ProgressFrame:
@@ -153,11 +169,11 @@ class Vip:
 
     # ------------------------------------------------------------- screens
     def header(self):
-        return self.box.draw_box([], "heavy", title="%s  %s" % (BRAND, VERSION),
+        return self.box.draw_box([], "thick", title="%s  %s" % (BRAND, VERSION),
                                  padding=0)
 
     def folder_rows(self):
-        rows = []
+        lines = []
         for label, folder in (("DROP/pak/", paths.DROP_PAK),
                               ("DROP/lua/", paths.DROP_LUA),
                               ("DROP/inject/", paths.DROP_INJECT)):
@@ -165,31 +181,28 @@ class Vip:
             if files:
                 n = len(files)
                 size = paths.human(sum(f.stat().st_size for f in files))
-                rows.append("  " + self.theme.apply(label, "dim")
-                            + self.theme.apply(" %d files   %s" % (n, size),
-                                               "success"))
+                line = (self.theme.apply(label, "text")
+                        + self.theme.apply(" %d files   %s" % (n, size),
+                                           "success"))
             else:
-                rows.append("  " + self.theme.apply(label, "dim")
-                            + self.theme.apply(" (empty)", "dim"))
-        return rows
+                line = (self.theme.apply(label, "text")
+                        + self.theme.apply(" (empty)", "dim"))
+            lines.append(line)
+        return [(None, lines)]
 
     def main_menu(self):
         blocks = [
-            self.header(),
-            self.box.draw_box([
-                self._opt("1", "PAK Tool", "primary"),
-                "    " + self.theme.apply("unpack · inject · repack · costom pak", "dim"),
-                SEP,
-                self._opt("2", "Lua Tool", "primary"),
-                "    " + self.theme.apply("compile · decompile", "dim"),
-                SEP,
-                self._opt("3", "Themes", "primary"),
-                "    " + self.theme.apply("switch the color theme of the whole tool", "dim"),
-                SEP,
+            self.box.draw_menu([
+                ("1", "📦 PAK TOOL (UNPACK, INJECT, REPACK)",
+                 ["unpack, inject, repack pak files",
+                  "COSTOM PAK: make empty pak all-in-one (option 4)"]),
+                ("2", "📜 LUA TOOL (COMPILING, DECOMPILING)",
+                 ["compile / decompile lua (auto-detect)"]),
+                ("3", "🎨 THEMES",
+                 ["switch the color theme of the whole tool"]),
             ] + self.folder_rows() + [
-                SEP,
-                self._opt("0", "Exit", "primary"),
-            ], "light", title="MAIN MENU"),
+                ("0", "EXIT", ["close the tool"]),
+            ], title="MAIN MENU (%s)" % VERSION.upper(), subtitle="choose a number"),
         ]
         return blocks
 
@@ -220,20 +233,13 @@ class Vip:
               "PUT FILE IN: DROP/pak",
               "OUTPUT: RESULT/CostomPak/"]),
         ]
-        rows = []
-        for digit, name, help_lines in opts:
-            rows.append(self._opt(digit, name, "primary"))
-            for h in help_lines:
-                rows.append("    " + self.theme.apply(h, "dim"))
-            rows.append(SEP)
+        rows = list(opts)
         rows += [
-            self._opt("C", "Clear DROP/pak/"),
-            self._opt("R", "Clear RESULT/"),
-            SEP,
-            self._opt("0", "← Back"),
+            ("C", "Clear DROP/pak/", ["wipe every file inside DROP/pak/"]),
+            ("R", "Clear RESULT/", ["wipe every file inside RESULT/"]),
+            ("0", "← Back", []),
         ]
-        return [self.box.draw_box(rows, "heavy",
-                                  title="IkramTool · PAK TOOL")]
+        return [self.box.draw_menu(rows, title="📦 PAK TOOL 📦")]
 
     def lua_menu(self):
         opts = [
@@ -247,37 +253,31 @@ class Vip:
               "PUT FILE IN: DROP/lua",
               "OUTPUT: RESULT/lua/"]),
         ]
-        rows = []
-        for digit, name, help_lines in opts:
-            rows.append(self._opt(digit, name, "primary"))
-            for h in help_lines:
-                rows.append("    " + self.theme.apply(h, "dim"))
-            rows.append(SEP)
+        rows = list(opts)
         rows += [
-            self._opt("C", "Clear DROP/lua/"),
-            self._opt("R", "Clear RESULT/lua/"),
-            SEP,
-            self._opt("0", "← Back"),
+            ("C", "Clear DROP/lua/", ["wipe every file inside DROP/lua/"]),
+            ("R", "Clear RESULT/lua/", ["wipe every file inside RESULT/lua/"]),
+            ("0", "← Back", []),
         ]
-        return [self.box.draw_box(rows, "heavy",
-                                  title="IkramTool · LUA TOOL")]
+        return [self.box.draw_menu(rows, title="📜 LUA TOOL 📜")]
 
     def themes_menu(self):
         rows = []
         for i, name in enumerate(THEMES, 1):
             th = Theme(name)
-            line = (self._opt(str(i), "") + " " + th.emoji() + " "
+            line = (self.theme.apply(str(i), "number") + "  "
+                    + th.emoji() + " "
                     + th.apply(name, "primary"))
             if name == self.theme.name:
                 line += self.theme.apply("   ← ✓", "success")
             rows.append(line)
-        rows.append(SEP)
-        rows.append(self._opt("0", "← Back"))
-        return [self.box.draw_box(rows, "heavy",
-                                  title="IkramTool · THEMES")]
+        rows.append(("0", "← Back", []))
+        return [self.box.draw_menu(rows, title="🎨 THEMES 🎨")]
 
     def _opt(self, digit, label, role="text"):
-        return "  " + self.theme.apply(digit, "number") + "  " + self.theme.apply(label, role)
+        cyc = _vip_num_cycle(self.theme._pal, self.theme.name)
+        n = self.theme.paint_code(str(digit), cyc.get(str(digit), cyc["5"]))
+        return "  " + n + "  " + self.theme.apply(label, role)
 
     def _opt_box(self, opt, style="light"):
         digit, name, help_lines = opt
@@ -337,7 +337,7 @@ class Vip:
         rows.append(SEP)
         rows.append("  " + self.theme.apply("[ Y ] Proceed", "success")
                     + "      " + self.theme.apply("[ N ] Cancel", "warn"))
-        self.write(self.box.draw_box(rows, "heavy", title="Proceed?") + "\n")
+        self.write(self.box.draw_box(rows, "thick", title="Proceed?") + "\n")
         self.write("  " + self.theme.apply("Proceed? (Y/N) ", "prompt") + " ")
         ans = self._ask("").strip().lower()
         while ans not in ("y", "n"):
@@ -382,7 +382,7 @@ class Vip:
             while True:
                 self.cls()
                 self.write("\n\n".join(self.main_menu()) + "\n")
-                got = self.prompt_in(("1", "2", "3", "0"), "Choose")
+                got = self.prompt_in(("1", "2", "3", "0"), "➜ SELECT:")
                 if got == "0":
                     self.exit_screen()
                     return
@@ -409,7 +409,7 @@ class Vip:
         while True:
             self.cls()
             self.write("\n\n".join(self.pak_menu()) + "\n")
-            got = self.prompt_in(("1", "2", "3", "4", "c", "r", "0"), "Choose")
+            got = self.prompt_in(("1", "2", "3", "4", "c", "r", "0"), "➜ SELECT:")
             if got == "0":
                 return
             self.cls()
@@ -453,7 +453,7 @@ class Vip:
         while True:
             self.cls()
             self.write("\n\n".join(self.lua_menu()) + "\n")
-            got = self.prompt_in(("1", "2", "c", "r", "0"), "Choose")
+            got = self.prompt_in(("1", "2", "c", "r", "0"), "➜ SELECT:")
             if got == "0":
                 return
             self.cls()

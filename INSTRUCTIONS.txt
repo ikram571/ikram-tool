@@ -1,10 +1,10 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     IKRAM TOOL v113
+     IKRAM TOOL v114
    THE EASY USER GUIDE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 👋 Hello! Thank you for using IKRAM TOOL.
-(V113 is a full VIP rebuild: 10 colour
+(V114 is a full VIP rebuild: 10 colour
 themes, boxed menus with live progress,
 a fixed DROP/RESULT folder system, and a
 new Lua Intelligence Engine that honestly
@@ -123,9 +123,9 @@ Press 2 in the main menu to open LUA TOOL.
 🎨 5) THEMES
 
 Press 3 in the main menu for themes.
-Choose any of the 10 themes — Neon Pink,
-Cyber Blue, Blood Red, Matrix Green, Gold VIP,
-Purple Reign, Ice White, Sunset Orange,
+Choose any of the 11 themes — Original Color,
+Neon Pink, Cyber Blue, Blood Red, Matrix Green,
+Gold VIP, Purple Reign, Ice White, Sunset Orange,
 Ocean Teal, Lava.
 The theme applies instantly and is remembered
 on the next launch (saved in ~/.ikramtool/config).

@@ -1,5 +1,15 @@
 # Changelog
 
+## V114
+
+### Bug fixes
+- **Self-update success box fixed** — the TTY success panel used a 4-placeholder
+  `format()` with only 3 arguments, raising `IndexError` on every successful
+  on-device self-update; the update was applied but reported as failed
+  (`INSTALLED_OK` never printed). Now renders and exits cleanly.
+- Version bumped to V114 across the tool (UI brand, `VERSION`, key metadata,
+  installer, docs, tests).
+
 ## V112
 
 ### Full Rebuild — premium VIP experience

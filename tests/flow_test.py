@@ -59,7 +59,7 @@ def main():
     # 1 ---- V112 shell: brand, folder status, exit (asserts inside runner)
     run_case("shell", {
         "steps": [{"script": ["0"],
-                   "expect": {"brand": ["IkramTool", "v113"],
+                   "expect": {"brand": ["IkramTool", "v114"],
                               "status": ["DROP/pak/", "(empty)"],
                               "exit": ["Thanks for using IkramTool"]}}]})
 

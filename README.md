@@ -1,12 +1,12 @@
 # IkramTool
-![Version](https://img.shields.io/badge/version-v113-blue)
+![Version](https://img.shields.io/badge/version-v114-blue)
 ![Platform](https://img.shields.io/badge/platform-Termux-green)
 ![Status](https://img.shields.io/badge/status-stable-success)
 
 **PAK / LUA Modding Tool** — built for Termux (PUBG / BGMI)
 
 Unpack, inject, repack, costom-pak files · Compile/decompile lua.
-**V113 — VIP Rebuild:** 10 colour themes, boxed menus + live progress,
+**V114 — VIP Rebuild:** 11 colour themes, boxed menus + live progress,
 fixed DROP/RESULT folder system, and the original compiled pak/lua
 engines kept intact (delegated 1:1, verified byte-exact).
 
@@ -83,7 +83,7 @@ The result of every job lands in the **RESULT** folder:
   unreadable → `<name>_FAILED.txt` with the reason.
 
 ### THEMES
-10 themes — Neon Pink, Cyber Blue, Blood Red, Matrix
+11 themes — Original Color (default), Neon Pink, Cyber Blue, Blood Red, Matrix
 Green, Gold VIP, Purple Reign, Ice White, Sunset Orange, Ocean Teal, Lava.
 The theme is saved and remembered on the next launch.
 

@@ -10,7 +10,7 @@
 # =============================================
 set -u
 
-# `curl ... | bash` phone-fail fixes (V113):
+# `curl ... | bash` phone-fail fixes (V114):
 #  1) PREFIX guard (for set -u) + apt NONINTERACTIVE — conffile/dpkg
 #     prompts must never eat the piped script bytes (that was the
 #     "stops halfway" phone-fail).
@@ -76,7 +76,7 @@ box() {
     printf "${COLOR}╰$(printf '─%.0s' $(seq 1 $BW))╯${C_RESET}\n"
 }
 
-# ---------------- system info / checks (V113) ----------------
+# ---------------- system info / checks (V114) ----------------
 sys_info() {
     local arch cpu android storage_ok
     arch=$(uname -m 2>/dev/null || echo "unknown")
@@ -86,7 +86,7 @@ sys_info() {
     android=$(getprop ro.build.version.release 2>/dev/null)
     [ -z "$android" ] && android=$(getprop ro.build.version.sdk 2>/dev/null)
     [ -z "$android" ] && android="n/a"
-    box "$C_GOLD" "⚙ SYSTEM (V113)"
+    box "$C_GOLD" "⚙ SYSTEM (V114)"
     printf "${C_BOLD}  • Arch    : ${C_CYAN}%s${C_RESET}\n" "$arch"
     printf "${C_BOLD}  • CPU ABI : ${C_CYAN}%s${C_RESET}\n" "$cpu"
     printf "${C_BOLD}  • Android : ${C_CYAN}%s${C_RESET}\n" "$android"
@@ -367,7 +367,7 @@ PY
     advance 100 "Boot test"
 }
 
-# ---------------- --test self-test mode (V113) ----------------
+# ---------------- --test self-test mode (V114) ----------------
 # install.sh --test  ->  system checks + boot test only (no reinstall).
 # Exit code 0 = PASS, 1 = FAIL. Clean output even when not on a TTY.
 SELF_TEST="${1:-}"
@@ -397,7 +397,7 @@ if [ -t 0 ]; then
     read -r dummy 2>/dev/null || true
 fi
 
-# system info — arch / android / storage (V113)
+# system info — arch / android / storage (V114)
 sys_info
 
 # phase weights (total 100)
@@ -583,7 +583,7 @@ mkdir -p "$TARGET/drop" "$TARGET/result"
 cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — always created (fresh install starts empty)
-# V113 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
+# V114 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
 # (Section G frozen — original lowercase/mixed-case spellings).
 # paths.py ensure_dirs() also creates these at launcher time; creating them
 # here too so the first boot shows no 'FOLDERS CREATED' box.

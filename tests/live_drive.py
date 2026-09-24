@@ -1,4 +1,4 @@
-"""IkramTool V113 — LIVE end-to-end pty drive.
+"""IkramTool V114 — LIVE end-to-end pty drive.
 
 Boots the tool on a real pseudo-terminal (TTY path: real ANSI to the wire,
 real width, real terminal behaviour) and walks every theme across every
@@ -331,8 +331,8 @@ def main():
 
     live.feed("FREETOOL\n", 1.0)
     print("== A. every theme x every menu ==")
-    _log("waiting for main menu (Lua Tool)")
-    if not live.wait_for("Lua Tool", 240):
+    _log("waiting for main menu (LUA TOOL)")
+    if not live.wait_for("LUA TOOL", 240):
         import re as _re
         line1 = live.drain_screen().decode("utf-8", "replace").split("\n")
         tail = [t[:80] for t in [_re.sub(r"\x1b\[[0-9;]*m", "", l).rstrip("\r")

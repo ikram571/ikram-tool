@@ -29,68 +29,76 @@ DIM = "2"
 
 # Fallback roles when a palette omits one (Red is a sane default accent).
 ROLES = (
-    "border", "title", "secondary", "text", "dim", "number", "prompt",
-    "separator", "success", "error", "warn", "accent", "primary", "info",
+    "border", "border_dark", "title", "secondary", "text", "dim", "number",
+    "prompt", "separator", "success", "error", "warn", "accent", "primary",
+    "info",
 )
 
 _PALETTES = {
+    "Original Color": dict(
+        primary=228, secondary=51, accent=141, border=135, border_dark=61,
+        title=228, number=45, text=231, dim=103, prompt=51, separator=135,
+        success=46, error=196, warn=214, info=141, bg=(14, 8, 23),
+    ),
     "Cyber Blue": dict(
-        primary=117, secondary=159, accent=81, border=117, title=87, number=117,
-        text=231, dim=253, prompt=87, separator=117, success=48, error=196,
-        warn=214, info=159,
+        primary=117, secondary=159, accent=81, border=117, border_dark=24,
+        title=87, number=45, text=231, dim=253, prompt=87, separator=117,
+        success=48, error=196, warn=214, info=159, bg=(5, 10, 20),
     ),
     "Neon Pink": dict(
-        primary=213, secondary=218, accent=205, border=213, title=213,
-        number=213, text=231, dim=253, prompt=213, separator=177, success=48,
-        error=196, warn=220, info=218,
+        primary=213, secondary=218, accent=205, border=213, border_dark=133,
+        title=213, number=45, text=231, dim=253, prompt=213, separator=177,
+        success=48, error=196, warn=220, info=218, bg=(20, 8, 18),
     ),
     "Blood Red": dict(
-        primary=210, secondary=216, accent=203, border=210, title=203, number=210,
-        text=231, dim=253, prompt=203, separator=167, success=48, error=196,
-        warn=208, info=222,
+        primary=210, secondary=216, accent=203, border=210, border_dark=124,
+        title=203, number=45, text=231, dim=253, prompt=203, separator=167,
+        success=48, error=196, warn=208, info=222, bg=(22, 5, 8),
     ),
     "Matrix Green": dict(
-        primary=114, secondary=158, accent=82, border=114, title=46, number=154,
-        text=231, dim=253, prompt=46, separator=114, success=46, error=196,
-        warn=220, info=159,
+        primary=114, secondary=158, accent=82, border=114, border_dark=28,
+        title=46, number=154, text=231, dim=253, prompt=46, separator=114,
+        success=46, error=196, warn=220, info=159, bg=(3, 14, 6),
     ),
     "Gold VIP": dict(
-        primary=220, secondary=229, accent=220, border=220, title=229, number=220,
-        text=231, dim=253, prompt=220, separator=178, success=48, error=196,
-        warn=208, info=229,
+        primary=220, secondary=229, accent=220, border=220, border_dark=172,
+        title=229, number=220, text=231, dim=253, prompt=220, separator=178,
+        success=48, error=196, warn=208, info=229, bg=(18, 14, 4),
     ),
     "Purple Reign": dict(
-        primary=183, secondary=189, accent=147, border=183, title=207, number=183,
-        text=231, dim=253, prompt=207, separator=140, success=48, error=196,
-        warn=220, info=189,
+        primary=183, secondary=189, accent=147, border=183, border_dark=140,
+        title=207, number=183, text=231, dim=253, prompt=207, separator=140,
+        success=48, error=196, warn=220, info=189, bg=(20, 6, 26),
     ),
     "Ice White": dict(
-        primary=152, secondary=195, accent=117, border=152, title=231, number=152,
-        text=231, dim=255, prompt=231, separator=152, success=48, error=196,
-        warn=214, info=159,
+        primary=152, secondary=195, accent=117, border=152, border_dark=60,
+        title=231, number=152, text=231, dim=255, prompt=231, separator=152,
+        success=48, error=196, warn=214, info=159, bg=(4, 6, 10),
     ),
     "Sunset Orange": dict(
-        primary=215, secondary=216, accent=209, border=215, title=222, number=215,
-        text=231, dim=253, prompt=214, separator=172, success=48, error=196,
-        warn=202, info=216,
+        primary=215, secondary=216, accent=209, border=215, border_dark=172,
+        title=222, number=215, text=231, dim=253, prompt=214, separator=172,
+        success=48, error=196, warn=202, info=216, bg=(24, 10, 5),
     ),
     "Ocean Teal": dict(
-        primary=80, secondary=123, accent=44, border=80, title=87, number=45,
-        text=231, dim=253, prompt=45, separator=80, success=48, error=196,
-        warn=220, info=159,
+        primary=80, secondary=123, accent=44, border=80, border_dark=23,
+        title=87, number=45, text=231, dim=253, prompt=45, separator=80,
+        success=48, error=196, warn=220, info=159, bg=(4, 16, 18),
     ),
     "Lava": dict(
-        primary=215, secondary=216, accent=214, border=215, title=226, number=215,
-        text=231, dim=253, prompt=208, separator=172, success=48, error=196,
-        warn=172, info=222,
+        primary=215, secondary=216, accent=214, border=215, border_dark=130,
+        title=226, number=208, text=231, dim=253, prompt=208, separator=172,
+        success=48, error=196, warn=172, info=222, bg=(24, 10, 4),
     ),
 }
 
 THEMES = (
-    "Neon Pink", "Cyber Blue", "Blood Red", "Matrix Green", "Gold VIP",
-    "Purple Reign", "Ice White", "Sunset Orange", "Ocean Teal", "Lava",
+    "Original Color", "Neon Pink", "Cyber Blue", "Blood Red", "Matrix Green",
+    "Gold VIP", "Purple Reign", "Ice White", "Sunset Orange", "Ocean Teal",
+    "Lava",
 )
 THEME_NAMES = {
+    "Original Color": "Original Color",
     "Neon Pink": "Neon Pink",
     "Cyber Blue": "Cyber Blue",
     "Blood Red": "Blood Red",
@@ -104,7 +112,7 @@ THEME_NAMES = {
 }
 
 _EMOJI = {
-    "Neon Pink": "🌸", "Cyber Blue": "💙", "Blood Red": "❤️",
+    "Original Color": "👑", "Neon Pink": "🌸", "Cyber Blue": "💙", "Blood Red": "❤️",
     "Matrix Green": "💚", "Gold VIP": "💛", "Purple Reign": "💜",
     "Ice White": "🤍", "Sunset Orange": "🧡", "Ocean Teal": "🩵",
     "Lava": "🔴",
@@ -139,7 +147,7 @@ def terminal_width(default=80) -> int:
     return w if w and w > 20 else default
 
 
-def _fansi(code: int, bold=False, dim=False) -> str:
+def _fansi(code: int, bold=False, dim=False, bg=None) -> str:
     if color_support() == 0:
         return ""
     parts = []
@@ -149,6 +157,8 @@ def _fansi(code: int, bold=False, dim=False) -> str:
         parts.append(DIM)
     if code:
         parts.append("38;5;%d" % code)
+    if bg:
+        parts.append("48;2;%d;%d;%d" % (bg[0], bg[1], bg[2]))
     if not parts:
         return ""
     return C + ";".join(parts) + "m"
@@ -157,12 +167,13 @@ def _fansi(code: int, bold=False, dim=False) -> str:
 class Theme:
     def __init__(self, name):
         if name not in THEMES:
-            name = "Cyber Blue"
+            name = "Original Color"
         self.name = name
-        pal = _PALETTES.get(name, _PALETTES["Cyber Blue"])
+        pal = _PALETTES.get(name, _PALETTES["Original Color"])
         self._pal = dict(pal)
         for r in ROLES:
             self._pal.setdefault(r, 231)
+        self._bg = tuple(pal.get("bg", (0, 0, 0)))
 
     def apply(self, text, role="text", bold=None):
         if role not in ROLES:
@@ -178,6 +189,18 @@ class Theme:
             return text
         return fg + text + RESET
 
+    def paint_code(self, text, code, bold=True):
+        """Exact ANSI colour by 256-code (V111 `_vip_num` cycle)."""
+        text = "" if text is None else str(text)
+        fg = _fansi(code, bold=bold)
+        if not fg:
+            return text
+        return fg + text + RESET
+
+    @property
+    def bg(self):
+        return self._bg
+
     def paint(self, text, role="text"):
         return self.apply(text, role)
 
@@ -188,9 +211,17 @@ class Theme:
         """Number slots: the theme's number colour."""
         return self.apply(text, "number")
 
+    def paint_code(self, text, code, bold=True):
+        """Exact ANSI colour by 256-code (V111 `_vip_num` cycle)."""
+        text = "" if text is None else str(text)
+        fg = _fansi(code, bold=bold)
+        if not fg:
+            return text
+        return fg + text + RESET
+
 
 def load_theme() -> Theme:
-    """Saved config -> Cyber Blue (default on fresh/no config)."""
+    """Saved config -> Original Color (default on fresh/no config)."""
     try:
         cfg = config_file()
         if cfg.is_file():
@@ -200,7 +231,7 @@ def load_theme() -> Theme:
                 return Theme(name)
     except Exception:
         pass
-    return Theme("Cyber Blue")
+    return Theme("Original Color")
 
 
 def save_theme(name: str) -> None:

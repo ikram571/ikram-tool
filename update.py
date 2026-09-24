@@ -193,8 +193,8 @@ def _show_complete():
     if _TTY:
         print("")
         print(green_bar)
-        print("{}{}{}{}".format(_GREEN, "  ✅  UPDATE INSTALLED SUCCESSFULLY!", _R))
-        print("{}{}{}{}".format(_GREEN, "      Restart the tool to continue...", _R))
+        print("{}{}{}".format(_GREEN, "  ✅  UPDATE INSTALLED SUCCESSFULLY!", _R))
+        print("{}{}{}".format(_GREEN, "      Restart the tool to continue...", _R))
         print(green_bar)
         print("")
     else:
