@@ -1,0 +1,4942 @@
+
+### [0] <module>  (file=lua_beautify.py) :: line 1, args 0, locals 0, stack 6, consts 84
+  0           RESUME                   0
+
+  1           LOAD_CONST               0 ('lua_beautify — obfuscated luadec output ko readable Lua me badlo (V14).\n\nKya karta hai (safe, semantics-preserving):\n  * Constant propagation + expression folding: register-style arithmetic\n    (L5_1 = 201 ~ L5_1; L5_1 = L5_1 ~ L6_1 ...) collapse hota hai.\n  * string.char(...) calls with all-constant args -> literal strings.\n  * Table builders (L3_1 = {}; L3_1[k] = <const>) -> table literal.\n  * Koi bhi var/side-effect nahi hataya jaata jiska value unknown ho —\n    non-constant code as-is rehta hai (bas cleaner formatting).\n\nHar statement jo prove-ably constant hai, woh fold hota hai; baaki waisa\nhi chhod diya jaata hai. Isliye output compile hoke same behavior deta hai.\n')
+              STORE_NAME               0 (__doc__)
+
+ 15           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (re)
+              STORE_NAME               1 (re)
+
+ 16           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (ast)
+              STORE_NAME               2 (ast)
+
+ 18           LOAD_CONST               2 ('[A-Za-z_][A-Za-z0-9_]*')
+              STORE_NAME               3 (_VAR)
+
+ 21           BUILD_MAP                0
+              STORE_NAME               4 (_KNOWN_FUNCS)
+
+ 24           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST               3 (<code object _FuncRef at 0x7aaf9eef30, file "lua_beautify.py", line 24>)
+              MAKE_FUNCTION
+              LOAD_CONST               4 ('_FuncRef')
+              CALL                     2
+              STORE_NAME               5 (_FuncRef)
+
+ 33           LOAD_CONST               5 (<code object _op_eval at 0xb400007c70069d10, file "lua_beautify.py", line 33>)
+              MAKE_FUNCTION
+              STORE_NAME               6 (_op_eval)
+
+ 76           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST               6 (<code object Expr at 0x7aab490580, file "lua_beautify.py", line 76>)
+              MAKE_FUNCTION
+              LOAD_CONST               7 ('Expr')
+              CALL                     2
+              STORE_NAME               7 (Expr)
+
+ 92           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+
+ 93           LOAD_CONST               8 ('^\\s*(?:(?P<num>[-+]?\\d+(?:\\.\\d+)?)|(?P<str>"(?:[^"\\\\]|\\\\.)*"|\\\'(?:[^\\\'\\\\]|\\\\.)*\\\')|(?P<var>')
+
+ 94           LOAD_NAME                3 (_VAR)
+
+ 93           BINARY_OP                0 (+)
+
+ 94           LOAD_CONST               9 ('(?:\\[[^\\]]+\\])?)|(?P<field>')
+
+ 93           BINARY_OP                0 (+)
+
+ 95           LOAD_NAME                3 (_VAR)
+
+ 93           BINARY_OP                0 (+)
+
+ 95           LOAD_CONST              10 (')\\.(?P<fieldname>')
+
+ 93           BINARY_OP                0 (+)
+
+ 95           LOAD_NAME                3 (_VAR)
+
+ 93           BINARY_OP                0 (+)
+
+ 95           LOAD_CONST              11 (')|(?P<un>#|~|not|-)\\s*(?P<unv>.+)|(?P<call>')
+
+ 93           BINARY_OP                0 (+)
+
+ 97           LOAD_NAME                3 (_VAR)
+
+ 93           BINARY_OP                0 (+)
+
+ 97           LOAD_CONST              12 (')(?P<args>\\([^()]*\\))|(?P<bin1>.+?)\\s*(?P<op1>==|~=|<=|>=|<<|>>|\\+|-|\\*|/|//|%|\\^|~|&|\\||<|>)\\s*(?P<bin2>.+?))\\s*$')
+
+ 93           BINARY_OP                0 (+)
+
+ 92           CALL                     1
+              STORE_NAME               9 (_EXPR_RE)
+
+101           LOAD_CONST              13 (<code object _lua_truthy at 0x7aab4733f0, file "lua_beautify.py", line 101>)
+              MAKE_FUNCTION
+              STORE_NAME              10 (_lua_truthy)
+
+108           LOAD_CONST              14 (<code object _eval_expr at 0xb400007bb0012fc0, file "lua_beautify.py", line 108>)
+              MAKE_FUNCTION
+              STORE_NAME              11 (_eval_expr)
+
+177           LOAD_NAME               12 (object)
+              PUSH_NULL
+              CALL                     0
+              STORE_NAME              13 (_UNKNOWN)
+
+178           LOAD_NAME               12 (object)
+              PUSH_NULL
+              CALL                     0
+              STORE_NAME              14 (_NIL)
+
+181           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              15 (<code object _Global at 0x7aab491460, file "lua_beautify.py", line 181>)
+              MAKE_FUNCTION
+              LOAD_CONST              16 ('_Global')
+              CALL                     2
+              STORE_NAME              15 (_Global)
+
+192           BUILD_SET                0
+
+193           LOAD_CONST              17 ('math')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              18 ('os')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              19 ('string')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              20 ('table')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              21 ('io')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              22 ('debug')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              23 ('package')
+
+192           SET_ADD                  1
+
+193           LOAD_CONST              24 ('coroutine')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              25 ('utf8')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              26 ('require')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              27 ('print')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              28 ('pairs')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              29 ('ipairs')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              30 ('select')
+
+192           SET_ADD                  1
+
+194           LOAD_CONST              31 ('setmetatable')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              32 ('getmetatable')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              33 ('tostring')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              34 ('tonumber')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              35 ('type')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              36 ('error')
+
+192           SET_ADD                  1
+
+195           LOAD_CONST              37 ('assert')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              38 ('rawget')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              39 ('rawset')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              40 ('rawequal')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              41 ('rawlen')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              42 ('next')
+
+192           SET_ADD                  1
+
+196           LOAD_CONST              43 ('collectgarbage')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              44 ('dofile')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              45 ('load')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              46 ('loadfile')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              47 ('pcall')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              48 ('xpcall')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              49 ('_G')
+
+192           SET_ADD                  1
+
+197           LOAD_CONST              50 ('_VERSION')
+
+192           SET_ADD                  1
+              STORE_NAME              16 (_KNOWN_GLOBALS)
+
+201           LOAD_CONST              51 (<code object _call_func at 0xb400007bb00158b0, file "lua_beautify.py", line 201>)
+              MAKE_FUNCTION
+              STORE_NAME              17 (_call_func)
+
+248           LOAD_CONST              52 (<code object _parse_expr at 0xb400007bb000c550, file "lua_beautify.py", line 248>)
+              MAKE_FUNCTION
+              STORE_NAME              18 (_parse_expr)
+
+300           LOAD_CONST              53 (<code object _split_args at 0xb400007d1004bdd0, file "lua_beautify.py", line 300>)
+              MAKE_FUNCTION
+              STORE_NAME              19 (_split_args)
+
+341           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              54 ('^')
+              LOAD_NAME                3 (_VAR)
+              BINARY_OP                0 (+)
+              LOAD_CONST              55 ('\\s*=\\s*\\{\\}\\s*$')
+              BINARY_OP                0 (+)
+              CALL                     1
+              STORE_NAME              20 (_TABLE_RE)
+
+342           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              56 ('^(')
+              LOAD_NAME                3 (_VAR)
+              BINARY_OP                0 (+)
+              LOAD_CONST              57 (')\\[(\\d+)\\]\\s*=\\s*(.+)$')
+              BINARY_OP                0 (+)
+              CALL                     1
+              STORE_NAME              21 (_ELEM_RE)
+
+345           LOAD_CONST              58 (<code object _build_table_literal at 0xb400007c8009c7d0, file "lua_beautify.py", line 345>)
+              MAKE_FUNCTION
+              STORE_NAME              22 (_build_table_literal)
+
+366           LOAD_CONST              59 (<code object _table_lit at 0xb400007c800a0880, file "lua_beautify.py", line 366>)
+              MAKE_FUNCTION
+              STORE_NAME              23 (_table_lit)
+
+378           LOAD_CONST              60 (<code object _lit at 0xb400007c7006f7b0, file "lua_beautify.py", line 378>)
+              MAKE_FUNCTION
+              STORE_NAME              24 (_lit)
+
+393           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              56 ('^(')
+              LOAD_NAME                3 (_VAR)
+              BINARY_OP                0 (+)
+              LOAD_CONST              61 (')\\s*=\\s*(.+)$')
+              BINARY_OP                0 (+)
+              CALL                     1
+              STORE_NAME              25 (_STMT_ASSIGN)
+
+394           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              62 ('^local\\s+(.+)$')
+              CALL                     1
+              STORE_NAME              26 (_STMT_LOCAL)
+
+395           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              63 ('^return\\s+(.+)$')
+              CALL                     1
+              STORE_NAME              27 (_STMT_RETURN)
+
+396           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              64 ('^if\\s+(.+)\\sthen$')
+              CALL                     1
+              STORE_NAME              28 (_STMT_IF)
+
+397           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              65 ('^while\\s+(.+)\\sdo$')
+              CALL                     1
+              STORE_NAME              29 (_STMT_WHILE)
+
+398           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              56 ('^(')
+              LOAD_NAME                3 (_VAR)
+              BINARY_OP                0 (+)
+              LOAD_CONST              57 (')\\[(\\d+)\\]\\s*=\\s*(.+)$')
+              BINARY_OP                0 (+)
+              CALL                     1
+              STORE_NAME              30 (_STMT_TABELEM)
+
+401           LOAD_CONST              66 (<code object beautify_block at 0xb400007bd0017a60, file "lua_beautify.py", line 401>)
+              MAKE_FUNCTION
+              STORE_NAME              31 (beautify_block)
+
+606           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+              LOAD_CONST              67 ('[A-Za-z0-9_\\.\\)"\\\'0-9]\\s*\\(')
+              CALL                     1
+              STORE_NAME              32 (_CALL_RHS)
+
+609           LOAD_CONST              68 (<code object _collect_vars at 0x7aaf62efb0, file "lua_beautify.py", line 609>)
+              MAKE_FUNCTION
+              STORE_NAME              33 (_collect_vars)
+
+613           LOAD_CONST              69 (<code object _has_call at 0x7aaf62f0f0, file "lua_beautify.py", line 613>)
+              MAKE_FUNCTION
+              STORE_NAME              34 (_has_call)
+
+619           LOAD_CONST              70 (<code object _dead_code_elim at 0xb400007d1004de00, file "lua_beautify.py", line 619>)
+              MAKE_FUNCTION
+              STORE_NAME              35 (_dead_code_elim)
+
+652           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+
+653           LOAD_CONST              71 ('(?:[ \\t]*if (?:true|false) then[ \\t]*\\n)+(?:[ \\t]*goto (\\w+)[ \\t]*\\n)(?:[ \\t]*end[ \\t]*\\n)+(?=\\s*::\\1::)')
+
+652           CALL                     1
+              STORE_NAME              36 (_NOOP_JUMP_RE)
+
+656           LOAD_NAME                1 (re)
+              LOAD_ATTR               16 (compile)
+              PUSH_NULL
+
+657           LOAD_CONST              72 ('(?:[ \\t]*)goto (\\w+)[ \\t]*\\n(?=\\s*::\\1::)')
+
+656           CALL                     1
+              STORE_NAME              37 (_NOOP_DIRECT_GOTO)
+
+661           LOAD_CONST              73 (<code object __annotate__ at 0x7aaf68d830, file "lua_beautify.py", line 661>)
+              MAKE_FUNCTION
+              LOAD_CONST              74 (<code object _strip_noop_jumps at 0x7aab4c13e0, file "lua_beautify.py", line 661>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              38 (_strip_noop_jumps)
+
+673           LOAD_CONST              75 (<code object _strip_orphan_labels at 0xb400007c7006e1d0, file "lua_beautify.py", line 673>)
+              MAKE_FUNCTION
+              STORE_NAME              39 (_strip_orphan_labels)
+
+692           LOAD_CONST              76 (<code object _unwrap_const_blocks at 0xb400007d1004f7c0, file "lua_beautify.py", line 692>)
+              MAKE_FUNCTION
+              STORE_NAME              40 (_unwrap_const_blocks)
+
+739           LOAD_CONST              77 (<code object __annotate__ at 0x7aaf68e030, file "lua_beautify.py", line 739>)
+              MAKE_FUNCTION
+              LOAD_CONST              78 (<code object _beautify_file at 0xb400007d1004d120, file "lua_beautify.py", line 739>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              41 (_beautify_file)
+
+778           LOAD_CONST              79 (<code object __annotate__ at 0x7aaf68e130, file "lua_beautify.py", line 778>)
+              MAKE_FUNCTION
+              LOAD_CONST              80 (<code object beautify_lua at 0x7aaf5e76d0, file "lua_beautify.py", line 778>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              42 (beautify_lua)
+
+785           LOAD_CONST              81 (<code object __annotate__ at 0x7aaf68e230, file "lua_beautify.py", line 785>)
+              MAKE_FUNCTION
+              LOAD_CONST              82 (<code object beautify_text at 0x7aaf603d20, file "lua_beautify.py", line 785>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              43 (beautify_text)
+
+790           LOAD_NAME               44 (__name__)
+              LOAD_CONST              83 ('__main__')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       38 (to L1)
+              NOT_TAKEN
+
+791           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME             45 (sys)
+              STORE_NAME              45 (sys)
+
+792           LOAD_NAME               46 (print)
+              PUSH_NULL
+              LOAD_NAME               42 (beautify_lua)
+              PUSH_NULL
+              LOAD_NAME               45 (sys)
+              LOAD_ATTR               94 (argv)
+              LOAD_SMALL_INT           1
+              BINARY_OP               26 ([])
+              CALL                     1
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+790   L1:     LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   _FuncRef  (file=lua_beautify.py) :: line 24, args 0, locals 1, stack 1, consts 6
+  --           MAKE_CELL                0 (__classdict__)
+
+  24           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('_FuncRef')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          24
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  25           LOAD_CONST               1 ('Known pure function reference (e.g. string.char).')
+               STORE_NAME               4 (__doc__)
+
+  26           LOAD_CONST               2 (<code object __init__ at 0x7aaf603690, file "lua_beautify.py", line 26>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (__init__)
+
+  29           LOAD_CONST               3 (<code object __repr__ at 0x7aaf603a50, file "lua_beautify.py", line 29>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (__repr__)
+               LOAD_CONST               4 (('name',))
+               STORE_NAME               7 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               8 (__classdictcell__)
+               LOAD_CONST               5 (None)
+               RETURN_VALUE
+
+
+### [2]     __init__  (file=lua_beautify.py) :: line 26, args 2, locals 2, stack 2, consts 1
+ 26           RESUME                   0
+
+ 27           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (name, self)
+              STORE_ATTR               0 (name)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [3]     __repr__  (file=lua_beautify.py) :: line 29, args 1, locals 1, stack 1, consts 1
+ 29           RESUME                   0
+
+ 30           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (name)
+              RETURN_VALUE
+
+
+### [4]   _op_eval  (file=lua_beautify.py) :: line 33, args 3, locals 3, stack 4, consts 19
+  33            RESUME                   0
+
+  34            NOP
+
+  35    L1:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               0 ('+')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L3)
+                NOT_TAKEN
+
+  36            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                0 (+)
+        L2:     RETURN_VALUE
+
+  37    L3:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               1 ('-')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L5)
+                NOT_TAKEN
+
+  38            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP               10 (-)
+        L4:     RETURN_VALUE
+
+  39    L5:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               2 ('*')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L7)
+                NOT_TAKEN
+
+  40            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                5 (*)
+        L6:     RETURN_VALUE
+
+  41    L7:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               3 ('/')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L9)
+                NOT_TAKEN
+
+  42            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP               11 (/)
+        L8:     RETURN_VALUE
+
+  43    L9:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               4 ('//')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L11)
+                NOT_TAKEN
+
+  44            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                2 (//)
+       L10:     RETURN_VALUE
+
+  45   L11:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               5 ('%')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L13)
+                NOT_TAKEN
+
+  46            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                6 (%)
+       L12:     RETURN_VALUE
+
+  47   L13:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               6 ('^')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L15)
+                NOT_TAKEN
+
+  48            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                8 (**)
+       L14:     RETURN_VALUE
+
+  49   L15:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               7 ('~')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L17)
+                NOT_TAKEN
+
+  50            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP               12 (^)
+       L16:     RETURN_VALUE
+
+  51   L17:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               8 ('&')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L19)
+                NOT_TAKEN
+
+  52            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                1 (&)
+       L18:     RETURN_VALUE
+
+  53   L19:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST               9 ('|')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L21)
+                NOT_TAKEN
+
+  54            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                7 (|)
+       L20:     RETURN_VALUE
+
+  55   L21:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              10 ('<<')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L23)
+                NOT_TAKEN
+
+  56            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                3 (<<)
+       L22:     RETURN_VALUE
+
+  57   L23:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              11 ('>>')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        9 (to L25)
+                NOT_TAKEN
+
+  58            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                BINARY_OP                9 (>>)
+       L24:     RETURN_VALUE
+
+  59   L25:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              12 ('==')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L27)
+                NOT_TAKEN
+
+  60            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP              72 (==)
+       L26:     RETURN_VALUE
+
+  61   L27:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              13 ('~=')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L29)
+                NOT_TAKEN
+
+  62            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP             103 (!=)
+       L28:     RETURN_VALUE
+
+  63   L29:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              14 ('<')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L31)
+                NOT_TAKEN
+
+  64            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP               2 (<)
+       L30:     RETURN_VALUE
+
+  65   L31:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              15 ('<=')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L33)
+                NOT_TAKEN
+
+  66            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP              42 (<=)
+       L32:     RETURN_VALUE
+
+  67   L33:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              16 ('>')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L35)
+                NOT_TAKEN
+
+  68            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP             132 (>)
+       L34:     RETURN_VALUE
+
+  69   L35:     LOAD_FAST_BORROW         0 (op)
+                LOAD_CONST              17 ('>=')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L37)
+                NOT_TAKEN
+
+  70            LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+                COMPARE_OP             172 (>=)
+       L36:     RETURN_VALUE
+
+  69   L37:     NOP
+
+  73            LOAD_CONST              18 (None)
+                RETURN_VALUE
+
+  --   L38:     PUSH_EXC_INFO
+
+  71            LOAD_GLOBAL              0 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L40)
+                NOT_TAKEN
+                POP_TOP
+
+  72   L39:     POP_EXCEPT
+                LOAD_CONST              18 (None)
+                RETURN_VALUE
+
+  71   L40:     RERAISE                  0
+
+  --   L41:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L38 [0]
+  L3 to L4 -> L38 [0]
+  L5 to L6 -> L38 [0]
+  L7 to L8 -> L38 [0]
+  L9 to L10 -> L38 [0]
+  L11 to L12 -> L38 [0]
+  L13 to L14 -> L38 [0]
+  L15 to L16 -> L38 [0]
+  L17 to L18 -> L38 [0]
+  L19 to L20 -> L38 [0]
+  L21 to L22 -> L38 [0]
+  L23 to L24 -> L38 [0]
+  L25 to L26 -> L38 [0]
+  L27 to L28 -> L38 [0]
+  L29 to L30 -> L38 [0]
+  L31 to L32 -> L38 [0]
+  L33 to L34 -> L38 [0]
+  L35 to L36 -> L38 [0]
+  L38 to L39 -> L41 [1] lasti
+  L40 to L41 -> L41 [1] lasti
+
+
+### [5]   Expr  (file=lua_beautify.py) :: line 76, args 0, locals 1, stack 2, consts 7
+  --           MAKE_CELL                0 (__classdict__)
+
+  76           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Expr')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          76
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  77           LOAD_CONST               1 ('Minimal expression tree for a single register statement.')
+               STORE_NAME               4 (__doc__)
+
+  78           LOAD_CONST               5 (('kind', 'val', 'a', 'op', 'b', 'args', 'fn', 'fieldname'))
+               STORE_NAME               5 (__slots__)
+
+  80           LOAD_CONST               6 ((None, None, None, None, None, None, None))
+               LOAD_CONST               3 (<code object __init__ at 0x7aab4c1140, file "lua_beautify.py", line 80>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME               6 (__init__)
+               LOAD_CONST               4 (('a', 'args', 'b', 'fieldname', 'fn', 'kind', 'op', 'val'))
+               STORE_NAME               7 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               8 (__classdictcell__)
+               LOAD_CONST               2 (None)
+               RETURN_VALUE
+
+
+### [6]     __init__  (file=lua_beautify.py) :: line 80, args 9, locals 9, stack 2, consts 1
+ 80           RESUME                   0
+
+ 82           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (kind, self)
+              STORE_ATTR               0 (kind)
+
+ 83           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (val, self)
+              STORE_ATTR               1 (val)
+
+ 84           LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (a, self)
+              STORE_ATTR               2 (a)
+
+ 85           LOAD_FAST_BORROW_LOAD_FAST_BORROW 64 (op, self)
+              STORE_ATTR               3 (op)
+
+ 86           LOAD_FAST_BORROW_LOAD_FAST_BORROW 80 (b, self)
+              STORE_ATTR               4 (b)
+
+ 87           LOAD_FAST                6 (args)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              BUILD_LIST               0
+      L1:     LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               5 (args)
+
+ 88           LOAD_FAST_BORROW_LOAD_FAST_BORROW 112 (fn, self)
+              STORE_ATTR               6 (fn)
+
+ 89           LOAD_FAST_BORROW_LOAD_FAST_BORROW 128 (fieldname, self)
+              STORE_ATTR               7 (fieldname)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [7]   _lua_truthy  (file=lua_beautify.py) :: line 101, args 1, locals 1, stack 2, consts 3
+101           RESUME                   0
+
+103           LOAD_FAST_BORROW         0 (v)
+              LOAD_GLOBAL              0 (_UNKNOWN)
+              IS_OP                    0 (is)
+              POP_JUMP_IF_TRUE        21 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_GLOBAL              2 (_NIL)
+              IS_OP                    0 (is)
+              POP_JUMP_IF_TRUE        11 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (v)
+              POP_JUMP_IF_NONE         7 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_CONST               1 (False)
+              IS_OP                    0 (is)
+              POP_JUMP_IF_FALSE        3 (to L2)
+              NOT_TAKEN
+
+104   L1:     LOAD_CONST               1 (False)
+              RETURN_VALUE
+
+105   L2:     LOAD_CONST               2 (True)
+              RETURN_VALUE
+
+
+### [8]   _eval_expr  (file=lua_beautify.py) :: line 108, args 11, locals 11, stack 7, consts 18
+ 108            RESUME                   0
+
+ 110            LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               1 ('num')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L1)
+                NOT_TAKEN
+
+ 111            LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                2 (val)
+                RETURN_VALUE
+
+ 112    L1:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               2 ('str')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L2)
+                NOT_TAKEN
+
+ 113            LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                2 (val)
+                RETURN_VALUE
+
+ 114    L2:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               3 ('bool')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L3)
+                NOT_TAKEN
+
+ 115            LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                2 (val)
+                RETURN_VALUE
+
+ 116    L3:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               4 ('nil')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L4)
+                NOT_TAKEN
+
+ 117            LOAD_CONST               5 (None)
+                RETURN_VALUE
+
+ 118    L4:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               6 ('var')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       33 (to L5)
+                NOT_TAKEN
+
+ 119            LOAD_FAST_BORROW         1 (env)
+                LOAD_ATTR                5 (get + NULL|self)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                2 (val)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                CALL                     2
+                RETURN_VALUE
+
+ 120    L5:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               7 ('field')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE      126 (to L8)
+                NOT_TAKEN
+
+ 121            LOAD_FAST_BORROW         1 (env)
+                LOAD_ATTR                5 (get + NULL|self)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                2 (val)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                CALL                     2
+                STORE_FAST               2 (base)
+
+ 122            LOAD_GLOBAL              9 (isinstance + NULL)
+                LOAD_FAST_BORROW         2 (base)
+                LOAD_GLOBAL             10 (_Global)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       66 (to L7)
+                NOT_TAKEN
+
+ 123            LOAD_FAST_BORROW         2 (base)
+                LOAD_ATTR               12 (name)
+                LOAD_CONST               8 ('.')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               14 (fieldname)
+                BINARY_OP                0 (+)
+                STORE_FAST               3 (fq)
+
+ 124            LOAD_FAST_BORROW         3 (fq)
+                LOAD_CONST              17 (('string.char', 'string.byte', 'string.len', 'string.lower', 'string.upper', 'string.format', 'string.rep', 'string.sub', 'string.gsub', 'math.floor', 'math.ceil', 'math.abs', 'math.max', 'math.min', 'math.sqrt', 'table.concat', 'table.insert', 'table.remove', 'table.sort', 'string.find', 'string.match', 'string.gmatch'))
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       12 (to L6)
+                NOT_TAKEN
+
+ 130            LOAD_GLOBAL             17 (_FuncRef + NULL)
+                LOAD_FAST_BORROW         3 (fq)
+                CALL                     1
+                RETURN_VALUE
+
+ 131    L6:     LOAD_GLOBAL             11 (_Global + NULL)
+                LOAD_FAST_BORROW         3 (fq)
+                CALL                     1
+                RETURN_VALUE
+
+ 132    L7:     LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+ 133    L8:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST               9 ('un')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE      140 (to L20)
+                NOT_TAKEN
+
+ 134            LOAD_GLOBAL             19 (_eval_expr + NULL)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               20 (a)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                STORE_FAST               4 (v)
+
+ 135            LOAD_FAST_BORROW         4 (v)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        7 (to L9)
+                NOT_TAKEN
+
+ 136            LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+ 137    L9:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               22 (op)
+                LOAD_CONST              10 ('#')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L12)
+                NOT_TAKEN
+
+ 138            NOP
+
+ 139   L10:     LOAD_GLOBAL             25 (len + NULL)
+                LOAD_FAST_BORROW         4 (v)
+                CALL                     1
+       L11:     RETURN_VALUE
+
+ 142   L12:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               22 (op)
+                LOAD_CONST              11 ('not')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        8 (to L13)
+                NOT_TAKEN
+
+ 143            LOAD_FAST_BORROW         4 (v)
+                TO_BOOL
+                UNARY_NOT
+                RETURN_VALUE
+
+ 144   L13:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               22 (op)
+                LOAD_CONST              12 ('-')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L16)
+                NOT_TAKEN
+
+ 145            NOP
+
+ 146   L14:     LOAD_FAST_BORROW         4 (v)
+                UNARY_NEGATIVE
+       L15:     RETURN_VALUE
+
+ 149   L16:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               22 (op)
+                LOAD_CONST              13 ('~')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L19)
+                NOT_TAKEN
+
+ 150            NOP
+
+ 151   L17:     LOAD_FAST_BORROW         4 (v)
+                UNARY_INVERT
+       L18:     RETURN_VALUE
+
+ 154   L19:     LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+ 155   L20:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST              14 ('bin')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       93 (to L23)
+                NOT_TAKEN
+
+ 156            LOAD_GLOBAL             19 (_eval_expr + NULL)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               20 (a)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                STORE_FAST               5 (a)
+
+ 157            LOAD_GLOBAL             19 (_eval_expr + NULL)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               28 (b)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                STORE_FAST               6 (b)
+
+ 158            LOAD_FAST_BORROW         5 (a)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_TRUE        11 (to L21)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (b)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        7 (to L22)
+                NOT_TAKEN
+
+ 159   L21:     LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+ 160   L22:     LOAD_GLOBAL             31 (_op_eval + NULL)
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               22 (op)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (a, b)
+                CALL                     3
+                RETURN_VALUE
+
+ 161   L23:     LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR                0 (kind)
+                LOAD_CONST              15 ('call')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE      183 (to L29)
+                NOT_TAKEN
+
+ 162            LOAD_GLOBAL             19 (_eval_expr + NULL)
+                LOAD_GLOBAL             33 (Expr + NULL)
+                LOAD_CONST               6 ('var')
+                LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               34 (fn)
+                LOAD_CONST              16 (('val',))
+                CALL_KW                  2
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                STORE_FAST               7 (f)
+
+ 163            LOAD_GLOBAL              9 (isinstance + NULL)
+                LOAD_FAST_BORROW         7 (f)
+                LOAD_GLOBAL             10 (_Global)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       22 (to L24)
+                NOT_TAKEN
+
+ 164            LOAD_GLOBAL             17 (_FuncRef + NULL)
+                LOAD_FAST_BORROW         7 (f)
+                LOAD_ATTR               12 (name)
+                CALL                     1
+                STORE_FAST               7 (f)
+
+ 165   L24:     LOAD_GLOBAL              9 (isinstance + NULL)
+                LOAD_FAST_BORROW         7 (f)
+                LOAD_GLOBAL             16 (_FuncRef)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       79 (to L28)
+                NOT_TAKEN
+
+ 166            BUILD_LIST               0
+                STORE_FAST               8 (args)
+
+ 167            LOAD_FAST_BORROW         0 (e)
+                LOAD_ATTR               36 (args)
+                GET_ITER
+       L25:     FOR_ITER                49 (to L27)
+                STORE_FAST               9 (ar)
+
+ 168            LOAD_GLOBAL             19 (_eval_expr + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 145 (ar, env)
+                CALL                     2
+                STORE_FAST              10 (av)
+
+ 169            LOAD_FAST_BORROW        10 (av)
+                LOAD_GLOBAL              6 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        9 (to L26)
+                NOT_TAKEN
+
+ 170            LOAD_GLOBAL              6 (_UNKNOWN)
+                SWAP                     2
+                POP_TOP
+                RETURN_VALUE
+
+ 171   L26:     LOAD_FAST_BORROW         8 (args)
+                LOAD_ATTR               39 (append + NULL|self)
+                LOAD_FAST_BORROW        10 (av)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           51 (to L25)
+
+ 167   L27:     END_FOR
+                POP_ITER
+
+ 172            LOAD_GLOBAL             41 (_call_func + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 120 (f, args)
+                CALL                     2
+                RETURN_VALUE
+
+ 173   L28:     LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+ 174   L29:     LOAD_GLOBAL              6 (_UNKNOWN)
+                RETURN_VALUE
+
+  --   L30:     PUSH_EXC_INFO
+
+ 140            LOAD_GLOBAL             26 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       10 (to L32)
+                NOT_TAKEN
+                POP_TOP
+
+ 141            LOAD_GLOBAL              6 (_UNKNOWN)
+                SWAP                     2
+       L31:     POP_EXCEPT
+                RETURN_VALUE
+
+ 140   L32:     RERAISE                  0
+
+  --   L33:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L34:     PUSH_EXC_INFO
+
+ 147            LOAD_GLOBAL             26 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       10 (to L36)
+                NOT_TAKEN
+                POP_TOP
+
+ 148            LOAD_GLOBAL              6 (_UNKNOWN)
+                SWAP                     2
+       L35:     POP_EXCEPT
+                RETURN_VALUE
+
+ 147   L36:     RERAISE                  0
+
+  --   L37:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L38:     PUSH_EXC_INFO
+
+ 152            LOAD_GLOBAL             26 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       10 (to L40)
+                NOT_TAKEN
+                POP_TOP
+
+ 153            LOAD_GLOBAL              6 (_UNKNOWN)
+                SWAP                     2
+       L39:     POP_EXCEPT
+                RETURN_VALUE
+
+ 152   L40:     RERAISE                  0
+
+  --   L41:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L10 to L11 -> L30 [0]
+  L14 to L15 -> L34 [0]
+  L17 to L18 -> L38 [0]
+  L30 to L31 -> L33 [1] lasti
+  L32 to L33 -> L33 [1] lasti
+  L34 to L35 -> L37 [1] lasti
+  L36 to L37 -> L37 [1] lasti
+  L38 to L39 -> L41 [1] lasti
+  L40 to L41 -> L41 [1] lasti
+
+
+### [9]   _Global  (file=lua_beautify.py) :: line 181, args 0, locals 1, stack 1, consts 6
+  --           MAKE_CELL                0 (__classdict__)
+
+ 181           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('_Global')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT         181
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+ 182           LOAD_CONST               1 ('Runtime global value (table/function) — only used for type() folding.')
+               STORE_NAME               4 (__doc__)
+
+ 183           LOAD_CONST               4 (('name',))
+               STORE_NAME               5 (__slots__)
+
+ 185           LOAD_CONST               2 (<code object __init__ at 0x7aaf6013e0, file "lua_beautify.py", line 185>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (__init__)
+
+ 188           LOAD_CONST               3 (<code object __repr__ at 0x7aaf603960, file "lua_beautify.py", line 188>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (__repr__)
+               LOAD_CONST               4 (('name',))
+               STORE_NAME               8 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               9 (__classdictcell__)
+               LOAD_CONST               5 (None)
+               RETURN_VALUE
+
+
+### [10]     __init__  (file=lua_beautify.py) :: line 185, args 2, locals 2, stack 2, consts 1
+185           RESUME                   0
+
+186           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (name, self)
+              STORE_ATTR               0 (name)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [11]     __repr__  (file=lua_beautify.py) :: line 188, args 1, locals 1, stack 1, consts 1
+188           RESUME                   0
+
+189           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (name)
+              RETURN_VALUE
+
+
+### [12]   _call_func  (file=lua_beautify.py) :: line 201, args 6, locals 6, stack 5, consts 17
+ 201            RESUME                   0
+
+ 202            NOP
+
+ 203    L1:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               0 ('string.char')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       27 (to L3)
+                NOT_TAKEN
+
+ 204            LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                CALL                     1
+                LOAD_ATTR                5 (decode + NULL|self)
+                LOAD_CONST               1 ('latin-1')
+                CALL                     1
+        L2:     RETURN_VALUE
+
+ 205    L3:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               2 ('string.byte')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       70 (to L7)
+                NOT_TAKEN
+
+ 206            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                STORE_FAST               2 (s)
+
+ 207            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                COMPARE_OP             148 (bool(>))
+                POP_JUMP_IF_FALSE       19 (to L4)
+                NOT_TAKEN
+                LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           1
+                BINARY_OP               26 ([])
+                CALL                     1
+                JUMP_FORWARD             1 (to L5)
+        L4:     LOAD_SMALL_INT           1
+        L5:     STORE_FAST               3 (i)
+
+ 208            LOAD_GLOBAL             11 (ord + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (s, i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               10 (-)
+                BINARY_OP               26 ([])
+                CALL                     1
+        L6:     RETURN_VALUE
+
+ 209    L7:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               3 ('string.len')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       19 (to L9)
+                NOT_TAKEN
+
+ 210            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+        L8:     RETURN_VALUE
+
+ 211    L9:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               4 ('string.lower')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       24 (to L11)
+                NOT_TAKEN
+
+ 212            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                LOAD_ATTR               13 (lower + NULL|self)
+                CALL                     0
+       L10:     RETURN_VALUE
+
+ 213   L11:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               5 ('string.upper')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       24 (to L13)
+                NOT_TAKEN
+
+ 214            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                LOAD_ATTR               15 (upper + NULL|self)
+                CALL                     0
+       L12:     RETURN_VALUE
+
+ 215   L13:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               6 ('math.floor')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       19 (to L15)
+                NOT_TAKEN
+
+ 216            LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+       L14:     RETURN_VALUE
+
+ 217   L15:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               7 ('math.ceil')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       21 (to L17)
+                NOT_TAKEN
+
+ 218            LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                UNARY_NEGATIVE
+                CALL                     1
+                UNARY_NEGATIVE
+       L16:     RETURN_VALUE
+
+ 219   L17:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               8 ('math.abs')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       19 (to L19)
+                NOT_TAKEN
+
+ 220            LOAD_GLOBAL             17 (abs + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+       L18:     RETURN_VALUE
+
+ 221   L19:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST               9 ('tonumber')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       60 (to L23)
+                NOT_TAKEN
+
+ 222            LOAD_CONST              10 ('.')
+                LOAD_GLOBAL             19 (str + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       19 (to L21)
+                NOT_TAKEN
+                LOAD_GLOBAL             21 (float + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+       L20:     RETURN_VALUE
+       L21:     LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+       L22:     RETURN_VALUE
+
+ 223   L23:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST              11 ('tostring')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       19 (to L25)
+                NOT_TAKEN
+
+ 224            LOAD_GLOBAL             19 (str + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                CALL                     1
+       L24:     RETURN_VALUE
+
+ 225   L25:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST              12 ('type')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       79 (to L31)
+                NOT_TAKEN
+
+ 226            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                STORE_FAST               4 (a)
+
+ 227            LOAD_GLOBAL             23 (isinstance + NULL)
+                LOAD_FAST_BORROW         4 (a)
+                LOAD_GLOBAL             24 (_Global)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L27)
+                NOT_TAKEN
+
+ 228   L26:     LOAD_CONST              13 ('table')
+                RETURN_VALUE
+
+ 229   L27:     LOAD_GLOBAL             23 (isinstance + NULL)
+                LOAD_FAST_BORROW         4 (a)
+                LOAD_GLOBAL             26 (_FuncRef)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L29)
+                NOT_TAKEN
+
+ 230   L28:     LOAD_CONST              14 ('function')
+                RETURN_VALUE
+
+ 231   L29:     LOAD_GLOBAL             29 (type + NULL)
+                LOAD_FAST_BORROW         4 (a)
+                CALL                     1
+                LOAD_ATTR               30 (__name__)
+       L30:     RETURN_VALUE
+
+ 232   L31:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST              15 ('string.sub')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE      166 (to L39)
+                NOT_TAKEN
+
+ 233            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                STORE_FAST               2 (s)
+
+ 234            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                COMPARE_OP             148 (bool(>))
+                POP_JUMP_IF_FALSE       19 (to L32)
+                NOT_TAKEN
+                LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           1
+                BINARY_OP               26 ([])
+                CALL                     1
+                JUMP_FORWARD             1 (to L33)
+       L32:     LOAD_SMALL_INT           1
+       L33:     STORE_FAST               3 (i)
+
+ 235            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                CALL                     1
+                LOAD_SMALL_INT           2
+                COMPARE_OP             148 (bool(>))
+                POP_JUMP_IF_FALSE       19 (to L34)
+                NOT_TAKEN
+                LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           2
+                BINARY_OP               26 ([])
+                CALL                     1
+                JUMP_FORWARD            10 (to L35)
+       L34:     LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         2 (s)
+                CALL                     1
+       L35:     STORE_FAST               5 (j)
+
+ 236            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              18 (bool(<))
+                POP_JUMP_IF_FALSE       26 (to L36)
+                NOT_TAKEN
+
+ 237            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         2 (s)
+                CALL                     1
+                LOAD_FAST_BORROW         3 (i)
+                BINARY_OP                0 (+)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                STORE_FAST               3 (i)
+
+ 238   L36:     LOAD_FAST_BORROW         5 (j)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              18 (bool(<))
+                POP_JUMP_IF_FALSE       26 (to L37)
+                NOT_TAKEN
+
+ 239            LOAD_GLOBAL              7 (len + NULL)
+                LOAD_FAST_BORROW         2 (s)
+                CALL                     1
+                LOAD_FAST_BORROW         5 (j)
+                BINARY_OP                0 (+)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                STORE_FAST               5 (j)
+
+ 240   L37:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (s, i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               10 (-)
+                LOAD_FAST_BORROW         5 (j)
+                BINARY_SLICE
+       L38:     RETURN_VALUE
+
+ 241   L39:     LOAD_FAST_BORROW         0 (f)
+                LOAD_ATTR                0 (name)
+                LOAD_CONST              16 ('string.rep')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       33 (to L41)
+                NOT_TAKEN
+
+ 242            LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (args)
+                LOAD_SMALL_INT           1
+                BINARY_OP               26 ([])
+                CALL                     1
+                BINARY_OP                5 (*)
+       L40:     RETURN_VALUE
+
+ 241   L41:     NOP
+
+ 245            LOAD_GLOBAL             34 (_UNKNOWN)
+                RETURN_VALUE
+
+  --   L42:     PUSH_EXC_INFO
+
+ 243            LOAD_GLOBAL             32 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       10 (to L44)
+                NOT_TAKEN
+                POP_TOP
+
+ 244            LOAD_GLOBAL             34 (_UNKNOWN)
+                SWAP                     2
+       L43:     POP_EXCEPT
+                RETURN_VALUE
+
+ 243   L44:     RERAISE                  0
+
+  --   L45:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L42 [0]
+  L3 to L6 -> L42 [0]
+  L7 to L8 -> L42 [0]
+  L9 to L10 -> L42 [0]
+  L11 to L12 -> L42 [0]
+  L13 to L14 -> L42 [0]
+  L15 to L16 -> L42 [0]
+  L17 to L18 -> L42 [0]
+  L19 to L20 -> L42 [0]
+  L21 to L22 -> L42 [0]
+  L23 to L24 -> L42 [0]
+  L25 to L26 -> L42 [0]
+  L27 to L28 -> L42 [0]
+  L29 to L30 -> L42 [0]
+  L31 to L38 -> L42 [0]
+  L39 to L40 -> L42 [0]
+  L42 to L43 -> L45 [1] lasti
+  L44 to L45 -> L45 [1] lasti
+
+
+### [13]   _parse_expr  (file=lua_beautify.py) :: line 248, args 11, locals 11, stack 8, consts 28
+ 248            RESUME                   0
+
+ 250            LOAD_FAST_BORROW         0 (s)
+                LOAD_ATTR                1 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST               0 (s)
+
+ 251            LOAD_FAST_BORROW         0 (s)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L1)
+                NOT_TAKEN
+
+ 252            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 254    L1:     LOAD_FAST_BORROW         0 (s)
+                LOAD_CONST               2 ('true')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L2)
+                NOT_TAKEN
+
+ 255            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST               3 ('bool')
+                LOAD_CONST               4 (True)
+                CALL                     2
+                RETURN_VALUE
+
+ 256    L2:     LOAD_FAST_BORROW         0 (s)
+                LOAD_CONST               5 ('false')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       13 (to L3)
+                NOT_TAKEN
+
+ 257            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST               3 ('bool')
+                LOAD_CONST               6 (False)
+                CALL                     2
+                RETURN_VALUE
+
+ 258    L3:     LOAD_FAST_BORROW         0 (s)
+                LOAD_CONST               7 ('nil')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       12 (to L4)
+                NOT_TAKEN
+
+ 259            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST               7 ('nil')
+                CALL                     1
+                RETURN_VALUE
+
+ 260    L4:     LOAD_GLOBAL              4 (_EXPR_RE)
+                LOAD_ATTR                7 (match + NULL|self)
+                LOAD_FAST_BORROW         0 (s)
+                CALL                     1
+                STORE_FAST               1 (m)
+
+ 261            LOAD_FAST_BORROW         1 (m)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L5)
+                NOT_TAKEN
+
+ 262            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 263    L5:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST               8 ('num')
+                CALL                     1
+                POP_JUMP_IF_NONE        61 (to L7)
+                NOT_TAKEN
+
+ 264            LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST               8 ('num')
+                CALL                     1
+                STORE_FAST               2 (t)
+
+ 265            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST               8 ('num')
+                LOAD_CONST               9 ('.')
+                LOAD_FAST_BORROW         2 (t)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       16 (to L6)
+                NOT_TAKEN
+                LOAD_GLOBAL             11 (float + NULL)
+                LOAD_FAST_BORROW         2 (t)
+                CALL                     1
+                CALL                     2
+                RETURN_VALUE
+        L6:     LOAD_GLOBAL             13 (int + NULL)
+                LOAD_FAST_BORROW         2 (t)
+                CALL                     1
+                CALL                     2
+                RETURN_VALUE
+
+ 266    L7:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              10 ('str')
+                CALL                     1
+                POP_JUMP_IF_NONE        49 (to L10)
+                NOT_TAKEN
+
+ 267            NOP
+
+ 268    L8:     LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              10 ('str')
+                LOAD_GLOBAL             14 (ast)
+                LOAD_ATTR               16 (literal_eval)
+                PUSH_NULL
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              10 ('str')
+                CALL                     1
+                CALL                     1
+                CALL                     2
+        L9:     RETURN_VALUE
+
+ 271   L10:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              11 ('var')
+                CALL                     1
+                POP_JUMP_IF_NONE        29 (to L11)
+                NOT_TAKEN
+
+ 272            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              11 ('var')
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              11 ('var')
+                CALL                     1
+                LOAD_CONST              12 (('val',))
+                CALL_KW                  2
+                RETURN_VALUE
+
+ 273   L11:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              13 ('field')
+                CALL                     1
+                POP_JUMP_IF_NONE        45 (to L12)
+                NOT_TAKEN
+
+ 274            LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              13 ('field')
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              13 ('field')
+                CALL                     1
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              14 ('fieldname')
+                CALL                     1
+                LOAD_CONST              15 (('val', 'fieldname'))
+                CALL_KW                  3
+                RETURN_VALUE
+
+ 275   L12:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              16 ('un')
+                CALL                     1
+                POP_JUMP_IF_NONE        62 (to L14)
+                NOT_TAKEN
+
+ 276            LOAD_GLOBAL             21 (_parse_expr + NULL)
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              17 ('unv')
+                CALL                     1
+                CALL                     1
+                STORE_FAST               3 (ua)
+
+ 277            LOAD_FAST_BORROW         3 (ua)
+                POP_JUMP_IF_NOT_NONE     3 (to L13)
+                NOT_TAKEN
+
+ 278            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 279   L13:     LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              16 ('un')
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              16 ('un')
+                CALL                     1
+                LOAD_FAST_BORROW         3 (ua)
+                LOAD_CONST              18 (('op', 'a'))
+                CALL_KW                  3
+                RETURN_VALUE
+
+ 280   L14:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              19 ('call')
+                CALL                     1
+                POP_JUMP_IF_NONE       129 (to L19)
+                NOT_TAKEN
+
+ 281            LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              20 ('args')
+                CALL                     1
+                LOAD_SMALL_INT           1
+                LOAD_CONST              27 (-1)
+                BINARY_SLICE
+                STORE_FAST               4 (argtxt)
+
+ 282            BUILD_LIST               0
+                STORE_FAST               5 (args)
+
+ 283            LOAD_FAST_BORROW         4 (argtxt)
+                LOAD_ATTR                1 (strip + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       56 (to L18)
+                NOT_TAKEN
+
+ 284            LOAD_GLOBAL             23 (_split_args + NULL)
+                LOAD_FAST_BORROW         4 (argtxt)
+                CALL                     1
+                STORE_FAST               6 (parts)
+
+ 285            LOAD_FAST_BORROW         6 (parts)
+                GET_ITER
+       L15:     FOR_ITER                38 (to L17)
+                STORE_FAST               7 (p)
+
+ 286            LOAD_GLOBAL             21 (_parse_expr + NULL)
+                LOAD_FAST_BORROW         7 (p)
+                CALL                     1
+                STORE_FAST               8 (pe)
+
+ 287            LOAD_FAST_BORROW         8 (pe)
+                POP_JUMP_IF_NOT_NONE     4 (to L16)
+                NOT_TAKEN
+
+ 288            POP_TOP
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 289   L16:     LOAD_FAST_BORROW         5 (args)
+                LOAD_ATTR               25 (append + NULL|self)
+                LOAD_FAST_BORROW         8 (pe)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           40 (to L15)
+
+ 285   L17:     END_FOR
+                POP_ITER
+
+ 290   L18:     LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              19 ('call')
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              19 ('call')
+                CALL                     1
+                LOAD_FAST_BORROW         5 (args)
+                LOAD_CONST              21 (('fn', 'args'))
+                CALL_KW                  3
+                RETURN_VALUE
+
+ 291   L19:     LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              22 ('op1')
+                CALL                     1
+                POP_JUMP_IF_NONE        92 (to L22)
+                NOT_TAKEN
+
+ 292            LOAD_GLOBAL             21 (_parse_expr + NULL)
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              23 ('bin1')
+                CALL                     1
+                CALL                     1
+                STORE_FAST               9 (a)
+
+ 293            LOAD_GLOBAL             21 (_parse_expr + NULL)
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              24 ('bin2')
+                CALL                     1
+                CALL                     1
+                STORE_FAST              10 (b)
+
+ 294            LOAD_FAST_BORROW         9 (a)
+                POP_JUMP_IF_NONE         5 (to L20)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        10 (b)
+                POP_JUMP_IF_NOT_NONE     3 (to L21)
+                NOT_TAKEN
+
+ 295   L20:     LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 296   L21:     LOAD_GLOBAL              3 (Expr + NULL)
+                LOAD_CONST              25 ('bin')
+                LOAD_FAST_BORROW         1 (m)
+                LOAD_ATTR                9 (group + NULL|self)
+                LOAD_CONST              22 ('op1')
+                CALL                     1
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 154 (a, b)
+                LOAD_CONST              26 (('op', 'a', 'b'))
+                CALL_KW                  4
+                RETURN_VALUE
+
+ 297   L22:     LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+  --   L23:     PUSH_EXC_INFO
+
+ 269            LOAD_GLOBAL             18 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L25)
+                NOT_TAKEN
+                POP_TOP
+
+ 270   L24:     POP_EXCEPT
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 269   L25:     RERAISE                  0
+
+  --   L26:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L8 to L9 -> L23 [0]
+  L23 to L24 -> L26 [1] lasti
+  L25 to L26 -> L26 [1] lasti
+
+
+### [14]   _split_args  (file=lua_beautify.py) :: line 300, args 6, locals 6, stack 5, consts 7
+300            RESUME                   0
+
+302            BUILD_LIST               0
+               STORE_FAST               1 (out)
+
+303            LOAD_SMALL_INT           0
+               STORE_FAST               2 (depth)
+
+304            BUILD_LIST               0
+               STORE_FAST               3 (cur)
+
+305            LOAD_SMALL_INT           0
+               STORE_FAST               4 (i)
+
+306    L1:     LOAD_FAST_BORROW         4 (i)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         0 (txt)
+               CALL                     1
+               COMPARE_OP              18 (bool(<))
+               EXTENDED_ARG             1
+               POP_JUMP_IF_FALSE      349 (to L11)
+               NOT_TAKEN
+
+307            LOAD_FAST_BORROW_LOAD_FAST_BORROW 4 (txt, i)
+               BINARY_OP               26 ([])
+               STORE_FAST               5 (c)
+
+308            LOAD_FAST_BORROW         5 (c)
+               LOAD_CONST               1 ('"\'')
+               CONTAINS_OP              0 (in)
+               POP_JUMP_IF_FALSE      197 (to L7)
+               NOT_TAKEN
+
+309            LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (c)
+               CALL                     1
+               POP_TOP
+
+310            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+
+311    L2:     LOAD_FAST_BORROW         4 (i)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         0 (txt)
+               CALL                     1
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_FALSE      111 (to L5)
+               NOT_TAKEN
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 4 (txt, i)
+               BINARY_OP               26 ([])
+               LOAD_FAST_BORROW         5 (c)
+               COMPARE_OP             119 (bool(!=))
+               POP_JUMP_IF_FALSE       98 (to L5)
+               NOT_TAKEN
+
+312            LOAD_FAST_BORROW_LOAD_FAST_BORROW 4 (txt, i)
+               BINARY_OP               26 ([])
+               LOAD_CONST               2 ('\\')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       33 (to L3)
+               NOT_TAKEN
+
+313            LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 4 (txt, i)
+               BINARY_OP               26 ([])
+               CALL                     1
+               POP_TOP
+
+314            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+
+315    L3:     LOAD_FAST_BORROW         4 (i)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         0 (txt)
+               CALL                     1
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_TRUE         3 (to L4)
+               NOT_TAKEN
+               JUMP_BACKWARD           92 (to L2)
+
+316    L4:     LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 4 (txt, i)
+               BINARY_OP               26 ([])
+               CALL                     1
+               POP_TOP
+
+317            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+               JUMP_BACKWARD          126 (to L2)
+
+318    L5:     LOAD_FAST_BORROW         4 (i)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         0 (txt)
+               CALL                     1
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_FALSE       27 (to L6)
+               NOT_TAKEN
+
+319            LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (c)
+               CALL                     1
+               POP_TOP
+
+320            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+
+321    L6:     JUMP_BACKWARD          228 (to L1)
+
+322    L7:     LOAD_FAST_BORROW         5 (c)
+               LOAD_CONST               3 ('(')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       11 (to L8)
+               NOT_TAKEN
+
+323            LOAD_FAST_BORROW         2 (depth)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               2 (depth)
+               JUMP_FORWARD            91 (to L10)
+
+324    L8:     LOAD_FAST_BORROW         5 (c)
+               LOAD_CONST               4 (')')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       11 (to L9)
+               NOT_TAKEN
+
+325            LOAD_FAST_BORROW         2 (depth)
+               LOAD_SMALL_INT           1
+               BINARY_OP               23 (-=)
+               STORE_FAST               2 (depth)
+               JUMP_FORWARD            74 (to L10)
+
+326    L9:     LOAD_FAST_BORROW         5 (c)
+               LOAD_CONST               5 (',')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       68 (to L10)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         2 (depth)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       61 (to L10)
+               NOT_TAKEN
+
+327            LOAD_FAST_BORROW         1 (out)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_CONST               6 ('')
+               LOAD_ATTR                5 (join + NULL|self)
+               LOAD_FAST_BORROW         3 (cur)
+               CALL                     1
+               LOAD_ATTR                7 (strip + NULL|self)
+               CALL                     0
+               CALL                     1
+               POP_TOP
+
+328            BUILD_LIST               0
+               STORE_FAST               3 (cur)
+
+329            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+
+330            EXTENDED_ARG             1
+               JUMP_BACKWARD          336 (to L1)
+
+331   L10:     LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (c)
+               CALL                     1
+               POP_TOP
+
+332            LOAD_FAST_BORROW         4 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               4 (i)
+               EXTENDED_ARG             1
+               JUMP_BACKWARD          365 (to L1)
+
+333   L11:     LOAD_CONST               6 ('')
+               LOAD_ATTR                5 (join + NULL|self)
+               LOAD_FAST_BORROW         3 (cur)
+               CALL                     1
+               LOAD_ATTR                7 (strip + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_FALSE       47 (to L12)
+               NOT_TAKEN
+
+334            LOAD_FAST_BORROW         1 (out)
+               LOAD_ATTR                3 (append + NULL|self)
+               LOAD_CONST               6 ('')
+               LOAD_ATTR                5 (join + NULL|self)
+               LOAD_FAST_BORROW         3 (cur)
+               CALL                     1
+               LOAD_ATTR                7 (strip + NULL|self)
+               CALL                     0
+               CALL                     1
+               POP_TOP
+
+335   L12:     LOAD_FAST_BORROW         1 (out)
+               RETURN_VALUE
+
+
+### [15]   _build_table_literal  (file=lua_beautify.py) :: line 345, args 7, locals 7, stack 9, consts 8
+ 345            RESUME                   0
+
+ 347            LOAD_FAST_BORROW         0 (env)
+                LOAD_ATTR                1 (get + NULL|self)
+                LOAD_FAST_BORROW         1 (var)
+                CALL                     1
+                STORE_FAST               2 (tb)
+
+ 348            LOAD_GLOBAL              3 (isinstance + NULL)
+                LOAD_FAST_BORROW         2 (tb)
+                LOAD_GLOBAL              4 (dict)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L1)
+                NOT_TAKEN
+
+ 349            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 350    L1:     LOAD_FAST_BORROW         2 (tb)
+                LOAD_ATTR                7 (keys + NULL|self)
+                CALL                     0
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      3 (k)
+                SWAP                     2
+        L2:     BUILD_LIST               0
+                SWAP                     2
+        L3:     FOR_ITER                29 (to L6)
+                STORE_FAST               3 (k)
+                LOAD_GLOBAL              3 (isinstance + NULL)
+                LOAD_FAST_BORROW         3 (k)
+                LOAD_GLOBAL              8 (int)
+                CALL                     2
+                TO_BOOL
+        L4:     POP_JUMP_IF_TRUE         3 (to L5)
+                NOT_TAKEN
+                JUMP_BACKWARD           27 (to L3)
+        L5:     LOAD_FAST_BORROW         3 (k)
+                LIST_APPEND              2
+                JUMP_BACKWARD           31 (to L3)
+        L6:     END_FOR
+                POP_ITER
+        L7:     STORE_FAST               4 (keys)
+                STORE_FAST               3 (k)
+
+ 351            LOAD_FAST_BORROW         4 (keys)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L8)
+                NOT_TAKEN
+
+ 352            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 353    L8:     LOAD_GLOBAL             10 (any)
+                COPY                     1
+                LOAD_COMMON_CONSTANT     4 (<built-in function any>)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE       28 (to L12)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_CONST               2 (<code object <genexpr> at 0x7aaf62eab0, file "lua_beautify.py", line 353>)
+                MAKE_FUNCTION
+                LOAD_FAST_BORROW         4 (keys)
+                GET_ITER
+                CALL                     0
+        L9:     FOR_ITER                12 (to L11)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L10)
+                NOT_TAKEN
+                JUMP_BACKWARD           11 (to L9)
+       L10:     POP_ITER
+                LOAD_CONST               3 (True)
+                JUMP_FORWARD            17 (to L13)
+       L11:     END_FOR
+                POP_ITER
+                LOAD_CONST               4 (False)
+                JUMP_FORWARD            13 (to L13)
+       L12:     PUSH_NULL
+                LOAD_CONST               2 (<code object <genexpr> at 0x7aaf62eab0, file "lua_beautify.py", line 353>)
+                MAKE_FUNCTION
+                LOAD_FAST_BORROW         4 (keys)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+       L13:     TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L14)
+                NOT_TAKEN
+
+ 354            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 355   L14:     LOAD_GLOBAL             13 (sorted + NULL)
+                LOAD_FAST_BORROW         4 (keys)
+                CALL                     1
+                LOAD_GLOBAL             15 (list + NULL)
+                LOAD_GLOBAL             17 (range + NULL)
+                LOAD_SMALL_INT           1
+                LOAD_GLOBAL             19 (max + NULL)
+                LOAD_FAST_BORROW         4 (keys)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                CALL                     2
+                CALL                     1
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE        3 (to L15)
+                NOT_TAKEN
+
+ 356            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 357   L15:     BUILD_LIST               0
+                STORE_FAST               5 (vals)
+
+ 358            LOAD_GLOBAL             17 (range + NULL)
+                LOAD_SMALL_INT           1
+                LOAD_GLOBAL             19 (max + NULL)
+                LOAD_FAST_BORROW         4 (keys)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                CALL                     2
+                GET_ITER
+       L16:     FOR_ITER                59 (to L18)
+                STORE_FAST               3 (k)
+
+ 359            LOAD_FAST_BORROW         2 (tb)
+                LOAD_ATTR                1 (get + NULL|self)
+                LOAD_FAST_BORROW         3 (k)
+                CALL                     1
+                STORE_FAST               6 (v)
+
+ 360            LOAD_FAST_BORROW         6 (v)
+                LOAD_GLOBAL             20 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        4 (to L17)
+                NOT_TAKEN
+
+ 361            POP_TOP
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 362   L17:     LOAD_FAST_BORROW         5 (vals)
+                LOAD_ATTR               23 (append + NULL|self)
+                LOAD_GLOBAL             25 (_lit + NULL)
+                LOAD_FAST_BORROW         6 (v)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           61 (to L16)
+
+ 358   L18:     END_FOR
+                POP_ITER
+
+ 363            LOAD_CONST               5 ('{')
+                LOAD_CONST               6 (', ')
+                LOAD_ATTR               27 (join + NULL|self)
+                LOAD_FAST_BORROW         5 (vals)
+                CALL                     1
+                BINARY_OP                0 (+)
+                LOAD_CONST               7 ('}')
+                BINARY_OP                0 (+)
+                RETURN_VALUE
+
+  --   L19:     SWAP                     2
+                POP_TOP
+
+ 350            SWAP                     2
+                STORE_FAST               3 (k)
+                RERAISE                  0
+ExceptionTable:
+  L2 to L4 -> L19 [2]
+  L5 to L7 -> L19 [2]
+
+
+### [16]     <genexpr>  (file=lua_beautify.py) :: line 353, args 2, locals 2, stack 5, consts 2
+ 353           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                39 (to L6)
+               STORE_FAST               1 (k)
+               LOAD_GLOBAL              1 (isinstance + NULL)
+               LOAD_FAST_BORROW         1 (k)
+               LOAD_GLOBAL              2 (int)
+               CALL                     2
+               TO_BOOL
+               UNARY_NOT
+               COPY                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE         6 (to L5)
+       L3:     NOT_TAKEN
+       L4:     POP_TOP
+               LOAD_FAST_BORROW         1 (k)
+               LOAD_SMALL_INT           1
+               COMPARE_OP               2 (<)
+       L5:     YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           41 (to L2)
+       L6:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L7:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L7 [0] lasti
+  L4 to L7 -> L7 [0] lasti
+
+
+### [17]   _table_lit  (file=lua_beautify.py) :: line 366, args 2, locals 3, stack 7, consts 11
+  --            MAKE_CELL                0 (tb)
+
+ 366            RESUME                   0
+
+ 368            LOAD_GLOBAL              1 (isinstance + NULL)
+                LOAD_DEREF               0 (tb)
+                LOAD_GLOBAL              2 (dict)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L1)
+                NOT_TAKEN
+
+ 369            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 370    L1:     LOAD_GLOBAL              4 (any)
+                COPY                     1
+                LOAD_COMMON_CONSTANT     4 (<built-in function any>)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE       42 (to L5)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_CONST               2 (<code object <genexpr> at 0x7aaf68d730, file "lua_beautify.py", line 370>)
+                MAKE_FUNCTION
+                LOAD_DEREF               0 (tb)
+                LOAD_ATTR                7 (values + NULL|self)
+                CALL                     0
+                GET_ITER
+                CALL                     0
+        L2:     FOR_ITER                12 (to L4)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L3)
+                NOT_TAKEN
+                JUMP_BACKWARD           11 (to L2)
+        L3:     POP_ITER
+                LOAD_CONST               3 (True)
+                JUMP_FORWARD            31 (to L6)
+        L4:     END_FOR
+                POP_ITER
+                LOAD_CONST               4 (False)
+                JUMP_FORWARD            27 (to L6)
+        L5:     PUSH_NULL
+                LOAD_CONST               2 (<code object <genexpr> at 0x7aaf68d730, file "lua_beautify.py", line 370>)
+                MAKE_FUNCTION
+                LOAD_DEREF               0 (tb)
+                LOAD_ATTR                7 (values + NULL|self)
+                CALL                     0
+                GET_ITER
+                CALL                     0
+                CALL                     1
+        L6:     TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L7)
+                NOT_TAKEN
+
+ 371            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 372    L7:     LOAD_GLOBAL              9 (sorted + NULL)
+                LOAD_DEREF               0 (tb)
+                LOAD_ATTR               11 (keys + NULL|self)
+                CALL                     0
+                CALL                     1
+                STORE_FAST               1 (skeys)
+
+ 373            LOAD_GLOBAL             12 (all)
+                COPY                     1
+                LOAD_COMMON_CONSTANT     3 (<built-in function all>)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE       38 (to L11)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_CONST               5 (<code object <genexpr> at 0x7aab4b0750, file "lua_beautify.py", line 373>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             15 (enumerate + NULL)
+                LOAD_FAST_BORROW         1 (skeys)
+                LOAD_SMALL_INT           1
+                CALL                     2
+                GET_ITER
+                CALL                     0
+        L8:     FOR_ITER                12 (to L10)
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L9)
+                NOT_TAKEN
+                JUMP_BACKWARD           11 (to L8)
+        L9:     POP_ITER
+                LOAD_CONST               4 (False)
+                JUMP_FORWARD            27 (to L12)
+       L10:     END_FOR
+                POP_ITER
+                LOAD_CONST               3 (True)
+                JUMP_FORWARD            23 (to L12)
+       L11:     PUSH_NULL
+                LOAD_CONST               5 (<code object <genexpr> at 0x7aab4b0750, file "lua_beautify.py", line 373>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             15 (enumerate + NULL)
+                LOAD_FAST_BORROW         1 (skeys)
+                LOAD_SMALL_INT           1
+                CALL                     2
+                GET_ITER
+                CALL                     0
+                CALL                     1
+       L12:     TO_BOOL
+                POP_JUMP_IF_FALSE       42 (to L13)
+                NOT_TAKEN
+
+ 374            LOAD_CONST               6 ('{')
+                LOAD_CONST               7 (', ')
+                LOAD_ATTR               17 (join + NULL|self)
+                LOAD_FAST_BORROW         0 (tb)
+                BUILD_TUPLE              1
+                LOAD_CONST               8 (<code object <genexpr> at 0x7aab472e50, file "lua_beautify.py", line 374>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                LOAD_FAST_BORROW         1 (skeys)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+                BINARY_OP                0 (+)
+                LOAD_CONST               9 ('}')
+                BINARY_OP                0 (+)
+                RETURN_VALUE
+
+ 375   L13:     LOAD_CONST               6 ('{')
+                LOAD_CONST               7 (', ')
+                LOAD_ATTR               17 (join + NULL|self)
+                LOAD_FAST_BORROW         0 (tb)
+                BUILD_TUPLE              1
+                LOAD_CONST              10 (<code object <genexpr> at 0x7aaf64a130, file "lua_beautify.py", line 375>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                LOAD_FAST_BORROW         1 (skeys)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+                BINARY_OP                0 (+)
+                LOAD_CONST               9 ('}')
+                BINARY_OP                0 (+)
+                RETURN_VALUE
+
+
+### [18]     <genexpr>  (file=lua_beautify.py) :: line 370, args 2, locals 2, stack 3, consts 1
+ 370           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                12 (to L3)
+               STORE_FAST_LOAD_FAST    17 (v, v)
+               LOAD_GLOBAL              0 (_UNKNOWN)
+               IS_OP                    0 (is)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           14 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [19]     <genexpr>  (file=lua_beautify.py) :: line 373, args 3, locals 3, stack 5, consts 1
+ 373           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                35 (to L6)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST   18 (i, k)
+               LOAD_GLOBAL              1 (isinstance + NULL)
+               LOAD_FAST_BORROW         2 (k)
+               LOAD_GLOBAL              2 (int)
+               CALL                     2
+               COPY                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE        5 (to L5)
+       L3:     NOT_TAKEN
+       L4:     POP_TOP
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 33 (k, i)
+               COMPARE_OP              72 (==)
+       L5:     YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           37 (to L2)
+       L6:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L7:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L7 [0] lasti
+  L4 to L7 -> L7 [0] lasti
+
+
+### [20]     <genexpr>  (file=lua_beautify.py) :: line 374, args 2, locals 3, stack 5, consts 1
+  --           COPY_FREE_VARS           1
+
+ 374           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                23 (to L3)
+               STORE_FAST               1 (k)
+               LOAD_GLOBAL              1 (_lit + NULL)
+               LOAD_DEREF               2 (tb)
+               LOAD_FAST_BORROW         1 (k)
+               BINARY_OP               26 ([])
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           25 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [21]     <genexpr>  (file=lua_beautify.py) :: line 375, args 2, locals 3, stack 6, consts 3
+  --           COPY_FREE_VARS           1
+
+ 375           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                53 (to L3)
+               STORE_FAST               1 (k)
+               LOAD_CONST               0 ('[')
+               LOAD_GLOBAL              1 (_lit + NULL)
+               LOAD_FAST_BORROW         1 (k)
+               CALL                     1
+               BINARY_OP                0 (+)
+               LOAD_CONST               1 ('] = ')
+               BINARY_OP                0 (+)
+               LOAD_GLOBAL              1 (_lit + NULL)
+               LOAD_DEREF               2 (tb)
+               LOAD_FAST_BORROW         1 (k)
+               BINARY_OP               26 ([])
+               CALL                     1
+               BINARY_OP                0 (+)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           55 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               2 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [22]   _lit  (file=lua_beautify.py) :: line 378, args 1, locals 1, stack 5, consts 8
+378           RESUME                   0
+
+379           LOAD_GLOBAL              1 (isinstance + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_GLOBAL              2 (bool)
+              CALL                     2
+              TO_BOOL
+              POP_JUMP_IF_FALSE       13 (to L2)
+              NOT_TAKEN
+
+380           LOAD_FAST_BORROW         0 (v)
+              TO_BOOL
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_CONST               0 ('true')
+              RETURN_VALUE
+      L1:     LOAD_CONST               1 ('false')
+              RETURN_VALUE
+
+381   L2:     LOAD_GLOBAL              1 (isinstance + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_GLOBAL              4 (str)
+              CALL                     2
+              TO_BOOL
+              POP_JUMP_IF_FALSE       65 (to L3)
+              NOT_TAKEN
+
+382           LOAD_CONST               2 ('"')
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_ATTR                7 (replace + NULL|self)
+              LOAD_CONST               3 ('\\')
+              LOAD_CONST               4 ('\\\\')
+              CALL                     2
+              LOAD_ATTR                7 (replace + NULL|self)
+              LOAD_CONST               2 ('"')
+              LOAD_CONST               5 ('\\"')
+              CALL                     2
+              LOAD_ATTR                7 (replace + NULL|self)
+              LOAD_CONST               6 ('\n')
+              LOAD_CONST               7 ('\\n')
+              CALL                     2
+              BINARY_OP                0 (+)
+              LOAD_CONST               2 ('"')
+              BINARY_OP                0 (+)
+              RETURN_VALUE
+
+383   L3:     LOAD_GLOBAL              1 (isinstance + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_GLOBAL              8 (float)
+              CALL                     2
+              TO_BOOL
+              POP_JUMP_IF_FALSE       54 (to L5)
+              NOT_TAKEN
+
+384           LOAD_FAST_BORROW         0 (v)
+              LOAD_ATTR               11 (is_integer + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE       21 (to L4)
+              NOT_TAKEN
+
+385           LOAD_GLOBAL              5 (str + NULL)
+              LOAD_GLOBAL             13 (int + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              CALL                     1
+              CALL                     1
+              RETURN_VALUE
+
+386   L4:     LOAD_GLOBAL             15 (repr + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              CALL                     1
+              RETURN_VALUE
+
+387   L5:     LOAD_GLOBAL              5 (str + NULL)
+              LOAD_FAST_BORROW         0 (v)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [23]   beautify_block  (file=lua_beautify.py) :: line 401, args 32, locals 32, stack 7, consts 30
+ 401            RESUME                   0
+
+ 404            BUILD_MAP                0
+                STORE_FAST               1 (env)
+
+ 405            BUILD_LIST               0
+                STORE_FAST               2 (out)
+
+ 406            LOAD_SMALL_INT           0
+                STORE_FAST               3 (i)
+
+ 407            LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST_BORROW         0 (lines)
+                CALL                     1
+                STORE_FAST               4 (n)
+
+ 412            LOAD_CONST               1 (False)
+                STORE_FAST               5 (unreachable)
+
+ 413            BUILD_LIST               0
+                STORE_FAST               6 (block_taken)
+
+ 414            LOAD_CONST               2 (None)
+                STORE_FAST               7 (_pending_label)
+
+ 415            BUILD_MAP                0
+                STORE_FAST               8 (_pending_elems)
+
+ 417    L1:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (i, n)
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG            10
+                POP_JUMP_IF_FALSE     2720 (to L68)
+                NOT_TAKEN
+
+ 418            LOAD_FAST_BORROW_LOAD_FAST_BORROW 3 (lines, i)
+                BINARY_OP               26 ([])
+                LOAD_ATTR                3 (rstrip + NULL|self)
+                CALL                     0
+                STORE_FAST               9 (line)
+
+ 419            LOAD_FAST_BORROW         9 (line)
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST              10 (s)
+
+ 420            LOAD_FAST_BORROW         9 (line)
+                LOAD_CONST               2 (None)
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST_BORROW         9 (line)
+                LOAD_ATTR                7 (lstrip + NULL|self)
+                CALL                     0
+                CALL                     1
+                BINARY_OP               10 (-)
+                BINARY_SLICE
+                STORE_FAST              11 (indent)
+
+ 422            LOAD_FAST_BORROW        10 (s)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       24 (to L2)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               3 ('--')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       29 (to L3)
+                NOT_TAKEN
+
+ 423    L2:     LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 424            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 425            JUMP_BACKWARD          148 (to L1)
+
+ 428    L3:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               4 ('elseif')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       29 (to L4)
+                NOT_TAKEN
+
+ 429            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 430            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 431            JUMP_BACKWARD          199 (to L1)
+
+ 432    L4:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               5 ('else')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       29 (to L5)
+                NOT_TAKEN
+
+ 433            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 434            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 435            JUMP_BACKWARD          250 (to L1)
+
+ 436    L5:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               6 ('end')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       54 (to L7)
+                NOT_TAKEN
+
+ 437            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 438            LOAD_FAST_BORROW         6 (block_taken)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       17 (to L6)
+                NOT_TAKEN
+
+ 439            LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_ATTR               13 (pop + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 440    L6:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 441            EXTENDED_ARG             1
+                JUMP_BACKWARD          326 (to L1)
+
+ 442    L7:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               7 ('::')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       79 (to L9)
+                NOT_TAKEN
+
+ 443            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 444            LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                5 (strip + NULL|self)
+                LOAD_CONST               8 (':')
+                CALL                     1
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST              12 (lbl)
+
+ 445            LOAD_FAST_BORROW         5 (unreachable)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       11 (to L8)
+                NOT_TAKEN
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 199 (lbl, _pending_label)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        5 (to L8)
+                NOT_TAKEN
+
+ 446            LOAD_CONST               1 (False)
+                STORE_FAST               5 (unreachable)
+
+ 447            LOAD_CONST               2 (None)
+                STORE_FAST               7 (_pending_label)
+
+ 448    L8:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 449            EXTENDED_ARG             1
+                JUMP_BACKWARD          427 (to L1)
+
+ 450    L9:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST               9 ('goto ')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       86 (to L12)
+                NOT_TAKEN
+
+ 451            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 452            LOAD_FAST_BORROW         5 (unreachable)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        49 (to L11)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (block_taken)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       16 (to L10)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_CONST              27 (-1)
+                BINARY_OP               26 ([])
+                TO_BOOL
+                POP_JUMP_IF_FALSE       26 (to L11)
+                NOT_TAKEN
+
+ 453   L10:     LOAD_CONST              10 (True)
+                STORE_FAST               5 (unreachable)
+
+ 454            LOAD_FAST_BORROW        10 (s)
+                LOAD_CONST              11 (slice(5, None, None))
+                BINARY_OP               26 ([])
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST               7 (_pending_label)
+
+ 455   L11:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 456            EXTENDED_ARG             2
+                JUMP_BACKWARD          535 (to L1)
+
+ 457   L12:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST              12 ('function ')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       30 (to L13)
+                NOT_TAKEN
+
+ 458            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 459            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 460            EXTENDED_ARG             2
+                JUMP_BACKWARD          587 (to L1)
+
+ 462   L13:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST              13 ('if ')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE      168 (to L20)
+                NOT_TAKEN
+
+ 463            LOAD_FAST_BORROW        10 (s)
+                LOAD_SMALL_INT           3
+                LOAD_CONST              28 (-5)
+                BINARY_SLICE
+                STORE_FAST              13 (cond)
+
+ 464            LOAD_GLOBAL             15 (_parse_expr + NULL)
+                LOAD_FAST_BORROW        13 (cond)
+                CALL                     1
+                STORE_FAST              14 (ce)
+
+ 465            LOAD_FAST_BORROW        14 (ce)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       12 (to L14)
+                NOT_TAKEN
+                LOAD_GLOBAL             17 (_eval_expr + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 225 (ce, env)
+                CALL                     2
+                JUMP_FORWARD             5 (to L15)
+       L14:     LOAD_GLOBAL             18 (_UNKNOWN)
+       L15:     STORE_FAST              15 (cv)
+
+ 466            LOAD_FAST_BORROW        15 (cv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    1 (is not)
+                POP_JUMP_IF_FALSE       71 (to L18)
+                NOT_TAKEN
+
+ 467            LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_GLOBAL             21 (_lua_truthy + NULL)
+                LOAD_FAST_BORROW        15 (cv)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 468            LOAD_FAST                2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST               11 (indent)
+                LOAD_GLOBAL             21 (_lua_truthy + NULL)
+                LOAD_FAST_BORROW        15 (cv)
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L16)
+                NOT_TAKEN
+                LOAD_CONST              14 ('if true then')
+                JUMP_FORWARD             1 (to L17)
+       L16:     LOAD_CONST              15 ('if false then')
+       L17:     BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD            34 (to L19)
+
+ 470   L18:     LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_CONST              10 (True)
+                CALL                     1
+                POP_TOP
+
+ 471            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 472   L19:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 473            EXTENDED_ARG             3
+                JUMP_BACKWARD          777 (to L1)
+
+ 475   L20:     LOAD_FAST_BORROW        10 (s)
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_CONST              16 ('while ')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE      168 (to L27)
+                NOT_TAKEN
+
+ 476            LOAD_FAST_BORROW        10 (s)
+                LOAD_SMALL_INT           6
+                LOAD_CONST              29 (-3)
+                BINARY_SLICE
+                STORE_FAST              13 (cond)
+
+ 477            LOAD_GLOBAL             15 (_parse_expr + NULL)
+                LOAD_FAST_BORROW        13 (cond)
+                CALL                     1
+                STORE_FAST              14 (ce)
+
+ 478            LOAD_FAST_BORROW        14 (ce)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       12 (to L21)
+                NOT_TAKEN
+                LOAD_GLOBAL             17 (_eval_expr + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 225 (ce, env)
+                CALL                     2
+                JUMP_FORWARD             5 (to L22)
+       L21:     LOAD_GLOBAL             18 (_UNKNOWN)
+       L22:     STORE_FAST              15 (cv)
+
+ 479            LOAD_FAST_BORROW        15 (cv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    1 (is not)
+                POP_JUMP_IF_FALSE       71 (to L25)
+                NOT_TAKEN
+
+ 480            LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_GLOBAL             21 (_lua_truthy + NULL)
+                LOAD_FAST_BORROW        15 (cv)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 481            LOAD_FAST                2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST               11 (indent)
+                LOAD_GLOBAL             21 (_lua_truthy + NULL)
+                LOAD_FAST_BORROW        15 (cv)
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L23)
+                NOT_TAKEN
+                LOAD_CONST              17 ('while true do')
+                JUMP_FORWARD             1 (to L24)
+       L23:     LOAD_CONST              18 ('while false do')
+       L24:     BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD            34 (to L26)
+
+ 483   L25:     LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_CONST              10 (True)
+                CALL                     1
+                POP_TOP
+
+ 484            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 485   L26:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 486            EXTENDED_ARG             3
+                JUMP_BACKWARD          967 (to L1)
+
+ 489   L27:     LOAD_GLOBAL             22 (_STMT_LOCAL)
+                LOAD_ATTR               25 (match + NULL|self)
+                LOAD_FAST_BORROW        10 (s)
+                CALL                     1
+                STORE_FAST              16 (m)
+
+ 490            LOAD_FAST_BORROW        16 (m)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      152 (to L33)
+                NOT_TAKEN
+
+ 491            LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           1
+                CALL                     1
+                STORE_FAST              17 (decls)
+
+ 492            LOAD_CONST              19 (',')
+                LOAD_FAST_BORROW        17 (decls)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       12 (to L28)
+                NOT_TAKEN
+                LOAD_GLOBAL             29 (_split_args + NULL)
+                LOAD_FAST_BORROW        17 (decls)
+                CALL                     1
+                JUMP_FORWARD             2 (to L29)
+       L28:     LOAD_FAST_BORROW        17 (decls)
+                BUILD_LIST               1
+       L29:     GET_ITER
+       L30:     FOR_ITER                80 (to L32)
+                STORE_FAST              18 (part)
+
+ 493            LOAD_FAST_BORROW        18 (part)
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST              19 (p)
+
+ 494            LOAD_GLOBAL             30 (re)
+                LOAD_ATTR               24 (match)
+                PUSH_NULL
+                LOAD_GLOBAL             32 (_VAR)
+                LOAD_FAST_BORROW        19 (p)
+                CALL                     2
+                STORE_FAST              20 (vn)
+
+ 495            LOAD_FAST_BORROW        20 (vn)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L31)
+                NOT_TAKEN
+                JUMP_BACKWARD           56 (to L30)
+
+ 496   L31:     LOAD_GLOBAL             18 (_UNKNOWN)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           0
+                CALL                     1
+                STORE_SUBSCR
+                JUMP_BACKWARD           82 (to L30)
+
+ 492   L32:     END_FOR
+                POP_ITER
+
+ 497            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 498            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 499            EXTENDED_ARG             4
+                JUMP_BACKWARD         1147 (to L1)
+
+ 502   L33:     LOAD_FAST_BORROW         5 (unreachable)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        24 (to L34)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (block_taken)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       45 (to L35)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (block_taken)
+                LOAD_CONST              27 (-1)
+                BINARY_OP               26 ([])
+                TO_BOOL
+                POP_JUMP_IF_TRUE        30 (to L35)
+                NOT_TAKEN
+
+ 503   L34:     LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 504            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 505            EXTENDED_ARG             4
+                JUMP_BACKWARD         1207 (to L1)
+
+ 508   L35:     LOAD_GLOBAL             34 (_STMT_TABELEM)
+                LOAD_ATTR               25 (match + NULL|self)
+                LOAD_FAST_BORROW        10 (s)
+                CALL                     1
+                STORE_FAST              16 (m)
+
+ 509            LOAD_FAST_BORROW        16 (m)
+                TO_BOOL
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      634 (to L49)
+                NOT_TAKEN
+
+ 510            LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           1
+                CALL                     1
+                LOAD_GLOBAL             37 (int + NULL)
+                LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           2
+                CALL                     1
+                CALL                     1
+                LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           3
+                CALL                     1
+                STORE_FAST              23 (rhs)
+                STORE_FAST              22 (k)
+                STORE_FAST              21 (tvar)
+
+ 511            LOAD_GLOBAL             15 (_parse_expr + NULL)
+                LOAD_FAST_BORROW        23 (rhs)
+                CALL                     1
+                STORE_FAST              24 (re_)
+
+ 512            LOAD_FAST_BORROW        24 (re_)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       13 (to L36)
+                NOT_TAKEN
+                LOAD_GLOBAL             17 (_eval_expr + NULL)
+                LOAD_FAST_BORROW        24 (re_)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                JUMP_FORWARD             5 (to L37)
+       L36:     LOAD_GLOBAL             18 (_UNKNOWN)
+       L37:     STORE_FAST              25 (rv)
+
+ 513            LOAD_FAST_BORROW         1 (env)
+                LOAD_ATTR               39 (get + NULL|self)
+                LOAD_FAST_BORROW        21 (tvar)
+                CALL                     1
+                STORE_FAST              26 (tb)
+
+ 514            LOAD_GLOBAL             41 (isinstance + NULL)
+                LOAD_FAST_BORROW        26 (tb)
+                LOAD_GLOBAL             42 (dict)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       26 (to L39)
+                NOT_TAKEN
+
+ 515            LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE       11 (to L38)
+                NOT_TAKEN
+
+ 516            LOAD_GLOBAL             18 (_UNKNOWN)
+                LOAD_FAST_BORROW        26 (tb)
+                LOAD_FAST_BORROW        22 (k)
+                STORE_SUBSCR
+                JUMP_FORWARD             5 (to L39)
+
+ 518   L38:     LOAD_FAST_BORROW        25 (rv)
+                LOAD_FAST_BORROW        26 (tb)
+                LOAD_FAST_BORROW        22 (k)
+                STORE_SUBSCR
+
+ 519   L39:     LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    1 (is not)
+                EXTENDED_ARG             1
+                POP_JUMP_IF_FALSE      339 (to L45)
+                NOT_TAKEN
+
+ 521            LOAD_FAST_BORROW         8 (_pending_elems)
+                LOAD_ATTR               45 (setdefault + NULL|self)
+                LOAD_FAST_BORROW        21 (tvar)
+                BUILD_LIST               0
+                CALL                     2
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        22 (k)
+                LOAD_GLOBAL             47 (_lit + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                CALL                     1
+                BUILD_TUPLE              2
+                CALL                     1
+                POP_TOP
+
+ 522            LOAD_GLOBAL             49 (_build_table_literal + NULL)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        21 (tvar)
+                CALL                     2
+                STORE_FAST              27 (lit)
+
+ 523            LOAD_FAST_BORROW        27 (lit)
+                EXTENDED_ARG             1
+                POP_JUMP_IF_NONE       277 (to L44)
+                NOT_TAKEN
+
+ 524            LOAD_GLOBAL             51 (range + NULL)
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST_BORROW         2 (out)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                BINARY_OP               10 (-)
+                LOAD_CONST              27 (-1)
+                LOAD_CONST              27 (-1)
+                CALL                     3
+                GET_ITER
+       L40:     FOR_ITER               150 (to L43)
+                STORE_FAST              28 (j)
+
+ 525            LOAD_GLOBAL             30 (re)
+                LOAD_ATTR               24 (match)
+                PUSH_NULL
+                LOAD_CONST              20 ('^')
+                LOAD_GLOBAL             32 (_VAR)
+                BINARY_OP                0 (+)
+                LOAD_CONST              21 ('\\s*=\\s*\\{')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW         2 (out)
+                LOAD_FAST_BORROW        28 (j)
+                BINARY_OP               26 ([])
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L41)
+                NOT_TAKEN
+                JUMP_BACKWARD           73 (to L40)
+       L41:     LOAD_FAST_BORROW         2 (out)
+                LOAD_FAST_BORROW        28 (j)
+                BINARY_OP               26 ([])
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                LOAD_ATTR                9 (startswith + NULL|self)
+                LOAD_FAST_BORROW        21 (tvar)
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L42)
+                NOT_TAKEN
+                JUMP_BACKWARD          119 (to L40)
+
+ 526   L42:     LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        21 (tvar)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        27 (lit)
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW         2 (out)
+                LOAD_FAST_BORROW        28 (j)
+                STORE_SUBSCR
+
+ 527            BUILD_LIST               0
+                LOAD_FAST_BORROW         8 (_pending_elems)
+                LOAD_FAST_BORROW        21 (tvar)
+                STORE_SUBSCR
+
+ 528            POP_TOP
+                JUMP_FORWARD           207 (to L48)
+
+ 524   L43:     END_FOR
+                POP_ITER
+
+ 530            LOAD_FAST_BORROW         8 (_pending_elems)
+                LOAD_FAST_BORROW        21 (tvar)
+                BINARY_OP               26 ([])
+                LOAD_ATTR               13 (pop + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 531            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        21 (tvar)
+                BINARY_OP                0 (+)
+                LOAD_CONST              23 ('[')
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL             53 (str + NULL)
+                LOAD_FAST_BORROW        22 (k)
+                CALL                     1
+                BINARY_OP                0 (+)
+                LOAD_CONST              24 ('] = ')
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL             47 (_lit + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                CALL                     1
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+
+  --   L44:     JUMP_FORWARD           111 (to L48)
+
+ 535   L45:     LOAD_FAST_BORROW         8 (_pending_elems)
+                LOAD_ATTR               39 (get + NULL|self)
+                LOAD_FAST_BORROW        21 (tvar)
+                BUILD_LIST               0
+                CALL                     2
+                GET_ITER
+       L46:     FOR_ITER                67 (to L47)
+                UNPACK_SEQUENCE          2
+                STORE_FAST              29 (pk)
+                STORE_FAST              30 (pv)
+
+ 536            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        21 (tvar)
+                BINARY_OP                0 (+)
+                LOAD_CONST              23 ('[')
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL             53 (str + NULL)
+                LOAD_FAST_BORROW        29 (pk)
+                CALL                     1
+                BINARY_OP                0 (+)
+                LOAD_CONST              24 ('] = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        30 (pv)
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           69 (to L46)
+
+ 535   L47:     END_FOR
+                POP_ITER
+
+ 537            BUILD_LIST               0
+                LOAD_FAST_BORROW         8 (_pending_elems)
+                LOAD_FAST_BORROW        21 (tvar)
+                STORE_SUBSCR
+
+ 538            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 539   L48:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 540            EXTENDED_ARG             7
+                JUMP_BACKWARD         1870 (to L1)
+
+ 543   L49:     LOAD_GLOBAL             54 (_STMT_ASSIGN)
+                LOAD_ATTR               25 (match + NULL|self)
+                LOAD_FAST_BORROW        10 (s)
+                CALL                     1
+                STORE_FAST              16 (m)
+
+ 544            LOAD_FAST_BORROW        16 (m)
+                TO_BOOL
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      637 (to L62)
+                NOT_TAKEN
+
+ 545            LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           1
+                CALL                     1
+                LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           2
+                CALL                     1
+                STORE_FAST              23 (rhs)
+                STORE_FAST              20 (vn)
+
+ 547            LOAD_FAST_BORROW        23 (rhs)
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                LOAD_CONST              25 ('{}')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       35 (to L50)
+                NOT_TAKEN
+
+ 548            BUILD_MAP                0
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 549            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 550            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 551            EXTENDED_ARG             7
+                JUMP_BACKWARD         1989 (to L1)
+
+ 552   L50:     LOAD_GLOBAL             15 (_parse_expr + NULL)
+                LOAD_FAST_BORROW        23 (rhs)
+                CALL                     1
+                STORE_FAST              24 (re_)
+
+ 553            LOAD_FAST_BORROW        24 (re_)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       13 (to L51)
+                NOT_TAKEN
+                LOAD_GLOBAL             17 (_eval_expr + NULL)
+                LOAD_FAST_BORROW        24 (re_)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                JUMP_FORWARD             5 (to L52)
+       L51:     LOAD_GLOBAL             18 (_UNKNOWN)
+       L52:     STORE_FAST              25 (rv)
+
+ 554            LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE      143 (to L54)
+                NOT_TAKEN
+
+ 556            LOAD_FAST_BORROW        23 (rhs)
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST              31 (rrhs)
+
+ 557            LOAD_GLOBAL             30 (re)
+                LOAD_ATTR               56 (fullmatch)
+                PUSH_NULL
+                LOAD_GLOBAL             32 (_VAR)
+                LOAD_FAST_BORROW        31 (rrhs)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       66 (to L53)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        31 (rrhs)
+                LOAD_GLOBAL             58 (_KNOWN_GLOBALS)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       55 (to L53)
+                NOT_TAKEN
+
+ 558            LOAD_GLOBAL             61 (_Global + NULL)
+                LOAD_FAST_BORROW        31 (rrhs)
+                CALL                     1
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 559            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        20 (vn)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        31 (rrhs)
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                EXTENDED_ARG             1
+                JUMP_FORWARD           374 (to L61)
+
+ 561   L53:     LOAD_GLOBAL             18 (_UNKNOWN)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 562            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+                EXTENDED_ARG             1
+                JUMP_FORWARD           346 (to L61)
+
+ 563   L54:     LOAD_GLOBAL             41 (isinstance + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             62 (_FuncRef)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       56 (to L55)
+                NOT_TAKEN
+
+ 564            LOAD_FAST_BORROW        25 (rv)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 565            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        20 (vn)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        25 (rv)
+                LOAD_ATTR               64 (name)
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                EXTENDED_ARG             1
+                JUMP_FORWARD           269 (to L61)
+
+ 566   L55:     LOAD_GLOBAL             41 (isinstance + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             60 (_Global)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE       55 (to L56)
+                NOT_TAKEN
+
+ 567            LOAD_FAST_BORROW        25 (rv)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 568            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        20 (vn)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        25 (rv)
+                LOAD_ATTR               64 (name)
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD           193 (to L61)
+
+ 569   L56:     LOAD_GLOBAL             41 (isinstance + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             42 (dict)
+                CALL                     2
+                TO_BOOL
+                POP_JUMP_IF_FALSE      120 (to L60)
+                NOT_TAKEN
+
+ 570            LOAD_FAST_BORROW         1 (env)
+                LOAD_ATTR               39 (get + NULL|self)
+                LOAD_FAST_BORROW        20 (vn)
+                CALL                     1
+                LOAD_FAST_BORROW        25 (rv)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE       13 (to L57)
+                NOT_TAKEN
+                LOAD_GLOBAL             49 (_build_table_literal + NULL)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                CALL                     2
+                JUMP_FORWARD            10 (to L58)
+       L57:     LOAD_GLOBAL             67 (_table_lit + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                CALL                     1
+       L58:     STORE_FAST              27 (lit)
+
+ 571            LOAD_FAST_BORROW        27 (lit)
+                POP_JUMP_IF_NONE        45 (to L59)
+                NOT_TAKEN
+
+ 572            LOAD_FAST_BORROW        25 (rv)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 573            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        20 (vn)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW        27 (lit)
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD            79 (to L61)
+
+ 575   L59:     LOAD_GLOBAL             18 (_UNKNOWN)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 576            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD            52 (to L61)
+
+ 578   L60:     LOAD_FAST_BORROW        25 (rv)
+                LOAD_FAST_BORROW         1 (env)
+                LOAD_FAST_BORROW        20 (vn)
+                STORE_SUBSCR
+
+ 579            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_FAST_BORROW        20 (vn)
+                BINARY_OP                0 (+)
+                LOAD_CONST              22 (' = ')
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL             47 (_lit + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                CALL                     1
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+
+ 580   L61:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 581            EXTENDED_ARG             9
+                JUMP_BACKWARD         2536 (to L1)
+
+ 584   L62:     LOAD_GLOBAL             68 (_STMT_RETURN)
+                LOAD_ATTR               25 (match + NULL|self)
+                LOAD_FAST_BORROW        10 (s)
+                CALL                     1
+                STORE_FAST              16 (m)
+
+ 585            LOAD_FAST_BORROW        16 (m)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      133 (to L67)
+                NOT_TAKEN
+
+ 586            LOAD_GLOBAL             15 (_parse_expr + NULL)
+                LOAD_FAST_BORROW        16 (m)
+                LOAD_ATTR               27 (group + NULL|self)
+                LOAD_SMALL_INT           1
+                CALL                     1
+                CALL                     1
+                STORE_FAST              24 (re_)
+
+ 587            LOAD_FAST_BORROW        24 (re_)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       13 (to L63)
+                NOT_TAKEN
+                LOAD_GLOBAL             17 (_eval_expr + NULL)
+                LOAD_FAST_BORROW        24 (re_)
+                LOAD_FAST_BORROW         1 (env)
+                CALL                     2
+                JUMP_FORWARD             5 (to L64)
+       L63:     LOAD_GLOBAL             18 (_UNKNOWN)
+       L64:     STORE_FAST              25 (rv)
+
+ 588            LOAD_FAST_BORROW        25 (rv)
+                LOAD_GLOBAL             18 (_UNKNOWN)
+                IS_OP                    1 (is not)
+                POP_JUMP_IF_FALSE       42 (to L65)
+                NOT_TAKEN
+
+ 589            LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (indent)
+                LOAD_CONST              26 ('return ')
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL             47 (_lit + NULL)
+                LOAD_FAST_BORROW        25 (rv)
+                CALL                     1
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+                JUMP_FORWARD            17 (to L66)
+
+ 591   L65:     LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 592   L66:     LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+
+ 593            EXTENDED_ARG            10
+                JUMP_BACKWARD         2697 (to L1)
+
+ 595   L67:     LOAD_FAST_BORROW         2 (out)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST_BORROW         9 (line)
+                CALL                     1
+                POP_TOP
+
+ 596            LOAD_FAST_BORROW         3 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP               13 (+=)
+                STORE_FAST               3 (i)
+                EXTENDED_ARG            10
+                JUMP_BACKWARD         2726 (to L1)
+
+ 598   L68:     LOAD_GLOBAL             71 (_dead_code_elim + NULL)
+                LOAD_FAST_BORROW         2 (out)
+                CALL                     1
+                RETURN_VALUE
+
+
+### [24]   _collect_vars  (file=lua_beautify.py) :: line 609, args 1, locals 1, stack 6, consts 1
+609           RESUME                   0
+
+610           LOAD_GLOBAL              1 (set + NULL)
+              LOAD_GLOBAL              2 (re)
+              LOAD_ATTR                4 (findall)
+              PUSH_NULL
+              LOAD_CONST               0 ('\\b')
+              LOAD_GLOBAL              6 (_VAR)
+              BINARY_OP                0 (+)
+              LOAD_CONST               0 ('\\b')
+              BINARY_OP                0 (+)
+              LOAD_FAST_BORROW         0 (expr)
+              CALL                     2
+              CALL                     1
+              RETURN_VALUE
+
+
+### [25]   _has_call  (file=lua_beautify.py) :: line 613, args 2, locals 2, stack 5, consts 3
+613           RESUME                   0
+
+615           LOAD_GLOBAL              0 (re)
+              LOAD_ATTR                2 (sub)
+              PUSH_NULL
+              LOAD_CONST               1 ('"(?:[^"\\\\]|\\\\.)*"')
+              LOAD_CONST               2 ('""')
+              LOAD_FAST_BORROW         0 (expr)
+              CALL                     3
+              STORE_FAST               1 (masked)
+
+616           LOAD_GLOBAL              5 (bool + NULL)
+              LOAD_GLOBAL              6 (_CALL_RHS)
+              LOAD_ATTR                9 (search + NULL|self)
+              LOAD_FAST_BORROW         1 (masked)
+              CALL                     1
+              CALL                     1
+              RETURN_VALUE
+
+
+### [26]   _dead_code_elim  (file=lua_beautify.py) :: line 619, args 9, locals 9, stack 7, consts 13
+619           RESUME                   0
+
+622           BUILD_LIST               0
+              STORE_FAST               1 (out)
+
+623           LOAD_GLOBAL              1 (set + NULL)
+              CALL                     0
+              STORE_FAST               2 (live)
+
+624           LOAD_GLOBAL              3 (reversed + NULL)
+              LOAD_FAST_BORROW         0 (lines)
+              CALL                     1
+              GET_ITER
+      L1:     EXTENDED_ARG             1
+              FOR_ITER               507 (to L7)
+              STORE_FAST               3 (l)
+
+625           LOAD_FAST_BORROW         3 (l)
+              LOAD_ATTR                5 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST               4 (s)
+
+626           LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               1 ('if ')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE       169 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               2 ('while ')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE       146 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               3 ('for ')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE       123 (to L2)
+              NOT_TAKEN
+
+627           LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               4 ('::')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE       100 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               5 ('goto')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        77 (to L2)
+              NOT_TAKEN
+
+628           LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               6 ('local ')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        54 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               7 ('return')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        31 (to L2)
+              NOT_TAKEN
+
+629           LOAD_FAST_BORROW         4 (s)
+              LOAD_ATTR                7 (startswith + NULL|self)
+              LOAD_CONST               8 ('function')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         8 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         4 (s)
+              LOAD_CONST               9 ('end')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       47 (to L3)
+              NOT_TAKEN
+
+631   L2:     LOAD_FAST_BORROW         1 (out)
+              LOAD_ATTR                9 (append + NULL|self)
+              LOAD_FAST_BORROW         3 (l)
+              CALL                     1
+              POP_TOP
+
+632           LOAD_FAST_BORROW         2 (live)
+              LOAD_ATTR               11 (update + NULL|self)
+              LOAD_GLOBAL             13 (_collect_vars + NULL)
+              LOAD_FAST_BORROW         4 (s)
+              CALL                     1
+              CALL                     1
+              POP_TOP
+
+633           EXTENDED_ARG             1
+              JUMP_BACKWARD          257 (to L1)
+
+634   L3:     LOAD_GLOBAL             14 (_STMT_ASSIGN)
+              LOAD_ATTR               17 (match + NULL|self)
+              LOAD_FAST_BORROW         4 (s)
+              CALL                     1
+              STORE_FAST               5 (m)
+
+635           LOAD_FAST_BORROW         5 (m)
+              TO_BOOL
+              POP_JUMP_IF_FALSE      179 (to L6)
+              NOT_TAKEN
+
+636           LOAD_FAST_BORROW         5 (m)
+              LOAD_ATTR               19 (group + NULL|self)
+              LOAD_SMALL_INT           1
+              CALL                     1
+              LOAD_FAST_BORROW         5 (m)
+              LOAD_ATTR               19 (group + NULL|self)
+              LOAD_SMALL_INT           2
+              CALL                     1
+              LOAD_ATTR                5 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST_STORE_FAST  118 (rhs, vn)
+
+637           LOAD_GLOBAL             21 (_has_call + NULL)
+              LOAD_FAST_BORROW         7 (rhs)
+              CALL                     1
+              TO_BOOL
+              UNARY_NOT
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       28 (to L4)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_CONST              10 ('[')
+              LOAD_GLOBAL             22 (re)
+              LOAD_ATTR               24 (sub)
+              PUSH_NULL
+              LOAD_CONST              11 ('"(?:[^"\\\\]|\\\\.)*"')
+              LOAD_CONST              12 ('""')
+              LOAD_FAST_BORROW         7 (rhs)
+              CALL                     3
+              CONTAINS_OP              1 (not in)
+      L4:     STORE_FAST               8 (pure)
+
+638           LOAD_FAST_BORROW_LOAD_FAST_BORROW 98 (vn, live)
+              CONTAINS_OP              1 (not in)
+              POP_JUMP_IF_FALSE       12 (to L5)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         8 (pure)
+              TO_BOOL
+              POP_JUMP_IF_FALSE        4 (to L5)
+              NOT_TAKEN
+
+640           EXTENDED_ARG             1
+              JUMP_BACKWARD          401 (to L1)
+
+641   L5:     LOAD_FAST_BORROW         1 (out)
+              LOAD_ATTR                9 (append + NULL|self)
+              LOAD_FAST_BORROW         3 (l)
+              CALL                     1
+              POP_TOP
+
+642           LOAD_FAST_BORROW         2 (live)
+              LOAD_ATTR               27 (discard + NULL|self)
+              LOAD_FAST_BORROW         6 (vn)
+              CALL                     1
+              POP_TOP
+
+643           LOAD_FAST_BORROW         2 (live)
+              LOAD_ATTR               11 (update + NULL|self)
+              LOAD_GLOBAL             13 (_collect_vars + NULL)
+              LOAD_FAST_BORROW         7 (rhs)
+              CALL                     1
+              CALL                     1
+              POP_TOP
+
+644           EXTENDED_ARG             1
+              JUMP_BACKWARD          464 (to L1)
+
+646   L6:     LOAD_FAST_BORROW         1 (out)
+              LOAD_ATTR                9 (append + NULL|self)
+              LOAD_FAST_BORROW         3 (l)
+              CALL                     1
+              POP_TOP
+
+647           LOAD_FAST_BORROW         2 (live)
+              LOAD_ATTR               11 (update + NULL|self)
+              LOAD_GLOBAL             13 (_collect_vars + NULL)
+              LOAD_FAST_BORROW         4 (s)
+              CALL                     1
+              CALL                     1
+              POP_TOP
+              EXTENDED_ARG             1
+              JUMP_BACKWARD          510 (to L1)
+
+624   L7:     END_FOR
+              POP_ITER
+
+648           LOAD_FAST_BORROW         1 (out)
+              LOAD_ATTR               29 (reverse + NULL|self)
+              CALL                     0
+              POP_TOP
+
+649           LOAD_FAST_BORROW         1 (out)
+              RETURN_VALUE
+
+
+### [27]   __annotate__  (file=lua_beautify.py) :: line 661, args 1, locals 1, stack 4, consts 3
+661           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [28]   _strip_noop_jumps  (file=lua_beautify.py) :: line 661, args 2, locals 2, stack 4, consts 3
+661           RESUME                   0
+
+665           LOAD_CONST               1 (None)
+              STORE_FAST               1 (prev)
+
+666   L1:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (prev, text)
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       49 (to L2)
+              NOT_TAKEN
+
+667           LOAD_FAST                0 (text)
+              STORE_FAST               1 (prev)
+
+668           LOAD_GLOBAL              0 (_NOOP_JUMP_RE)
+              LOAD_ATTR                3 (sub + NULL|self)
+              LOAD_CONST               2 ('')
+              LOAD_FAST_BORROW         0 (text)
+              CALL                     2
+              STORE_FAST               0 (text)
+
+669           LOAD_GLOBAL              4 (_NOOP_DIRECT_GOTO)
+              LOAD_ATTR                3 (sub + NULL|self)
+              LOAD_CONST               2 ('')
+              LOAD_FAST_BORROW         0 (text)
+              CALL                     2
+              STORE_FAST               0 (text)
+              JUMP_BACKWARD           54 (to L1)
+
+670   L2:     LOAD_FAST_BORROW         0 (text)
+              RETURN_VALUE
+
+
+### [29]   _strip_orphan_labels  (file=lua_beautify.py) :: line 673, args 6, locals 6, stack 5, consts 5
+673           RESUME                   0
+
+676           LOAD_GLOBAL              1 (set + NULL)
+              CALL                     0
+              STORE_FAST               1 (gotos)
+
+677           LOAD_FAST_BORROW         0 (lines)
+              GET_ITER
+      L1:     FOR_ITER                82 (to L3)
+              STORE_FAST               2 (l)
+
+678           LOAD_FAST_BORROW         2 (l)
+              LOAD_ATTR                3 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST               3 (s)
+
+679           LOAD_FAST_BORROW         3 (s)
+              LOAD_ATTR                5 (startswith + NULL|self)
+              LOAD_CONST               1 ('goto ')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L2)
+              NOT_TAKEN
+              JUMP_BACKWARD           44 (to L1)
+
+680   L2:     LOAD_FAST_BORROW         1 (gotos)
+              LOAD_ATTR                7 (add + NULL|self)
+              LOAD_FAST_BORROW         3 (s)
+              LOAD_CONST               2 (slice(5, None, None))
+              BINARY_OP               26 ([])
+              LOAD_ATTR                3 (strip + NULL|self)
+              CALL                     0
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           84 (to L1)
+
+677   L3:     END_FOR
+              POP_ITER
+
+681           BUILD_LIST               0
+              STORE_FAST               4 (out)
+
+682           LOAD_FAST_BORROW         0 (lines)
+              GET_ITER
+      L4:     FOR_ITER               121 (to L6)
+              STORE_FAST               2 (l)
+
+683           LOAD_FAST_BORROW         2 (l)
+              LOAD_ATTR                3 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST               3 (s)
+
+684           LOAD_FAST_BORROW         3 (s)
+              LOAD_ATTR                5 (startswith + NULL|self)
+              LOAD_CONST               3 ('::')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       63 (to L5)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         3 (s)
+              LOAD_ATTR                9 (endswith + NULL|self)
+              LOAD_CONST               3 ('::')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       40 (to L5)
+              NOT_TAKEN
+
+685           LOAD_FAST_BORROW         3 (s)
+              LOAD_ATTR                3 (strip + NULL|self)
+              LOAD_CONST               4 (':')
+              CALL                     1
+              LOAD_ATTR                3 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST               5 (lbl)
+
+686           LOAD_FAST_BORROW_LOAD_FAST_BORROW 81 (lbl, gotos)
+              CONTAINS_OP              1 (not in)
+              POP_JUMP_IF_FALSE        3 (to L5)
+              NOT_TAKEN
+
+687           JUMP_BACKWARD          104 (to L4)
+
+688   L5:     LOAD_FAST_BORROW         4 (out)
+              LOAD_ATTR               11 (append + NULL|self)
+              LOAD_FAST_BORROW         2 (l)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD          123 (to L4)
+
+682   L6:     END_FOR
+              POP_ITER
+
+689           LOAD_FAST_BORROW         4 (out)
+              RETURN_VALUE
+
+
+### [30]   _unwrap_const_blocks  (file=lua_beautify.py) :: line 692, args 15, locals 15, stack 7, consts 16
+692            RESUME                   0
+
+696            BUILD_LIST               0
+               STORE_FAST               1 (out)
+
+697            LOAD_SMALL_INT           0
+               STORE_FAST               2 (i)
+
+698            LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         0 (lines)
+               CALL                     1
+               STORE_FAST               3 (n)
+
+699    L1:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (i, n)
+               COMPARE_OP              18 (bool(<))
+               EXTENDED_ARG             2
+               POP_JUMP_IF_FALSE      623 (to L20)
+               NOT_TAKEN
+
+700            LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               BINARY_OP               26 ([])
+               LOAD_ATTR                3 (strip + NULL|self)
+               CALL                     0
+               STORE_FAST               4 (s)
+
+701            LOAD_GLOBAL              4 (re)
+               LOAD_ATTR                6 (match)
+               PUSH_NULL
+               LOAD_CONST               1 ('^(if|while)\\s+(true|false)\\s+then\\s*$')
+               LOAD_FAST_BORROW         4 (s)
+               CALL                     2
+               STORE_FAST               5 (m)
+
+702            LOAD_FAST_BORROW         5 (m)
+               TO_BOOL
+               EXTENDED_ARG             2
+               POP_JUMP_IF_FALSE      534 (to L19)
+               NOT_TAKEN
+
+703            LOAD_FAST_BORROW         5 (m)
+               LOAD_ATTR                9 (group + NULL|self)
+               LOAD_SMALL_INT           1
+               CALL                     1
+               LOAD_FAST_BORROW         5 (m)
+               LOAD_ATTR                9 (group + NULL|self)
+               LOAD_SMALL_INT           2
+               CALL                     1
+               STORE_FAST_STORE_FAST  118 (val, kw)
+
+704            LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               BINARY_OP               26 ([])
+               LOAD_CONST               2 (None)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               BINARY_OP               26 ([])
+               CALL                     1
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               BINARY_OP               26 ([])
+               LOAD_ATTR               11 (lstrip + NULL|self)
+               CALL                     0
+               CALL                     1
+               BINARY_OP               10 (-)
+               BINARY_SLICE
+               STORE_FAST               8 (start_indent)
+
+705            LOAD_SMALL_INT           1
+               STORE_FAST               9 (depth)
+
+706            BUILD_LIST               0
+               STORE_FAST              10 (body)
+
+707            LOAD_FAST_BORROW         2 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               STORE_FAST              11 (j)
+
+708    L2:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 179 (j, n)
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_FALSE      246 (to L7)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         9 (depth)
+               LOAD_SMALL_INT           0
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE      239 (to L7)
+               NOT_TAKEN
+
+709            LOAD_FAST_BORROW_LOAD_FAST_BORROW 11 (lines, j)
+               BINARY_OP               26 ([])
+               STORE_FAST              12 (inner)
+
+710            LOAD_FAST_BORROW        12 (inner)
+               LOAD_ATTR                3 (strip + NULL|self)
+               CALL                     0
+               STORE_FAST              13 (t)
+
+711            LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               3 ('if ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE       123 (to L3)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               4 ('while ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE       100 (to L3)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               5 ('for ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE        77 (to L3)
+               NOT_TAKEN
+
+712            LOAD_FAST_BORROW        13 (t)
+               LOAD_CONST               6 ('else')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_TRUE        70 (to L3)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               7 ('elseif')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE        47 (to L3)
+               NOT_TAKEN
+
+713            LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               8 ('function ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE        24 (to L3)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        13 (t)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_CONST               9 ('local function ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE       11 (to L4)
+               NOT_TAKEN
+
+714    L3:     LOAD_FAST_BORROW         9 (depth)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               9 (depth)
+               JUMP_FORWARD            24 (to L5)
+
+715    L4:     LOAD_FAST_BORROW        13 (t)
+               LOAD_CONST              10 ('end')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       18 (to L5)
+               NOT_TAKEN
+
+716            LOAD_FAST_BORROW         9 (depth)
+               LOAD_SMALL_INT           1
+               BINARY_OP               23 (-=)
+               STORE_FAST               9 (depth)
+
+717            LOAD_FAST_BORROW         9 (depth)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE        2 (to L5)
+               NOT_TAKEN
+
+718            JUMP_FORWARD            35 (to L7)
+
+719    L5:     LOAD_FAST_BORROW         9 (depth)
+               LOAD_SMALL_INT           0
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       18 (to L6)
+               NOT_TAKEN
+
+720            LOAD_FAST_BORROW        10 (body)
+               LOAD_ATTR               15 (append + NULL|self)
+               LOAD_FAST_BORROW        12 (inner)
+               CALL                     1
+               POP_TOP
+
+721    L6:     LOAD_FAST_BORROW        11 (j)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST              11 (j)
+               JUMP_BACKWARD          251 (to L2)
+
+722    L7:     LOAD_FAST_BORROW         6 (kw)
+               LOAD_CONST              11 ('if')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE      130 (to L17)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         7 (val)
+               LOAD_CONST              12 ('true')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE      123 (to L17)
+               NOT_TAKEN
+               LOAD_GLOBAL             16 (any)
+               COPY                     1
+               LOAD_COMMON_CONSTANT     4 (<built-in function any>)
+               IS_OP                    0 (is)
+               POP_JUMP_IF_FALSE       28 (to L11)
+               NOT_TAKEN
+               POP_TOP
+               LOAD_CONST              13 (<code object <genexpr> at 0x7aab4b0620, file "lua_beautify.py", line 722>)
+               MAKE_FUNCTION
+
+723            LOAD_FAST_BORROW        10 (body)
+               GET_ITER
+
+722            CALL                     0
+       L8:     FOR_ITER                12 (to L10)
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L9)
+               NOT_TAKEN
+               JUMP_BACKWARD           11 (to L8)
+       L9:     POP_ITER
+               LOAD_CONST              14 (True)
+               JUMP_FORWARD            17 (to L12)
+      L10:     END_FOR
+               POP_ITER
+               LOAD_CONST              15 (False)
+               JUMP_FORWARD            13 (to L12)
+      L11:     PUSH_NULL
+               LOAD_CONST              13 (<code object <genexpr> at 0x7aab4b0620, file "lua_beautify.py", line 722>)
+               MAKE_FUNCTION
+
+723            LOAD_FAST_BORROW        10 (body)
+               GET_ITER
+
+722            CALL                     0
+               CALL                     1
+      L12:     TO_BOOL
+               POP_JUMP_IF_TRUE        65 (to L17)
+               NOT_TAKEN
+
+727            LOAD_FAST_BORROW        10 (body)
+               GET_ITER
+      L13:     FOR_ITER                57 (to L16)
+               STORE_FAST              14 (b)
+
+728            LOAD_FAST                1 (out)
+               LOAD_ATTR               15 (append + NULL|self)
+               LOAD_FAST_BORROW        14 (b)
+               LOAD_ATTR               13 (startswith + NULL|self)
+               LOAD_FAST_BORROW         8 (start_indent)
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE       15 (to L14)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        14 (b)
+               LOAD_GLOBAL              1 (len + NULL)
+               LOAD_FAST_BORROW         8 (start_indent)
+               CALL                     1
+               LOAD_CONST               2 (None)
+               BINARY_SLICE
+               JUMP_FORWARD             1 (to L15)
+      L14:     LOAD_FAST               14 (b)
+      L15:     CALL                     1
+               POP_TOP
+               JUMP_BACKWARD           59 (to L13)
+
+727   L16:     END_FOR
+               POP_ITER
+               JUMP_FORWARD            26 (to L18)
+
+730   L17:     LOAD_FAST_BORROW         1 (out)
+               LOAD_ATTR               19 (extend + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               LOAD_FAST_BORROW        11 (j)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               CALL                     1
+               POP_TOP
+
+732   L18:     LOAD_FAST_BORROW        11 (j)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               STORE_FAST               2 (i)
+
+733            EXTENDED_ARG             2
+               JUMP_BACKWARD          594 (to L1)
+
+734   L19:     LOAD_FAST_BORROW         1 (out)
+               LOAD_ATTR               15 (append + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (lines, i)
+               BINARY_OP               26 ([])
+               CALL                     1
+               POP_TOP
+
+735            LOAD_FAST_BORROW         2 (i)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               2 (i)
+               EXTENDED_ARG             2
+               JUMP_BACKWARD          629 (to L1)
+
+736   L20:     LOAD_FAST_BORROW         1 (out)
+               RETURN_VALUE
+
+
+### [31]     <genexpr>  (file=lua_beautify.py) :: line 722, args 2, locals 2, stack 4, consts 2
+ 722           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+
+ 723   L2:     FOR_ITER                35 (to L3)
+               STORE_FAST_LOAD_FAST    17 (b, b)
+               LOAD_ATTR                1 (strip + NULL|self)
+               CALL                     0
+               LOAD_ATTR                3 (startswith + NULL|self)
+               LOAD_CONST               0 ('return')
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           37 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [32]   __annotate__  (file=lua_beautify.py) :: line 739, args 1, locals 1, stack 4, consts 3
+739           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [33]   _beautify_file  (file=lua_beautify.py) :: line 739, args 11, locals 11, stack 6, consts 7
+739            RESUME                   0
+
+741            LOAD_FAST_BORROW         0 (text)
+               LOAD_ATTR                1 (splitlines + NULL|self)
+               CALL                     0
+               STORE_FAST               1 (lines)
+
+742            BUILD_LIST               0
+               STORE_FAST               2 (blocks)
+
+743            BUILD_LIST               0
+               STORE_FAST               3 (cur)
+
+744            LOAD_SMALL_INT           0
+               STORE_FAST               4 (depth)
+
+746            LOAD_FAST_BORROW         1 (lines)
+               GET_ITER
+       L1:     FOR_ITER               252 (to L6)
+               STORE_FAST               5 (l)
+
+747            LOAD_FAST_BORROW         5 (l)
+               LOAD_ATTR                3 (strip + NULL|self)
+               CALL                     0
+               STORE_FAST               6 (s)
+
+748            LOAD_FAST_BORROW         6 (s)
+               LOAD_ATTR                5 (startswith + NULL|self)
+               LOAD_CONST               1 ('function ')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE       52 (to L3)
+               NOT_TAKEN
+
+749            LOAD_FAST_BORROW         3 (cur)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       22 (to L2)
+               NOT_TAKEN
+
+750            LOAD_FAST_BORROW         2 (blocks)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_CONST               2 ('block')
+               LOAD_FAST_BORROW         3 (cur)
+               BUILD_TUPLE              2
+               CALL                     1
+               POP_TOP
+
+751            BUILD_LIST               0
+               STORE_FAST               3 (cur)
+
+752    L2:     LOAD_FAST_BORROW         2 (blocks)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_CONST               3 ('funcdef')
+               LOAD_FAST_BORROW         5 (l)
+               BUILD_LIST               1
+               BUILD_TUPLE              2
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD           93 (to L1)
+
+753    L3:     LOAD_FAST_BORROW         6 (s)
+               LOAD_CONST               4 ('end')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       79 (to L4)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         3 (cur)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       71 (to L4)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         3 (cur)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_ATTR                5 (startswith + NULL|self)
+               LOAD_CONST               5 ('function')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE       41 (to L4)
+               NOT_TAKEN
+
+754            LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (l)
+               CALL                     1
+               POP_TOP
+
+755            LOAD_FAST_BORROW         2 (blocks)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_CONST               2 ('block')
+               LOAD_FAST_BORROW         3 (cur)
+               BUILD_TUPLE              2
+               CALL                     1
+               POP_TOP
+
+756            BUILD_LIST               0
+               STORE_FAST               3 (cur)
+               JUMP_BACKWARD          178 (to L1)
+
+758    L4:     LOAD_FAST_BORROW         3 (cur)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       50 (to L5)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         3 (cur)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_ATTR                5 (startswith + NULL|self)
+               LOAD_CONST               5 ('function')
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE       20 (to L5)
+               NOT_TAKEN
+
+759            LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (l)
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD          235 (to L1)
+
+761    L5:     LOAD_FAST_BORROW         3 (cur)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_FAST_BORROW         5 (l)
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD          254 (to L1)
+
+746    L6:     END_FOR
+               POP_ITER
+
+762            LOAD_FAST_BORROW         3 (cur)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       20 (to L7)
+               NOT_TAKEN
+
+763            LOAD_FAST_BORROW         2 (blocks)
+               LOAD_ATTR                7 (append + NULL|self)
+               LOAD_CONST               2 ('block')
+               LOAD_FAST_BORROW         3 (cur)
+               BUILD_TUPLE              2
+               CALL                     1
+               POP_TOP
+
+765    L7:     BUILD_LIST               0
+               STORE_FAST               7 (out)
+
+766            LOAD_FAST_BORROW         2 (blocks)
+               GET_ITER
+       L8:     FOR_ITER                57 (to L10)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST  137 (kind, bl)
+
+767            LOAD_FAST_BORROW         8 (kind)
+               LOAD_CONST               3 ('funcdef')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       20 (to L9)
+               NOT_TAKEN
+
+768            LOAD_FAST_BORROW         7 (out)
+               LOAD_ATTR                9 (extend + NULL|self)
+               LOAD_FAST_BORROW         9 (bl)
+               CALL                     1
+               POP_TOP
+
+769            JUMP_BACKWARD           31 (to L8)
+
+770    L9:     LOAD_FAST_BORROW         7 (out)
+               LOAD_ATTR                9 (extend + NULL|self)
+               LOAD_GLOBAL             11 (beautify_block + NULL)
+               LOAD_FAST_BORROW         9 (bl)
+               CALL                     1
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD           59 (to L8)
+
+766   L10:     END_FOR
+               POP_ITER
+
+771            LOAD_CONST               6 ('\n')
+               LOAD_ATTR               13 (join + NULL|self)
+               LOAD_FAST_BORROW         7 (out)
+               CALL                     1
+               STORE_FAST              10 (joined)
+
+772            LOAD_GLOBAL             15 (_strip_noop_jumps + NULL)
+               LOAD_FAST_BORROW        10 (joined)
+               CALL                     1
+               STORE_FAST              10 (joined)
+
+773            LOAD_CONST               6 ('\n')
+               LOAD_ATTR               13 (join + NULL|self)
+               LOAD_GLOBAL             17 (_unwrap_const_blocks + NULL)
+               LOAD_FAST_BORROW        10 (joined)
+               LOAD_ATTR                1 (splitlines + NULL|self)
+               CALL                     0
+               CALL                     1
+               CALL                     1
+               STORE_FAST              10 (joined)
+
+774            LOAD_CONST               6 ('\n')
+               LOAD_ATTR               13 (join + NULL|self)
+               LOAD_GLOBAL             19 (_strip_orphan_labels + NULL)
+               LOAD_FAST_BORROW        10 (joined)
+               LOAD_ATTR                1 (splitlines + NULL|self)
+               CALL                     0
+               CALL                     1
+               CALL                     1
+               STORE_FAST              10 (joined)
+
+775            LOAD_FAST_BORROW        10 (joined)
+               RETURN_VALUE
+
+
+### [34]   __annotate__  (file=lua_beautify.py) :: line 778, args 1, locals 1, stack 4, consts 3
+778           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('src_path')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [35]   beautify_lua  (file=lua_beautify.py) :: line 778, args 3, locals 3, stack 7, consts 6
+ 778           RESUME                   0
+
+ 780           LOAD_GLOBAL              1 (open + NULL)
+               LOAD_FAST_BORROW         0 (src_path)
+               LOAD_CONST               1 ('r')
+               LOAD_CONST               2 ('utf-8')
+               LOAD_CONST               3 ('replace')
+               LOAD_CONST               4 (('encoding', 'errors'))
+               CALL_KW                  4
+               COPY                     1
+               LOAD_SPECIAL             1 (__exit__)
+               SWAP                     2
+               SWAP                     3
+               LOAD_SPECIAL             0 (__enter__)
+               CALL                     0
+       L1:     STORE_FAST               1 (f)
+
+ 781           LOAD_FAST_BORROW         1 (f)
+               LOAD_ATTR                3 (read + NULL|self)
+               CALL                     0
+               STORE_FAST               2 (text)
+
+ 780   L2:     LOAD_CONST               5 (None)
+               LOAD_CONST               5 (None)
+               LOAD_CONST               5 (None)
+               CALL                     3
+               POP_TOP
+
+ 782   L3:     LOAD_GLOBAL              5 (_beautify_file + NULL)
+               LOAD_FAST_CHECK          2 (text)
+               CALL                     1
+               RETURN_VALUE
+
+ 780   L4:     PUSH_EXC_INFO
+               WITH_EXCEPT_START
+               TO_BOOL
+               POP_JUMP_IF_TRUE         2 (to L5)
+               NOT_TAKEN
+               RERAISE                  2
+       L5:     POP_TOP
+       L6:     POP_EXCEPT
+               POP_TOP
+               POP_TOP
+               POP_TOP
+               JUMP_BACKWARD_NO_INTERRUPT 27 (to L3)
+
+  --   L7:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L4 [2] lasti
+  L4 to L6 -> L7 [4] lasti
+
+
+### [36]   __annotate__  (file=lua_beautify.py) :: line 785, args 1, locals 1, stack 4, consts 3
+785           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [37]   beautify_text  (file=lua_beautify.py) :: line 785, args 1, locals 1, stack 3, consts 1
+785           RESUME                   0
+
+787           LOAD_GLOBAL              1 (_beautify_file + NULL)
+              LOAD_FAST_BORROW         0 (text)
+              CALL                     1
+              RETURN_VALUE

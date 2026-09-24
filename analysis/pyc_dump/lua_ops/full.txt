@@ -1,0 +1,1092 @@
+
+### [0] <module>  (file=lua_ops.py) :: line 1, args 0, locals 0, stack 10, consts 31
+  0           RESUME                   0
+
+  1           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              0 (shutil)
+              STORE_NAME               0 (shutil)
+
+  2           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (subprocess)
+              STORE_NAME               1 (subprocess)
+
+  3           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('Path',))
+              IMPORT_NAME              2 (pathlib)
+              IMPORT_FROM              3 (Path)
+              STORE_NAME               3 (Path)
+              POP_TOP
+
+  6           LOAD_CONST               3 (b'\x1bLuaQ')
+              LOAD_CONST               4 ('Lua 5.1')
+
+  7           LOAD_CONST               5 (b'\x1bLuaR')
+              LOAD_CONST               6 ('Lua 5.2')
+
+  8           LOAD_CONST               7 (b'\x1bLuaS')
+              LOAD_CONST               8 ('Lua 5.3')
+
+  9           LOAD_CONST               9 (b'\x1bLuaT')
+              LOAD_CONST              10 ('Lua 5.4')
+
+ 10           LOAD_CONST              11 (b'\x1bLJ')
+              LOAD_CONST              12 ('LuaJIT')
+
+  5           BUILD_MAP                5
+              STORE_NAME               4 (LUA_VERSION_HINTS)
+
+ 14           LOAD_CONST              13 ('https://downloads.sourceforge.net/project/unluac/Unstable/unluac_2025_12_23.jar')
+
+ 15           LOAD_CONST              14 ('https://sourceforge.net/projects/unluac/files/latest/download')
+
+ 13           BUILD_LIST               2
+              STORE_NAME               5 (UNLUAC_URLS)
+
+ 19           LOAD_CONST              15 (<code object __annotate__ at 0x7aaf9eef30, file "lua_ops.py", line 19>)
+              MAKE_FUNCTION
+              LOAD_CONST              16 (<code object detect_lua at 0xb400007c7006afd0, file "lua_ops.py", line 19>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME               6 (detect_lua)
+
+ 37           LOAD_CONST              17 (<code object _find_luac at 0x7aab4b0750, file "lua_ops.py", line 37>)
+              MAKE_FUNCTION
+              STORE_NAME               7 (_find_luac)
+
+ 45           LOAD_CONST              30 ((None,))
+              LOAD_CONST              18 (<code object __annotate__ at 0x7aaf68e930, file "lua_ops.py", line 45>)
+              MAKE_FUNCTION
+              LOAD_CONST              19 (<code object compile_lua at 0x7aaf7db690, file "lua_ops.py", line 45>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME               8 (compile_lua)
+
+ 56           LOAD_CONST              20 (<code object __annotate__ at 0x7aaf68d730, file "lua_ops.py", line 56>)
+              MAKE_FUNCTION
+              LOAD_CONST              21 (<code object unluac_dir at 0x7aaf5e9230, file "lua_ops.py", line 56>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME               9 (unluac_dir)
+
+ 71           LOAD_CONST              22 (<code object find_unluac_jar at 0xb400007c000176b0, file "lua_ops.py", line 71>)
+              MAKE_FUNCTION
+              STORE_NAME              10 (find_unluac_jar)
+
+ 82           LOAD_CONST              23 (<code object __annotate__ at 0x7aaf68d830, file "lua_ops.py", line 82>)
+              MAKE_FUNCTION
+              LOAD_CONST              24 (<code object ensure_unluac_jar at 0xb400007c800a0880, file "lua_ops.py", line 82>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              11 (ensure_unluac_jar)
+
+106           LOAD_CONST              30 ((None,))
+              LOAD_CONST              25 (<code object __annotate__ at 0x7aaf68e130, file "lua_ops.py", line 106>)
+              MAKE_FUNCTION
+              LOAD_CONST              26 (<code object decompile_lua at 0xb400007c700664d0, file "lua_ops.py", line 106>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              12 (decompile_lua)
+
+121           LOAD_CONST              30 ((None,))
+              LOAD_CONST              27 (<code object decompile_lua_partial at 0xb400007c70066b10, file "lua_ops.py", line 121>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              13 (decompile_lua_partial)
+
+140           LOAD_CONST              30 ((None,))
+              LOAD_CONST              28 (<code object __annotate__ at 0x7aaf68e030, file "lua_ops.py", line 140>)
+              MAKE_FUNCTION
+              LOAD_CONST              29 (<code object compile_batch at 0xb400007c7006a990, file "lua_ops.py", line 140>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              14 (compile_batch)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   __annotate__  (file=lua_ops.py) :: line 19, args 1, locals 1, stack 2, consts 2
+ 19           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [2]   detect_lua  (file=lua_ops.py) :: line 19, args 5, locals 5, stack 7, consts 19
+  19            RESUME                   0
+
+  20            LOAD_GLOBAL              1 (open + NULL)
+                LOAD_FAST_BORROW         0 (path)
+                LOAD_CONST               0 ('rb')
+                CALL                     2
+                COPY                     1
+                LOAD_SPECIAL             1 (__exit__)
+                SWAP                     2
+                SWAP                     3
+                LOAD_SPECIAL             0 (__enter__)
+                CALL                     0
+        L1:     STORE_FAST               1 (f)
+
+  21            LOAD_FAST_BORROW         1 (f)
+                LOAD_ATTR                3 (read + NULL|self)
+                LOAD_SMALL_INT           5
+                CALL                     1
+                STORE_FAST               2 (head)
+
+  20    L2:     LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                CALL                     3
+                POP_TOP
+
+  22    L3:     LOAD_FAST_CHECK          2 (head)
+                LOAD_ATTR                5 (startswith + NULL|self)
+                LOAD_CONST               2 (b'\x1bLua')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE       41 (to L4)
+                NOT_TAKEN
+
+  23            LOAD_GLOBAL              6 (LUA_VERSION_HINTS)
+                LOAD_ATTR                9 (get + NULL|self)
+                LOAD_FAST_BORROW         2 (head)
+                LOAD_CONST               3 ('unknown (0x')
+                LOAD_FAST_BORROW         2 (head)
+                LOAD_ATTR               11 (hex + NULL|self)
+                CALL                     0
+                FORMAT_SIMPLE
+                LOAD_CONST               4 (')')
+                BUILD_STRING             3
+                CALL                     2
+                RETURN_VALUE
+
+  24    L4:     LOAD_FAST_BORROW         2 (head)
+                LOAD_ATTR                5 (startswith + NULL|self)
+                LOAD_CONST               5 (b'\x1bLJ')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L5)
+                NOT_TAKEN
+
+  25            LOAD_CONST               6 ('LuaJIT')
+                RETURN_VALUE
+
+  26    L5:     NOP
+
+  27    L6:     LOAD_GLOBAL              1 (open + NULL)
+                LOAD_FAST_BORROW         0 (path)
+                LOAD_CONST               7 ('r')
+                LOAD_CONST               8 ('utf-8')
+                LOAD_CONST               9 ('strict')
+                LOAD_CONST              10 (('encoding', 'errors'))
+                CALL_KW                  4
+                LOAD_ATTR                3 (read + NULL|self)
+                LOAD_SMALL_INT         200
+                CALL                     1
+                STORE_FAST               3 (text)
+
+  28            LOAD_FAST_BORROW         3 (text)
+                LOAD_ATTR               13 (lower + NULL|self)
+                CALL                     0
+                STORE_FAST               4 (low)
+
+  29            LOAD_CONST              11 ('function')
+                LOAD_FAST_BORROW         4 (low)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE        36 (to L7)
+                NOT_TAKEN
+                LOAD_CONST              12 ('local')
+                LOAD_FAST_BORROW         4 (low)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE        29 (to L7)
+                NOT_TAKEN
+                LOAD_CONST              13 ('end')
+                LOAD_FAST_BORROW         4 (low)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE        22 (to L7)
+                NOT_TAKEN
+
+  30            LOAD_CONST              14 ('return')
+                LOAD_FAST_BORROW         4 (low)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE        15 (to L7)
+                NOT_TAKEN
+                LOAD_CONST              15 ('--')
+                LOAD_FAST_BORROW         3 (text)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE         8 (to L7)
+                NOT_TAKEN
+                LOAD_CONST              16 ('print(')
+                LOAD_FAST_BORROW         3 (text)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE        3 (to L8)
+                NOT_TAKEN
+
+  31    L7:     LOAD_CONST              17 ('text (plain lua source)')
+                RETURN_VALUE
+
+  30    L8:     NOP
+
+  34            LOAD_CONST              18 ('unknown')
+                RETURN_VALUE
+
+  20    L9:     PUSH_EXC_INFO
+                WITH_EXCEPT_START
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L10)
+                NOT_TAKEN
+                RERAISE                  2
+       L10:     POP_TOP
+       L11:     POP_EXCEPT
+                POP_TOP
+                POP_TOP
+                POP_TOP
+                JUMP_BACKWARD_NO_INTERRUPT 198 (to L3)
+
+  --   L12:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L13:     PUSH_EXC_INFO
+
+  32            LOAD_GLOBAL             14 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L15)
+                NOT_TAKEN
+                POP_TOP
+
+  33   L14:     POP_EXCEPT
+
+  34            LOAD_CONST              18 ('unknown')
+                RETURN_VALUE
+
+  32   L15:     RERAISE                  0
+
+  --   L16:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L9 [2] lasti
+  L6 to L7 -> L13 [0]
+  L9 to L11 -> L12 [4] lasti
+  L13 to L14 -> L16 [1] lasti
+  L15 to L16 -> L16 [1] lasti
+
+
+### [3]   _find_luac  (file=lua_ops.py) :: line 37, args 2, locals 2, stack 4, consts 3
+ 37           RESUME                   0
+
+ 38           LOAD_CONST               2 (('luac5.3', 'luac53', 'luac'))
+              GET_ITER
+      L1:     FOR_ITER                37 (to L3)
+              STORE_FAST               0 (name)
+
+ 39           LOAD_GLOBAL              0 (shutil)
+              LOAD_ATTR                2 (which)
+              PUSH_NULL
+              LOAD_FAST_BORROW         0 (name)
+              CALL                     1
+              STORE_FAST               1 (p)
+
+ 40           LOAD_FAST_BORROW         1 (p)
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L2)
+              NOT_TAKEN
+              JUMP_BACKWARD           35 (to L1)
+
+ 41   L2:     LOAD_FAST_BORROW         1 (p)
+              SWAP                     2
+              POP_TOP
+              RETURN_VALUE
+
+ 38   L3:     END_FOR
+              POP_ITER
+
+ 42           LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [4]   __annotate__  (file=lua_ops.py) :: line 45, args 1, locals 1, stack 2, consts 2
+ 45           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [5]   compile_lua  (file=lua_ops.py) :: line 45, args 6, locals 6, stack 6, consts 6
+ 45           RESUME                   0
+
+ 46           LOAD_FAST                2 (lua_bin)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        11 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_GLOBAL              1 (_find_luac + NULL)
+              CALL                     0
+      L1:     STORE_FAST               3 (bin_path)
+
+ 47           LOAD_FAST_BORROW         3 (bin_path)
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L2)
+              NOT_TAKEN
+
+ 48           LOAD_CONST               0 ('luac not found. Install: pkg install lua53')
+              RETURN_VALUE
+
+ 49   L2:     LOAD_FAST_BORROW         3 (bin_path)
+              LOAD_CONST               1 ('-o')
+              LOAD_GLOBAL              3 (str + NULL)
+              LOAD_FAST_BORROW         1 (out_path)
+              CALL                     1
+              LOAD_GLOBAL              3 (str + NULL)
+              LOAD_FAST_BORROW         0 (src_path)
+              CALL                     1
+              BUILD_LIST               4
+              STORE_FAST               4 (cmd)
+
+ 50           LOAD_GLOBAL              4 (subprocess)
+              LOAD_ATTR                6 (run)
+              PUSH_NULL
+              LOAD_FAST_BORROW         4 (cmd)
+              LOAD_CONST               2 (True)
+              LOAD_CONST               2 (True)
+              LOAD_CONST               3 (('capture_output', 'text'))
+              CALL_KW                  3
+              STORE_FAST               5 (proc)
+
+ 51           LOAD_FAST_BORROW         5 (proc)
+              LOAD_ATTR                8 (returncode)
+              LOAD_SMALL_INT           0
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       37 (to L4)
+              NOT_TAKEN
+
+ 52           LOAD_FAST_BORROW         5 (proc)
+              LOAD_ATTR               10 (stderr)
+              LOAD_ATTR               13 (strip + NULL|self)
+              CALL                     0
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L3)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_CONST               4 ('compile failed')
+      L3:     RETURN_VALUE
+
+ 53   L4:     LOAD_CONST               5 (None)
+              RETURN_VALUE
+
+
+### [6]   __annotate__  (file=lua_ops.py) :: line 56, args 1, locals 1, stack 2, consts 2
+ 56           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (Path)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [7]   unluac_dir  (file=lua_ops.py) :: line 56, args 2, locals 2, stack 6, consts 3
+  56           RESUME                   0
+
+  58           LOAD_GLOBAL              1 (Path + NULL)
+               LOAD_GLOBAL              2 (__file__)
+               CALL                     1
+               LOAD_ATTR                5 (resolve + NULL|self)
+               CALL                     0
+               LOAD_ATTR                6 (parent)
+
+  59           LOAD_GLOBAL              0 (Path)
+               LOAD_ATTR                8 (home)
+               PUSH_NULL
+               CALL                     0
+               LOAD_CONST               0 ('Ikram_Tool')
+               BINARY_OP               11 (/)
+
+  57           BUILD_LIST               2
+               STORE_FAST               0 (candidates)
+
+  61           LOAD_FAST_BORROW         0 (candidates)
+               GET_ITER
+       L1:     FOR_ITER                49 (to L5)
+               STORE_FAST               1 (c)
+
+  62           NOP
+
+  63   L2:     LOAD_FAST_BORROW         1 (c)
+               LOAD_ATTR               11 (mkdir + NULL|self)
+               LOAD_CONST               1 (True)
+               LOAD_CONST               1 (True)
+               LOAD_CONST               2 (('parents', 'exist_ok'))
+               CALL_KW                  2
+               POP_TOP
+
+  66   L3:     LOAD_FAST_BORROW         1 (c)
+               LOAD_ATTR               15 (is_dir + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L4)
+               NOT_TAKEN
+               JUMP_BACKWARD           47 (to L1)
+
+  67   L4:     LOAD_FAST_BORROW         1 (c)
+               SWAP                     2
+               POP_TOP
+               RETURN_VALUE
+
+  61   L5:     END_FOR
+               POP_ITER
+
+  68           LOAD_FAST_BORROW         0 (candidates)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               RETURN_VALUE
+
+  --   L6:     PUSH_EXC_INFO
+
+  64           LOAD_GLOBAL             12 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        4 (to L8)
+               NOT_TAKEN
+               POP_TOP
+
+  65   L7:     POP_EXCEPT
+               JUMP_BACKWARD_NO_INTERRUPT 52 (to L3)
+
+  64   L8:     RERAISE                  0
+
+  --   L9:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L6 [1]
+  L6 to L7 -> L9 [2] lasti
+  L8 to L9 -> L9 [2] lasti
+
+
+### [8]   find_unluac_jar  (file=lua_ops.py) :: line 71, args 3, locals 3, stack 4, consts 3
+ 71           RESUME                   0
+
+ 72           LOAD_GLOBAL              1 (unluac_dir + NULL)
+              CALL                     0
+              STORE_FAST               0 (jar_dir)
+
+ 73           LOAD_FAST_BORROW         0 (jar_dir)
+              LOAD_CONST               0 ('unluac.jar')
+              BINARY_OP               11 (/)
+              STORE_FAST               1 (jar)
+
+ 74           LOAD_FAST_BORROW         1 (jar)
+              LOAD_ATTR                3 (exists + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+ 75           LOAD_GLOBAL              5 (str + NULL)
+              LOAD_FAST_BORROW         1 (jar)
+              CALL                     1
+              RETURN_VALUE
+
+ 76   L1:     LOAD_GLOBAL              6 (Path)
+              LOAD_ATTR                8 (home)
+              PUSH_NULL
+              CALL                     0
+              LOAD_CONST               0 ('unluac.jar')
+              BINARY_OP               11 (/)
+              LOAD_GLOBAL              6 (Path)
+              LOAD_ATTR                8 (home)
+              PUSH_NULL
+              CALL                     0
+              LOAD_CONST               1 ('Ikram_Tool')
+              BINARY_OP               11 (/)
+              LOAD_CONST               0 ('unluac.jar')
+              BINARY_OP               11 (/)
+              BUILD_TUPLE              2
+              GET_ITER
+      L2:     FOR_ITER                38 (to L4)
+              STORE_FAST               2 (c)
+
+ 77           LOAD_FAST_BORROW         2 (c)
+              LOAD_ATTR                3 (exists + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L3)
+              NOT_TAKEN
+              JUMP_BACKWARD           27 (to L2)
+
+ 78   L3:     LOAD_GLOBAL              5 (str + NULL)
+              LOAD_FAST_BORROW         2 (c)
+              CALL                     1
+              SWAP                     2
+              POP_TOP
+              RETURN_VALUE
+
+ 76   L4:     END_FOR
+              POP_ITER
+
+ 79           LOAD_CONST               2 (None)
+              RETURN_VALUE
+
+
+### [9]   __annotate__  (file=lua_ops.py) :: line 82, args 1, locals 1, stack 2, consts 2
+ 82           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [10]   ensure_unluac_jar  (file=lua_ops.py) :: line 82, args 10, locals 10, stack 8, consts 13
+  82            RESUME                   0
+
+  83            LOAD_GLOBAL              1 (find_unluac_jar + NULL)
+                CALL                     0
+                STORE_FAST               0 (found)
+
+  84            LOAD_FAST_BORROW         0 (found)
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L1)
+                NOT_TAKEN
+
+  85            LOAD_FAST_BORROW         0 (found)
+                RETURN_VALUE
+
+  86    L1:     LOAD_GLOBAL              3 (unluac_dir + NULL)
+                CALL                     0
+                STORE_FAST               1 (jar_dir)
+
+  87            LOAD_FAST_BORROW         1 (jar_dir)
+                LOAD_CONST               0 ('unluac.jar')
+                BINARY_OP               11 (/)
+                STORE_FAST               2 (jar)
+
+  88            LOAD_GLOBAL              4 (shutil)
+                LOAD_ATTR                6 (which)
+                PUSH_NULL
+                LOAD_CONST               1 ('java')
+                CALL                     1
+                POP_JUMP_IF_NOT_NONE     3 (to L2)
+                NOT_TAKEN
+
+  89            LOAD_CONST               3 ('')
+                RETURN_VALUE
+
+  90    L2:     LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              4 (urllib.request)
+                STORE_FAST               3 (urllib)
+
+  91            LOAD_CONST               2 (None)
+                STORE_FAST               4 (last_err)
+
+  92            LOAD_GLOBAL             10 (UNLUAC_URLS)
+                GET_ITER
+        L3:     FOR_ITER               165 (to L10)
+                STORE_FAST               5 (url)
+
+  93            NOP
+
+  94    L4:     LOAD_FAST_BORROW         3 (urllib)
+                LOAD_ATTR               12 (request)
+                LOAD_ATTR               15 (Request + NULL|self)
+                LOAD_FAST_BORROW         5 (url)
+                LOAD_CONST               4 ('User-Agent')
+                LOAD_CONST               5 ('Mozilla/5.0')
+                BUILD_MAP                1
+                LOAD_CONST               6 (('headers',))
+                CALL_KW                  2
+                STORE_FAST               6 (req)
+
+  95            LOAD_FAST_BORROW         3 (urllib)
+                LOAD_ATTR               12 (request)
+                LOAD_ATTR               17 (urlopen + NULL|self)
+                LOAD_FAST_BORROW         6 (req)
+                LOAD_SMALL_INT         120
+                LOAD_CONST               7 (('timeout',))
+                CALL_KW                  2
+                COPY                     1
+                LOAD_SPECIAL             1 (__exit__)
+                SWAP                     2
+                SWAP                     3
+                LOAD_SPECIAL             0 (__enter__)
+                CALL                     0
+        L5:     STORE_FAST               7 (r)
+
+  96            LOAD_FAST_BORROW         7 (r)
+                LOAD_ATTR               19 (read + NULL|self)
+                CALL                     0
+                STORE_FAST               8 (data)
+
+  95    L6:     LOAD_CONST               2 (None)
+                LOAD_CONST               2 (None)
+                LOAD_CONST               2 (None)
+                CALL                     3
+                POP_TOP
+
+  97    L7:     LOAD_GLOBAL             21 (len + NULL)
+                LOAD_FAST_CHECK          8 (data)
+                CALL                     1
+                LOAD_CONST               8 (100000)
+                COMPARE_OP              18 (bool(<))
+                POP_JUMP_IF_FALSE       25 (to L8)
+                NOT_TAKEN
+
+  98            LOAD_GLOBAL             23 (ValueError + NULL)
+                LOAD_CONST               9 ('too small: ')
+                LOAD_GLOBAL             21 (len + NULL)
+                LOAD_FAST_BORROW         8 (data)
+                CALL                     1
+                FORMAT_SIMPLE
+                LOAD_CONST              10 (' bytes')
+                BUILD_STRING             3
+                CALL                     1
+                RAISE_VARARGS            1
+
+  99    L8:     LOAD_FAST_BORROW         2 (jar)
+                LOAD_ATTR               25 (write_bytes + NULL|self)
+                LOAD_FAST_BORROW         8 (data)
+                CALL                     1
+                POP_TOP
+
+ 100            LOAD_GLOBAL             27 (str + NULL)
+                LOAD_FAST_BORROW         2 (jar)
+                CALL                     1
+        L9:     SWAP                     2
+                POP_TOP
+                RETURN_VALUE
+
+  92   L10:     END_FOR
+                POP_ITER
+
+ 103            LOAD_CONST              11 ('download failed (')
+                LOAD_FAST_BORROW         4 (last_err)
+                FORMAT_SIMPLE
+                LOAD_CONST              12 (')')
+                BUILD_STRING             3
+                RETURN_VALUE
+
+  95   L11:     PUSH_EXC_INFO
+                WITH_EXCEPT_START
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L12)
+                NOT_TAKEN
+                RERAISE                  2
+       L12:     POP_TOP
+       L13:     POP_EXCEPT
+                POP_TOP
+                POP_TOP
+                POP_TOP
+                JUMP_BACKWARD_NO_INTERRUPT 94 (to L7)
+
+  --   L14:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L15:     PUSH_EXC_INFO
+
+ 101            LOAD_GLOBAL             28 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       14 (to L19)
+                NOT_TAKEN
+                STORE_FAST               9 (e)
+
+ 102   L16:     LOAD_FAST                9 (e)
+                STORE_FAST               4 (last_err)
+       L17:     POP_EXCEPT
+                LOAD_CONST               2 (None)
+                STORE_FAST               9 (e)
+                DELETE_FAST              9 (e)
+                JUMP_BACKWARD          213 (to L3)
+
+  --   L18:     LOAD_CONST               2 (None)
+                STORE_FAST               9 (e)
+                DELETE_FAST              9 (e)
+                RERAISE                  1
+
+ 101   L19:     RERAISE                  0
+
+  --   L20:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L4 to L5 -> L15 [1]
+  L5 to L6 -> L11 [3] lasti
+  L6 to L9 -> L15 [1]
+  L11 to L13 -> L14 [5] lasti
+  L13 to L15 -> L15 [1]
+  L15 to L16 -> L20 [2] lasti
+  L16 to L17 -> L18 [2] lasti
+  L18 to L20 -> L20 [2] lasti
+
+
+### [11]   __annotate__  (file=lua_ops.py) :: line 106, args 1, locals 1, stack 2, consts 2
+106           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [12]   decompile_lua  (file=lua_ops.py) :: line 106, args 5, locals 5, stack 8, consts 11
+106           RESUME                   0
+
+107           LOAD_FAST                2 (unluac_jar)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        11 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_GLOBAL              1 (find_unluac_jar + NULL)
+              CALL                     0
+      L1:     STORE_FAST               3 (jar)
+
+108           LOAD_FAST_BORROW         3 (jar)
+              TO_BOOL
+              POP_JUMP_IF_TRUE        14 (to L2)
+              NOT_TAKEN
+
+109           LOAD_CONST               0 ('unluac.jar not found at ')
+              LOAD_GLOBAL              3 (unluac_dir + NULL)
+              CALL                     0
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              RETURN_VALUE
+
+110   L2:     LOAD_GLOBAL              4 (shutil)
+              LOAD_ATTR                6 (which)
+              PUSH_NULL
+              LOAD_CONST               1 ('java')
+              CALL                     1
+              POP_JUMP_IF_NOT_NONE     3 (to L3)
+              NOT_TAKEN
+
+111           LOAD_CONST               3 ('java not found. Install: pkg install openjdk-17')
+              RETURN_VALUE
+
+112   L3:     LOAD_GLOBAL              8 (subprocess)
+              LOAD_ATTR               10 (run)
+              PUSH_NULL
+              LOAD_CONST               1 ('java')
+              LOAD_CONST               4 ('-jar')
+              LOAD_FAST_BORROW         3 (jar)
+              LOAD_GLOBAL             13 (str + NULL)
+              LOAD_FAST_BORROW         0 (src_path)
+              CALL                     1
+              BUILD_LIST               4
+              LOAD_CONST               5 (True)
+              LOAD_CONST               6 (('capture_output',))
+              CALL_KW                  2
+              STORE_FAST               4 (proc)
+
+113           LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               14 (returncode)
+              LOAD_SMALL_INT           0
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       53 (to L5)
+              NOT_TAKEN
+
+114           LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               16 (stderr)
+              LOAD_ATTR               19 (decode + NULL|self)
+              LOAD_CONST               7 ('replace')
+              LOAD_CONST               8 (('errors',))
+              CALL_KW                  1
+              LOAD_ATTR               21 (strip + NULL|self)
+              CALL                     0
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L4)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_CONST               9 ('decompile failed')
+      L4:     RETURN_VALUE
+
+115   L5:     LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               22 (stdout)
+              LOAD_ATTR               21 (strip + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L6)
+              NOT_TAKEN
+
+116           LOAD_CONST              10 ('decompile returned empty output')
+              RETURN_VALUE
+
+117   L6:     LOAD_GLOBAL             25 (Path + NULL)
+              LOAD_FAST_BORROW         1 (out_path)
+              CALL                     1
+              LOAD_ATTR               27 (write_bytes + NULL|self)
+              LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               22 (stdout)
+              CALL                     1
+              POP_TOP
+
+118           LOAD_CONST               2 (None)
+              RETURN_VALUE
+
+
+### [13]   decompile_lua_partial  (file=lua_ops.py) :: line 121, args 6, locals 6, stack 8, consts 14
+121           RESUME                   0
+
+123           LOAD_FAST                2 (unluac_jar)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        11 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_GLOBAL              1 (find_unluac_jar + NULL)
+              CALL                     0
+      L1:     STORE_FAST               3 (jar)
+
+124           LOAD_FAST_BORROW         3 (jar)
+              TO_BOOL
+              POP_JUMP_IF_TRUE        16 (to L2)
+              NOT_TAKEN
+
+125           LOAD_CONST               1 (False)
+              LOAD_CONST               2 ('unluac.jar not found at ')
+              LOAD_GLOBAL              3 (unluac_dir + NULL)
+              CALL                     0
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              BUILD_TUPLE              2
+              RETURN_VALUE
+
+126   L2:     LOAD_GLOBAL              4 (shutil)
+              LOAD_ATTR                6 (which)
+              PUSH_NULL
+              LOAD_CONST               3 ('java')
+              CALL                     1
+              POP_JUMP_IF_NOT_NONE     3 (to L3)
+              NOT_TAKEN
+
+127           LOAD_CONST              11 ((False, 'java not found. Install: pkg install openjdk-17'))
+              RETURN_VALUE
+
+128   L3:     LOAD_GLOBAL              8 (subprocess)
+              LOAD_ATTR               10 (run)
+              PUSH_NULL
+              LOAD_CONST               3 ('java')
+              LOAD_CONST               4 ('-jar')
+              LOAD_FAST_BORROW         3 (jar)
+              LOAD_GLOBAL             13 (str + NULL)
+              LOAD_FAST_BORROW         0 (src_path)
+              CALL                     1
+              BUILD_LIST               4
+              LOAD_CONST               5 (True)
+              LOAD_CONST               6 (('capture_output',))
+              CALL_KW                  2
+              STORE_FAST               4 (proc)
+
+129           LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               14 (stderr)
+              LOAD_ATTR               17 (decode + NULL|self)
+              LOAD_CONST               7 ('replace')
+              LOAD_CONST               8 (('errors',))
+              CALL_KW                  1
+              LOAD_ATTR               19 (strip + NULL|self)
+              CALL                     0
+              STORE_FAST               5 (stderr)
+
+130           LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               20 (stdout)
+              LOAD_ATTR               19 (strip + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE       70 (to L6)
+              NOT_TAKEN
+
+131           LOAD_GLOBAL             23 (Path + NULL)
+              LOAD_FAST_BORROW         1 (out_path)
+              CALL                     1
+              LOAD_ATTR               25 (write_bytes + NULL|self)
+              LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               20 (stdout)
+              CALL                     1
+              POP_TOP
+
+132           LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               26 (returncode)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        3 (to L4)
+              NOT_TAKEN
+
+133           LOAD_CONST              12 ((True, None))
+              RETURN_VALUE
+
+134   L4:     LOAD_CONST               1 (False)
+              LOAD_FAST                5 (stderr)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L5)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_CONST               9 ('partial decompile')
+      L5:     BUILD_TUPLE              2
+              RETURN_VALUE
+
+135   L6:     LOAD_FAST_BORROW         4 (proc)
+              LOAD_ATTR               26 (returncode)
+              LOAD_SMALL_INT           0
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       15 (to L8)
+              NOT_TAKEN
+
+136           LOAD_CONST               1 (False)
+              LOAD_FAST                5 (stderr)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L7)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_CONST              10 ('decompile failed')
+      L7:     BUILD_TUPLE              2
+              RETURN_VALUE
+
+137   L8:     LOAD_CONST              13 ((False, 'decompile returned empty output'))
+              RETURN_VALUE
+
+
+### [14]   __annotate__  (file=lua_ops.py) :: line 140, args 1, locals 1, stack 3, consts 2
+140           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (int)
+              LOAD_GLOBAL              2 (list)
+              BUILD_TUPLE              2
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [15]   compile_batch  (file=lua_ops.py) :: line 140, args 9, locals 9, stack 6, consts 6
+140           RESUME                   0
+
+141           LOAD_GLOBAL              1 (Path + NULL)
+              LOAD_FAST_BORROW         0 (src_dir)
+              CALL                     1
+              LOAD_GLOBAL              1 (Path + NULL)
+              LOAD_FAST_BORROW         1 (out_dir)
+              CALL                     1
+              STORE_FAST_STORE_FAST   16 (out_dir, src_dir)
+
+142           BUILD_LIST               0
+              STORE_FAST               3 (errors)
+
+143           LOAD_SMALL_INT           0
+              STORE_FAST               4 (ok)
+
+144           LOAD_GLOBAL              3 (sorted + NULL)
+              LOAD_FAST_BORROW         0 (src_dir)
+              LOAD_ATTR                5 (rglob + NULL|self)
+              LOAD_CONST               1 ('*.lua')
+              CALL                     1
+              CALL                     1
+              GET_ITER
+      L1:     FOR_ITER               135 (to L3)
+              STORE_FAST               5 (p)
+
+145           LOAD_FAST_BORROW         5 (p)
+              LOAD_ATTR                7 (relative_to + NULL|self)
+              LOAD_FAST_BORROW         0 (src_dir)
+              CALL                     1
+              LOAD_ATTR                9 (with_suffix + NULL|self)
+              LOAD_CONST               2 ('.luac')
+              CALL                     1
+              STORE_FAST               6 (rel)
+
+146           LOAD_FAST_BORROW_LOAD_FAST_BORROW 22 (out_dir, rel)
+              BINARY_OP               11 (/)
+              STORE_FAST               7 (target)
+
+147           LOAD_FAST_BORROW         7 (target)
+              LOAD_ATTR               10 (parent)
+              LOAD_ATTR               13 (mkdir + NULL|self)
+              LOAD_CONST               3 (True)
+              LOAD_CONST               3 (True)
+              LOAD_CONST               4 (('parents', 'exist_ok'))
+              CALL_KW                  2
+              POP_TOP
+
+148           LOAD_GLOBAL             15 (compile_lua + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 87 (p, target)
+              LOAD_FAST_BORROW         2 (lua_bin)
+              CALL                     3
+              STORE_FAST               8 (err)
+
+149           LOAD_FAST_BORROW         8 (err)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       35 (to L2)
+              NOT_TAKEN
+
+150           LOAD_FAST_BORROW         3 (errors)
+              LOAD_ATTR               17 (append + NULL|self)
+              LOAD_FAST_BORROW         5 (p)
+              LOAD_ATTR               18 (name)
+              FORMAT_SIMPLE
+              LOAD_CONST               5 (': ')
+              LOAD_FAST_BORROW         8 (err)
+              FORMAT_SIMPLE
+              BUILD_STRING             3
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD          126 (to L1)
+
+152   L2:     LOAD_FAST_BORROW         4 (ok)
+              LOAD_SMALL_INT           1
+              BINARY_OP               13 (+=)
+              STORE_FAST               4 (ok)
+              JUMP_BACKWARD          137 (to L1)
+
+144   L3:     END_FOR
+              POP_ITER
+
+153           LOAD_FAST_BORROW_LOAD_FAST_BORROW 67 (ok, errors)
+              BUILD_TUPLE              2
+              RETURN_VALUE

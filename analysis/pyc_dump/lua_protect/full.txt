@@ -1,0 +1,1389 @@
+
+### [0] <module>  (file=lua_protect.py) :: line 1, args 0, locals 0, stack 3, consts 34
+  0           RESUME                   0
+
+ 19           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              0 (base64)
+              STORE_NAME               0 (base64)
+
+ 20           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (re)
+              STORE_NAME               1 (re)
+
+ 21           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (tempfile)
+              STORE_NAME               2 (tempfile)
+
+ 22           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('Path',))
+              IMPORT_NAME              3 (pathlib)
+              IMPORT_FROM              4 (Path)
+              STORE_NAME               4 (Path)
+              POP_TOP
+
+ 24           LOAD_CONST               3 ('IKRAMPROT')
+              STORE_NAME               5 (_MAGIC)
+
+ 25           LOAD_CONST               4 (b'IkramTool#2026!LuaProtect')
+              STORE_NAME               6 (_SECRET)
+
+ 26           LOAD_CONST               5 (1664525)
+              STORE_NAME               7 (_LCG_A)
+
+ 27           LOAD_CONST               6 (1013904223)
+              STORE_NAME               8 (_LCG_C)
+
+ 28           LOAD_CONST               7 (4294967295)
+              STORE_NAME               9 (_LCG_M)
+
+ 31           LOAD_CONST               8 (<code object __annotate__ at 0x7aab490580, file "lua_protect.py", line 31>)
+              MAKE_FUNCTION
+              LOAD_CONST               9 (<code object _lcg_stream at 0x7aaf5abd70, file "lua_protect.py", line 31>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              10 (_lcg_stream)
+
+ 41           LOAD_CONST              10 (<code object __annotate__ at 0x7aaf68e930, file "lua_protect.py", line 41>)
+              MAKE_FUNCTION
+              LOAD_CONST              11 (<code object _seed_from at 0x7aaf62f5f0, file "lua_protect.py", line 41>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              11 (_seed_from)
+
+ 50           LOAD_CONST              12 (<code object __annotate__ at 0x7aaf9eef30, file "lua_protect.py", line 50>)
+              MAKE_FUNCTION
+              LOAD_CONST              13 (<code object _encrypt_blob at 0x7aaf6596b0, file "lua_protect.py", line 50>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              12 (_encrypt_blob)
+
+ 59           LOAD_CONST              14 (<code object __annotate__ at 0x7aaf68d730, file "lua_protect.py", line 59>)
+              MAKE_FUNCTION
+              LOAD_CONST              15 (<code object _decrypt_blob at 0x7aaf757b40, file "lua_protect.py", line 59>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              13 (_decrypt_blob)
+
+ 73           LOAD_CONST              16 ('-- IKRAMPROT v3 protected chunk (DO NOT EDIT)\nlocal _z = {}\nlocal function _Y(t)\n  local _r = {}\n  for _i = 1, #t do _r[_i] = string.sub(t, _i, _i) end\n  return _r\nend\nlocal _C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"\nlocal _T = {}\nfor _i = 1, 64 do _T[string.sub(_C, _i, _i)] = _i - 1 end\nlocal _D = function(_p0, _p1, _p2)\n  local _q = _p0 .. _p1 .. _p2\n  local _R = _Y(_q)\n  local _L = {}\n  for _i = #_R, 1, -1 do _L[#_L + 1] = _R[_i] end\n  local _b64 = table.concat(_L, "")\n  local _bytes = {}\n  local _ptr = 1\n  local _b, _n = 0, 0\n  for _pos = 1, #_b64 do\n    local _ch = string.sub(_b64, _pos, _pos)\n    if _ch ~= "=" then\n      local _v = _T[_ch]\n      if _v == nil then _v = 0 end\n      _b = (_b * 64) + _v\n      _n = _n + 6\n      if _n >= 8 then\n        _n = _n - 8\n        _bytes[_ptr] = math.floor(_b / (2 ^ _n)) % 256\n        _ptr = _ptr + 1\n        _b = _b % (2 ^ _n)\n      end\n    end\n  end\n  local _seed = _bytes[1] + (_bytes[2] * 256) + (_bytes[3] * 65536) + (_bytes[4] * 16777216)\n  local _a, _c, _m = 0x19660D, 0x3C6EF35F, 0x100000000\n  local _s = _seed\n  local _out = {}\n  for _j = 5, #_bytes do\n    _s = (_s * _a + _c) % _m\n    local _k = math.floor((_s / 256) % 256)\n    _out[_j - 4] = string.char((_bytes[_j] - _k + 256) % 256)\n  end\n  return table.concat(_out, "")\nend\n{{{BLOBS}}}\nlocal _ld = loadstring or load\nlocal _err = "unknown"\nfor _i = 1, #_B do\n  local _raw = _D(_B[_i][2], _B[_i][3], _B[_i][4])\n  local _ok, _res = pcall(function()\n    return _ld(_raw, "@ikramprotected", "b")\n  end)\n  if _ok and type(_res) == "function" then\n    _res()\n    return\n  end\n  _err = tostring(_res)\nend\nerror("corrupt chunk: " .. _err, 0)\n')
+              STORE_NAME              14 (_LOADER_TMPL)
+
+135           LOAD_NAME                1 (re)
+              LOAD_ATTR               30 (compile)
+              PUSH_NULL
+              LOAD_CONST              17 ('[^A-Za-z0-9+/=]')
+              CALL                     1
+              STORE_NAME              16 (_B64_STRIP)
+
+139           LOAD_CONST              32 (('5.3', '5.4', '5.1', '5.2', 'jit'))
+              STORE_NAME              17 (_ALL_VERSIONS)
+
+142           LOAD_CONST              18 (<code object __annotate__ at 0x7aaf68e130, file "lua_protect.py", line 142>)
+              MAKE_FUNCTION
+              LOAD_CONST              19 (<code object _compile_one at 0xb400007c7006afd0, file "lua_protect.py", line 142>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              18 (_compile_one)
+
+161           LOAD_CONST              20 (<code object __annotate__ at 0x7aab491570, file "lua_protect.py", line 161>)
+              MAKE_FUNCTION
+              LOAD_CONST              21 (<code object _compile_one_named at 0xb400007c700664d0, file "lua_protect.py", line 161>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              19 (_compile_one_named)
+
+179           LOAD_CONST              33 ((None,))
+              LOAD_CONST              22 (<code object __annotate__ at 0x7aaf68e230, file "lua_protect.py", line 179>)
+              MAKE_FUNCTION
+              LOAD_CONST              23 (<code object protect_compile at 0xb400007d100531b0, file "lua_protect.py", line 179>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              20 (protect_compile)
+
+223           LOAD_CONST              24 (<code object __annotate__ at 0x7aaf68de30, file "lua_protect.py", line 223>)
+              MAKE_FUNCTION
+              LOAD_CONST              25 (<code object _split_parts at 0x7aaf64a130, file "lua_protect.py", line 223>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              21 (_split_parts)
+
+235           LOAD_CONST              26 (<code object __annotate__ at 0x7aaf68ea30, file "lua_protect.py", line 235>)
+              MAKE_FUNCTION
+              LOAD_CONST              27 (<code object _extract_b64 at 0xb400007c70066b10, file "lua_protect.py", line 235>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              22 (_extract_b64)
+
+257           LOAD_CONST              28 (<code object __annotate__ at 0x7aaf68eb30, file "lua_protect.py", line 257>)
+              MAKE_FUNCTION
+              LOAD_CONST              29 (<code object is_protected at 0x7aab4c0ff0, file "lua_protect.py", line 257>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              23 (is_protected)
+
+265           LOAD_CONST              30 (<code object __annotate__ at 0x7aaf68ec30, file "lua_protect.py", line 265>)
+              MAKE_FUNCTION
+              LOAD_CONST              31 (<code object unprotect_blob at 0xb400007c0001b9c0, file "lua_protect.py", line 265>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              24 (unprotect_blob)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   __annotate__  (file=lua_protect.py) :: line 31, args 1, locals 1, stack 6, consts 4
+ 31           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('key')
+              LOAD_GLOBAL              0 (int)
+              LOAD_CONST               2 ('n')
+              LOAD_GLOBAL              0 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              2 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [2]   _lcg_stream  (file=lua_protect.py) :: line 31, args 5, locals 5, stack 5, consts 1
+ 31           RESUME                   0
+
+ 33           LOAD_FAST_BORROW         0 (key)
+              LOAD_GLOBAL              0 (_LCG_M)
+              BINARY_OP                1 (&)
+              STORE_FAST               2 (s)
+
+ 34           LOAD_GLOBAL              3 (bytearray + NULL)
+              CALL                     0
+              STORE_FAST               3 (out)
+
+ 35           LOAD_GLOBAL              5 (range + NULL)
+              LOAD_FAST_BORROW         1 (n)
+              CALL                     1
+              GET_ITER
+      L1:     FOR_ITER                69 (to L2)
+              STORE_FAST               4 (_)
+
+ 36           LOAD_FAST_BORROW         2 (s)
+              LOAD_GLOBAL              6 (_LCG_A)
+              BINARY_OP                5 (*)
+              LOAD_GLOBAL              8 (_LCG_C)
+              BINARY_OP                0 (+)
+              LOAD_GLOBAL              0 (_LCG_M)
+              BINARY_OP                1 (&)
+              STORE_FAST               2 (s)
+
+ 37           LOAD_FAST_BORROW         3 (out)
+              LOAD_ATTR               11 (append + NULL|self)
+              LOAD_FAST_BORROW         2 (s)
+              LOAD_SMALL_INT           8
+              BINARY_OP                9 (>>)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           71 (to L1)
+
+ 35   L2:     END_FOR
+              POP_ITER
+
+ 38           LOAD_GLOBAL             13 (bytes + NULL)
+              LOAD_FAST_BORROW         3 (out)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [3]   __annotate__  (file=lua_protect.py) :: line 41, args 1, locals 1, stack 4, consts 3
+ 41           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (int)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [4]   _seed_from  (file=lua_protect.py) :: line 41, args 3, locals 3, stack 3, consts 4
+ 41           RESUME                   0
+
+ 43           LOAD_CONST               1 (2166136261)
+              STORE_FAST               1 (h)
+
+ 44           LOAD_FAST_BORROW         0 (data)
+              LOAD_GLOBAL              0 (_SECRET)
+              BINARY_OP                0 (+)
+              GET_ITER
+      L1:     FOR_ITER                27 (to L2)
+              STORE_FAST               2 (b)
+
+ 45           LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (h, b)
+              BINARY_OP               25 (^=)
+              STORE_FAST               1 (h)
+
+ 46           LOAD_FAST_BORROW         1 (h)
+              LOAD_CONST               2 (16777619)
+              BINARY_OP                5 (*)
+              LOAD_CONST               3 (4294967295)
+              BINARY_OP                1 (&)
+              STORE_FAST               1 (h)
+              JUMP_BACKWARD           29 (to L1)
+
+ 44   L2:     END_FOR
+              POP_ITER
+
+ 47           LOAD_FAST_BORROW         1 (h)
+              LOAD_SMALL_INT           1
+              BINARY_OP                7 (|)
+              RETURN_VALUE
+
+
+### [5]   __annotate__  (file=lua_protect.py) :: line 50, args 1, locals 1, stack 4, consts 3
+ 50           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('bytecode')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [6]   _encrypt_blob  (file=lua_protect.py) :: line 50, args 4, locals 4, stack 7, consts 3
+ 50           RESUME                   0
+
+ 53           LOAD_GLOBAL              1 (_seed_from + NULL)
+              LOAD_FAST_BORROW         0 (bytecode)
+              CALL                     1
+              STORE_FAST               1 (seed)
+
+ 54           LOAD_GLOBAL              3 (_lcg_stream + NULL)
+              LOAD_FAST_BORROW         1 (seed)
+              LOAD_GLOBAL              5 (len + NULL)
+              LOAD_FAST_BORROW         0 (bytecode)
+              CALL                     1
+              CALL                     2
+              STORE_FAST               2 (ks)
+
+ 55           LOAD_GLOBAL              7 (bytes + NULL)
+              LOAD_CONST               1 (<code object <genexpr> at 0x7aab472e50, file "lua_protect.py", line 55>)
+              MAKE_FUNCTION
+              LOAD_GLOBAL              9 (zip + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 2 (bytecode, ks)
+              CALL                     2
+              GET_ITER
+              CALL                     0
+              CALL                     1
+              STORE_FAST               3 (enc)
+
+ 56           LOAD_FAST_BORROW         1 (seed)
+              LOAD_ATTR               11 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               2 ('little')
+              CALL                     2
+              LOAD_FAST_BORROW         3 (enc)
+              BINARY_OP                0 (+)
+              RETURN_VALUE
+
+
+### [7]     <genexpr>  (file=lua_protect.py) :: line 55, args 3, locals 3, stack 3, consts 2
+  55           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                22 (to L3)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST   18 (c, k)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (c, k)
+               BINARY_OP                0 (+)
+               LOAD_CONST               0 (256)
+               BINARY_OP                6 (%)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           24 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [8]   __annotate__  (file=lua_protect.py) :: line 59, args 1, locals 1, stack 4, consts 3
+ 59           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('blob')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [9]   _decrypt_blob  (file=lua_protect.py) :: line 59, args 4, locals 4, stack 7, consts 6
+  59           RESUME                   0
+
+  61           NOP
+
+  62   L1:     LOAD_GLOBAL              0 (int)
+               LOAD_ATTR                3 (from_bytes + NULL|self)
+               LOAD_FAST_BORROW         0 (blob)
+               LOAD_CONST               1 (slice(None, 4, None))
+               BINARY_OP               26 ([])
+               LOAD_CONST               2 ('little')
+               CALL                     2
+               STORE_FAST               1 (seed)
+
+  63           LOAD_FAST_BORROW         0 (blob)
+               LOAD_CONST               3 (slice(4, None, None))
+               BINARY_OP               26 ([])
+               STORE_FAST               2 (enc)
+
+  64           LOAD_GLOBAL              5 (_lcg_stream + NULL)
+               LOAD_FAST_BORROW         1 (seed)
+               LOAD_GLOBAL              7 (len + NULL)
+               LOAD_FAST_BORROW         2 (enc)
+               CALL                     1
+               CALL                     2
+               STORE_FAST               3 (ks)
+
+  65           LOAD_GLOBAL              9 (bytes + NULL)
+               LOAD_CONST               4 (<code object <genexpr> at 0x7aab473e10, file "lua_protect.py", line 65>)
+               MAKE_FUNCTION
+               LOAD_GLOBAL             11 (zip + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (enc, ks)
+               CALL                     2
+               GET_ITER
+               CALL                     0
+               CALL                     1
+       L2:     RETURN_VALUE
+
+  --   L3:     PUSH_EXC_INFO
+
+  66           LOAD_GLOBAL             12 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L5)
+               NOT_TAKEN
+               POP_TOP
+
+  67   L4:     POP_EXCEPT
+               LOAD_CONST               5 (None)
+               RETURN_VALUE
+
+  66   L5:     RERAISE                  0
+
+  --   L6:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L3 [0]
+  L3 to L4 -> L6 [1] lasti
+  L5 to L6 -> L6 [1] lasti
+
+
+### [10]     <genexpr>  (file=lua_protect.py) :: line 65, args 3, locals 3, stack 3, consts 2
+  65           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                22 (to L3)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST   18 (c, k)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (c, k)
+               BINARY_OP               10 (-)
+               LOAD_CONST               0 (256)
+               BINARY_OP                6 (%)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           24 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [11]   __annotate__  (file=lua_protect.py) :: line 142, args 1, locals 1, stack 4, consts 3
+142           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('version')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [12]   _compile_one  (file=lua_protect.py) :: line 142, args 6, locals 6, stack 7, consts 12
+ 142           RESUME                   0
+
+ 144           LOAD_SMALL_INT           0
+               LOAD_CONST               1 (None)
+               IMPORT_NAME              0 (univ)
+               STORE_FAST               2 (univ)
+
+ 145           LOAD_GLOBAL              3 (Path + NULL)
+               LOAD_GLOBAL              4 (tempfile)
+               LOAD_ATTR                6 (mkstemp)
+               PUSH_NULL
+               LOAD_CONST               2 ('.lua')
+               LOAD_CONST               3 (('suffix',))
+               CALL_KW                  1
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               STORE_FAST               3 (tmp)
+
+ 146           LOAD_GLOBAL              3 (Path + NULL)
+               LOAD_GLOBAL              4 (tempfile)
+               LOAD_ATTR                6 (mkstemp)
+               PUSH_NULL
+               LOAD_CONST               4 ('.luc')
+               LOAD_CONST               3 (('suffix',))
+               CALL_KW                  1
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               STORE_FAST               4 (out_tmp)
+
+ 147           NOP
+
+ 148   L1:     LOAD_FAST_BORROW         3 (tmp)
+               LOAD_ATTR                9 (write_text + NULL|self)
+               LOAD_FAST_BORROW         0 (text)
+               LOAD_CONST               5 ('utf-8')
+               LOAD_CONST               6 (('encoding',))
+               CALL_KW                  2
+               POP_TOP
+
+ 149           LOAD_FAST_BORROW         1 (version)
+               LOAD_CONST               7 ('jit')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       19 (to L2)
+               NOT_TAKEN
+
+ 150           LOAD_FAST_BORROW         2 (univ)
+               LOAD_ATTR               11 (_compile_luajit + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (tmp, out_tmp)
+               CALL                     2
+               STORE_FAST               5 (err)
+               JUMP_FORWARD            20 (to L3)
+
+ 152   L2:     LOAD_FAST_BORROW         2 (univ)
+               LOAD_ATTR               13 (compile_lua + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (tmp, out_tmp)
+               LOAD_FAST_BORROW         1 (version)
+               LOAD_CONST               8 (False)
+               LOAD_CONST               9 (('version', 'strip'))
+               CALL_KW                  4
+               STORE_FAST               5 (err)
+
+ 153   L3:     LOAD_FAST_BORROW         5 (err)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       40 (to L5)
+       L4:     NOT_TAKEN
+
+ 154           NOP
+
+ 157           LOAD_FAST_BORROW         3 (tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 158           LOAD_FAST_BORROW         4 (out_tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+ 155   L5:     LOAD_FAST_BORROW         4 (out_tmp)
+               LOAD_ATTR               17 (read_bytes + NULL|self)
+               CALL                     0
+
+ 157   L6:     LOAD_FAST_BORROW         3 (tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 158           LOAD_FAST_BORROW         4 (out_tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               RETURN_VALUE
+
+  --   L7:     PUSH_EXC_INFO
+
+ 157           LOAD_FAST                3 (tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 158           LOAD_FAST                4 (out_tmp)
+               LOAD_ATTR               15 (unlink + NULL|self)
+               LOAD_CONST              10 (True)
+               LOAD_CONST              11 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               RERAISE                  0
+
+  --   L8:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L7 [0]
+  L5 to L6 -> L7 [0]
+  L7 to L8 -> L8 [1] lasti
+
+
+### [13]   __annotate__  (file=lua_protect.py) :: line 161, args 1, locals 1, stack 6, consts 4
+161           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('version')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               3 ('chunkname')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [14]   _compile_one_named  (file=lua_protect.py) :: line 161, args 7, locals 7, stack 6, consts 9
+ 161           RESUME                   0
+
+ 165           LOAD_SMALL_INT           0
+               LOAD_CONST               1 (None)
+               IMPORT_NAME              0 (univ)
+               STORE_FAST               3 (univ)
+
+ 166           LOAD_GLOBAL              3 (Path + NULL)
+               LOAD_GLOBAL              4 (tempfile)
+               LOAD_ATTR                6 (mkstemp)
+               PUSH_NULL
+               LOAD_CONST               2 ('.lua')
+               LOAD_CONST               3 (('suffix',))
+               CALL_KW                  1
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               STORE_FAST               4 (tmp)
+
+ 167           LOAD_GLOBAL              3 (Path + NULL)
+               LOAD_GLOBAL              4 (tempfile)
+               LOAD_ATTR                6 (mkstemp)
+               PUSH_NULL
+               LOAD_CONST               4 ('.luc')
+               LOAD_CONST               3 (('suffix',))
+               CALL_KW                  1
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               STORE_FAST               5 (out_tmp)
+
+ 168           NOP
+
+ 169   L1:     LOAD_FAST_BORROW         4 (tmp)
+               LOAD_ATTR                9 (write_text + NULL|self)
+               LOAD_FAST_BORROW         0 (text)
+               LOAD_CONST               5 ('utf-8')
+               LOAD_CONST               6 (('encoding',))
+               CALL_KW                  2
+               POP_TOP
+
+ 170           LOAD_FAST_BORROW         3 (univ)
+               LOAD_ATTR               11 (_compile_lua_named + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 69 (tmp, out_tmp)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (version, chunkname)
+               CALL                     4
+               STORE_FAST               6 (err)
+
+ 171           LOAD_FAST_BORROW         6 (err)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       40 (to L3)
+               NOT_TAKEN
+
+ 172   L2:     NOP
+
+ 175           LOAD_FAST_BORROW         4 (tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 176           LOAD_FAST_BORROW         5 (out_tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+ 173   L3:     LOAD_FAST_BORROW         5 (out_tmp)
+               LOAD_ATTR               15 (read_bytes + NULL|self)
+               CALL                     0
+
+ 175   L4:     LOAD_FAST_BORROW         4 (tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 176           LOAD_FAST_BORROW         5 (out_tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               RETURN_VALUE
+
+  --   L5:     PUSH_EXC_INFO
+
+ 175           LOAD_FAST                4 (tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+
+ 176           LOAD_FAST                5 (out_tmp)
+               LOAD_ATTR               13 (unlink + NULL|self)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('missing_ok',))
+               CALL_KW                  1
+               POP_TOP
+               RERAISE                  0
+
+  --   L6:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L5 [0]
+  L3 to L4 -> L5 [0]
+  L5 to L6 -> L6 [1] lasti
+
+
+### [15]   __annotate__  (file=lua_protect.py) :: line 179, args 1, locals 1, stack 2, consts 2
+179           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (tuple)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [16]   protect_compile  (file=lua_protect.py) :: line 179, args 12, locals 12, stack 6, consts 25
+ 179            RESUME                   0
+
+ 184            LOAD_GLOBAL              1 (Path + NULL)
+                LOAD_FAST_BORROW         0 (src)
+                CALL                     1
+                STORE_FAST               0 (src)
+
+ 185            LOAD_GLOBAL              1 (Path + NULL)
+                LOAD_FAST_BORROW         1 (out_root)
+                CALL                     1
+                STORE_FAST               1 (out_root)
+
+ 186            LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                3 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_TRUE        18 (to L1)
+                NOT_TAKEN
+
+ 187            LOAD_CONST               1 (False)
+                LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                4 (name)
+                FORMAT_SIMPLE
+                LOAD_CONST               2 (' not found')
+                BUILD_STRING             2
+                BUILD_TUPLE              2
+                RETURN_VALUE
+
+ 188    L1:     LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                6 (suffix)
+                LOAD_ATTR                9 (lower + NULL|self)
+                CALL                     0
+                LOAD_CONST               3 ('.lua')
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE        3 (to L2)
+                NOT_TAKEN
+
+ 189            LOAD_CONST              21 ((False, 'only .lua source files can be protected'))
+                RETURN_VALUE
+
+ 190    L2:     LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR               11 (read_text + NULL|self)
+                LOAD_CONST               4 ('utf-8')
+                LOAD_CONST               5 ('replace')
+                LOAD_CONST               6 (('encoding', 'errors'))
+                CALL_KW                  2
+                STORE_FAST               3 (text)
+
+ 191            LOAD_FAST_BORROW         3 (text)
+                LOAD_ATTR               13 (strip + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L3)
+                NOT_TAKEN
+
+ 192            LOAD_CONST              22 ((False, 'empty source'))
+                RETURN_VALUE
+
+ 194    L3:     LOAD_SMALL_INT           0
+                LOAD_CONST               7 (None)
+                IMPORT_NAME              7 (univ)
+                STORE_FAST               4 (univ)
+
+ 195            LOAD_FAST_BORROW         4 (univ)
+                LOAD_ATTR               17 (_read_lua_profile + NULL|self)
+                LOAD_FAST_BORROW         0 (src)
+                CALL                     1
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L4)
+                NOT_TAKEN
+                POP_TOP
+                BUILD_MAP                0
+        L4:     STORE_FAST               5 (profile)
+
+ 196            LOAD_FAST_BORROW         5 (profile)
+                LOAD_ATTR               19 (get + NULL|self)
+                LOAD_CONST               8 ('engine')
+                CALL                     1
+                STORE_FAST               6 (engine)
+
+ 198            LOAD_FAST_BORROW         6 (engine)
+                LOAD_CONST               9 ('jit')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE      161 (to L6)
+                NOT_TAKEN
+
+ 199            LOAD_GLOBAL             21 (_compile_one + NULL)
+                LOAD_FAST_BORROW         3 (text)
+                LOAD_CONST               9 ('jit')
+                CALL                     2
+                STORE_FAST               7 (bytecode)
+
+ 200            LOAD_FAST_BORROW         7 (bytecode)
+                POP_JUMP_IF_NOT_NONE     3 (to L5)
+                NOT_TAKEN
+
+ 201            LOAD_CONST              23 ((False, 'LuaJIT compile failed'))
+                RETURN_VALUE
+
+ 202    L5:     LOAD_FAST_BORROW         1 (out_root)
+                LOAD_CONST              10 ('lua')
+                BINARY_OP               11 (/)
+                LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR               22 (stem)
+                LOAD_CONST              11 (' [compiled]')
+                BINARY_OP                0 (+)
+                LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                6 (suffix)
+                BINARY_OP                0 (+)
+                BINARY_OP               11 (/)
+                STORE_FAST               8 (out)
+
+ 203            LOAD_FAST_BORROW         8 (out)
+                LOAD_ATTR               24 (parent)
+                LOAD_ATTR               27 (mkdir + NULL|self)
+                LOAD_CONST              12 (True)
+                LOAD_CONST              12 (True)
+                LOAD_CONST              13 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 204            LOAD_FAST_BORROW         8 (out)
+                LOAD_ATTR               29 (write_bytes + NULL|self)
+                LOAD_FAST_BORROW         7 (bytecode)
+                CALL                     1
+                POP_TOP
+
+ 205            LOAD_CONST              12 (True)
+                LOAD_CONST              14 ('PROTECTED -> RESULT/lua/')
+                LOAD_FAST_BORROW         8 (out)
+                LOAD_ATTR                4 (name)
+                FORMAT_SIMPLE
+                LOAD_CONST              15 (' (')
+                LOAD_FAST_BORROW         8 (out)
+                LOAD_ATTR               31 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               32 (st_size)
+                LOAD_CONST              16 (',')
+                FORMAT_WITH_SPEC
+                LOAD_CONST              17 (' B, LuaJIT bytecode)')
+                BUILD_STRING             5
+                BUILD_TUPLE              2
+                RETURN_VALUE
+
+ 207    L6:     LOAD_GLOBAL             21 (_compile_one + NULL)
+                LOAD_FAST_BORROW         3 (text)
+                LOAD_CONST              18 ('5.3')
+                CALL                     2
+                STORE_FAST               7 (bytecode)
+
+ 208            LOAD_FAST_BORROW         7 (bytecode)
+                POP_JUMP_IF_NOT_NONE     3 (to L7)
+                NOT_TAKEN
+
+ 209            LOAD_CONST              24 ((False, 'compile failed (Lua 5.3)'))
+                RETURN_VALUE
+
+ 210    L7:     LOAD_SMALL_INT           0
+                LOAD_CONST               7 (None)
+                IMPORT_NAME             17 (lua_bgmi)
+                STORE_FAST               9 (lua_bgmi)
+
+ 211            NOP
+
+ 212    L8:     LOAD_FAST_BORROW         9 (lua_bgmi)
+                LOAD_ATTR               37 (std_to_bgmi + NULL|self)
+                LOAD_FAST_BORROW         7 (bytecode)
+                CALL                     1
+                STORE_FAST              10 (game)
+
+ 213            LOAD_FAST_BORROW         9 (lua_bgmi)
+                LOAD_ATTR               39 (bgmi_to_std + NULL|self)
+                LOAD_FAST_BORROW        10 (game)
+                CALL                     1
+                POP_TOP
+
+ 217    L9:     LOAD_FAST                1 (out_root)
+                LOAD_CONST              10 ('lua')
+                BINARY_OP               11 (/)
+                LOAD_FAST                0 (src)
+                LOAD_ATTR               22 (stem)
+                LOAD_CONST              11 (' [compiled]')
+                BINARY_OP                0 (+)
+                LOAD_FAST                0 (src)
+                LOAD_ATTR                6 (suffix)
+                BINARY_OP                0 (+)
+                BINARY_OP               11 (/)
+                STORE_FAST               8 (out)
+
+ 218            LOAD_FAST                8 (out)
+                LOAD_ATTR               24 (parent)
+                LOAD_ATTR               27 (mkdir + NULL|self)
+                LOAD_CONST              12 (True)
+                LOAD_CONST              12 (True)
+                LOAD_CONST              13 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 219            LOAD_FAST                8 (out)
+                LOAD_ATTR               29 (write_bytes + NULL|self)
+                LOAD_FAST               10 (game)
+                CALL                     1
+                POP_TOP
+
+ 220            LOAD_CONST              12 (True)
+                LOAD_CONST              14 ('PROTECTED -> RESULT/lua/')
+                LOAD_FAST                8 (out)
+                LOAD_ATTR                4 (name)
+                FORMAT_SIMPLE
+                LOAD_CONST              15 (' (')
+                LOAD_FAST                8 (out)
+                LOAD_ATTR               31 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               32 (st_size)
+                LOAD_CONST              16 (',')
+                FORMAT_WITH_SPEC
+                LOAD_CONST              20 (' B, PUBG/BGMI bytecode)')
+                BUILD_STRING             5
+                BUILD_TUPLE              2
+                RETURN_VALUE
+
+  --   L10:     PUSH_EXC_INFO
+
+ 214            LOAD_GLOBAL             40 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       18 (to L15)
+                NOT_TAKEN
+                STORE_FAST              11 (e)
+
+ 215   L11:     LOAD_CONST               1 (False)
+                LOAD_CONST              19 ('BGMI convert failed: ')
+                LOAD_FAST               11 (e)
+                FORMAT_SIMPLE
+                BUILD_STRING             2
+                BUILD_TUPLE              2
+       L12:     SWAP                     2
+       L13:     POP_EXCEPT
+                LOAD_CONST               7 (None)
+                STORE_FAST              11 (e)
+                DELETE_FAST             11 (e)
+                RETURN_VALUE
+
+  --   L14:     LOAD_CONST               7 (None)
+                STORE_FAST              11 (e)
+                DELETE_FAST             11 (e)
+                RERAISE                  1
+
+ 214   L15:     RERAISE                  0
+
+  --   L16:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L8 to L9 -> L10 [0]
+  L10 to L11 -> L16 [1] lasti
+  L11 to L12 -> L14 [1] lasti
+  L12 to L13 -> L16 [1] lasti
+  L14 to L16 -> L16 [1] lasti
+
+
+### [17]   __annotate__  (file=lua_protect.py) :: line 223, args 1, locals 1, stack 2, consts 2
+223           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('b64')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [18]   _split_parts  (file=lua_protect.py) :: line 223, args 7, locals 7, stack 4, consts 3
+223           RESUME                   0
+
+226           LOAD_FAST_BORROW         0 (b64)
+              LOAD_CONST               1 (None)
+              LOAD_CONST               1 (None)
+              LOAD_CONST               2 (-1)
+              BUILD_SLICE              3
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (rev)
+
+227           LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         1 (rev)
+              CALL                     1
+              STORE_FAST               2 (n)
+
+228           LOAD_FAST_BORROW         2 (n)
+              LOAD_SMALL_INT           3
+              BINARY_OP                2 (//)
+              STORE_FAST               3 (cut)
+
+229           LOAD_FAST_BORROW         1 (rev)
+              LOAD_CONST               1 (None)
+              LOAD_FAST_BORROW         3 (cut)
+              BINARY_SLICE
+              STORE_FAST               4 (p0)
+
+230           LOAD_FAST_BORROW_LOAD_FAST_BORROW 19 (rev, cut)
+              LOAD_SMALL_INT           2
+              LOAD_FAST_BORROW         3 (cut)
+              BINARY_OP                5 (*)
+              BINARY_SLICE
+              STORE_FAST               5 (p1)
+
+231           LOAD_FAST_BORROW         1 (rev)
+              LOAD_SMALL_INT           2
+              LOAD_FAST_BORROW         3 (cut)
+              BINARY_OP                5 (*)
+              LOAD_CONST               1 (None)
+              BINARY_SLICE
+              STORE_FAST               6 (p2)
+
+232           LOAD_FAST_BORROW_LOAD_FAST_BORROW 69 (p0, p1)
+              LOAD_FAST_BORROW         6 (p2)
+              BUILD_TUPLE              3
+              RETURN_VALUE
+
+
+### [19]   __annotate__  (file=lua_protect.py) :: line 235, args 1, locals 1, stack 2, consts 2
+235           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('text')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [20]   _extract_b64  (file=lua_protect.py) :: line 235, args 10, locals 10, stack 8, consts 8
+235           RESUME                   0
+
+238           LOAD_GLOBAL              0 (re)
+              LOAD_ATTR                2 (findall)
+              PUSH_NULL
+
+239           LOAD_CONST               1 ('\\{"([^"]+)","([A-Za-z0-9+/=]*)","([A-Za-z0-9+/=]*)","([A-Za-z0-9+/=]*)"\\}')
+
+240           LOAD_FAST_BORROW         0 (text)
+
+238           CALL                     2
+              STORE_FAST               1 (pairs)
+
+241           BUILD_LIST               0
+              STORE_FAST               2 (out)
+
+242           LOAD_FAST_BORROW         1 (pairs)
+              GET_ITER
+      L1:     FOR_ITER                59 (to L3)
+              UNPACK_SEQUENCE          4
+              STORE_FAST_STORE_FAST   52 (version, p0)
+              STORE_FAST_STORE_FAST   86 (p1, p2)
+
+243           LOAD_FAST_BORROW_LOAD_FAST_BORROW 69 (p0, p1)
+              BINARY_OP                0 (+)
+              LOAD_FAST_BORROW         6 (p2)
+              BINARY_OP                0 (+)
+              STORE_FAST               7 (joined)
+
+244           LOAD_FAST_BORROW         7 (joined)
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L2)
+              NOT_TAKEN
+              JUMP_BACKWARD           31 (to L1)
+
+245   L2:     LOAD_FAST_BORROW         2 (out)
+              LOAD_ATTR                5 (append + NULL|self)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 55 (version, joined)
+              LOAD_CONST               2 (None)
+              LOAD_CONST               2 (None)
+              LOAD_CONST               7 (-1)
+              BUILD_SLICE              3
+              BINARY_OP               26 ([])
+              BUILD_TUPLE              2
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           61 (to L1)
+
+242   L3:     END_FOR
+              POP_ITER
+
+246           LOAD_FAST_BORROW         2 (out)
+              TO_BOOL
+              POP_JUMP_IF_FALSE        3 (to L4)
+              NOT_TAKEN
+
+247           LOAD_FAST_BORROW         2 (out)
+              RETURN_VALUE
+
+248   L4:     LOAD_GLOBAL              0 (re)
+              LOAD_ATTR                2 (findall)
+              PUSH_NULL
+              LOAD_CONST               3 ('local _p\\d = "([A-Za-z0-9+/=]*)"')
+              LOAD_FAST_BORROW         0 (text)
+              CALL                     2
+              STORE_FAST               8 (parts)
+
+249           LOAD_GLOBAL              7 (len + NULL)
+              LOAD_FAST_BORROW         8 (parts)
+              CALL                     1
+              LOAD_SMALL_INT           3
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       41 (to L5)
+              NOT_TAKEN
+
+250           LOAD_CONST               4 ('')
+              LOAD_ATTR                9 (join + NULL|self)
+              LOAD_FAST_BORROW         8 (parts)
+              CALL                     1
+              STORE_FAST               7 (joined)
+
+251           LOAD_FAST_BORROW         7 (joined)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       16 (to L5)
+              NOT_TAKEN
+
+252           LOAD_CONST               5 ('?')
+              LOAD_FAST_BORROW         7 (joined)
+              LOAD_CONST               2 (None)
+              LOAD_CONST               2 (None)
+              LOAD_CONST               7 (-1)
+              BUILD_SLICE              3
+              BINARY_OP               26 ([])
+              BUILD_TUPLE              2
+              BUILD_LIST               1
+              RETURN_VALUE
+
+253   L5:     LOAD_GLOBAL              0 (re)
+              LOAD_ATTR               10 (search)
+              PUSH_NULL
+              LOAD_CONST               6 ('local _b64 = "([A-Za-z0-9+/=]+)"')
+              LOAD_FAST_BORROW         0 (text)
+              CALL                     2
+              STORE_FAST               9 (m)
+
+254           LOAD_FAST_BORROW         9 (m)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       21 (to L6)
+              NOT_TAKEN
+              LOAD_CONST               5 ('?')
+              LOAD_FAST_BORROW         9 (m)
+              LOAD_ATTR               13 (group + NULL|self)
+              LOAD_SMALL_INT           1
+              CALL                     1
+              BUILD_TUPLE              2
+              BUILD_LIST               1
+              RETURN_VALUE
+      L6:     BUILD_LIST               0
+              RETURN_VALUE
+
+
+### [21]   __annotate__  (file=lua_protect.py) :: line 257, args 1, locals 1, stack 2, consts 2
+257           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (bool)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [22]   is_protected  (file=lua_protect.py) :: line 257, args 2, locals 2, stack 4, consts 3
+ 257           RESUME                   0
+
+ 258           NOP
+
+ 259   L1:     LOAD_GLOBAL              1 (Path + NULL)
+               LOAD_FAST_BORROW         0 (src)
+               CALL                     1
+               LOAD_ATTR                3 (read_bytes + NULL|self)
+               CALL                     0
+               LOAD_CONST               0 (slice(None, 2048, None))
+               BINARY_OP               26 ([])
+               STORE_FAST               1 (head)
+
+ 262   L2:     LOAD_CONST               2 (b'IKRAMPROT')
+               LOAD_FAST_BORROW         1 (head)
+               CONTAINS_OP              0 (in)
+               RETURN_VALUE
+
+  --   L3:     PUSH_EXC_INFO
+
+ 260           LOAD_GLOBAL              4 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L5)
+               NOT_TAKEN
+               POP_TOP
+
+ 261   L4:     POP_EXCEPT
+               LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+ 260   L5:     RERAISE                  0
+
+  --   L6:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L3 [0]
+  L3 to L4 -> L6 [1] lasti
+  L5 to L6 -> L6 [1] lasti
+
+
+### [23]   __annotate__  (file=lua_protect.py) :: line 265, args 1, locals 1, stack 2, consts 2
+265           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (dict)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [24]   unprotect_blob  (file=lua_protect.py) :: line 265, args 7, locals 7, stack 5, consts 4
+ 265            RESUME                   0
+
+ 268            LOAD_GLOBAL              1 (is_protected + NULL)
+                LOAD_FAST_BORROW         0 (src)
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L1)
+                NOT_TAKEN
+
+ 269            BUILD_MAP                0
+                RETURN_VALUE
+
+ 270    L1:     NOP
+
+ 271    L2:     LOAD_GLOBAL              3 (Path + NULL)
+                LOAD_FAST_BORROW         0 (src)
+                CALL                     1
+                LOAD_ATTR                5 (read_text + NULL|self)
+                LOAD_CONST               1 ('utf-8')
+                LOAD_CONST               2 ('replace')
+                LOAD_CONST               3 (('encoding', 'errors'))
+                CALL_KW                  2
+                STORE_FAST               1 (text)
+
+ 274    L3:     BUILD_MAP                0
+                STORE_FAST               2 (result)
+
+ 275            LOAD_GLOBAL              9 (_extract_b64 + NULL)
+                LOAD_FAST                1 (text)
+                CALL                     1
+                GET_ITER
+        L4:     FOR_ITER                63 (to L9)
+                UNPACK_SEQUENCE          2
+                STORE_FAST_STORE_FAST   52 (version, b64)
+
+ 276            NOP
+
+ 277    L5:     LOAD_GLOBAL             10 (base64)
+                LOAD_ATTR               12 (b64decode)
+                PUSH_NULL
+                LOAD_FAST                4 (b64)
+                CALL                     1
+                STORE_FAST               5 (blob)
+
+ 280    L6:     LOAD_FAST                5 (blob)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L7)
+                NOT_TAKEN
+
+ 281            JUMP_BACKWARD           38 (to L4)
+
+ 282    L7:     LOAD_GLOBAL             15 (_decrypt_blob + NULL)
+                LOAD_FAST                5 (blob)
+                CALL                     1
+                STORE_FAST               6 (dec)
+
+ 283            LOAD_FAST                6 (dec)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L8)
+                NOT_TAKEN
+                JUMP_BACKWARD           59 (to L4)
+
+ 284    L8:     LOAD_FAST_LOAD_FAST     98 (dec, result)
+                LOAD_FAST                3 (version)
+                STORE_SUBSCR
+                JUMP_BACKWARD           65 (to L4)
+
+ 275    L9:     END_FOR
+                POP_ITER
+
+ 285            LOAD_FAST                2 (result)
+                RETURN_VALUE
+
+  --   L10:     PUSH_EXC_INFO
+
+ 272            LOAD_GLOBAL              6 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L12)
+                NOT_TAKEN
+                POP_TOP
+
+ 273            BUILD_MAP                0
+                SWAP                     2
+       L11:     POP_EXCEPT
+                RETURN_VALUE
+
+ 272   L12:     RERAISE                  0
+
+  --   L13:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L14:     PUSH_EXC_INFO
+
+ 278            LOAD_GLOBAL              6 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L16)
+                NOT_TAKEN
+                POP_TOP
+
+ 279   L15:     POP_EXCEPT
+                JUMP_BACKWARD          102 (to L4)
+
+ 278   L16:     RERAISE                  0
+
+  --   L17:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L10 [0]
+  L5 to L6 -> L14 [1]
+  L10 to L11 -> L13 [1] lasti
+  L12 to L13 -> L13 [1] lasti
+  L14 to L15 -> L17 [2] lasti
+  L16 to L17 -> L17 [2] lasti

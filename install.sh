@@ -10,7 +10,7 @@
 # =============================================
 set -u
 
-# `curl ... | bash` phone-fail fixes (V111):
+# `curl ... | bash` phone-fail fixes (V112):
 #  1) PREFIX guard (set -u ke liye) + apt NONINTERACTIVE — conffile/dpkg
 #     prompt kabhi piped script bytes na khaye (wo "mid-way ruk jata hai"
 #     wala phone-fail tha).
@@ -76,7 +76,7 @@ box() {
     printf "${COLOR}╰$(printf '─%.0s' $(seq 1 $BW))╯${C_RESET}\n"
 }
 
-# ---------------- system info / checks (V111) ----------------
+# ---------------- system info / checks (V112) ----------------
 sys_info() {
     local arch cpu android storage_ok
     arch=$(uname -m 2>/dev/null || echo "unknown")
@@ -86,7 +86,7 @@ sys_info() {
     android=$(getprop ro.build.version.release 2>/dev/null)
     [ -z "$android" ] && android=$(getprop ro.build.version.sdk 2>/dev/null)
     [ -z "$android" ] && android="n/a"
-    box "$C_GOLD" "⚙ SYSTEM (V111)"
+    box "$C_GOLD" "⚙ SYSTEM (V112)"
     printf "${C_BOLD}  • Arch    : ${C_CYAN}%s${C_RESET}\n" "$arch"
     printf "${C_BOLD}  • CPU ABI : ${C_CYAN}%s${C_RESET}\n" "$cpu"
     printf "${C_BOLD}  • Android : ${C_CYAN}%s${C_RESET}\n" "$android"
@@ -367,7 +367,7 @@ PY
     advance 100 "Boot test"
 }
 
-# ---------------- --test self-test mode (V111) ----------------
+# ---------------- --test self-test mode (V112) ----------------
 # install.sh --test  ->  system checks + boot test only (no reinstall).
 # Exit code 0 = PASS, 1 = FAIL. Not a TTY pe bhi clean output.
 SELF_TEST="${1:-}"
@@ -397,7 +397,7 @@ if [ -t 0 ]; then
     read -r dummy 2>/dev/null || true
 fi
 
-# system info — arch / android / storage (V111)
+# system info — arch / android / storage (V112)
 sys_info
 
 # phase weights (total 100)
@@ -447,8 +447,10 @@ box "$C_CYAN" "⬇ Installing core packages (python, git, curl, unzip, java, lua
 # openjdk ka naam har Termux repo state pe same nahi hota: candidate-chain
 # try karo (17 -> 21 -> 25), jo bhi us mirror pe mile use karo. Java cfr.jar
 # / unluac.jar ke liye chahiye; Lua native (luac_patched) java ke bina chalega.
+# clang = sm4_custom ke runtime C self-repair fallback ke liye (agar shippped
+#         ikram_sm4_fast.so kabhi corrupt/missing ho to device par recompile).
 install_pkgs "$PW_UPDATE" "$PW_PKGS" "Installing" \
-    python git curl unzip lua53
+    python git curl unzip lua53 clang
 
 JAVA_PKG=""
 if ! command -v javac >/dev/null 2>&1; then
@@ -503,7 +505,9 @@ human() {
 TARGET="$HOME/Ikram_Tool"
 box "$C_CYAN" "⬇ Downloading tool"
 mkdir -p "$TARGET"
-TOOL_URL="https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
+# TOOL_URL env override = local/testing builds. Default = GitHub latest.
+: "${TOOL_URL:=https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip}"
+TOOL_URL="$TOOL_URL"
 DL_BASE=$((PW_UPDATE + PW_PKGS + PW_PIP))
 _pbar "$DL_BASE" "Downloading tool"
 TOTAL=$(curl -sIL "$TOOL_URL" 2>/dev/null | grep -i '^content-length' | tail -1 | tr -dc '0-9')
@@ -579,9 +583,14 @@ mkdir -p "$TARGET/drop" "$TARGET/result"
 cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — hamesha banayein (fresh install pe khali hota hai)
-mkdir -p "$TARGET/.engine" "$TARGET/drop/inject" "$TARGET/drop/lua" "$TARGET/drop/pak" \
-         "$TARGET/result/injected" "$TARGET/result/extracted" \
-         "$TARGET/result/lua" "$TARGET/result/Repacked" "$TARGET/result/CostomPak"
+# V112 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
+# (Section G frozen — original lowercase/mixed-case spellings).
+# paths.py ensure_dirs() bhi launcher pe banata hai; yahan bana do taaki
+# pehli boot pe 'FOLDERS CREATED' box na dikhe.
+mkdir -p "$TARGET/drop/pak" "$TARGET/drop/lua" "$TARGET/drop/inject" \
+         "$TARGET/result/extracted" "$TARGET/result/injected" \
+         "$TARGET/result/lua" "$TARGET/result/processed" \
+         "$TARGET/result/CostomPak" "$TARGET/result/Repacked"
 # engine ab .engine/ me — DROP/RESULT symlink (engine __file__-relative me root drop/result)
 ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
 ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"

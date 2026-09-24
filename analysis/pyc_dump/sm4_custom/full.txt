@@ -1,0 +1,4632 @@
+
+### [0] <module>  (file=sm4_custom.py) :: line 1, args 0, locals 0, stack 4, consts 55
+  0           RESUME                   0
+
+  2           LOAD_CONST               0 ('Custom SM4 variant (CHEN TOOL X) — modified S-Box + same round structure.\n\nTencent pak encrypts some files with a NON-standard SM4 whose S-Box differs\nfrom the official one (CHEN_LUA_PAK / GRW tooling). Standard gmalg SM4 cannot\ndecrypt those. This module implements the variant end-to-end (pure Python,\nno gmalg dependency) so both S-Boxes can be tried.\n\nS-Box reference: CHEN_TOOL_X/sm4_variant/sm4.py\n')
+              STORE_NAME               0 (__doc__)
+
+ 11           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (struct)
+              STORE_NAME               1 (struct)
+
+ 12           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('lru_cache',))
+              IMPORT_NAME              2 (functools)
+              IMPORT_FROM              3 (lru_cache)
+              STORE_NAME               3 (lru_cache)
+              POP_TOP
+
+ 14           LOAD_NAME                4 (bytes)
+              PUSH_NULL
+              BUILD_LIST               0
+
+ 15           LOAD_SMALL_INT          52
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         102
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          37
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         116
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         137
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         120
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         228
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         169
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          90
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          65
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         188
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         122
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT         214
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          22
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          33
+
+ 14           LIST_APPEND              1
+
+ 15           LOAD_SMALL_INT          35
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          77
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          97
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         218
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         148
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         155
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         223
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          19
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          60
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         105
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          58
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          49
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          10
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          95
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         215
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         153
+
+ 14           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         149
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         241
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         174
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         114
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT          61
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT           7
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT          96
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT          36
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         182
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         152
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         238
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         196
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         162
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT          45
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         136
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         221
+
+ 14           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         141
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT           4
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         234
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         187
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          17
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         202
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          62
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          93
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         161
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         246
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          63
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         176
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         151
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         128
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          71
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          43
+
+ 14           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         166
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         230
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         247
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         217
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         177
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          89
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         192
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         124
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         190
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          84
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          40
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         183
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         126
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          79
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         248
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          67
+
+ 14           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         110
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         160
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          80
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          14
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         245
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         144
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         184
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         251
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         163
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         123
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          98
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          25
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          70
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT           3
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT          42
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         185
+
+ 14           LIST_APPEND              1
+
+ 20           LOAD_SMALL_INT         143
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         159
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         119
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         180
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT          91
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         131
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         135
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT           8
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         235
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         226
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT          30
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT          66
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         240
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT          15
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         232
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         113
+
+ 14           LIST_APPEND              1
+
+ 21           LOAD_SMALL_INT         106
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         117
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         173
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT          85
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT          31
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         181
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         171
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT          51
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         250
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         127
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT          21
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         189
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         133
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         216
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT           6
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         104
+
+ 14           LIST_APPEND              1
+
+ 22           LOAD_SMALL_INT         179
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          82
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          48
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          72
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          11
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT           0
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         237
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         239
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         178
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          87
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         142
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         231
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         108
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         213
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT         229
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          46
+
+ 14           LIST_APPEND              1
+
+ 23           LOAD_SMALL_INT          83
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         130
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT           5
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         249
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         129
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         244
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT          86
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         191
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         140
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT          75
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         227
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         219
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT          74
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         145
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT          76
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT          44
+
+ 14           LIST_APPEND              1
+
+ 24           LOAD_SMALL_INT         211
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          64
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          41
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          78
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          32
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          20
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          54
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         121
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT           9
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         111
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         209
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          55
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         224
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          57
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT          12
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         138
+
+ 14           LIST_APPEND              1
+
+ 25           LOAD_SMALL_INT         146
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT          56
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT          18
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT          53
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         109
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         225
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         253
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         147
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         154
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT          23
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         212
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         201
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         156
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         107
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         132
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT          38
+
+ 14           LIST_APPEND              1
+
+ 26           LOAD_SMALL_INT         157
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         175
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         118
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         193
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         158
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         208
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         150
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         197
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         203
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         233
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         115
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT          73
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         210
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         205
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         100
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         195
+
+ 14           LIST_APPEND              1
+
+ 27           LOAD_SMALL_INT         199
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT           1
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         125
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         243
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         172
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         252
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         222
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         164
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT          68
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT          50
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT          27
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         194
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         186
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT          28
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT           2
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT         198
+
+ 14           LIST_APPEND              1
+
+ 28           LOAD_SMALL_INT          39
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          69
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         139
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         242
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          24
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         167
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          16
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          81
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          29
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         200
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         207
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          99
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         255
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          47
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          13
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT          88
+
+ 14           LIST_APPEND              1
+
+ 29           LOAD_SMALL_INT         206
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         101
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         165
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         220
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT          26
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT          59
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         134
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         254
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT          34
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT          92
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         168
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT          94
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         103
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         170
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         236
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         112
+
+ 14           LIST_APPEND              1
+
+ 30           LOAD_SMALL_INT         204
+
+ 14           LIST_APPEND              1
+              CALL                     1
+              STORE_NAME               5 (_S_BOX)
+
+ 33           BUILD_LIST               0
+              LOAD_CONST              54 ((1184304796, 1270900830, 1493524870, 3164752158))
+              LIST_EXTEND              1
+              STORE_NAME               6 (_FK)
+
+ 35           BUILD_LIST               0
+
+ 36           LOAD_CONST               3 (964907)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               4 (973793155)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               5 (2654690407)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               6 (2916866751)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               7 (2071233739)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               8 (1226140771)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST               9 (3348805095)
+
+ 35           LIST_APPEND              1
+
+ 36           LOAD_CONST              10 (2045549823)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              11 (388349611)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              12 (800627875)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              13 (612403927)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              14 (3721562911)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              15 (1195432523)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              16 (3150178931)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              17 (612053223)
+
+ 35           LIST_APPEND              1
+
+ 37           LOAD_CONST              18 (2445162591)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              19 (67183755)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              20 (1174197155)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              21 (1393249511)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              22 (3331183455)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              23 (3822152747)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              24 (1332317203)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              25 (1804781383)
+
+ 35           LIST_APPEND              1
+
+ 38           LOAD_CONST              26 (1990130463)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              27 (1282653851)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              28 (3376591251)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              29 (2910902311)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              30 (925872959)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              31 (332098219)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              32 (735840931)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              33 (396665415)
+
+ 35           LIST_APPEND              1
+
+ 39           LOAD_CONST              34 (3588844719)
+
+ 35           LIST_APPEND              1
+              STORE_NAME               7 (_CK)
+
+ 43           LOAD_CONST              35 (<code object _rol32 at 0x7aab4b1f10, file "sm4_custom.py", line 43>)
+              MAKE_FUNCTION
+              STORE_NAME               8 (_rol32)
+
+ 48           LOAD_CONST              36 (<code object _bs at 0x7aaf78a6f0, file "sm4_custom.py", line 48>)
+              MAKE_FUNCTION
+              STORE_NAME               9 (_bs)
+
+ 55           LOAD_CONST              37 (<code object _t0 at 0x7aaf6596b0, file "sm4_custom.py", line 55>)
+              MAKE_FUNCTION
+              STORE_NAME              10 (_t0)
+
+ 60           LOAD_CONST              38 (<code object _t1 at 0x7aab4b1cb0, file "sm4_custom.py", line 60>)
+              MAKE_FUNCTION
+              STORE_NAME              11 (_t1)
+
+ 65           LOAD_NAME                3 (lru_cache)
+              PUSH_NULL
+              LOAD_CONST              39 (4096)
+              LOAD_CONST              40 (('maxsize',))
+              CALL_KW                  1
+
+ 66           LOAD_CONST              41 (<code object __annotate__ at 0x7aaf9eef30, file "sm4_custom.py", line 66>)
+              MAKE_FUNCTION
+              LOAD_CONST              42 (<code object _expand_key at 0xb400007d1004e470, file "sm4_custom.py", line 65>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+
+ 65           CALL                     0
+
+ 66           STORE_NAME              12 (_expand_key)
+
+ 89           LOAD_CONST              43 (<code object __annotate__ at 0x7aab491570, file "sm4_custom.py", line 89>)
+              MAKE_FUNCTION
+              LOAD_CONST              44 (<code object decrypt_block at 0xb400007d1004cab0, file "sm4_custom.py", line 89>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              13 (decrypt_block)
+
+107           LOAD_CONST              45 (<code object __annotate__ at 0x7aab490580, file "sm4_custom.py", line 107>)
+              MAKE_FUNCTION
+              LOAD_CONST              46 (<code object encrypt_block at 0xb400007d1004b760, file "sm4_custom.py", line 107>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              14 (encrypt_block)
+
+124           LOAD_CONST              47 (<code object __annotate__ at 0x7aab493000, file "sm4_custom.py", line 124>)
+              MAKE_FUNCTION
+              LOAD_CONST              48 (<code object decrypt_ecb at 0xb400007bd0017a60, file "<decrypt_ecb>", line 124>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              15 (decrypt_ecb)
+
+133           LOAD_CONST              49 (<code object __annotate__ at 0x7aab493550, file "sm4_custom.py", line 133>)
+              MAKE_FUNCTION
+              LOAD_CONST              50 (<code object encrypt_ecb at 0xb400007bd001b200, file "<encrypt_ecb>", line 133>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              16 (encrypt_ecb)
+
+140           LOAD_CONST              51 (<code object self_test at 0x7aaf7db690, file "sm4_custom.py", line 140>)
+              MAKE_FUNCTION
+              STORE_NAME              17 (self_test)
+
+152           LOAD_NAME               18 (__name__)
+              LOAD_CONST              52 ('__main__')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       26 (to L2)
+              NOT_TAKEN
+
+153           LOAD_NAME               17 (self_test)
+              PUSH_NULL
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     0 (AssertionError)
+              RAISE_VARARGS            1
+
+154   L1:     LOAD_NAME               19 (print)
+              PUSH_NULL
+              LOAD_CONST              53 ('custom SM4 self-test OK')
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+152   L2:     LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   _rol32  (file=sm4_custom.py) :: line 43, args 2, locals 2, stack 4, consts 2
+ 43           RESUME                   0
+
+ 44           LOAD_FAST_BORROW         1 (n)
+              LOAD_SMALL_INT          31
+              BINARY_OP               14 (&=)
+              STORE_FAST               1 (n)
+
+ 45           LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (x, n)
+              BINARY_OP                3 (<<)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          32
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP               10 (-)
+              BINARY_OP                9 (>>)
+              BINARY_OP                7 (|)
+              LOAD_CONST               1 (4294967295)
+              BINARY_OP                1 (&)
+              RETURN_VALUE
+
+
+### [2]   _bs  (file=sm4_custom.py) :: line 48, args 1, locals 1, stack 4, consts 1
+ 48           RESUME                   0
+
+ 49           LOAD_GLOBAL              0 (_S_BOX)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          24
+              BINARY_OP                9 (>>)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              BINARY_OP               26 ([])
+              LOAD_SMALL_INT          24
+              BINARY_OP                3 (<<)
+
+ 50           LOAD_GLOBAL              0 (_S_BOX)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          16
+              BINARY_OP                9 (>>)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              BINARY_OP               26 ([])
+              LOAD_SMALL_INT          16
+              BINARY_OP                3 (<<)
+
+ 49           BINARY_OP                7 (|)
+
+ 51           LOAD_GLOBAL              0 (_S_BOX)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT           8
+              BINARY_OP                9 (>>)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              BINARY_OP               26 ([])
+              LOAD_SMALL_INT           8
+              BINARY_OP                3 (<<)
+
+ 49           BINARY_OP                7 (|)
+
+ 52           LOAD_GLOBAL              0 (_S_BOX)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              BINARY_OP               26 ([])
+
+ 49           BINARY_OP                7 (|)
+              RETURN_VALUE
+
+
+### [3]   _t0  (file=sm4_custom.py) :: line 55, args 1, locals 1, stack 5, consts 1
+ 55           RESUME                   0
+
+ 56           LOAD_GLOBAL              1 (_bs + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              CALL                     1
+              STORE_FAST               0 (x)
+
+ 57           LOAD_FAST_BORROW         0 (x)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT           2
+              CALL                     2
+              BINARY_OP               12 (^)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          10
+              CALL                     2
+              BINARY_OP               12 (^)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          18
+              CALL                     2
+              BINARY_OP               12 (^)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          24
+              CALL                     2
+              BINARY_OP               12 (^)
+              RETURN_VALUE
+
+
+### [4]   _t1  (file=sm4_custom.py) :: line 60, args 1, locals 1, stack 5, consts 1
+ 60           RESUME                   0
+
+ 61           LOAD_GLOBAL              1 (_bs + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              CALL                     1
+              STORE_FAST               0 (x)
+
+ 62           LOAD_FAST_BORROW         0 (x)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          13
+              CALL                     2
+              BINARY_OP               12 (^)
+              LOAD_GLOBAL              3 (_rol32 + NULL)
+              LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          23
+              CALL                     2
+              BINARY_OP               12 (^)
+              RETURN_VALUE
+
+
+### [5]   __annotate__  (file=sm4_custom.py) :: line 66, args 1, locals 1, stack 4, consts 3
+ 66           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (tuple)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [6]   _expand_key  (file=sm4_custom.py) :: line 65, args 8, locals 8, stack 6, consts 5
+ 65           RESUME                   0
+
+ 67           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (key)
+              LOAD_CONST               0 (slice(0, 4, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               1 ('big')
+              CALL                     2
+              LOAD_GLOBAL              4 (_FK)
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              STORE_FAST               1 (k0)
+
+ 68           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (key)
+              LOAD_CONST               2 (slice(4, 8, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               1 ('big')
+              CALL                     2
+              LOAD_GLOBAL              4 (_FK)
+              LOAD_SMALL_INT           1
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              STORE_FAST               2 (k1)
+
+ 69           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (key)
+              LOAD_CONST               3 (slice(8, 12, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               1 ('big')
+              CALL                     2
+              LOAD_GLOBAL              4 (_FK)
+              LOAD_SMALL_INT           2
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              STORE_FAST               3 (k2)
+
+ 70           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (key)
+              LOAD_CONST               4 (slice(12, 16, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               1 ('big')
+              CALL                     2
+              LOAD_GLOBAL              4 (_FK)
+              LOAD_SMALL_INT           3
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              STORE_FAST               4 (k3)
+
+ 71           BUILD_LIST               0
+              STORE_FAST               5 (rk)
+
+ 72           LOAD_GLOBAL              7 (range + NULL)
+              LOAD_SMALL_INT          32
+              CALL                     1
+              GET_ITER
+      L1:     EXTENDED_ARG             1
+              FOR_ITER               285 (to L5)
+              STORE_FAST               6 (i)
+
+ 73           LOAD_GLOBAL              8 (_CK)
+              LOAD_FAST_BORROW         6 (i)
+              BINARY_OP               26 ([])
+              STORE_FAST               7 (ck)
+
+ 74           LOAD_FAST_BORROW         6 (i)
+              LOAD_SMALL_INT           4
+              BINARY_OP                6 (%)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       58 (to L2)
+              NOT_TAKEN
+
+ 75           LOAD_FAST_BORROW         1 (k0)
+              LOAD_GLOBAL             11 (_t1 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (k1, k2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         4 (k3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         7 (ck)
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               12 (^)
+              STORE_FAST               1 (k0)
+
+ 76           LOAD_FAST_BORROW         5 (rk)
+              LOAD_ATTR               13 (append + NULL|self)
+              LOAD_FAST_BORROW         1 (k0)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           88 (to L1)
+
+ 77   L2:     LOAD_FAST_BORROW         6 (i)
+              LOAD_SMALL_INT           4
+              BINARY_OP                6 (%)
+              LOAD_SMALL_INT           1
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       58 (to L3)
+              NOT_TAKEN
+
+ 78           LOAD_FAST_BORROW         2 (k1)
+              LOAD_GLOBAL             11 (_t1 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (k2, k3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         1 (k0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         7 (ck)
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               12 (^)
+              STORE_FAST               2 (k1)
+
+ 79           LOAD_FAST_BORROW         5 (rk)
+              LOAD_ATTR               13 (append + NULL|self)
+              LOAD_FAST_BORROW         2 (k1)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD          159 (to L1)
+
+ 80   L3:     LOAD_FAST_BORROW         6 (i)
+              LOAD_SMALL_INT           4
+              BINARY_OP                6 (%)
+              LOAD_SMALL_INT           2
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       58 (to L4)
+              NOT_TAKEN
+
+ 81           LOAD_FAST_BORROW         3 (k2)
+              LOAD_GLOBAL             11 (_t1 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 65 (k3, k0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         2 (k1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         7 (ck)
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               12 (^)
+              STORE_FAST               3 (k2)
+
+ 82           LOAD_FAST_BORROW         5 (rk)
+              LOAD_ATTR               13 (append + NULL|self)
+              LOAD_FAST_BORROW         3 (k2)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD          230 (to L1)
+
+ 84   L4:     LOAD_FAST_BORROW         4 (k3)
+              LOAD_GLOBAL             11 (_t1 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (k0, k1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         3 (k2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         7 (ck)
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               12 (^)
+              STORE_FAST               4 (k3)
+
+ 85           LOAD_FAST_BORROW         5 (rk)
+              LOAD_ATTR               13 (append + NULL|self)
+              LOAD_FAST_BORROW         4 (k3)
+              CALL                     1
+              POP_TOP
+              EXTENDED_ARG             1
+              JUMP_BACKWARD          288 (to L1)
+
+ 72   L5:     END_FOR
+              POP_ITER
+
+ 86           LOAD_GLOBAL             15 (tuple + NULL)
+              LOAD_FAST_BORROW         5 (rk)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [7]   __annotate__  (file=sm4_custom.py) :: line 89, args 1, locals 1, stack 6, consts 4
+ 89           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('block')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [8]   decrypt_block  (file=sm4_custom.py) :: line 89, args 8, locals 8, stack 8, consts 7
+ 89           RESUME                   0
+
+ 91           LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         0 (block)
+              CALL                     1
+              LOAD_SMALL_INT          16
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+ 92           LOAD_GLOBAL              3 (ValueError + NULL)
+              LOAD_CONST               1 ('block must be 16 bytes')
+              CALL                     1
+              RAISE_VARARGS            1
+
+ 93   L1:     LOAD_GLOBAL              5 (_expand_key + NULL)
+              LOAD_GLOBAL              7 (bytes + NULL)
+              LOAD_FAST_BORROW         1 (key)
+              CALL                     1
+              CALL                     1
+              STORE_FAST               2 (rk)
+
+ 94           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               2 (slice(0, 4, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               3 (x0)
+
+ 95           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               4 (slice(4, 8, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               4 (x1)
+
+ 96           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               5 (slice(8, 12, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               5 (x2)
+
+ 97           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               6 (slice(12, 16, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               6 (x3)
+
+ 98           LOAD_GLOBAL             13 (range + NULL)
+              LOAD_SMALL_INT           0
+              LOAD_SMALL_INT          32
+              LOAD_SMALL_INT           4
+              CALL                     3
+              GET_ITER
+      L2:     FOR_ITER               211 (to L3)
+              STORE_FAST               7 (i)
+
+ 99           LOAD_FAST_BORROW         3 (x0)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 69 (x1, x2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         6 (x3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         2 (rk)
+              LOAD_SMALL_INT          31
+              LOAD_FAST_BORROW         7 (i)
+              BINARY_OP               10 (-)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               3 (x0)
+
+100           LOAD_FAST_BORROW         4 (x1)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (x2, x3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         3 (x0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         2 (rk)
+              LOAD_SMALL_INT          30
+              LOAD_FAST_BORROW         7 (i)
+              BINARY_OP               10 (-)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               4 (x1)
+
+101           LOAD_FAST_BORROW         5 (x2)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 99 (x3, x0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         4 (x1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         2 (rk)
+              LOAD_SMALL_INT          29
+              LOAD_FAST_BORROW         7 (i)
+              BINARY_OP               10 (-)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               5 (x2)
+
+102           LOAD_FAST_BORROW         6 (x3)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (x0, x1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         5 (x2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         2 (rk)
+              LOAD_SMALL_INT          28
+              LOAD_FAST_BORROW         7 (i)
+              BINARY_OP               10 (-)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               6 (x3)
+              JUMP_BACKWARD          213 (to L2)
+
+ 98   L3:     END_FOR
+              POP_ITER
+
+103           LOAD_FAST_BORROW         6 (x3)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              LOAD_FAST_BORROW         5 (x2)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              BINARY_OP                0 (+)
+
+104           LOAD_FAST_BORROW         4 (x1)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+
+103           BINARY_OP                0 (+)
+
+104           LOAD_FAST_BORROW         3 (x0)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+
+103           BINARY_OP                0 (+)
+              RETURN_VALUE
+
+
+### [9]   __annotate__  (file=sm4_custom.py) :: line 107, args 1, locals 1, stack 6, consts 4
+107           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('block')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [10]   encrypt_block  (file=sm4_custom.py) :: line 107, args 8, locals 8, stack 8, consts 7
+107           RESUME                   0
+
+108           LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         0 (block)
+              CALL                     1
+              LOAD_SMALL_INT          16
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+109           LOAD_GLOBAL              3 (ValueError + NULL)
+              LOAD_CONST               1 ('block must be 16 bytes')
+              CALL                     1
+              RAISE_VARARGS            1
+
+110   L1:     LOAD_GLOBAL              5 (_expand_key + NULL)
+              LOAD_GLOBAL              7 (bytes + NULL)
+              LOAD_FAST_BORROW         1 (key)
+              CALL                     1
+              CALL                     1
+              STORE_FAST               2 (rk)
+
+111           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               2 (slice(0, 4, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               3 (x0)
+
+112           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               4 (slice(4, 8, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               4 (x1)
+
+113           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               5 (slice(8, 12, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               5 (x2)
+
+114           LOAD_GLOBAL              8 (int)
+              LOAD_ATTR               11 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (block)
+              LOAD_CONST               6 (slice(12, 16, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              STORE_FAST               6 (x3)
+
+115           LOAD_GLOBAL             13 (range + NULL)
+              LOAD_SMALL_INT           0
+              LOAD_SMALL_INT          32
+              LOAD_SMALL_INT           4
+              CALL                     3
+              GET_ITER
+      L2:     FOR_ITER               200 (to L3)
+              STORE_FAST               7 (i)
+
+116           LOAD_FAST_BORROW         3 (x0)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 69 (x1, x2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         6 (x3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 39 (rk, i)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               3 (x0)
+
+117           LOAD_FAST_BORROW         4 (x1)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (x2, x3)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         3 (x0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 39 (rk, i)
+              LOAD_SMALL_INT           1
+              BINARY_OP                0 (+)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               4 (x1)
+
+118           LOAD_FAST_BORROW         5 (x2)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 99 (x3, x0)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         4 (x1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 39 (rk, i)
+              LOAD_SMALL_INT           2
+              BINARY_OP                0 (+)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               5 (x2)
+
+119           LOAD_FAST_BORROW         6 (x3)
+              LOAD_GLOBAL             15 (_t0 + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (x0, x1)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW         5 (x2)
+              BINARY_OP               12 (^)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 39 (rk, i)
+              LOAD_SMALL_INT           3
+              BINARY_OP                0 (+)
+              BINARY_OP               26 ([])
+              BINARY_OP               12 (^)
+              CALL                     1
+              BINARY_OP               25 (^=)
+              STORE_FAST               6 (x3)
+              JUMP_BACKWARD          202 (to L2)
+
+115   L3:     END_FOR
+              POP_ITER
+
+120           LOAD_FAST_BORROW         6 (x3)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              LOAD_FAST_BORROW         5 (x2)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+              BINARY_OP                0 (+)
+
+121           LOAD_FAST_BORROW         4 (x1)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+
+120           BINARY_OP                0 (+)
+
+121           LOAD_FAST_BORROW         3 (x0)
+              LOAD_ATTR               17 (to_bytes + NULL|self)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               3 ('big')
+              CALL                     2
+
+120           BINARY_OP                0 (+)
+              RETURN_VALUE
+
+
+### [11]   __annotate__  (file=sm4_custom.py) :: line 124, args 1, locals 1, stack 6, consts 4
+124           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [12]   decrypt_ecb  (file=<decrypt_ecb>) :: line 124, args 45, locals 46, stack 12, consts 35
+  --            MAKE_CELL               45 (rol32)
+
+ 124            RESUME                   0
+
+ 125            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (('Path',))
+                IMPORT_NAME              0 (pathlib)
+                IMPORT_FROM              1 (Path)
+                STORE_FAST               2 (Path)
+                POP_TOP
+
+ 126            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              2 (sys)
+                STORE_FAST               3 (_s_mod)
+
+ 127            LOAD_FAST_BORROW         3 (_s_mod)
+                LOAD_ATTR                6 (modules)
+                LOAD_GLOBAL              8 (__name__)
+                BINARY_OP               26 ([])
+                STORE_FAST               4 (_me)
+
+ 128            LOAD_GLOBAL             11 (bytes + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                STORE_FAST               5 (buf)
+
+ 129            LOAD_GLOBAL             13 (len + NULL)
+                LOAD_FAST_BORROW         5 (buf)
+                CALL                     1
+                STORE_FAST               6 (n)
+
+ 130            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST               3 ('_lib')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST               7 (lib)
+
+ 131            LOAD_FAST_BORROW         7 (lib)
+                EXTENDED_ARG             2
+                POP_JUMP_IF_NOT_NONE   592 (to L25)
+                NOT_TAKEN
+
+ 132            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              8 (ctypes)
+                STORE_FAST               8 (ctypes)
+
+ 133            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              9 (subprocess)
+                STORE_FAST               9 (subprocess)
+
+ 134            LOAD_FAST_BORROW         2 (Path)
+                PUSH_NULL
+                LOAD_GLOBAL             20 (__file__)
+                CALL                     1
+                LOAD_ATTR               23 (resolve + NULL|self)
+                CALL                     0
+                LOAD_ATTR               24 (parent)
+                LOAD_CONST               4 ('ikram_sm4_fast.c')
+                BINARY_OP               11 (/)
+                STORE_FAST              10 (src_path)
+
+ 135            LOAD_FAST_BORROW        10 (src_path)
+                LOAD_ATTR               27 (with_suffix + NULL|self)
+                LOAD_CONST               5 ('.so')
+                CALL                     1
+                STORE_FAST              11 (so_path)
+
+ 136            LOAD_CONST               6 ('// auto-generated fast pak cipher\n#include <stdint.h>\n#include <stddef.h>\nstatic const uint8_t SBOX[256] = { ')
+
+ 138            LOAD_CONST               7 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST               8 (<code object <genexpr> at 0x7aab491460, file "<decrypt_ecb>", line 15>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             30 (_S_BOX)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 136            BINARY_OP                0 (+)
+
+ 138            LOAD_CONST               9 (' };\nstatic const uint32_t FK[4] = { ')
+
+ 136            BINARY_OP                0 (+)
+
+ 139            LOAD_CONST               7 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST              10 (<code object <genexpr> at 0x7aab493cc0, file "<decrypt_ecb>", line 16>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             32 (_FK)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 136            BINARY_OP                0 (+)
+
+ 139            LOAD_CONST              11 (' };\nstatic const uint32_t CK[32] = { ')
+
+ 136            BINARY_OP                0 (+)
+
+ 140            LOAD_CONST               7 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST              12 (<code object <genexpr> at 0x7aab4929a0, file "<decrypt_ecb>", line 17>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             34 (_CK)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 136            BINARY_OP                0 (+)
+
+ 140            LOAD_CONST              13 (' };\nstatic inline uint32_t rotl(uint32_t x, int n){ return (x << n) | (x >> (32 - n)); }\nstatic inline uint32_t load_be(const uint8_t* p){ return ((uint32_t)p[0]<<24)|((uint32_t)p[1]<<16)|((uint32_t)p[2]<<8)|(uint32_t)p[3]; }\nstatic inline void store_be(uint8_t* p, uint32_t v){ p[0]=(uint8_t)(v>>24); p[1]=(uint8_t)(v>>16); p[2]=(uint8_t)(v>>8); p[3]=(uint8_t)v; }\nstatic inline uint32_t sb(uint32_t x){ return ((uint32_t)SBOX[(x>>24)&0xff]<<24)|((uint32_t)SBOX[(x>>16)&0xff]<<16)|((uint32_t)SBOX[(x>>8)&0xff]<<8)|(uint32_t)SBOX[x&0xff]; }\nstatic inline uint32_t t0(uint32_t x){ x = sb(x); return x ^ rotl(x,2) ^ rotl(x,10) ^ rotl(x,18) ^ rotl(x,24); }\nstatic inline uint32_t t1(uint32_t x){ x = sb(x); return x ^ rotl(x,13) ^ rotl(x,23); }\nstatic void expand(const uint8_t* key, uint32_t rk[32]){\n    uint32_t k0 = load_be(key) ^ FK[0];\n    uint32_t k1 = load_be(key+4) ^ FK[1];\n    uint32_t k2 = load_be(key+8) ^ FK[2];\n    uint32_t k3 = load_be(key+12) ^ FK[3];\n    for (int i = 0; i < 32; i++){\n        k0 ^= t1(k1 ^ k2 ^ k3 ^ CK[i]); rk[i] = k0;\n        k1 ^= t1(k2 ^ k3 ^ k0 ^ CK[++i]); rk[i] = k1;\n        k2 ^= t1(k3 ^ k0 ^ k1 ^ CK[++i]); rk[i] = k2;\n        k3 ^= t1(k0 ^ k1 ^ k2 ^ CK[++i]); rk[i] = k3;\n    }\n}\nstatic void crypt_block(const uint8_t* in, uint8_t* out, const uint32_t* rk){\n    uint32_t x0 = load_be(in);\n    uint32_t x1 = load_be(in+4);\n    uint32_t x2 = load_be(in+8);\n    uint32_t x3 = load_be(in+12);\n    for (int i = 0; i < 32; i += 4){\n        x0 ^= t0(x1 ^ x2 ^ x3 ^ rk[i]);\n        x1 ^= t0(x2 ^ x3 ^ x0 ^ rk[i+1]);\n        x2 ^= t0(x3 ^ x0 ^ x1 ^ rk[i+2]);\n        x3 ^= t0(x0 ^ x1 ^ x2 ^ rk[i+3]);\n    }\n    store_be(out, x3); store_be(out+4, x2); store_be(out+8, x1); store_be(out+12, x0);\n}\nvoid sm4_ecb(const uint8_t* key, const uint8_t* in, uint8_t* out, size_t len, int encrypt){\n    uint32_t rk[32];\n    expand(key, rk);\n    if (!encrypt){\n        for (int i = 0; i < 16; i++){ uint32_t tmp = rk[i]; rk[i] = rk[31-i]; rk[31-i] = tmp; }\n    }\n    for (size_t off = 0; off < len; off += 16){\n        crypt_block(in + off, out + off, rk);\n    }\n}')
+
+ 136            BINARY_OP                0 (+)
+                STORE_FAST              12 (csrc)
+
+ 182            NOP
+
+ 183    L1:     LOAD_FAST_BORROW        10 (src_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       22 (to L4)
+        L2:     NOT_TAKEN
+        L3:     LOAD_FAST_BORROW        10 (src_path)
+                LOAD_ATTR               39 (read_text + NULL|self)
+                CALL                     0
+                LOAD_FAST_BORROW        12 (csrc)
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE       18 (to L5)
+                NOT_TAKEN
+
+ 184    L4:     LOAD_FAST_BORROW        10 (src_path)
+                LOAD_ATTR               41 (write_text + NULL|self)
+                LOAD_FAST_BORROW        12 (csrc)
+                CALL                     1
+                POP_TOP
+
+ 185    L5:     LOAD_FAST_BORROW        11 (so_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                UNARY_NOT
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE        54 (to L8)
+        L6:     NOT_TAKEN
+        L7:     POP_TOP
+                LOAD_FAST_BORROW        11 (so_path)
+                LOAD_ATTR               43 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               44 (st_mtime)
+                LOAD_FAST_BORROW        10 (src_path)
+                LOAD_ATTR               43 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               44 (st_mtime)
+                COMPARE_OP               2 (<)
+        L8:     STORE_FAST              13 (need)
+
+ 186            LOAD_FAST_BORROW        13 (need)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      122 (to L23)
+        L9:     NOT_TAKEN
+
+ 187   L10:     LOAD_CONST              14 (False)
+                STORE_FAST              14 (built)
+
+ 188            LOAD_CONST              33 (('gcc', 'cc', 'clang'))
+                GET_ITER
+       L11:     FOR_ITER                94 (to L19)
+                STORE_FAST              15 (cc)
+
+ 189   L12:     NOP
+
+ 190   L13:     LOAD_FAST_BORROW         9 (subprocess)
+                LOAD_ATTR               47 (run + NULL|self)
+                LOAD_FAST_BORROW        15 (cc)
+                LOAD_CONST              15 ('-O2')
+                LOAD_CONST              16 ('-shared')
+                LOAD_CONST              17 ('-fPIC')
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        10 (src_path)
+                CALL                     1
+                LOAD_CONST              18 ('-o')
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        11 (so_path)
+                CALL                     1
+                BUILD_LIST               7
+                LOAD_CONST              19 (True)
+                LOAD_SMALL_INT         120
+                LOAD_CONST              20 (('capture_output', 'timeout'))
+                CALL_KW                  3
+                STORE_FAST              16 (r)
+
+ 191            LOAD_FAST_BORROW        16 (r)
+                LOAD_ATTR               50 (returncode)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       29 (to L18)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        11 (so_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE        5 (to L17)
+       L14:     NOT_TAKEN
+
+ 192   L15:     LOAD_CONST              19 (True)
+                STORE_FAST              14 (built)
+
+ 193   L16:     POP_TOP
+                JUMP_FORWARD             6 (to L20)
+
+ 191   L17:     JUMP_BACKWARD           94 (to L11)
+       L18:     JUMP_BACKWARD           96 (to L11)
+
+ 188   L19:     END_FOR
+                POP_ITER
+
+ 196   L20:     LOAD_FAST_BORROW        14 (built)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        12 (to L23)
+       L21:     NOT_TAKEN
+
+ 197   L22:     LOAD_GLOBAL             55 (OSError + NULL)
+                LOAD_CONST              21 ('no compiler')
+                CALL                     1
+                RAISE_VARARGS            1
+
+ 198   L23:     LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               57 (CDLL + NULL|self)
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        11 (so_path)
+                CALL                     1
+                CALL                     1
+                STORE_FAST               7 (lib)
+
+ 199            LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               60 (c_size_t)
+                LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               62 (c_int)
+                BUILD_LIST               5
+                LOAD_FAST_BORROW         7 (lib)
+                LOAD_ATTR               64 (sm4_ecb)
+                STORE_ATTR              33 (argtypes)
+
+ 200            LOAD_CONST               2 (None)
+                LOAD_FAST_BORROW         7 (lib)
+                LOAD_ATTR               64 (sm4_ecb)
+                STORE_ATTR              34 (restype)
+
+ 203   L24:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 116 (lib, _me)
+                STORE_ATTR              35 (_lib)
+
+ 204            LOAD_FAST_BORROW         7 (lib)
+                LOAD_CONST              14 (False)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        3 (to L25)
+                NOT_TAKEN
+
+ 205            LOAD_CONST               2 (None)
+                STORE_FAST               7 (lib)
+
+ 206   L25:     LOAD_FAST_BORROW         7 (lib)
+                POP_JUMP_IF_NONE        79 (to L26)
+                NOT_TAKEN
+
+ 207            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              8 (ctypes)
+                STORE_FAST               8 (ctypes)
+
+ 208            LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               73 (create_string_buffer + NULL|self)
+                LOAD_FAST_BORROW         6 (n)
+                CALL                     1
+                STORE_FAST              17 (out)
+
+ 209            LOAD_FAST_BORROW         7 (lib)
+                LOAD_ATTR               65 (sm4_ecb + NULL|self)
+                LOAD_GLOBAL             11 (bytes + NULL)
+                LOAD_FAST_BORROW         1 (key)
+                CALL                     1
+                LOAD_FAST_BORROW         8 (ctypes)
+                LOAD_ATTR               73 (create_string_buffer + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (buf, n)
+                CALL                     2
+                LOAD_FAST_BORROW        17 (out)
+                LOAD_FAST_BORROW         6 (n)
+                LOAD_SMALL_INT           0
+                CALL                     5
+                POP_TOP
+
+ 210            LOAD_FAST_BORROW        17 (out)
+                LOAD_ATTR               74 (raw)
+                RETURN_VALUE
+
+ 211   L26:     LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              22 ('_tbl')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              18 (tbl)
+
+ 212            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              23 ('_k')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              19 (kcache)
+
+ 213            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              24 ('_rkenc')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              20 (rkc)
+
+ 214            LOAD_FAST_BORROW        18 (tbl)
+                POP_JUMP_IF_NONE         9 (to L27)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        19 (kcache)
+                LOAD_FAST_BORROW         1 (key)
+                COMPARE_OP             119 (bool(!=))
+                EXTENDED_ARG             5
+                POP_JUMP_IF_FALSE     1331 (to L32)
+                NOT_TAKEN
+
+ 215   L27:     LOAD_GLOBAL             30 (_S_BOX)
+                STORE_FAST              21 (S)
+
+ 216            LOAD_GLOBAL             76 (_rol32)
+                STORE_DEREF             45 (rol32)
+
+ 217            LOAD_FAST_BORROW        45 (rol32)
+                BUILD_TUPLE              1
+                LOAD_CONST              25 (<code object L at 0x7aab4c0ff0, file "<decrypt_ecb>", line 94>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                STORE_FAST              22 (L)
+
+ 219            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              26 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              23 (T0)
+
+ 220            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              26 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              24 (T1)
+
+ 221            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              26 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              25 (T2)
+
+ 222            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              26 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              26 (T3)
+
+ 223            LOAD_GLOBAL             79 (range + NULL)
+                LOAD_CONST              26 (256)
+                CALL                     1
+                GET_ITER
+       L28:     FOR_ITER                77 (to L29)
+                STORE_FAST              27 (i)
+
+ 224            LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        27 (i)
+                BINARY_OP               26 ([])
+                STORE_FAST              28 (s)
+
+ 225            LOAD_FAST_BORROW        22 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        28 (s)
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        27 (i)
+                STORE_SUBSCR
+
+ 226            LOAD_FAST_BORROW        22 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        28 (s)
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        27 (i)
+                STORE_SUBSCR
+
+ 227            LOAD_FAST_BORROW        22 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        28 (s)
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        27 (i)
+                STORE_SUBSCR
+
+ 228            LOAD_FAST_BORROW        22 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        28 (s)
+                CALL                     1
+                LOAD_FAST_BORROW        26 (T3)
+                LOAD_FAST_BORROW        27 (i)
+                STORE_SUBSCR
+                JUMP_BACKWARD           79 (to L28)
+
+ 223   L29:     END_FOR
+                POP_ITER
+
+ 229            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_SMALL_INT          32
+                BINARY_OP                5 (*)
+                STORE_FAST              16 (r)
+
+ 230            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              27 (slice(0, 4, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              28 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              29 (k0)
+
+ 231            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              29 (slice(4, 8, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              28 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           1
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              30 (k1)
+
+ 232            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              30 (slice(8, 12, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              28 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           2
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              31 (k2)
+
+ 233            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              31 (slice(12, 16, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              28 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           3
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              32 (k3)
+
+ 234            LOAD_GLOBAL             34 (_CK)
+                STORE_FAST              33 (CK)
+
+ 235            LOAD_SMALL_INT           0
+                STORE_FAST              27 (i)
+
+ 236   L30:     LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT          32
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             3
+                POP_JUMP_IF_FALSE      917 (to L31)
+                NOT_TAKEN
+
+ 237            LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        31 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        32 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        31 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        32 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        31 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        32 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        31 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        32 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              34 (x)
+
+ 238            LOAD_FAST_BORROW        34 (x)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              34 (x)
+
+ 239            LOAD_FAST_BORROW        29 (k0)
+                LOAD_FAST_BORROW        34 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              29 (k0)
+                LOAD_FAST_BORROW        29 (k0)
+                LOAD_FAST_BORROW        16 (r)
+                LOAD_FAST_BORROW        27 (i)
+                STORE_SUBSCR
+
+ 240            LOAD_FAST_BORROW        31 (k2)
+                LOAD_FAST_BORROW        32 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        29 (k0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (a)
+
+ 241            LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              34 (x)
+
+ 242            LOAD_FAST_BORROW        34 (x)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              34 (x)
+
+ 243            LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        34 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              30 (k1)
+                LOAD_FAST_BORROW        30 (k1)
+                LOAD_FAST_BORROW        16 (r)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 244            LOAD_FAST_BORROW        32 (k3)
+                LOAD_FAST_BORROW        29 (k0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        30 (k1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (a)
+
+ 245            LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              34 (x)
+
+ 246            LOAD_FAST_BORROW        34 (x)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              34 (x)
+
+ 247            LOAD_FAST_BORROW        31 (k2)
+                LOAD_FAST_BORROW        34 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              31 (k2)
+                LOAD_FAST_BORROW        31 (k2)
+                LOAD_FAST_BORROW        16 (r)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 248            LOAD_FAST_BORROW        29 (k0)
+                LOAD_FAST_BORROW        30 (k1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        31 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (CK)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (a)
+
+ 249            LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        21 (S)
+                LOAD_FAST_BORROW        35 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              34 (x)
+
+ 250            LOAD_FAST_BORROW        34 (x)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              45 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        34 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              34 (x)
+
+ 251            LOAD_FAST_BORROW        32 (k3)
+                LOAD_FAST_BORROW        34 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              32 (k3)
+                LOAD_FAST_BORROW        32 (k3)
+                LOAD_FAST_BORROW        16 (r)
+                LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 252            LOAD_FAST_BORROW        27 (i)
+                LOAD_SMALL_INT           4
+                BINARY_OP               13 (+=)
+                STORE_FAST              27 (i)
+                EXTENDED_ARG             3
+                JUMP_BACKWARD          924 (to L30)
+
+ 253   L31:     LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        26 (T3)
+                BUILD_TUPLE              4
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              42 (_tbl)
+
+ 254            LOAD_FAST_BORROW        16 (r)
+                LOAD_CONST               2 (None)
+                LOAD_CONST               2 (None)
+                LOAD_CONST              34 (-1)
+                BUILD_SLICE              3
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              43 (_rkdec)
+
+ 255            LOAD_GLOBAL             89 (list + NULL)
+                LOAD_FAST_BORROW        16 (r)
+                CALL                     1
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              45 (_rkenc)
+
+ 256            LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (key, _me)
+                STORE_ATTR              46 (_k)
+
+ 257   L32:     LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME             47 (struct)
+                STORE_FAST              36 (_s)
+
+ 258            LOAD_GLOBAL             96 (encrypt)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        14 (to L33)
+                NOT_TAKEN
+
+ 259            LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               86 (_rkdec)
+                STORE_FAST              37 (rk)
+                JUMP_FORWARD            12 (to L34)
+
+ 261   L33:     LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               90 (_rkenc)
+                STORE_FAST              37 (rk)
+
+ 262   L34:     LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               84 (_tbl)
+                UNPACK_SEQUENCE          4
+                STORE_FAST              23 (T0)
+                STORE_FAST              24 (T1)
+                STORE_FAST              25 (T2)
+                STORE_FAST              26 (T3)
+
+ 263            LOAD_GLOBAL             99 (bytearray + NULL)
+                LOAD_FAST_BORROW         6 (n)
+                CALL                     1
+                STORE_FAST              17 (out)
+
+ 264            LOAD_SMALL_INT           0
+                STORE_FAST              38 (idx)
+
+ 265   L35:     LOAD_FAST_BORROW        38 (idx)
+                LOAD_FAST_BORROW         6 (n)
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      623 (to L38)
+                NOT_TAKEN
+
+ 266            LOAD_FAST_BORROW        36 (_s)
+                LOAD_ATTR              101 (unpack_from + NULL|self)
+                LOAD_CONST              32 ('>IIII')
+                LOAD_FAST_BORROW         5 (buf)
+                LOAD_FAST_BORROW        38 (idx)
+                CALL                     3
+                UNPACK_SEQUENCE          4
+                STORE_FAST              39 (x0)
+                STORE_FAST              40 (x1)
+                STORE_FAST              41 (x2)
+                STORE_FAST              42 (x3)
+
+ 267            LOAD_SMALL_INT           0
+                STORE_FAST              43 (j)
+
+ 268   L36:     LOAD_FAST_BORROW        43 (j)
+                LOAD_SMALL_INT          32
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      554 (to L37)
+                NOT_TAKEN
+
+ 269            LOAD_FAST_BORROW        40 (x1)
+                LOAD_FAST_BORROW        41 (x2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        42 (x3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        37 (rk)
+                LOAD_FAST_BORROW        43 (j)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              44 (t)
+
+ 270            LOAD_FAST_BORROW        39 (x0)
+                LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T3)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              39 (x0)
+
+ 271            LOAD_FAST_BORROW        41 (x2)
+                LOAD_FAST_BORROW        42 (x3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        39 (x0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        37 (rk)
+                LOAD_FAST_BORROW        43 (j)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              44 (t)
+
+ 272            LOAD_FAST_BORROW        40 (x1)
+                LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T3)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              40 (x1)
+
+ 273            LOAD_FAST_BORROW        42 (x3)
+                LOAD_FAST_BORROW        39 (x0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        40 (x1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        37 (rk)
+                LOAD_FAST_BORROW        43 (j)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              44 (t)
+
+ 274            LOAD_FAST_BORROW        41 (x2)
+                LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T3)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              41 (x2)
+
+ 275            LOAD_FAST_BORROW        39 (x0)
+                LOAD_FAST_BORROW        40 (x1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        41 (x2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        37 (rk)
+                LOAD_FAST_BORROW        43 (j)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              44 (t)
+
+ 276            LOAD_FAST_BORROW        42 (x3)
+                LOAD_FAST_BORROW        23 (T0)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        24 (T1)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        25 (T2)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T3)
+                LOAD_FAST_BORROW        44 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              42 (x3)
+
+ 277            LOAD_FAST_BORROW        43 (j)
+                LOAD_SMALL_INT           4
+                BINARY_OP               13 (+=)
+                STORE_FAST              43 (j)
+                EXTENDED_ARG             2
+                JUMP_BACKWARD          561 (to L36)
+
+ 278   L37:     LOAD_FAST_BORROW        36 (_s)
+                LOAD_ATTR              103 (pack_into + NULL|self)
+                LOAD_CONST              32 ('>IIII')
+                LOAD_FAST_BORROW        17 (out)
+                LOAD_FAST_BORROW        38 (idx)
+                LOAD_FAST_BORROW        42 (x3)
+                LOAD_FAST_BORROW        41 (x2)
+                LOAD_FAST_BORROW        40 (x1)
+                LOAD_FAST_BORROW        39 (x0)
+                CALL                     7
+                POP_TOP
+
+ 279            LOAD_FAST_BORROW        38 (idx)
+                LOAD_SMALL_INT          16
+                BINARY_OP               13 (+=)
+                STORE_FAST              38 (idx)
+                EXTENDED_ARG             2
+                JUMP_BACKWARD          630 (to L35)
+
+ 280   L38:     LOAD_GLOBAL             11 (bytes + NULL)
+                LOAD_FAST_BORROW        17 (out)
+                CALL                     1
+                RETURN_VALUE
+
+  --   L39:     PUSH_EXC_INFO
+
+ 194            LOAD_GLOBAL             52 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L41)
+                NOT_TAKEN
+                POP_TOP
+
+ 195   L40:     POP_EXCEPT
+                EXTENDED_ARG             9
+                JUMP_BACKWARD         2436 (to L11)
+
+ 194   L41:     RERAISE                  0
+
+  --   L42:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L43:     PUSH_EXC_INFO
+
+ 201            LOAD_GLOBAL             52 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        7 (to L45)
+                NOT_TAKEN
+                POP_TOP
+
+ 202            LOAD_CONST              14 (False)
+                STORE_FAST               7 (lib)
+       L44:     POP_EXCEPT
+                EXTENDED_ARG             8
+                JUMP_BACKWARD_NO_INTERRUPT 2224 (to L24)
+
+ 201   L45:     RERAISE                  0
+
+  --   L46:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L43 [0]
+  L3 to L6 -> L43 [0]
+  L7 to L9 -> L43 [0]
+  L10 to L12 -> L43 [0]
+  L13 to L14 -> L39 [1]
+  L15 to L16 -> L39 [1]
+  L16 to L21 -> L43 [0]
+  L22 to L24 -> L43 [0]
+  L39 to L40 -> L42 [2] lasti
+  L40 to L41 -> L43 [0]
+  L41 to L42 -> L42 [2] lasti
+  L42 to L43 -> L43 [0]
+  L43 to L44 -> L46 [1] lasti
+  L45 to L46 -> L46 [1] lasti
+
+
+### [13]     <genexpr>  (file=<decrypt_ecb>) :: line 15, args 2, locals 2, stack 4, consts 1
+  15           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (str + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [14]     <genexpr>  (file=<decrypt_ecb>) :: line 16, args 2, locals 2, stack 4, consts 1
+  16           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (hex + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [15]     <genexpr>  (file=<decrypt_ecb>) :: line 17, args 2, locals 2, stack 4, consts 1
+  17           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (hex + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [16]     L  (file=<decrypt_ecb>) :: line 94, args 1, locals 2, stack 5, consts 1
+  --           COPY_FREE_VARS           1
+
+  94           RESUME                   0
+
+  95           LOAD_FAST_BORROW         0 (y)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT           2
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          10
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          18
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          24
+               CALL                     2
+               BINARY_OP               12 (^)
+               RETURN_VALUE
+
+
+### [17]   __annotate__  (file=sm4_custom.py) :: line 133, args 1, locals 1, stack 6, consts 4
+133           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [18]   encrypt_ecb  (file=<encrypt_ecb>) :: line 133, args 46, locals 47, stack 12, consts 36
+  --            MAKE_CELL               46 (rol32)
+
+ 133            RESUME                   0
+
+ 134            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (('Path',))
+                IMPORT_NAME              0 (pathlib)
+                IMPORT_FROM              1 (Path)
+                STORE_FAST               2 (Path)
+                POP_TOP
+
+ 135            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              2 (sys)
+                STORE_FAST               3 (_s_mod)
+
+ 136            LOAD_FAST_BORROW         3 (_s_mod)
+                LOAD_ATTR                6 (modules)
+                LOAD_GLOBAL              8 (__name__)
+                BINARY_OP               26 ([])
+                STORE_FAST               4 (_me)
+
+ 137            LOAD_GLOBAL             11 (len + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                UNARY_NEGATIVE
+                LOAD_SMALL_INT          16
+                BINARY_OP                6 (%)
+                STORE_FAST               5 (pad)
+
+ 138            LOAD_GLOBAL             13 (bytes + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                LOAD_CONST               3 (b'\x00')
+                LOAD_FAST_BORROW         5 (pad)
+                BINARY_OP                5 (*)
+                BINARY_OP                0 (+)
+                STORE_FAST               6 (buf)
+
+ 139            LOAD_GLOBAL             11 (len + NULL)
+                LOAD_FAST_BORROW         6 (buf)
+                CALL                     1
+                STORE_FAST               7 (n)
+
+ 140            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST               4 ('_lib')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST               8 (lib)
+
+ 141            LOAD_FAST_BORROW         8 (lib)
+                EXTENDED_ARG             2
+                POP_JUMP_IF_NOT_NONE   592 (to L25)
+                NOT_TAKEN
+
+ 142            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              8 (ctypes)
+                STORE_FAST               9 (ctypes)
+
+ 143            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              9 (subprocess)
+                STORE_FAST              10 (subprocess)
+
+ 144            LOAD_FAST_BORROW         2 (Path)
+                PUSH_NULL
+                LOAD_GLOBAL             20 (__file__)
+                CALL                     1
+                LOAD_ATTR               23 (resolve + NULL|self)
+                CALL                     0
+                LOAD_ATTR               24 (parent)
+                LOAD_CONST               5 ('ikram_sm4_fast.c')
+                BINARY_OP               11 (/)
+                STORE_FAST              11 (src_path)
+
+ 145            LOAD_FAST_BORROW        11 (src_path)
+                LOAD_ATTR               27 (with_suffix + NULL|self)
+                LOAD_CONST               6 ('.so')
+                CALL                     1
+                STORE_FAST              12 (so_path)
+
+ 146            LOAD_CONST               7 ('// auto-generated fast pak cipher\n#include <stdint.h>\n#include <stddef.h>\nstatic const uint8_t SBOX[256] = { ')
+
+ 148            LOAD_CONST               8 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST               9 (<code object <genexpr> at 0x7aab493660, file "<encrypt_ecb>", line 16>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             30 (_S_BOX)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 146            BINARY_OP                0 (+)
+
+ 148            LOAD_CONST              10 (' };\nstatic const uint32_t FK[4] = { ')
+
+ 146            BINARY_OP                0 (+)
+
+ 149            LOAD_CONST               8 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST              11 (<code object <genexpr> at 0x7aab493770, file "<encrypt_ecb>", line 17>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             32 (_FK)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 146            BINARY_OP                0 (+)
+
+ 149            LOAD_CONST              12 (' };\nstatic const uint32_t CK[32] = { ')
+
+ 146            BINARY_OP                0 (+)
+
+ 150            LOAD_CONST               8 (', ')
+                LOAD_ATTR               29 (join + NULL|self)
+                LOAD_CONST              13 (<code object <genexpr> at 0x7aab493880, file "<encrypt_ecb>", line 18>)
+                MAKE_FUNCTION
+                LOAD_GLOBAL             34 (_CK)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+
+ 146            BINARY_OP                0 (+)
+
+ 150            LOAD_CONST              14 (' };\nstatic inline uint32_t rotl(uint32_t x, int n){ return (x << n) | (x >> (32 - n)); }\nstatic inline uint32_t load_be(const uint8_t* p){ return ((uint32_t)p[0]<<24)|((uint32_t)p[1]<<16)|((uint32_t)p[2]<<8)|(uint32_t)p[3]; }\nstatic inline void store_be(uint8_t* p, uint32_t v){ p[0]=(uint8_t)(v>>24); p[1]=(uint8_t)(v>>16); p[2]=(uint8_t)(v>>8); p[3]=(uint8_t)v; }\nstatic inline uint32_t sb(uint32_t x){ return ((uint32_t)SBOX[(x>>24)&0xff]<<24)|((uint32_t)SBOX[(x>>16)&0xff]<<16)|((uint32_t)SBOX[(x>>8)&0xff]<<8)|(uint32_t)SBOX[x&0xff]; }\nstatic inline uint32_t t0(uint32_t x){ x = sb(x); return x ^ rotl(x,2) ^ rotl(x,10) ^ rotl(x,18) ^ rotl(x,24); }\nstatic inline uint32_t t1(uint32_t x){ x = sb(x); return x ^ rotl(x,13) ^ rotl(x,23); }\nstatic void expand(const uint8_t* key, uint32_t rk[32]){\n    uint32_t k0 = load_be(key) ^ FK[0];\n    uint32_t k1 = load_be(key+4) ^ FK[1];\n    uint32_t k2 = load_be(key+8) ^ FK[2];\n    uint32_t k3 = load_be(key+12) ^ FK[3];\n    for (int i = 0; i < 32; i++){\n        k0 ^= t1(k1 ^ k2 ^ k3 ^ CK[i]); rk[i] = k0;\n        k1 ^= t1(k2 ^ k3 ^ k0 ^ CK[++i]); rk[i] = k1;\n        k2 ^= t1(k3 ^ k0 ^ k1 ^ CK[++i]); rk[i] = k2;\n        k3 ^= t1(k0 ^ k1 ^ k2 ^ CK[++i]); rk[i] = k3;\n    }\n}\nstatic void crypt_block(const uint8_t* in, uint8_t* out, const uint32_t* rk){\n    uint32_t x0 = load_be(in);\n    uint32_t x1 = load_be(in+4);\n    uint32_t x2 = load_be(in+8);\n    uint32_t x3 = load_be(in+12);\n    for (int i = 0; i < 32; i += 4){\n        x0 ^= t0(x1 ^ x2 ^ x3 ^ rk[i]);\n        x1 ^= t0(x2 ^ x3 ^ x0 ^ rk[i+1]);\n        x2 ^= t0(x3 ^ x0 ^ x1 ^ rk[i+2]);\n        x3 ^= t0(x0 ^ x1 ^ x2 ^ rk[i+3]);\n    }\n    store_be(out, x3); store_be(out+4, x2); store_be(out+8, x1); store_be(out+12, x0);\n}\nvoid sm4_ecb(const uint8_t* key, const uint8_t* in, uint8_t* out, size_t len, int encrypt){\n    uint32_t rk[32];\n    expand(key, rk);\n    if (!encrypt){\n        for (int i = 0; i < 16; i++){ uint32_t tmp = rk[i]; rk[i] = rk[31-i]; rk[31-i] = tmp; }\n    }\n    for (size_t off = 0; off < len; off += 16){\n        crypt_block(in + off, out + off, rk);\n    }\n}')
+
+ 146            BINARY_OP                0 (+)
+                STORE_FAST              13 (csrc)
+
+ 192            NOP
+
+ 193    L1:     LOAD_FAST_BORROW        11 (src_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       22 (to L4)
+        L2:     NOT_TAKEN
+        L3:     LOAD_FAST_BORROW        11 (src_path)
+                LOAD_ATTR               39 (read_text + NULL|self)
+                CALL                     0
+                LOAD_FAST_BORROW        13 (csrc)
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE       18 (to L5)
+                NOT_TAKEN
+
+ 194    L4:     LOAD_FAST_BORROW        11 (src_path)
+                LOAD_ATTR               41 (write_text + NULL|self)
+                LOAD_FAST_BORROW        13 (csrc)
+                CALL                     1
+                POP_TOP
+
+ 195    L5:     LOAD_FAST_BORROW        12 (so_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                UNARY_NOT
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE        54 (to L8)
+        L6:     NOT_TAKEN
+        L7:     POP_TOP
+                LOAD_FAST_BORROW        12 (so_path)
+                LOAD_ATTR               43 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               44 (st_mtime)
+                LOAD_FAST_BORROW        11 (src_path)
+                LOAD_ATTR               43 (stat + NULL|self)
+                CALL                     0
+                LOAD_ATTR               44 (st_mtime)
+                COMPARE_OP               2 (<)
+        L8:     STORE_FAST              14 (need)
+
+ 196            LOAD_FAST_BORROW        14 (need)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      122 (to L23)
+        L9:     NOT_TAKEN
+
+ 197   L10:     LOAD_CONST              15 (False)
+                STORE_FAST              15 (built)
+
+ 198            LOAD_CONST              34 (('gcc', 'cc', 'clang'))
+                GET_ITER
+       L11:     FOR_ITER                94 (to L19)
+                STORE_FAST              16 (cc)
+
+ 199   L12:     NOP
+
+ 200   L13:     LOAD_FAST_BORROW        10 (subprocess)
+                LOAD_ATTR               47 (run + NULL|self)
+                LOAD_FAST_BORROW        16 (cc)
+                LOAD_CONST              16 ('-O2')
+                LOAD_CONST              17 ('-shared')
+                LOAD_CONST              18 ('-fPIC')
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        11 (src_path)
+                CALL                     1
+                LOAD_CONST              19 ('-o')
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        12 (so_path)
+                CALL                     1
+                BUILD_LIST               7
+                LOAD_CONST              20 (True)
+                LOAD_SMALL_INT         120
+                LOAD_CONST              21 (('capture_output', 'timeout'))
+                CALL_KW                  3
+                STORE_FAST              17 (r)
+
+ 201            LOAD_FAST_BORROW        17 (r)
+                LOAD_ATTR               50 (returncode)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       29 (to L18)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        12 (so_path)
+                LOAD_ATTR               37 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE        5 (to L17)
+       L14:     NOT_TAKEN
+
+ 202   L15:     LOAD_CONST              20 (True)
+                STORE_FAST              15 (built)
+
+ 203   L16:     POP_TOP
+                JUMP_FORWARD             6 (to L20)
+
+ 201   L17:     JUMP_BACKWARD           94 (to L11)
+       L18:     JUMP_BACKWARD           96 (to L11)
+
+ 198   L19:     END_FOR
+                POP_ITER
+
+ 206   L20:     LOAD_FAST_BORROW        15 (built)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        12 (to L23)
+       L21:     NOT_TAKEN
+
+ 207   L22:     LOAD_GLOBAL             55 (OSError + NULL)
+                LOAD_CONST              22 ('no compiler')
+                CALL                     1
+                RAISE_VARARGS            1
+
+ 208   L23:     LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               57 (CDLL + NULL|self)
+                LOAD_GLOBAL             49 (str + NULL)
+                LOAD_FAST_BORROW        12 (so_path)
+                CALL                     1
+                CALL                     1
+                STORE_FAST               8 (lib)
+
+ 209            LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               58 (c_char_p)
+                LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               60 (c_size_t)
+                LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               62 (c_int)
+                BUILD_LIST               5
+                LOAD_FAST_BORROW         8 (lib)
+                LOAD_ATTR               64 (sm4_ecb)
+                STORE_ATTR              33 (argtypes)
+
+ 210            LOAD_CONST               2 (None)
+                LOAD_FAST_BORROW         8 (lib)
+                LOAD_ATTR               64 (sm4_ecb)
+                STORE_ATTR              34 (restype)
+
+ 213   L24:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 132 (lib, _me)
+                STORE_ATTR              35 (_lib)
+
+ 214            LOAD_FAST_BORROW         8 (lib)
+                LOAD_CONST              15 (False)
+                IS_OP                    0 (is)
+                POP_JUMP_IF_FALSE        3 (to L25)
+                NOT_TAKEN
+
+ 215            LOAD_CONST               2 (None)
+                STORE_FAST               8 (lib)
+
+ 216   L25:     LOAD_FAST_BORROW         8 (lib)
+                POP_JUMP_IF_NONE        79 (to L26)
+                NOT_TAKEN
+
+ 217            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME              8 (ctypes)
+                STORE_FAST               9 (ctypes)
+
+ 218            LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               73 (create_string_buffer + NULL|self)
+                LOAD_FAST_BORROW         7 (n)
+                CALL                     1
+                STORE_FAST              18 (out)
+
+ 219            LOAD_FAST_BORROW         8 (lib)
+                LOAD_ATTR               65 (sm4_ecb + NULL|self)
+                LOAD_GLOBAL             13 (bytes + NULL)
+                LOAD_FAST_BORROW         1 (key)
+                CALL                     1
+                LOAD_FAST_BORROW         9 (ctypes)
+                LOAD_ATTR               73 (create_string_buffer + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 103 (buf, n)
+                CALL                     2
+                LOAD_FAST_BORROW        18 (out)
+                LOAD_FAST_BORROW         7 (n)
+                LOAD_SMALL_INT           1
+                CALL                     5
+                POP_TOP
+
+ 220            LOAD_FAST_BORROW        18 (out)
+                LOAD_ATTR               74 (raw)
+                RETURN_VALUE
+
+ 221   L26:     LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              23 ('_tbl')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              19 (tbl)
+
+ 222            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              24 ('_k')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              20 (kcache)
+
+ 223            LOAD_GLOBAL             15 (getattr + NULL)
+                LOAD_FAST_BORROW         4 (_me)
+                LOAD_CONST              25 ('_rkenc')
+                LOAD_CONST               2 (None)
+                CALL                     3
+                STORE_FAST              21 (rkc)
+
+ 224            LOAD_FAST_BORROW        19 (tbl)
+                POP_JUMP_IF_NONE         9 (to L27)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        20 (kcache)
+                LOAD_FAST_BORROW         1 (key)
+                COMPARE_OP             119 (bool(!=))
+                EXTENDED_ARG             5
+                POP_JUMP_IF_FALSE     1331 (to L32)
+                NOT_TAKEN
+
+ 225   L27:     LOAD_GLOBAL             30 (_S_BOX)
+                STORE_FAST              22 (S)
+
+ 226            LOAD_GLOBAL             76 (_rol32)
+                STORE_DEREF             46 (rol32)
+
+ 227            LOAD_FAST_BORROW        46 (rol32)
+                BUILD_TUPLE              1
+                LOAD_CONST              26 (<code object L at 0x7aab4c1290, file "<encrypt_ecb>", line 95>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                STORE_FAST              23 (L)
+
+ 229            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              27 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              24 (T0)
+
+ 230            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              27 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              25 (T1)
+
+ 231            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              27 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              26 (T2)
+
+ 232            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_CONST              27 (256)
+                BINARY_OP                5 (*)
+                STORE_FAST              27 (T3)
+
+ 233            LOAD_GLOBAL             79 (range + NULL)
+                LOAD_CONST              27 (256)
+                CALL                     1
+                GET_ITER
+       L28:     FOR_ITER                77 (to L29)
+                STORE_FAST              28 (i)
+
+ 234            LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        28 (i)
+                BINARY_OP               26 ([])
+                STORE_FAST              29 (s)
+
+ 235            LOAD_FAST_BORROW        23 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        29 (s)
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        28 (i)
+                STORE_SUBSCR
+
+ 236            LOAD_FAST_BORROW        23 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        29 (s)
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        28 (i)
+                STORE_SUBSCR
+
+ 237            LOAD_FAST_BORROW        23 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        29 (s)
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                CALL                     1
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        28 (i)
+                STORE_SUBSCR
+
+ 238            LOAD_FAST_BORROW        23 (L)
+                PUSH_NULL
+                LOAD_FAST_BORROW        29 (s)
+                CALL                     1
+                LOAD_FAST_BORROW        27 (T3)
+                LOAD_FAST_BORROW        28 (i)
+                STORE_SUBSCR
+                JUMP_BACKWARD           79 (to L28)
+
+ 233   L29:     END_FOR
+                POP_ITER
+
+ 239            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                LOAD_SMALL_INT          32
+                BINARY_OP                5 (*)
+                STORE_FAST              17 (r)
+
+ 240            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              28 (slice(0, 4, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              29 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              30 (k0)
+
+ 241            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              30 (slice(4, 8, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              29 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           1
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              31 (k1)
+
+ 242            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              31 (slice(8, 12, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              29 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           2
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              32 (k2)
+
+ 243            LOAD_GLOBAL             80 (int)
+                LOAD_ATTR               83 (from_bytes + NULL|self)
+                LOAD_FAST_BORROW         1 (key)
+                LOAD_CONST              32 (slice(12, 16, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST              29 ('big')
+                CALL                     2
+                LOAD_GLOBAL             32 (_FK)
+                LOAD_SMALL_INT           3
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              33 (k3)
+
+ 244            LOAD_GLOBAL             34 (_CK)
+                STORE_FAST              34 (CK)
+
+ 245            LOAD_SMALL_INT           0
+                STORE_FAST              28 (i)
+
+ 246   L30:     LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT          32
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             3
+                POP_JUMP_IF_FALSE      917 (to L31)
+                NOT_TAKEN
+
+ 247            LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        32 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        32 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        32 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        32 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        33 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              35 (x)
+
+ 248            LOAD_FAST_BORROW        35 (x)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (x)
+
+ 249            LOAD_FAST_BORROW        30 (k0)
+                LOAD_FAST_BORROW        35 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              30 (k0)
+                LOAD_FAST_BORROW        30 (k0)
+                LOAD_FAST_BORROW        17 (r)
+                LOAD_FAST_BORROW        28 (i)
+                STORE_SUBSCR
+
+ 250            LOAD_FAST_BORROW        32 (k2)
+                LOAD_FAST_BORROW        33 (k3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        30 (k0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              36 (a)
+
+ 251            LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              35 (x)
+
+ 252            LOAD_FAST_BORROW        35 (x)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (x)
+
+ 253            LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        35 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              31 (k1)
+                LOAD_FAST_BORROW        31 (k1)
+                LOAD_FAST_BORROW        17 (r)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 254            LOAD_FAST_BORROW        33 (k3)
+                LOAD_FAST_BORROW        30 (k0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        31 (k1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              36 (a)
+
+ 255            LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              35 (x)
+
+ 256            LOAD_FAST_BORROW        35 (x)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (x)
+
+ 257            LOAD_FAST_BORROW        32 (k2)
+                LOAD_FAST_BORROW        35 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              32 (k2)
+                LOAD_FAST_BORROW        32 (k2)
+                LOAD_FAST_BORROW        17 (r)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 258            LOAD_FAST_BORROW        30 (k0)
+                LOAD_FAST_BORROW        31 (k1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        32 (k2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        34 (CK)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              36 (a)
+
+ 259            LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          24
+                BINARY_OP                3 (<<)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT          16
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                LOAD_SMALL_INT           8
+                BINARY_OP                3 (<<)
+                BINARY_OP                7 (|)
+                LOAD_FAST_BORROW        22 (S)
+                LOAD_FAST_BORROW        36 (a)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP                7 (|)
+                STORE_FAST              35 (x)
+
+ 260            LOAD_FAST_BORROW        35 (x)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          13
+                CALL                     2
+                BINARY_OP               12 (^)
+                LOAD_DEREF              46 (rol32)
+                PUSH_NULL
+                LOAD_FAST_BORROW        35 (x)
+                LOAD_SMALL_INT          23
+                CALL                     2
+                BINARY_OP               12 (^)
+                STORE_FAST              35 (x)
+
+ 261            LOAD_FAST_BORROW        33 (k3)
+                LOAD_FAST_BORROW        35 (x)
+                BINARY_OP               25 (^=)
+                STORE_FAST              33 (k3)
+                LOAD_FAST_BORROW        33 (k3)
+                LOAD_FAST_BORROW        17 (r)
+                LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                STORE_SUBSCR
+
+ 262            LOAD_FAST_BORROW        28 (i)
+                LOAD_SMALL_INT           4
+                BINARY_OP               13 (+=)
+                STORE_FAST              28 (i)
+                EXTENDED_ARG             3
+                JUMP_BACKWARD          924 (to L30)
+
+ 263   L31:     LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        27 (T3)
+                BUILD_TUPLE              4
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              42 (_tbl)
+
+ 264            LOAD_FAST_BORROW        17 (r)
+                LOAD_CONST               2 (None)
+                LOAD_CONST               2 (None)
+                LOAD_CONST              35 (-1)
+                BUILD_SLICE              3
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              43 (_rkdec)
+
+ 265            LOAD_GLOBAL             89 (list + NULL)
+                LOAD_FAST_BORROW        17 (r)
+                CALL                     1
+                LOAD_FAST_BORROW         4 (_me)
+                STORE_ATTR              45 (_rkenc)
+
+ 266            LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (key, _me)
+                STORE_ATTR              46 (_k)
+
+ 267   L32:     LOAD_SMALL_INT           0
+                LOAD_CONST               2 (None)
+                IMPORT_NAME             47 (struct)
+                STORE_FAST              37 (_s)
+
+ 268            LOAD_GLOBAL             96 (encrypt)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        14 (to L33)
+                NOT_TAKEN
+
+ 269            LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               86 (_rkdec)
+                STORE_FAST              38 (rk)
+                JUMP_FORWARD            12 (to L34)
+
+ 271   L33:     LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               90 (_rkenc)
+                STORE_FAST              38 (rk)
+
+ 272   L34:     LOAD_FAST_BORROW         4 (_me)
+                LOAD_ATTR               84 (_tbl)
+                UNPACK_SEQUENCE          4
+                STORE_FAST              24 (T0)
+                STORE_FAST              25 (T1)
+                STORE_FAST              26 (T2)
+                STORE_FAST              27 (T3)
+
+ 273            LOAD_GLOBAL             99 (bytearray + NULL)
+                LOAD_FAST_BORROW         7 (n)
+                CALL                     1
+                STORE_FAST              18 (out)
+
+ 274            LOAD_SMALL_INT           0
+                STORE_FAST              39 (idx)
+
+ 275   L35:     LOAD_FAST_BORROW        39 (idx)
+                LOAD_FAST_BORROW         7 (n)
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      623 (to L38)
+                NOT_TAKEN
+
+ 276            LOAD_FAST_BORROW        37 (_s)
+                LOAD_ATTR              101 (unpack_from + NULL|self)
+                LOAD_CONST              33 ('>IIII')
+                LOAD_FAST_BORROW         6 (buf)
+                LOAD_FAST_BORROW        39 (idx)
+                CALL                     3
+                UNPACK_SEQUENCE          4
+                STORE_FAST              40 (x0)
+                STORE_FAST              41 (x1)
+                STORE_FAST              42 (x2)
+                STORE_FAST              43 (x3)
+
+ 277            LOAD_SMALL_INT           0
+                STORE_FAST              44 (j)
+
+ 278   L36:     LOAD_FAST_BORROW        44 (j)
+                LOAD_SMALL_INT          32
+                COMPARE_OP              18 (bool(<))
+                EXTENDED_ARG             2
+                POP_JUMP_IF_FALSE      554 (to L37)
+                NOT_TAKEN
+
+ 279            LOAD_FAST_BORROW        41 (x1)
+                LOAD_FAST_BORROW        42 (x2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        43 (x3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        38 (rk)
+                LOAD_FAST_BORROW        44 (j)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              45 (t)
+
+ 280            LOAD_FAST_BORROW        40 (x0)
+                LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        27 (T3)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              40 (x0)
+
+ 281            LOAD_FAST_BORROW        42 (x2)
+                LOAD_FAST_BORROW        43 (x3)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        40 (x0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        38 (rk)
+                LOAD_FAST_BORROW        44 (j)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              45 (t)
+
+ 282            LOAD_FAST_BORROW        41 (x1)
+                LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        27 (T3)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              41 (x1)
+
+ 283            LOAD_FAST_BORROW        43 (x3)
+                LOAD_FAST_BORROW        40 (x0)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        41 (x1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        38 (rk)
+                LOAD_FAST_BORROW        44 (j)
+                LOAD_SMALL_INT           2
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              45 (t)
+
+ 284            LOAD_FAST_BORROW        42 (x2)
+                LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        27 (T3)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              42 (x2)
+
+ 285            LOAD_FAST_BORROW        40 (x0)
+                LOAD_FAST_BORROW        41 (x1)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        42 (x2)
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        38 (rk)
+                LOAD_FAST_BORROW        44 (j)
+                LOAD_SMALL_INT           3
+                BINARY_OP                0 (+)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                STORE_FAST              45 (t)
+
+ 286            LOAD_FAST_BORROW        43 (x3)
+                LOAD_FAST_BORROW        24 (T0)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          24
+                BINARY_OP                9 (>>)
+                BINARY_OP               26 ([])
+                LOAD_FAST_BORROW        25 (T1)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT          16
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        26 (T2)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT           8
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                LOAD_FAST_BORROW        27 (T3)
+                LOAD_FAST_BORROW        45 (t)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                BINARY_OP               26 ([])
+                BINARY_OP               12 (^)
+                BINARY_OP               25 (^=)
+                STORE_FAST              43 (x3)
+
+ 287            LOAD_FAST_BORROW        44 (j)
+                LOAD_SMALL_INT           4
+                BINARY_OP               13 (+=)
+                STORE_FAST              44 (j)
+                EXTENDED_ARG             2
+                JUMP_BACKWARD          561 (to L36)
+
+ 288   L37:     LOAD_FAST_BORROW        37 (_s)
+                LOAD_ATTR              103 (pack_into + NULL|self)
+                LOAD_CONST              33 ('>IIII')
+                LOAD_FAST_BORROW        18 (out)
+                LOAD_FAST_BORROW        39 (idx)
+                LOAD_FAST_BORROW        43 (x3)
+                LOAD_FAST_BORROW        42 (x2)
+                LOAD_FAST_BORROW        41 (x1)
+                LOAD_FAST_BORROW        40 (x0)
+                CALL                     7
+                POP_TOP
+
+ 289            LOAD_FAST_BORROW        39 (idx)
+                LOAD_SMALL_INT          16
+                BINARY_OP               13 (+=)
+                STORE_FAST              39 (idx)
+                EXTENDED_ARG             2
+                JUMP_BACKWARD          630 (to L35)
+
+ 290   L38:     LOAD_GLOBAL             13 (bytes + NULL)
+                LOAD_FAST_BORROW        18 (out)
+                CALL                     1
+                RETURN_VALUE
+
+  --   L39:     PUSH_EXC_INFO
+
+ 204            LOAD_GLOBAL             52 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L41)
+                NOT_TAKEN
+                POP_TOP
+
+ 205   L40:     POP_EXCEPT
+                EXTENDED_ARG             9
+                JUMP_BACKWARD         2436 (to L11)
+
+ 204   L41:     RERAISE                  0
+
+  --   L42:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L43:     PUSH_EXC_INFO
+
+ 211            LOAD_GLOBAL             52 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        7 (to L45)
+                NOT_TAKEN
+                POP_TOP
+
+ 212            LOAD_CONST              15 (False)
+                STORE_FAST               8 (lib)
+       L44:     POP_EXCEPT
+                EXTENDED_ARG             8
+                JUMP_BACKWARD_NO_INTERRUPT 2224 (to L24)
+
+ 211   L45:     RERAISE                  0
+
+  --   L46:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L43 [0]
+  L3 to L6 -> L43 [0]
+  L7 to L9 -> L43 [0]
+  L10 to L12 -> L43 [0]
+  L13 to L14 -> L39 [1]
+  L15 to L16 -> L39 [1]
+  L16 to L21 -> L43 [0]
+  L22 to L24 -> L43 [0]
+  L39 to L40 -> L42 [2] lasti
+  L40 to L41 -> L43 [0]
+  L41 to L42 -> L42 [2] lasti
+  L42 to L43 -> L43 [0]
+  L43 to L44 -> L46 [1] lasti
+  L45 to L46 -> L46 [1] lasti
+
+
+### [19]     <genexpr>  (file=<encrypt_ecb>) :: line 16, args 2, locals 2, stack 4, consts 1
+  16           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (str + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [20]     <genexpr>  (file=<encrypt_ecb>) :: line 17, args 2, locals 2, stack 4, consts 1
+  17           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (hex + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [21]     <genexpr>  (file=<encrypt_ecb>) :: line 18, args 2, locals 2, stack 4, consts 1
+  18           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                16 (to L3)
+               STORE_FAST               1 (x)
+               LOAD_GLOBAL              1 (hex + NULL)
+               LOAD_FAST_BORROW         1 (x)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           18 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [22]     L  (file=<encrypt_ecb>) :: line 95, args 1, locals 2, stack 5, consts 1
+  --           COPY_FREE_VARS           1
+
+  95           RESUME                   0
+
+  96           LOAD_FAST_BORROW         0 (y)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT           2
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          10
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          18
+               CALL                     2
+               BINARY_OP               12 (^)
+               LOAD_DEREF               1 (rol32)
+               PUSH_NULL
+               LOAD_FAST_BORROW         0 (y)
+               LOAD_SMALL_INT          24
+               CALL                     2
+               BINARY_OP               12 (^)
+               RETURN_VALUE
+
+
+### [23]   self_test  (file=sm4_custom.py) :: line 140, args 4, locals 4, stack 6, consts 4
+140           RESUME                   0
+
+142           LOAD_GLOBAL              0 (bytes)
+              LOAD_ATTR                3 (fromhex + NULL|self)
+              LOAD_CONST               1 ('0123456789abcdeffedcba9876543210')
+              CALL                     1
+              STORE_FAST               0 (key)
+
+143           LOAD_GLOBAL              1 (bytes + NULL)
+              LOAD_GLOBAL              5 (range + NULL)
+              LOAD_SMALL_INT          16
+              CALL                     1
+              CALL                     1
+              STORE_FAST               1 (pt)
+
+144           LOAD_GLOBAL              7 (encrypt_ecb + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (pt, key)
+              CALL                     2
+              STORE_FAST               2 (ct)
+
+145           LOAD_GLOBAL              9 (decrypt_ecb + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (ct, key)
+              CALL                     2
+              LOAD_CONST               2 (slice(None, 16, None))
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         1 (pt)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_TRUE         3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     0 (AssertionError)
+              RAISE_VARARGS            1
+
+147   L1:     LOAD_GLOBAL              7 (encrypt_ecb + NULL)
+              LOAD_FAST_BORROW         1 (pt)
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_ATTR                3 (fromhex + NULL|self)
+              LOAD_CONST               1 ('0123456789abcdeffedcba9876543210')
+              CALL                     1
+              CALL                     2
+              STORE_FAST               3 (std_ct)
+
+148           LOAD_GLOBAL             11 (len + NULL)
+              LOAD_FAST_BORROW         3 (std_ct)
+              CALL                     1
+              LOAD_SMALL_INT          16
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_TRUE         3 (to L2)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     0 (AssertionError)
+              RAISE_VARARGS            1
+
+149   L2:     LOAD_CONST               3 (True)
+              RETURN_VALUE

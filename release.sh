@@ -35,7 +35,9 @@ fi
 rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT "$STAGE"/output
 rm -rf "$STAGE"/original "$STAGE"/logs
 rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
-rm -rf "$STAGE"/.git
+rm -rf "$STAGE"/.git "$STAGE"/.github
+rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools
+rm -f "$STAGE"/luac.out
 
 # Stamp the new version into VERSION + ikram_key.json (key_hash unchanged).
 echo "$VERSION" > "$STAGE/VERSION"

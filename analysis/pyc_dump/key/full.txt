@@ -1,0 +1,654 @@
+
+### [0] <module>  (file=key.py) :: line 1, args 0, locals 0, stack 3, consts 22
+  0           RESUME                   0
+
+  2           LOAD_CONST               0 ('IKRAM TOOL - Key system (version-tied).\n\nHar version ki apni key hoti hai. Jab owner naya version publish karta hai\n(ikram_key.json me naya key hash) to purane versions ka key INVALID ho jata\nhai - naya key maanga jata hai. Isi liye "purana key" kabhi kaam nahi karta\njab naya version aata hai.\n\nFiles:\n  ikram_key.json  -> {version, key_hash, owner_hash} (owner ke paas)\n  activated.json  -> {version, key_hash} (client par, ek baar key sahi = note)\n\nUsage:\n  python3 key.py --make KEY          -> ikram_key.json me naya key daalo (owner)\n  python3 key.py --check KEY         -> key sahi hai? (exit 0/1)\n  python3 key.py --verify            -> current activation theek hai?\n')
+              STORE_NAME               0 (__doc__)
+
+ 18           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (hashlib)
+              STORE_NAME               1 (hashlib)
+
+ 19           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (json)
+              STORE_NAME               2 (json)
+
+ 20           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              3 (sys)
+              STORE_NAME               3 (sys)
+
+ 21           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('Path',))
+              IMPORT_NAME              4 (pathlib)
+              IMPORT_FROM              5 (Path)
+              STORE_NAME               5 (Path)
+              POP_TOP
+
+ 23           LOAD_NAME                5 (Path)
+              PUSH_NULL
+              LOAD_NAME                6 (__file__)
+              CALL                     1
+              LOAD_ATTR               15 (resolve + NULL|self)
+              CALL                     0
+              LOAD_ATTR               16 (parent)
+              STORE_NAME               9 (TOOL_DIR)
+
+ 24           LOAD_NAME                9 (TOOL_DIR)
+              LOAD_CONST               3 ('ikram_key.json')
+              BINARY_OP               11 (/)
+              STORE_NAME              10 (KEY_FILE)
+
+ 25           LOAD_NAME                9 (TOOL_DIR)
+              LOAD_CONST               4 ('.ikram_tool')
+              BINARY_OP               11 (/)
+              LOAD_CONST               5 ('activated.json')
+              BINARY_OP               11 (/)
+              STORE_NAME              11 (ACT_FILE)
+
+ 28           LOAD_CONST               6 (<code object __annotate__ at 0x7aaf9eef30, file "key.py", line 28>)
+              MAKE_FUNCTION
+              LOAD_CONST               7 (<code object _hash at 0x7aaf5e76d0, file "key.py", line 28>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              12 (_hash)
+
+ 32           LOAD_CONST               8 (<code object load_key at 0x7aab49b230, file "key.py", line 32>)
+              MAKE_FUNCTION
+              STORE_NAME              13 (load_key)
+
+ 41           LOAD_CONST               9 (<code object current_version at 0x7aaf64a130, file "key.py", line 41>)
+              MAKE_FUNCTION
+              STORE_NAME              14 (current_version)
+
+ 46           LOAD_CONST              10 (<code object __annotate__ at 0x7aaf68d730, file "key.py", line 46>)
+              MAKE_FUNCTION
+              LOAD_CONST              11 (<code object make_key at 0x7aaf77f430, file "key.py", line 46>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              15 (make_key)
+
+ 55           LOAD_CONST              12 (<code object key_hash at 0x7aab490580, file "key.py", line 55>)
+              MAKE_FUNCTION
+              STORE_NAME              16 (key_hash)
+
+ 59           LOAD_CONST              13 (<code object __annotate__ at 0x7aaf68d830, file "key.py", line 59>)
+              MAKE_FUNCTION
+              LOAD_CONST              14 (<code object check at 0x7aab49b3c0, file "key.py", line 59>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              17 (check)
+
+ 68           LOAD_CONST              15 (<code object __annotate__ at 0x7aaf68e030, file "key.py", line 68>)
+              MAKE_FUNCTION
+              LOAD_CONST              16 (<code object _activate at 0x7aaf757b40, file "key.py", line 68>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              18 (_activate)
+
+ 77           LOAD_CONST              17 (<code object is_activated at 0x7aaf5e9230, file "key.py", line 77>)
+              MAKE_FUNCTION
+              STORE_NAME              19 (is_activated)
+
+ 91           LOAD_CONST              18 (<code object __annotate__ at 0x7aaf68e130, file "key.py", line 91>)
+              MAKE_FUNCTION
+              LOAD_CONST              19 (<code object try_activate at 0x7aab493cc0, file "key.py", line 91>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              20 (try_activate)
+
+ 97           LOAD_CONST              20 (<code object main at 0xb400007c800a37f0, file "key.py", line 97>)
+              MAKE_FUNCTION
+              STORE_NAME              21 (main)
+
+112           LOAD_NAME               22 (__name__)
+              LOAD_CONST              21 ('__main__')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       10 (to L1)
+              NOT_TAKEN
+
+113           LOAD_NAME               21 (main)
+              PUSH_NULL
+              CALL                     0
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+112   L1:     LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   __annotate__  (file=key.py) :: line 28, args 1, locals 1, stack 4, consts 3
+ 28           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('s')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [2]   _hash  (file=key.py) :: line 28, args 1, locals 1, stack 4, consts 1
+ 28           RESUME                   0
+
+ 29           LOAD_GLOBAL              0 (hashlib)
+              LOAD_ATTR                2 (sha256)
+              PUSH_NULL
+              LOAD_FAST_BORROW         0 (s)
+              LOAD_ATTR                5 (strip + NULL|self)
+              CALL                     0
+              LOAD_ATTR                7 (upper + NULL|self)
+              CALL                     0
+              LOAD_ATTR                9 (encode + NULL|self)
+              CALL                     0
+              CALL                     1
+              LOAD_ATTR               11 (hexdigest + NULL|self)
+              CALL                     0
+              RETURN_VALUE
+
+
+### [3]   load_key  (file=key.py) :: line 32, args 0, locals 0, stack 4, consts 1
+  32           RESUME                   0
+
+  33           LOAD_GLOBAL              0 (KEY_FILE)
+               LOAD_ATTR                3 (exists + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L1)
+               NOT_TAKEN
+
+  34           BUILD_MAP                0
+               RETURN_VALUE
+
+  35   L1:     NOP
+
+  36   L2:     LOAD_GLOBAL              4 (json)
+               LOAD_ATTR                6 (loads)
+               PUSH_NULL
+               LOAD_GLOBAL              0 (KEY_FILE)
+               LOAD_ATTR                9 (read_text + NULL|self)
+               CALL                     0
+               CALL                     1
+       L3:     RETURN_VALUE
+
+  --   L4:     PUSH_EXC_INFO
+
+  37           LOAD_GLOBAL             10 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        6 (to L6)
+               NOT_TAKEN
+               POP_TOP
+
+  38           BUILD_MAP                0
+               SWAP                     2
+       L5:     POP_EXCEPT
+               RETURN_VALUE
+
+  37   L6:     RERAISE                  0
+
+  --   L7:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L4 [0]
+  L4 to L5 -> L7 [1] lasti
+  L6 to L7 -> L7 [1] lasti
+
+
+### [4]   current_version  (file=key.py) :: line 41, args 1, locals 1, stack 2, consts 2
+ 41           RESUME                   0
+
+ 42           LOAD_GLOBAL              0 (TOOL_DIR)
+              LOAD_CONST               0 ('VERSION')
+              BINARY_OP               11 (/)
+              STORE_FAST               0 (v)
+
+ 43           LOAD_FAST_BORROW         0 (v)
+              LOAD_ATTR                3 (exists + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE       31 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (v)
+              LOAD_ATTR                5 (read_text + NULL|self)
+              CALL                     0
+              LOAD_ATTR                7 (strip + NULL|self)
+              CALL                     0
+              RETURN_VALUE
+      L1:     LOAD_CONST               1 ('0.0.0')
+              RETURN_VALUE
+
+
+### [5]   __annotate__  (file=key.py) :: line 46, args 1, locals 1, stack 4, consts 3
+ 46           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('plain_key')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [6]   make_key  (file=key.py) :: line 46, args 2, locals 2, stack 7, consts 4
+ 46           RESUME                   0
+
+ 48           LOAD_GLOBAL              1 (load_key + NULL)
+              CALL                     0
+              STORE_FAST               1 (data)
+
+ 49           LOAD_GLOBAL              3 (current_version + NULL)
+              CALL                     0
+              LOAD_FAST_BORROW         1 (data)
+              LOAD_CONST               1 ('version')
+              STORE_SUBSCR
+
+ 50           LOAD_GLOBAL              5 (_hash + NULL)
+              LOAD_FAST_BORROW         0 (plain_key)
+              CALL                     1
+              LOAD_FAST_BORROW         1 (data)
+              LOAD_CONST               2 ('key_hash')
+              STORE_SUBSCR
+
+ 51           LOAD_GLOBAL              6 (KEY_FILE)
+              LOAD_ATTR                9 (write_text + NULL|self)
+              LOAD_GLOBAL             10 (json)
+              LOAD_ATTR               12 (dumps)
+              PUSH_NULL
+              LOAD_FAST_BORROW         1 (data)
+              LOAD_SMALL_INT           2
+              LOAD_CONST               3 (('indent',))
+              CALL_KW                  2
+              CALL                     1
+              POP_TOP
+
+ 52           LOAD_GLOBAL              6 (KEY_FILE)
+              LOAD_ATTR               14 (name)
+              RETURN_VALUE
+
+
+### [7]   key_hash  (file=key.py) :: line 55, args 0, locals 0, stack 4, consts 2
+ 55           RESUME                   0
+
+ 56           LOAD_GLOBAL              1 (load_key + NULL)
+              CALL                     0
+              LOAD_ATTR                3 (get + NULL|self)
+              LOAD_CONST               0 ('key_hash')
+              LOAD_CONST               1 ('')
+              CALL                     2
+              RETURN_VALUE
+
+
+### [8]   __annotate__  (file=key.py) :: line 59, args 1, locals 1, stack 4, consts 3
+ 59           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('plain_key')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (bool)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [9]   check  (file=key.py) :: line 59, args 2, locals 2, stack 3, consts 3
+ 59           RESUME                   0
+
+ 60           LOAD_GLOBAL              1 (load_key + NULL)
+              CALL                     0
+              STORE_FAST               1 (data)
+
+ 61           LOAD_FAST_BORROW         1 (data)
+              LOAD_ATTR                3 (get + NULL|self)
+              LOAD_CONST               0 ('key_hash')
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE         3 (to L1)
+              NOT_TAKEN
+
+ 62           LOAD_CONST               1 (False)
+              RETURN_VALUE
+
+ 63   L1:     LOAD_FAST_BORROW         1 (data)
+              LOAD_ATTR                3 (get + NULL|self)
+              LOAD_CONST               2 ('version')
+              CALL                     1
+              LOAD_GLOBAL              5 (current_version + NULL)
+              CALL                     0
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE        3 (to L2)
+              NOT_TAKEN
+
+ 64           LOAD_CONST               1 (False)
+              RETURN_VALUE
+
+ 65   L2:     LOAD_GLOBAL              7 (_hash + NULL)
+              LOAD_FAST_BORROW         0 (plain_key)
+              CALL                     1
+              LOAD_FAST_BORROW         1 (data)
+              LOAD_CONST               0 ('key_hash')
+              BINARY_OP               26 ([])
+              COMPARE_OP              72 (==)
+              RETURN_VALUE
+
+
+### [10]   __annotate__  (file=key.py) :: line 68, args 1, locals 1, stack 2, consts 2
+ 68           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('plain_key')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [11]   _activate  (file=key.py) :: line 68, args 1, locals 1, stack 10, consts 4
+ 68           RESUME                   0
+
+ 69           LOAD_GLOBAL              0 (ACT_FILE)
+              LOAD_ATTR                2 (parent)
+              LOAD_ATTR                5 (mkdir + NULL|self)
+              LOAD_CONST               0 (True)
+              LOAD_CONST               0 (True)
+              LOAD_CONST               1 (('parents', 'exist_ok'))
+              CALL_KW                  2
+              POP_TOP
+
+ 70           LOAD_GLOBAL              0 (ACT_FILE)
+              LOAD_ATTR                7 (write_text + NULL|self)
+              LOAD_GLOBAL              8 (json)
+              LOAD_ATTR               10 (dumps)
+              PUSH_NULL
+
+ 71           LOAD_CONST               2 ('version')
+              LOAD_GLOBAL             13 (current_version + NULL)
+              CALL                     0
+
+ 72           LOAD_CONST               3 ('key_hash')
+              LOAD_GLOBAL             15 (_hash + NULL)
+              LOAD_FAST_BORROW         0 (plain_key)
+              CALL                     1
+
+ 70           BUILD_MAP                2
+              CALL                     1
+              CALL                     1
+              POP_TOP
+
+ 74           LOAD_GLOBAL              0 (ACT_FILE)
+              LOAD_ATTR               16 (name)
+              RETURN_VALUE
+
+
+### [12]   is_activated  (file=key.py) :: line 77, args 1, locals 1, stack 4, consts 4
+  77           RESUME                   0
+
+  80           LOAD_GLOBAL              0 (ACT_FILE)
+               LOAD_ATTR                3 (exists + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L1)
+               NOT_TAKEN
+
+  81           LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+  82   L1:     NOP
+
+  83   L2:     LOAD_GLOBAL              4 (json)
+               LOAD_ATTR                6 (loads)
+               PUSH_NULL
+               LOAD_GLOBAL              0 (ACT_FILE)
+               LOAD_ATTR                9 (read_text + NULL|self)
+               CALL                     0
+               CALL                     1
+               STORE_FAST               0 (a)
+
+  86   L3:     LOAD_FAST                0 (a)
+               LOAD_ATTR               13 (get + NULL|self)
+               LOAD_CONST               2 ('version')
+               CALL                     1
+               LOAD_GLOBAL             15 (current_version + NULL)
+               CALL                     0
+               COMPARE_OP             119 (bool(!=))
+               POP_JUMP_IF_FALSE        3 (to L4)
+               NOT_TAKEN
+
+  87           LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+  88   L4:     LOAD_FAST                0 (a)
+               LOAD_ATTR               13 (get + NULL|self)
+               LOAD_CONST               3 ('key_hash')
+               CALL                     1
+               LOAD_GLOBAL             17 (key_hash + NULL)
+               CALL                     0
+               COMPARE_OP              72 (==)
+               RETURN_VALUE
+
+  --   L5:     PUSH_EXC_INFO
+
+  84           LOAD_GLOBAL             10 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L7)
+               NOT_TAKEN
+               POP_TOP
+
+  85   L6:     POP_EXCEPT
+               LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+  84   L7:     RERAISE                  0
+
+  --   L8:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L5 [0]
+  L5 to L6 -> L8 [1] lasti
+  L7 to L8 -> L8 [1] lasti
+
+
+### [13]   __annotate__  (file=key.py) :: line 91, args 1, locals 1, stack 2, consts 2
+ 91           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('plain_key')
+              LOAD_GLOBAL              0 (str)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [14]   try_activate  (file=key.py) :: line 91, args 1, locals 1, stack 3, consts 1
+ 91           RESUME                   0
+
+ 92           LOAD_GLOBAL              1 (check + NULL)
+              LOAD_FAST_BORROW         0 (plain_key)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+ 93           LOAD_GLOBAL              3 (_activate + NULL)
+              LOAD_FAST_BORROW         0 (plain_key)
+              CALL                     1
+              RETURN_VALUE
+
+ 94   L1:     LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [15]   main  (file=key.py) :: line 97, args 2, locals 2, stack 7, consts 14
+ 97            RESUME                   0
+
+ 98            LOAD_GLOBAL              0 (sys)
+               LOAD_ATTR                2 (argv)
+               LOAD_CONST               0 (slice(1, None, None))
+               BINARY_OP               26 ([])
+               STORE_FAST               0 (args)
+
+ 99            LOAD_GLOBAL              5 (len + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               CALL                     1
+               LOAD_SMALL_INT           2
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_FALSE       59 (to L1)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_CONST               1 ('--make')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       45 (to L1)
+               NOT_TAKEN
+
+100            LOAD_GLOBAL              7 (print + NULL)
+               LOAD_CONST               2 ('Key set: ')
+               LOAD_GLOBAL              9 (make_key + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               FORMAT_SIMPLE
+               LOAD_CONST               3 (' (version ')
+               LOAD_GLOBAL             11 (current_version + NULL)
+               CALL                     0
+               FORMAT_SIMPLE
+               LOAD_CONST               4 (')')
+               BUILD_STRING             5
+               CALL                     1
+               POP_TOP
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+101    L1:     LOAD_GLOBAL              5 (len + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               CALL                     1
+               LOAD_SMALL_INT           2
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_FALSE       54 (to L4)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_CONST               5 ('--check')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       40 (to L4)
+               NOT_TAKEN
+
+102            LOAD_GLOBAL              7 (print + NULL)
+               LOAD_GLOBAL             13 (check + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               TO_BOOL
+               POP_JUMP_IF_FALSE        3 (to L2)
+               NOT_TAKEN
+               LOAD_CONST               6 ('OK')
+               JUMP_FORWARD             1 (to L3)
+       L2:     LOAD_CONST               7 ('BAD')
+       L3:     CALL                     1
+               POP_TOP
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+103    L4:     LOAD_GLOBAL              5 (len + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               CALL                     1
+               LOAD_SMALL_INT           2
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_FALSE       59 (to L7)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_CONST               8 ('--activate')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       45 (to L7)
+               NOT_TAKEN
+
+104            LOAD_GLOBAL             15 (try_activate + NULL)
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           1
+               BINARY_OP               26 ([])
+               CALL                     1
+               STORE_FAST               1 (f)
+
+105            LOAD_GLOBAL              7 (print + NULL)
+               LOAD_FAST_BORROW         1 (f)
+               TO_BOOL
+               POP_JUMP_IF_FALSE        6 (to L5)
+               NOT_TAKEN
+               LOAD_CONST               9 ('Activated: ')
+               LOAD_FAST_BORROW         1 (f)
+               FORMAT_SIMPLE
+               BUILD_STRING             2
+               JUMP_FORWARD             1 (to L6)
+       L5:     LOAD_CONST               7 ('BAD')
+       L6:     CALL                     1
+               POP_TOP
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+106    L7:     LOAD_FAST_BORROW         0 (args)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       46 (to L10)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         0 (args)
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LOAD_CONST              10 ('--verify')
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       32 (to L10)
+               NOT_TAKEN
+
+107            LOAD_GLOBAL              7 (print + NULL)
+               LOAD_GLOBAL             17 (is_activated + NULL)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_FALSE        3 (to L8)
+               NOT_TAKEN
+               LOAD_CONST              11 ('ACTIVE')
+               JUMP_FORWARD             1 (to L9)
+       L8:     LOAD_CONST              12 ('LOCKED')
+       L9:     CALL                     1
+               POP_TOP
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+109   L10:     LOAD_GLOBAL              7 (print + NULL)
+               LOAD_GLOBAL             18 (__doc__)
+               CALL                     1
+               POP_TOP
+               LOAD_CONST              13 (None)
+               RETURN_VALUE

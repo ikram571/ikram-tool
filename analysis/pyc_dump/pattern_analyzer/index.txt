@@ -1,0 +1,57 @@
+# pattern_analyzer
+# funcs=98
+# top-level names:
+  Counter
+  MAGICS
+  MAGIC_LJ
+  MAGIC_LUA
+  Path
+  _LUAC_DATA
+  _additive_lua
+  _base64_wrapped
+  _bitwise_not
+  _brpc_family
+  _byte_reverse
+  _compressed
+  _decompiled_output
+  _embedded_lua
+  _entropy
+  _looks_like_real_text
+  _nibble_swap
+  _plain_lua
+  _readability
+  _rolling_xor
+  _sparse_runs
+  _substantive_source
+  _try_decompile
+  _valid_lua_header
+  _word_transforms
+  _xor_additive_all
+  _xor_all_keys
+  _xor_header_key
+  _xor_key_magic
+  _xor_repeating
+  _xor_single_lua
+  analyze_pattern
+  annotations
+  auto_decrypt
+  base64
+  bz2
+  collections
+  gzip
+  lzma
+  math
+  os
+  pathlib
+  pattern_decompile
+  re
+  zlib
+# module str consts:
+  'ELF'
+  'Lua bytecode'
+  'LuaJIT bytecode'
+  'PNG'
+  'ZIP'
+  'bzip2'
+  'gzip'
+  'pattern_analyzer.py — LAST-RESORT auto pattern engine.\n\nJab koi bhi decompile/crypto engine file ko handle nahi kar pata, to ye\nengine file ka structure/pattern parhta hai:\n  - entropy, zero-ratio, byte distribution, sparse-run structure\n  - Lua/LuaJIT magic, base64, compressed, single/multi-byte XOR families\nAur matching decrypt method auto-laga kar readable output banata hai.\nYe "crack sab kuch" nahi hai — pattern jo cryptographically derive ho\nsakta hai wahi nikalta hai. Genuine custom cipher (BRPC family) me\nanalysis report banata hai jo family identify karta hai.\n\nPublic API:\n  analyze_pattern(data, name="") -> dict          (structure report)\n  auto_decrypt(data, name="") -> list[(label, bytes, score)]\n  pattern_decompile(src, out, progress=None) -> (ok, msg)   # engine-compatible\n'

@@ -1,0 +1,29 @@
+# key
+# funcs=16
+# top-level names:
+  ACT_FILE
+  KEY_FILE
+  Path
+  TOOL_DIR
+  _activate
+  _hash
+  check
+  current_version
+  hashlib
+  is_activated
+  json
+  key_hash
+  load_key
+  main
+  make_key
+  parent
+  pathlib
+  resolve
+  sys
+  try_activate
+# module str consts:
+  '.ikram_tool'
+  'IKRAM TOOL - Key system (version-tied).\n\nHar version ki apni key hoti hai. Jab owner naya version publish karta hai\n(ikram_key.json me naya key hash) to purane versions ka key INVALID ho jata\nhai - naya key maanga jata hai. Isi liye "purana key" kabhi kaam nahi karta\njab naya version aata hai.\n\nFiles:\n  ikram_key.json  -> {version, key_hash, owner_hash} (owner ke paas)\n  activated.json  -> {version, key_hash} (client par, ek baar key sahi = note)\n\nUsage:\n  python3 key.py --make KEY          -> ikram_key.json me naya key daalo (owner)\n  python3 key.py --check KEY         -> key sahi hai? (exit 0/1)\n  python3 key.py --verify            -> current activation theek hai?\n'
+  '__main__'
+  'activated.json'
+  'ikram_key.json'

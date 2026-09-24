@@ -1,0 +1,31 @@
+# lua_bgmi
+# funcs=39
+# top-level names:
+  BGMI_TO_STD
+  HEADER_SIZE
+  STD_FMT
+  STD_TO_BGMI
+  STRING_XOR_KEY
+  _R
+  _W
+  _clean_text
+  _cvt_func
+  _op
+  _probe_format
+  _probe_func
+  bgmi_op
+  bgmi_to_std
+  bytes
+  detect_format
+  dict
+  is_bgmi
+  items
+  range
+  sorted
+  std_op
+  std_to_bgmi
+  struct
+# module str consts:
+  "BGMI / PUBG Mobile Lua bytecode converter.\n\nReal-game (BGMI/PUBG) .luac files use a custom format on top of Lua 5.3:\n  * standard 33-byte Lua 5.3 header\n  * strings stored as 1-byte size (0xFF + u32 for long), content XOR'd\n    with a 32-byte key\n  * opcodes remapped (custom order)\n\nThis module converts BGMI bytecode <-> standard Lua 5.3 bytecode so the\nstandard toolchain (unluac / luac 5.3) can be used on real game files.\n"
+  '_R'
+  '_W'

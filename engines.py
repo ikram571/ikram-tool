@@ -216,7 +216,7 @@ def _repak_version_str(version, compression_u8):
 
 
 # ---------------------------------------------------------------------------
-# V111 — multi-AES-key auto-try + working-key persistence (PakEngine keys).
+# V112 — multi-AES-key auto-try + working-key persistence (PakEngine keys).
 # Keys are stored OUTSIDE the tool dir (~/.config/ikramtool/pak_keys.json) so
 # a clean-replace update never wipes a key the user already made to work.
 # ---------------------------------------------------------------------------

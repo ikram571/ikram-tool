@@ -1,0 +1,3091 @@
+
+### [0] <module>  (file=pakcrypto.py) :: line 1, args 1, locals 1, stack 6, consts 67
+   0            RESUME                   0
+
+   1            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME              0 (struct)
+                STORE_NAME               0 (struct)
+
+   2            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME              1 (zlib)
+                STORE_NAME               1 (zlib)
+
+   3            LOAD_SMALL_INT           0
+                LOAD_CONST               2 (('sha1',))
+                IMPORT_NAME              2 (hashlib)
+                IMPORT_FROM              3 (sha1)
+                STORE_NAME               3 (sha1)
+                POP_TOP
+
+   4            LOAD_SMALL_INT           0
+                LOAD_CONST               3 (('lru_cache',))
+                IMPORT_NAME              4 (functools)
+                IMPORT_FROM              5 (lru_cache)
+                STORE_NAME               5 (lru_cache)
+                POP_TOP
+
+   6            LOAD_SMALL_INT           0
+                LOAD_CONST               4 (('SM4',))
+                IMPORT_NAME              6 (gmalg)
+                IMPORT_FROM              7 (SM4)
+                STORE_NAME               8 (GmalgSM4)
+                POP_TOP
+
+   7            LOAD_SMALL_INT           0
+                LOAD_CONST               5 (('ZUC',))
+                IMPORT_NAME              9 (gmalg.zuc)
+                IMPORT_FROM             10 (ZUC)
+                STORE_NAME              10 (ZUC)
+                POP_TOP
+
+   9            LOAD_NAME               11 (bytes)
+                LOAD_ATTR               25 (fromhex + NULL|self)
+                LOAD_CONST               6 ('01010101010101010101010101010101')
+                CALL                     1
+                STORE_NAME              13 (ZUC_KEY)
+
+  10            LOAD_NAME               11 (bytes)
+                LOAD_ATTR               25 (fromhex + NULL|self)
+                LOAD_CONST               7 ('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
+                CALL                     1
+                STORE_NAME              14 (ZUC_IV)
+
+  12            LOAD_NAME               11 (bytes)
+                LOAD_ATTR               25 (fromhex + NULL|self)
+                LOAD_CONST               8 ('CBE8B9F2504050EF9831B719E9A6249A6D238505ADE909BDE78C180DED6072A0C3347B8AF4780E1F212D952D82D4BF7F233C1ECA499E1F9D9A85B4FAD759F54BABC1666C5DE411EA9E4B2374425DD6C6F54333BBC8F2610FE6063E4D0D6C21A671A8F7C3740555E5DC06D4E1691C456DB4116C0C012BF7B206E8311AAAEC689952BF804EF638F09D5822B4117B114208F14DEB459E80CB770E5B0D7978E21F5E6CED4999D3583108221A7AB28B960277ADB5690A332784019D9C195BE4EA9EA0A09459010F236465DE0D59C3EF7324E954E1118D93EE19F299760C2CDB963CE87973EA5ECC9BBE81C27D4C7C8572AC07E9BCEAC9BD72AB7A56A3C0AD736ABCE4')
+                CALL                     1
+                STORE_NAME              15 (RSA_MOD_1)
+
+  14            LOAD_SMALL_INT         121
+                STORE_NAME              16 (SIMPLE1_KEY)
+
+  15            LOAD_NAME               11 (bytes)
+                LOAD_ATTR               25 (fromhex + NULL|self)
+                LOAD_CONST               9 ('E55B4ED1')
+                CALL                     1
+                STORE_NAME              17 (SIMPLE2_KEY)
+
+  16            LOAD_SMALL_INT          16
+                STORE_NAME              18 (SIMPLE2_BLOCK)
+
+  18            LOAD_CONST              10 ('Q0hVTKey$as*1ZFlQCiA')
+                STORE_NAME              19 (SM4_SECRET_2)
+
+  19            LOAD_CONST              11 ('eb691efea914241317a8')
+                STORE_NAME              20 (SM4_SECRET_4)
+
+  20            BUILD_LIST               0
+                LOAD_CONST              63 (('xG2qW5lP7lV2iN5fN5pG', 'xT1cJ6dL5wC0kK1rB4dK', 'qC4jS5bZ6fL5xE6nD4zA', 'gD4jQ2aL3bS3lC3xT0iW', 'xU1yQ8wE9zY3gZ3bT5aE', 'uQ3cO2dX7xY4xU7gH7iS', 'gW1fR0jK6wQ4oN0oK1kZ', 'aJ4pV7iZ7pU4wP2aC2cZ', 'cX6jT3cM2oT3vK0kJ1qN', 'iT2vS0cS6yT6cZ1sE1lO', 'hM1pH9iY8wM9hT4lN5uJ', 'kG6bC8jK0fL0dE4sH4mL', 'dB6lB3vE0eZ8wM8rI0aC', 'tP7sP7nI9rA2vQ4cV5yQ', 'aT0cL1yN4pT3sZ7eM2vY', 'uV6fU8fC9zN3mP5dH8mN', 'rT6aQ6oZ1yM0gO5tO1aN', 'jU5bH7lQ0fM9hK2kI0oF', 'iQ0eM0mJ7uT0kV6kL5zY'))
+                LIST_EXTEND              1
+                STORE_NAME              21 (SM4_SECRET_NEW)
+
+  31            LOAD_SMALL_INT           1
+                STORE_NAME              22 (EM_SIMPLE1)
+
+  32            LOAD_SMALL_INT          16
+                STORE_NAME              23 (EM_SIMPLE2)
+
+  33            LOAD_SMALL_INT           2
+                STORE_NAME              24 (EM_SM4_2)
+
+  34            LOAD_SMALL_INT           4
+                STORE_NAME              25 (EM_SM4_4)
+
+  35            LOAD_SMALL_INT          31
+                STORE_NAME              26 (EM_SM4_NEW_BASE)
+
+  36            LOAD_NAME               26 (EM_SM4_NEW_BASE)
+                UNARY_INVERT
+                STORE_NAME              27 (EM_SM4_NEW_MASK)
+
+  37            LOAD_SMALL_INT          17
+                STORE_NAME              28 (EM_UNKNOWN_17)
+
+  39            LOAD_SMALL_INT           0
+                STORE_NAME              29 (CM_NONE)
+
+  40            LOAD_SMALL_INT           1
+                STORE_NAME              30 (CM_ZLIB)
+
+  41            LOAD_SMALL_INT           6
+                STORE_NAME              31 (CM_ZSTD)
+
+  42            LOAD_SMALL_INT           8
+                STORE_NAME              32 (CM_ZSTD_DICT)
+
+  43            LOAD_SMALL_INT          15
+                STORE_NAME              33 (CM_MASK)
+
+  46            LOAD_CONST              64 ((32,))
+                LOAD_CONST              12 (<code object zuc_keystream at 0x7aab49b230, file "pakcrypto.py", line 46>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   1 (defaults)
+                STORE_NAME              34 (zuc_keystream)
+
+  51            LOAD_CONST              13 (<code object __annotate__ at 0x7aab491570, file "pakcrypto.py", line 51>)
+                MAKE_FUNCTION
+                LOAD_CONST              14 (<code object _hashhash at 0x7aab4c13e0, file "pakcrypto.py", line 51>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              35 (_hashhash)
+
+  58            LOAD_CONST              15 (<code object __annotate__ at 0x7aaf9eef30, file "pakcrypto.py", line 58>)
+                MAKE_FUNCTION
+                LOAD_CONST              16 (<code object _safe_unpad at 0x7aaf6596b0, file "pakcrypto.py", line 58>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              36 (_safe_unpad)
+
+  66            LOAD_CONST              17 (<code object __annotate__ at 0x7aab490580, file "pakcrypto.py", line 66>)
+                MAKE_FUNCTION
+                LOAD_CONST              18 (<code object rsa_extract at 0xb400007c70069d10, file "pakcrypto.py", line 66>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              37 (rsa_extract)
+
+  82            LOAD_CONST              19 (<code object __annotate__ at 0x7aaf68ee30, file "pakcrypto.py", line 82>)
+                MAKE_FUNCTION
+                LOAD_CONST              20 (<code object decrypt_index at 0xb400007c8009fb90, file "pakcrypto.py", line 82>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              38 (decrypt_index)
+
+ 102            LOAD_CONST              21 (<code object is_simple1 at 0x7aaf603c30, file "pakcrypto.py", line 102>)
+                MAKE_FUNCTION
+                STORE_NAME              39 (is_simple1)
+
+ 106            LOAD_CONST              22 (<code object is_simple2 at 0x7aab493550, file "pakcrypto.py", line 106>)
+                MAKE_FUNCTION
+                STORE_NAME              40 (is_simple2)
+
+ 110            LOAD_CONST              23 (<code object is_sm4 at 0x7aaf62efb0, file "pakcrypto.py", line 110>)
+                MAKE_FUNCTION
+                STORE_NAME              41 (is_sm4)
+
+ 114            LOAD_CONST              24 (<code object align_encrypted_size at 0x7aaf77f430, file "pakcrypto.py", line 114>)
+                MAKE_FUNCTION
+                STORE_NAME              42 (align_encrypted_size)
+
+ 122            LOAD_CONST              25 (<code object __annotate__ at 0x7aab493660, file "pakcrypto.py", line 122>)
+                MAKE_FUNCTION
+                LOAD_CONST              26 (<code object derive_sm4_key at 0xb400007c00017210, file "pakcrypto.py", line 122>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              43 (derive_sm4_key)
+
+ 133            LOAD_NAME                5 (lru_cache)
+                PUSH_NULL
+                LOAD_CONST               1 (None)
+                LOAD_CONST              27 (('maxsize',))
+                CALL_KW                  1
+
+ 134            LOAD_CONST              28 (<code object __annotate__ at 0x7aab493770, file "pakcrypto.py", line 134>)
+                MAKE_FUNCTION
+                LOAD_CONST              29 (<code object _derive_sm4_key_cached at 0x7aaf6013e0, file "pakcrypto.py", line 133>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+
+ 133            CALL                     0
+
+ 134            STORE_NAME              44 (_derive_sm4_key_cached)
+
+ 139            NOP
+
+ 140    L1:     LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME             45 (ctypes)
+                STORE_NAME              45 (ctypes)
+
+ 141            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME             46 (ctypes.util)
+                STORE_NAME              45 (ctypes)
+
+ 142            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR               94 (util)
+                LOAD_ATTR               97 (find_library + NULL|self)
+                LOAD_CONST              30 ('crypto')
+                CALL                     1
+                STORE_NAME              49 (_crypto_path)
+
+ 143            LOAD_NAME               49 (_crypto_path)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L2)
+                NOT_TAKEN
+
+ 144            LOAD_CONST              31 ('/data/data/com.termux/files/usr/lib/libcrypto.so.3')
+                STORE_NAME              49 (_crypto_path)
+
+ 145    L2:     LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              100 (CDLL)
+                PUSH_NULL
+                LOAD_NAME               49 (_crypto_path)
+                CALL                     1
+                STORE_NAME              51 (_crypto)
+
+ 147            LOAD_BUILD_CLASS
+                PUSH_NULL
+                LOAD_CONST              32 (<code object _EVP_CIPHER_CTX at 0x7aaf603690, file "pakcrypto.py", line 147>)
+                MAKE_FUNCTION
+                LOAD_CONST              33 ('_EVP_CIPHER_CTX')
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              104 (Structure)
+                CALL                     3
+                STORE_NAME              53 (_EVP_CIPHER_CTX)
+
+ 150            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              108 (POINTER)
+                PUSH_NULL
+                LOAD_NAME               53 (_EVP_CIPHER_CTX)
+                CALL                     1
+                STORE_NAME              55 (_CTX)
+
+ 151            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              114 (EVP_sm4_ecb)
+                STORE_ATTR              58 (restype)
+
+ 152            LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              115 (EVP_sm4_ecb + NULL|self)
+                CALL                     0
+                STORE_NAME              59 (_SM4_ECB)
+
+ 153            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              120 (EVP_CIPHER_CTX_new)
+                STORE_ATTR              58 (restype)
+
+ 154            LOAD_NAME               55 (_CTX)
+                BUILD_LIST               1
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              122 (EVP_CIPHER_CTX_free)
+                STORE_ATTR              62 (argtypes)
+
+ 155            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                BUILD_LIST               2
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              128 (EVP_CIPHER_CTX_set_padding)
+                STORE_ATTR              62 (argtypes)
+
+ 156            LOAD_CONST              65 (('EVP_DecryptInit_ex', 'EVP_DecryptUpdate', 'EVP_DecryptFinal_ex', 'EVP_EncryptInit_ex', 'EVP_EncryptUpdate', 'EVP_EncryptFinal_ex'))
+                GET_ITER
+        L3:     FOR_ITER                27 (to L4)
+                STORE_NAME              65 (_fn)
+
+ 158            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                LOAD_NAME               66 (getattr)
+                PUSH_NULL
+                LOAD_NAME               51 (_crypto)
+                LOAD_NAME               65 (_fn)
+                CALL                     2
+                STORE_ATTR              58 (restype)
+                JUMP_BACKWARD           29 (to L3)
+
+ 156    L4:     END_FOR
+                POP_ITER
+
+ 159            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+
+ 160            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+
+ 159            BUILD_LIST               5
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              134 (EVP_DecryptInit_ex)
+                STORE_ATTR              62 (argtypes)
+
+ 161            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              108 (POINTER)
+                PUSH_NULL
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                CALL                     1
+
+ 162            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+
+ 161            BUILD_LIST               5
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              136 (EVP_DecryptUpdate)
+                STORE_ATTR              62 (argtypes)
+
+ 163            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              108 (POINTER)
+                PUSH_NULL
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                CALL                     1
+                BUILD_LIST               3
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              138 (EVP_DecryptFinal_ex)
+                STORE_ATTR              62 (argtypes)
+
+ 164            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+
+ 165            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+
+ 164            BUILD_LIST               5
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              140 (EVP_EncryptInit_ex)
+                STORE_ATTR              62 (argtypes)
+
+ 166            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              108 (POINTER)
+                PUSH_NULL
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                CALL                     1
+
+ 167            LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+
+ 166            BUILD_LIST               5
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              142 (EVP_EncryptUpdate)
+                STORE_ATTR              62 (argtypes)
+
+ 168            LOAD_NAME               55 (_CTX)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              112 (c_void_p)
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              108 (POINTER)
+                PUSH_NULL
+                LOAD_NAME               45 (ctypes)
+                LOAD_ATTR              126 (c_int)
+                CALL                     1
+                BUILD_LIST               3
+                LOAD_NAME               51 (_crypto)
+                LOAD_ATTR              144 (EVP_EncryptFinal_ex)
+                STORE_ATTR              62 (argtypes)
+
+ 171            LOAD_CONST              34 (<code object __annotate__ at 0x7aab472f70, file "pakcrypto.py", line 171>)
+                MAKE_FUNCTION
+                LOAD_CONST              35 (<code object _sm4_ossl at 0xb400007d1004e470, file "pakcrypto.py", line 171>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              73 (_sm4_ossl)
+
+ 197            LOAD_CONST              36 (True)
+                STORE_NAME              74 (_HAVE_OSSL_SM4)
+
+ 202    L5:     LOAD_CONST              38 (<code object __annotate__ at 0x7aab493880, file "pakcrypto.py", line 202>)
+                MAKE_FUNCTION
+                LOAD_CONST              39 (<code object sm4_decrypt_block at 0x7aaf77f290, file "pakcrypto.py", line 202>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              76 (sm4_decrypt_block)
+
+ 208            LOAD_CONST              40 (<code object __annotate__ at 0x7aab493990, file "pakcrypto.py", line 208>)
+                MAKE_FUNCTION
+                LOAD_CONST              41 (<code object sm4_encrypt_block at 0x7aab508030, file "pakcrypto.py", line 208>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              77 (sm4_encrypt_block)
+
+ 214            LOAD_CONST              42 (<code object __annotate__ at 0x7aab493aa0, file "pakcrypto.py", line 214>)
+                MAKE_FUNCTION
+                LOAD_CONST              43 (<code object _sm4_custom_decrypt at 0x7aaf603870, file "pakcrypto.py", line 214>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              78 (_sm4_custom_decrypt)
+
+ 221            LOAD_CONST              44 (<code object __annotate__ at 0x7aab493dd0, file "pakcrypto.py", line 221>)
+                MAKE_FUNCTION
+                LOAD_CONST              45 (<code object _sm4_custom_encrypt at 0x7aaf603a50, file "pakcrypto.py", line 221>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              79 (_sm4_custom_encrypt)
+
+ 226            LOAD_CONST              46 (<code object __annotate__ at 0x7aab493bb0, file "pakcrypto.py", line 226>)
+                MAKE_FUNCTION
+                LOAD_CONST              47 (<code object _xor_bytes at 0x7aaf62f0f0, file "pakcrypto.py", line 226>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              80 (_xor_bytes)
+
+ 232            LOAD_CONST              48 (<code object __annotate__ at 0x7aab33c030, file "pakcrypto.py", line 232>)
+                MAKE_FUNCTION
+                LOAD_CONST              49 (<code object _simple2_prefix at 0xb400007c7006e1d0, file "pakcrypto.py", line 232>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              81 (_simple2_prefix)
+
+ 251            LOAD_CONST              50 (<code object __annotate__ at 0x7aab4731b0, file "pakcrypto.py", line 251>)
+                MAKE_FUNCTION
+                LOAD_CONST              51 (<code object decrypt_block at 0xb400007c700648b0, file "pakcrypto.py", line 251>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              82 (decrypt_block)
+
+ 266            LOAD_NAME               22 (EM_SIMPLE1)
+                LOAD_NAME               23 (EM_SIMPLE2)
+                LOAD_NAME               24 (EM_SM4_2)
+                LOAD_NAME               25 (EM_SM4_4)
+                BUILD_LIST               4
+
+ 267            LOAD_NAME               83 (range)
+                PUSH_NULL
+                LOAD_SMALL_INT          16
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      0 (i)
+                SWAP                     2
+        L6:     BUILD_LIST               0
+                SWAP                     2
+        L7:     FOR_ITER                12 (to L8)
+                STORE_FAST               0 (i)
+                LOAD_NAME               26 (EM_SM4_NEW_BASE)
+                LOAD_FAST_BORROW         0 (i)
+                BINARY_OP                0 (+)
+                LIST_APPEND              2
+                JUMP_BACKWARD           14 (to L7)
+        L8:     END_FOR
+                POP_ITER
+        L9:     SWAP                     2
+                STORE_FAST               0 (i)
+
+ 266            BINARY_OP                0 (+)
+                STORE_NAME              84 (ALT_ENCRYPTION_METHODS)
+
+ 270            LOAD_CONST              52 (<code object __annotate__ at 0x7aaf68e930, file "pakcrypto.py", line 270>)
+                MAKE_FUNCTION
+                LOAD_CONST              53 (<code object looks_like_garbage at 0x7aab5081d0, file "pakcrypto.py", line 270>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              85 (looks_like_garbage)
+
+ 285            LOAD_CONST              54 (<code object __annotate__ at 0x7aab33c140, file "pakcrypto.py", line 285>)
+                MAKE_FUNCTION
+                LOAD_CONST              55 (<code object try_decrypt_variants at 0xb400007c0001ce90, file "pakcrypto.py", line 285>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              86 (try_decrypt_variants)
+
+ 305            LOAD_CONST              56 (<code object __annotate__ at 0x7aab473e10, file "pakcrypto.py", line 305>)
+                MAKE_FUNCTION
+                LOAD_CONST              57 (<code object encrypt_block at 0xb400007c800a37f0, file "pakcrypto.py", line 305>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              87 (encrypt_block)
+
+ 327            LOAD_CONST              66 ((None,))
+                LOAD_CONST              58 (<code object __annotate__ at 0x7aab33c250, file "pakcrypto.py", line 327>)
+                MAKE_FUNCTION
+                LOAD_CONST              59 (<code object best_compress at 0xb400007c7006f7b0, file "pakcrypto.py", line 327>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                SET_FUNCTION_ATTRIBUTE   1 (defaults)
+                STORE_NAME              88 (best_compress)
+
+ 354            LOAD_CONST               1 (None)
+                STORE_GLOBAL            89 (_ZSTD_OBJ)
+
+ 355            BUILD_MAP                0
+                STORE_NAME              90 (_COMPRESSORS)
+
+ 356            BUILD_MAP                0
+                STORE_NAME              91 (_DECOMP_DICT)
+
+ 359            LOAD_CONST              60 (<code object _zstd at 0x7aab4e0270, file "pakcrypto.py", line 359>)
+                MAKE_FUNCTION
+                STORE_NAME              92 (_zstd)
+
+ 367            LOAD_CONST              61 (<code object __annotate__ at 0x7aab33c360, file "pakcrypto.py", line 367>)
+                MAKE_FUNCTION
+                LOAD_CONST              62 (<code object decompress_block at 0xb400007d1004bdd0, file "pakcrypto.py", line 367>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE  16 (annotate)
+                STORE_NAME              93 (decompress_block)
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+  --   L10:     PUSH_EXC_INFO
+
+ 198            LOAD_NAME               75 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L12)
+                NOT_TAKEN
+                POP_TOP
+
+ 199            LOAD_CONST              37 (False)
+                STORE_NAME              74 (_HAVE_OSSL_SM4)
+       L11:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 138 (to L5)
+
+ 198   L12:     RERAISE                  0
+
+  --   L13:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L14:     SWAP                     2
+                POP_TOP
+
+ 267            SWAP                     2
+                STORE_FAST               0 (i)
+                RERAISE                  0
+ExceptionTable:
+  L1 to L5 -> L10 [0]
+  L6 to L9 -> L14 [3]
+  L10 to L11 -> L13 [1] lasti
+  L12 to L13 -> L13 [1] lasti
+
+
+### [1]   zuc_keystream  (file=pakcrypto.py) :: line 46, args 3, locals 3, stack 8, consts 1
+  46           RESUME                   0
+
+  47           LOAD_GLOBAL              1 (ZUC + NULL)
+               LOAD_GLOBAL              2 (ZUC_KEY)
+               LOAD_GLOBAL              4 (ZUC_IV)
+               CALL                     2
+               STORE_FAST               1 (z)
+
+  48           LOAD_GLOBAL              7 (range + NULL)
+               LOAD_FAST_BORROW         0 (n)
+               CALL                     1
+               GET_ITER
+               LOAD_FAST_AND_CLEAR      2 (_)
+               SWAP                     2
+       L1:     BUILD_LIST               0
+               SWAP                     2
+       L2:     FOR_ITER                47 (to L3)
+               STORE_FAST               2 (_)
+               LOAD_GLOBAL              8 (struct)
+               LOAD_ATTR               10 (unpack)
+               PUSH_NULL
+               LOAD_CONST               0 ('>I')
+               LOAD_FAST_BORROW         1 (z)
+               LOAD_ATTR               13 (generate + NULL|self)
+               CALL                     0
+               CALL                     2
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               LIST_APPEND              2
+               JUMP_BACKWARD           49 (to L2)
+       L3:     END_FOR
+               POP_ITER
+       L4:     SWAP                     2
+               STORE_FAST               2 (_)
+               RETURN_VALUE
+
+  --   L5:     SWAP                     2
+               POP_TOP
+
+  48           SWAP                     2
+               STORE_FAST               2 (_)
+               RERAISE                  0
+ExceptionTable:
+  L1 to L4 -> L5 [2]
+
+
+### [2]   __annotate__  (file=pakcrypto.py) :: line 51, args 1, locals 1, stack 6, consts 4
+ 51           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('n')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [3]   _hashhash  (file=pakcrypto.py) :: line 51, args 3, locals 3, stack 4, consts 2
+ 51           RESUME                   0
+
+ 52           LOAD_CONST               0 (b'')
+              STORE_FAST               2 (result)
+
+ 53   L1:     LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         2 (result)
+              CALL                     1
+              LOAD_FAST_BORROW         1 (n)
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       35 (to L2)
+              NOT_TAKEN
+
+ 54           LOAD_FAST_BORROW         2 (result)
+              LOAD_GLOBAL              3 (sha1 + NULL)
+              LOAD_FAST_BORROW         0 (data)
+              CALL                     1
+              LOAD_ATTR                5 (digest + NULL|self)
+              CALL                     0
+              BINARY_OP               13 (+=)
+              STORE_FAST               2 (result)
+              JUMP_BACKWARD           50 (to L1)
+
+ 55   L2:     LOAD_FAST_BORROW         2 (result)
+              LOAD_CONST               1 (None)
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_SLICE
+              RETURN_VALUE
+
+
+### [4]   __annotate__  (file=pakcrypto.py) :: line 58, args 1, locals 1, stack 4, consts 3
+ 58           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('x')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [5]   _safe_unpad  (file=pakcrypto.py) :: line 58, args 2, locals 3, stack 9, consts 4
+  --           MAKE_CELL                0 (x)
+
+  58           RESUME                   0
+
+  59           NOP
+
+  60   L1:     LOAD_SMALL_INT           1
+               LOAD_GLOBAL              1 (next + NULL)
+               LOAD_FAST_BORROW         0 (x)
+               BUILD_TUPLE              1
+               LOAD_CONST               1 (<code object <genexpr> at 0x7aab4733f0, file "pakcrypto.py", line 60>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              3 (range + NULL)
+               LOAD_GLOBAL              5 (len + NULL)
+               LOAD_DEREF               0 (x)
+               CALL                     1
+               CALL                     1
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               BINARY_OP                0 (+)
+               STORE_FAST               1 (skip)
+
+  61           LOAD_DEREF               0 (x)
+               LOAD_FAST_BORROW         1 (skip)
+               LOAD_CONST               2 (None)
+               BINARY_SLICE
+       L2:     RETURN_VALUE
+
+  --   L3:     PUSH_EXC_INFO
+
+  62           LOAD_GLOBAL              6 (StopIteration)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE       21 (to L5)
+               NOT_TAKEN
+               POP_TOP
+
+  63           LOAD_DEREF               0 (x)
+               LOAD_ATTR                9 (strip + NULL|self)
+               LOAD_CONST               3 (b'\x00')
+               CALL                     1
+               SWAP                     2
+       L4:     POP_EXCEPT
+               RETURN_VALUE
+
+  62   L5:     RERAISE                  0
+
+  --   L6:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L3 [0]
+  L3 to L4 -> L6 [1] lasti
+  L5 to L6 -> L6 [1] lasti
+
+
+### [6]     <genexpr>  (file=pakcrypto.py) :: line 60, args 2, locals 3, stack 3, consts 2
+  --           COPY_FREE_VARS           1
+
+  60           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                23 (to L5)
+               STORE_FAST               1 (i)
+               LOAD_DEREF               2 (x)
+               LOAD_FAST_BORROW         1 (i)
+               BINARY_OP               26 ([])
+               LOAD_SMALL_INT           0
+               COMPARE_OP             119 (bool(!=))
+       L3:     POP_JUMP_IF_TRUE         3 (to L4)
+               NOT_TAKEN
+               JUMP_BACKWARD           19 (to L2)
+       L4:     LOAD_FAST_BORROW         1 (i)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           25 (to L2)
+       L5:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L6:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L6 [0] lasti
+  L4 to L6 -> L6 [0] lasti
+
+
+### [7]   __annotate__  (file=pakcrypto.py) :: line 66, args 1, locals 1, stack 6, consts 4
+ 66           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('signature')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('modulus')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [8]   rsa_extract  (file=pakcrypto.py) :: line 66, args 9, locals 9, stack 12, consts 12
+ 66           RESUME                   0
+
+ 67           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (signature)
+              LOAD_CONST               0 ('little')
+              CALL                     2
+              STORE_FAST               2 (c)
+
+ 68           LOAD_GLOBAL              0 (int)
+              LOAD_ATTR                3 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         1 (modulus)
+              LOAD_CONST               0 ('little')
+              CALL                     2
+              STORE_FAST               3 (n)
+
+ 69           LOAD_GLOBAL              5 (pow + NULL)
+              LOAD_FAST_BORROW         2 (c)
+              LOAD_CONST               1 (65537)
+              LOAD_FAST_BORROW         3 (n)
+              CALL                     3
+              LOAD_ATTR                7 (to_bytes + NULL|self)
+              LOAD_CONST               2 (256)
+              LOAD_CONST               0 ('little')
+              CALL                     2
+              LOAD_ATTR                9 (rstrip + NULL|self)
+              LOAD_CONST               3 (b'\x00')
+              CALL                     1
+              STORE_FAST               4 (m)
+
+ 70           LOAD_GLOBAL             11 (len + NULL)
+              LOAD_FAST_BORROW         4 (m)
+              CALL                     1
+              LOAD_SMALL_INT          43
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+
+ 71           LOAD_CONST               4 (b'')
+              RETURN_VALUE
+
+ 72   L1:     LOAD_FAST_BORROW         4 (m)
+              LOAD_CONST               5 (slice(1, None, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               6 (slice(None, 20, None))
+              BINARY_OP               26 ([])
+              STORE_FAST               5 (x1)
+
+ 73           LOAD_FAST_BORROW         4 (m)
+              LOAD_CONST               7 (slice(21, None, None))
+              BINARY_OP               26 ([])
+              STORE_FAST               6 (x2)
+
+ 74           LOAD_GLOBAL             13 (bytes + NULL)
+              LOAD_CONST               8 (<code object <genexpr> at 0x7aab491460, file "pakcrypto.py", line 74>)
+              MAKE_FUNCTION
+              LOAD_GLOBAL             15 (zip + NULL)
+              LOAD_FAST_BORROW         5 (x1)
+              LOAD_GLOBAL             17 (_hashhash + NULL)
+              LOAD_FAST_BORROW         6 (x2)
+              LOAD_GLOBAL             11 (len + NULL)
+              LOAD_FAST_BORROW         5 (x1)
+              CALL                     1
+              CALL                     2
+              CALL                     2
+              GET_ITER
+              CALL                     0
+              CALL                     1
+              STORE_FAST               5 (x1)
+
+ 75           LOAD_GLOBAL             13 (bytes + NULL)
+              LOAD_CONST               9 (<code object <genexpr> at 0x7aab493cc0, file "pakcrypto.py", line 75>)
+              MAKE_FUNCTION
+              LOAD_GLOBAL             15 (zip + NULL)
+              LOAD_FAST_BORROW         6 (x2)
+              LOAD_GLOBAL             17 (_hashhash + NULL)
+              LOAD_FAST_BORROW         5 (x1)
+              LOAD_GLOBAL             11 (len + NULL)
+              LOAD_FAST_BORROW         6 (x2)
+              CALL                     1
+              CALL                     2
+              CALL                     2
+              GET_ITER
+              CALL                     0
+              CALL                     1
+              STORE_FAST               6 (x2)
+
+ 76           LOAD_FAST_BORROW         6 (x2)
+              LOAD_CONST               6 (slice(None, 20, None))
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         6 (x2)
+              LOAD_CONST              10 (slice(20, None, None))
+              BINARY_OP               26 ([])
+              STORE_FAST_STORE_FAST  135 (rest, part1)
+
+ 77           LOAD_FAST_BORROW         7 (part1)
+              LOAD_GLOBAL             19 (sha1 + NULL)
+              LOAD_CONST              11 (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+              CALL                     1
+              LOAD_ATTR               21 (digest + NULL|self)
+              CALL                     0
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE        3 (to L2)
+              NOT_TAKEN
+
+ 78           LOAD_CONST               4 (b'')
+              RETURN_VALUE
+
+ 79   L2:     LOAD_GLOBAL             23 (_safe_unpad + NULL)
+              LOAD_FAST_BORROW         8 (rest)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [9]     <genexpr>  (file=pakcrypto.py) :: line 74, args 3, locals 3, stack 3, consts 1
+  74           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                15 (to L3)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST   18 (a, b)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           17 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [10]     <genexpr>  (file=pakcrypto.py) :: line 75, args 3, locals 3, stack 3, consts 1
+  75           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                15 (to L3)
+               UNPACK_SEQUENCE          2
+               STORE_FAST_STORE_FAST   18 (a, b)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (a, b)
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           17 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [11]   __annotate__  (file=pakcrypto.py) :: line 82, args 1, locals 1, stack 4, consts 3
+ 82           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('ciphertext')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [12]   decrypt_index  (file=pakcrypto.py) :: line 82, args 9, locals 9, stack 6, consts 8
+  82            RESUME                   0
+
+  83            LOAD_FAST_BORROW         1 (pak_info)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT           7
+                COMPARE_OP             148 (bool(>))
+                POP_JUMP_IF_FALSE      161 (to L5)
+                NOT_TAKEN
+
+  84            LOAD_GLOBAL              3 (rsa_extract + NULL)
+                LOAD_FAST_BORROW         1 (pak_info)
+                LOAD_ATTR                4 (packed_key)
+                LOAD_GLOBAL              6 (RSA_MOD_1)
+                CALL                     2
+                STORE_FAST               2 (key)
+
+  85            LOAD_GLOBAL              3 (rsa_extract + NULL)
+                LOAD_FAST_BORROW         1 (pak_info)
+                LOAD_ATTR                8 (packed_iv)
+                LOAD_GLOBAL              6 (RSA_MOD_1)
+                CALL                     2
+                STORE_FAST               3 (iv)
+
+  86            LOAD_GLOBAL             11 (len + NULL)
+                LOAD_FAST_BORROW         2 (key)
+                CALL                     1
+                LOAD_SMALL_INT          32
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_TRUE        17 (to L1)
+                NOT_TAKEN
+                LOAD_GLOBAL             11 (len + NULL)
+                LOAD_FAST_BORROW         3 (iv)
+                CALL                     1
+                LOAD_SMALL_INT          32
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE        3 (to L2)
+                NOT_TAKEN
+
+  87    L1:     LOAD_FAST_BORROW         0 (ciphertext)
+                RETURN_VALUE
+
+  88    L2:     LOAD_SMALL_INT           0
+                LOAD_CONST               1 (('AES',))
+                IMPORT_NAME              6 (Crypto.Cipher)
+                IMPORT_FROM              7 (AES)
+                STORE_FAST               4 (AES)
+                POP_TOP
+
+  89            LOAD_FAST_BORROW         4 (AES)
+                LOAD_ATTR               17 (new + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 36 (key, AES)
+                LOAD_ATTR               18 (MODE_CBC)
+                LOAD_FAST_BORROW         3 (iv)
+                LOAD_CONST               2 (slice(None, 16, None))
+                BINARY_OP               26 ([])
+                CALL                     3
+                STORE_FAST               5 (aes)
+
+  90            LOAD_FAST_BORROW         5 (aes)
+                LOAD_ATTR               21 (decrypt + NULL|self)
+                LOAD_FAST_BORROW         0 (ciphertext)
+                CALL                     1
+                STORE_FAST               6 (decrypted)
+
+  91            NOP
+
+  92    L3:     LOAD_SMALL_INT           0
+                LOAD_CONST               3 (('unpad',))
+                IMPORT_NAME             11 (Crypto.Util.Padding)
+                IMPORT_FROM             12 (unpad)
+                STORE_FAST               7 (unpad)
+                POP_TOP
+
+  93            LOAD_FAST_BORROW         7 (unpad)
+                PUSH_NULL
+                LOAD_FAST_BORROW         6 (decrypted)
+                LOAD_SMALL_INT          16
+                CALL                     2
+        L4:     RETURN_VALUE
+
+  99    L5:     LOAD_GLOBAL             31 (bytes + NULL)
+                LOAD_CONST               6 (<code object <genexpr> at 0x7aab4929a0, file "pakcrypto.py", line 99>)
+                MAKE_FUNCTION
+                LOAD_FAST_BORROW         0 (ciphertext)
+                GET_ITER
+                CALL                     0
+                CALL                     1
+                RETURN_VALUE
+
+  --    L6:     PUSH_EXC_INFO
+
+  94            LOAD_GLOBAL             26 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       96 (to L12)
+                NOT_TAKEN
+                POP_TOP
+
+  95            LOAD_FAST                6 (decrypted)
+                LOAD_CONST               7 (-1)
+                BINARY_OP               26 ([])
+                STORE_FAST               8 (last)
+
+  96            LOAD_SMALL_INT           1
+                LOAD_FAST                8 (last)
+                SWAP                     2
+                COPY                     2
+                COMPARE_OP              58 (bool(<=))
+                POP_JUMP_IF_FALSE        8 (to L7)
+                NOT_TAKEN
+                LOAD_SMALL_INT          16
+                COMPARE_OP              58 (bool(<=))
+                POP_JUMP_IF_FALSE       52 (to L10)
+                NOT_TAKEN
+                JUMP_FORWARD             2 (to L8)
+        L7:     POP_TOP
+                JUMP_FORWARD            48 (to L10)
+        L8:     LOAD_FAST                6 (decrypted)
+                LOAD_ATTR               29 (endswith + NULL|self)
+                LOAD_GLOBAL             31 (bytes + NULL)
+                LOAD_FAST                8 (last)
+                BUILD_LIST               1
+                CALL                     1
+                LOAD_FAST                8 (last)
+                BINARY_OP                5 (*)
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_FALSE        9 (to L10)
+                NOT_TAKEN
+
+  97            LOAD_FAST                6 (decrypted)
+                LOAD_CONST               4 (None)
+                LOAD_FAST                8 (last)
+                UNARY_NEGATIVE
+                BINARY_SLICE
+                SWAP                     2
+        L9:     POP_EXCEPT
+                RETURN_VALUE
+
+  98   L10:     LOAD_FAST                6 (decrypted)
+                LOAD_ATTR               33 (rstrip + NULL|self)
+                LOAD_CONST               5 (b'\x00')
+                CALL                     1
+                SWAP                     2
+       L11:     POP_EXCEPT
+                RETURN_VALUE
+
+  94   L12:     RERAISE                  0
+
+  --   L13:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L3 to L4 -> L6 [0]
+  L6 to L9 -> L13 [1] lasti
+  L10 to L11 -> L13 [1] lasti
+  L12 to L13 -> L13 [1] lasti
+
+
+### [13]     <genexpr>  (file=pakcrypto.py) :: line 99, args 2, locals 2, stack 3, consts 1
+  99           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                17 (to L3)
+               STORE_FAST_LOAD_FAST    17 (b, b)
+               LOAD_GLOBAL              0 (SIMPLE1_KEY)
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           19 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [14]   is_simple1  (file=pakcrypto.py) :: line 102, args 1, locals 1, stack 2, consts 1
+102           RESUME                   0
+
+103           LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              0 (EM_SIMPLE1)
+              COMPARE_OP              72 (==)
+              RETURN_VALUE
+
+
+### [15]   is_simple2  (file=pakcrypto.py) :: line 106, args 1, locals 1, stack 2, consts 1
+106           RESUME                   0
+
+107           LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              0 (EM_SIMPLE2)
+              COMPARE_OP              72 (==)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        10 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              2 (EM_UNKNOWN_17)
+              COMPARE_OP              72 (==)
+      L1:     RETURN_VALUE
+
+
+### [16]   is_sm4  (file=pakcrypto.py) :: line 110, args 1, locals 1, stack 2, consts 1
+110           RESUME                   0
+
+111           LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              0 (EM_SM4_2)
+              COMPARE_OP              72 (==)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        34 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              2 (EM_SM4_4)
+              COMPARE_OP              72 (==)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_TRUE        17 (to L1)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_FAST_BORROW         0 (m)
+              LOAD_GLOBAL              4 (EM_SM4_NEW_MASK)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT           0
+              COMPARE_OP             103 (!=)
+      L1:     RETURN_VALUE
+
+
+### [17]   align_encrypted_size  (file=pakcrypto.py) :: line 114, args 2, locals 2, stack 3, consts 1
+114           RESUME                   0
+
+115           LOAD_GLOBAL              1 (is_simple2 + NULL)
+              LOAD_FAST_BORROW         1 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       43 (to L1)
+              NOT_TAKEN
+
+116           LOAD_FAST_BORROW         0 (n)
+              LOAD_GLOBAL              2 (SIMPLE2_BLOCK)
+              BINARY_OP                0 (+)
+              LOAD_SMALL_INT           1
+              BINARY_OP               10 (-)
+              LOAD_GLOBAL              2 (SIMPLE2_BLOCK)
+              BINARY_OP                2 (//)
+              LOAD_GLOBAL              2 (SIMPLE2_BLOCK)
+              BINARY_OP                5 (*)
+              RETURN_VALUE
+
+117   L1:     LOAD_GLOBAL              5 (is_sm4 + NULL)
+              LOAD_FAST_BORROW         1 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       24 (to L2)
+              NOT_TAKEN
+
+118           LOAD_FAST_BORROW         0 (n)
+              LOAD_SMALL_INT          15
+              BINARY_OP                0 (+)
+              LOAD_SMALL_INT          16
+              BINARY_OP                2 (//)
+              LOAD_SMALL_INT          16
+              BINARY_OP                5 (*)
+              RETURN_VALUE
+
+119   L2:     LOAD_FAST_BORROW         0 (n)
+              RETURN_VALUE
+
+
+### [18]   __annotate__  (file=pakcrypto.py) :: line 122, args 1, locals 1, stack 6, consts 4
+122           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('stem')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('method')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              4 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [19]   derive_sm4_key  (file=pakcrypto.py) :: line 122, args 4, locals 4, stack 4, consts 1
+122           RESUME                   0
+
+123           LOAD_FAST_BORROW         1 (method)
+              LOAD_GLOBAL              0 (EM_SM4_2)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        8 (to L1)
+              NOT_TAKEN
+
+124           LOAD_GLOBAL              2 (SM4_SECRET_2)
+              STORE_FAST               2 (secret)
+              JUMP_FORWARD            68 (to L3)
+
+125   L1:     LOAD_FAST_BORROW         1 (method)
+              LOAD_GLOBAL              4 (EM_SM4_4)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        8 (to L2)
+              NOT_TAKEN
+
+126           LOAD_GLOBAL              6 (SM4_SECRET_4)
+              STORE_FAST               2 (secret)
+              JUMP_FORWARD            50 (to L3)
+
+128   L2:     LOAD_FAST_BORROW         1 (method)
+              LOAD_GLOBAL              8 (EM_SM4_NEW_BASE)
+              BINARY_OP               10 (-)
+              LOAD_GLOBAL             11 (len + NULL)
+              LOAD_GLOBAL             12 (SM4_SECRET_NEW)
+              CALL                     1
+              BINARY_OP                6 (%)
+              STORE_FAST               3 (index)
+
+129           LOAD_GLOBAL             12 (SM4_SECRET_NEW)
+              LOAD_FAST_BORROW         3 (index)
+              BINARY_OP               26 ([])
+              FORMAT_SIMPLE
+              LOAD_FAST_BORROW         1 (method)
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              STORE_FAST               2 (secret)
+
+130   L3:     LOAD_GLOBAL             15 (sha1 + NULL)
+              LOAD_FAST_BORROW         0 (stem)
+              LOAD_ATTR               17 (lower + NULL|self)
+              CALL                     0
+              LOAD_FAST_BORROW         2 (secret)
+              BINARY_OP                0 (+)
+              LOAD_ATTR               19 (encode + NULL|self)
+              CALL                     0
+              CALL                     1
+              LOAD_ATTR               21 (digest + NULL|self)
+              CALL                     0
+              LOAD_CONST               0 (slice(None, 16, None))
+              BINARY_OP               26 ([])
+              RETURN_VALUE
+
+
+### [20]   __annotate__  (file=pakcrypto.py) :: line 134, args 1, locals 1, stack 6, consts 4
+134           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('stem')
+              LOAD_GLOBAL              0 (str)
+              LOAD_CONST               2 ('method')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              4 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [21]   _derive_sm4_key_cached  (file=pakcrypto.py) :: line 133, args 2, locals 2, stack 4, consts 1
+133           RESUME                   0
+
+135           LOAD_GLOBAL              1 (derive_sm4_key + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (stem, method)
+              CALL                     2
+              RETURN_VALUE
+
+
+### [22]   _EVP_CIPHER_CTX  (file=pakcrypto.py) :: line 147, args 0, locals 0, stack 1, consts 3
+147           RESUME                   0
+              LOAD_NAME                0 (__name__)
+              STORE_NAME               1 (__module__)
+              LOAD_CONST               0 ('_EVP_CIPHER_CTX')
+              STORE_NAME               2 (__qualname__)
+              LOAD_SMALL_INT         147
+              STORE_NAME               3 (__firstlineno__)
+
+148           LOAD_CONST               1 (())
+              STORE_NAME               4 (__static_attributes__)
+              LOAD_CONST               2 (None)
+              RETURN_VALUE
+
+
+### [23]   __annotate__  (file=pakcrypto.py) :: line 171, args 1, locals 1, stack 8, consts 5
+171           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('decrypt')
+              LOAD_GLOBAL              2 (bool)
+              LOAD_CONST               4 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                4
+              RETURN_VALUE
+
+
+### [24]   _sm4_ossl  (file=pakcrypto.py) :: line 171, args 8, locals 8, stack 9, consts 2
+ 171            RESUME                   0
+
+ 172            LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR                3 (EVP_CIPHER_CTX_new + NULL|self)
+                CALL                     0
+                STORE_FAST               3 (ctx)
+
+ 173            LOAD_FAST_BORROW         3 (ctx)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        12 (to L1)
+                NOT_TAKEN
+
+ 174            LOAD_GLOBAL              5 (RuntimeError + NULL)
+                LOAD_CONST               0 ('EVP_CIPHER_CTX_new failed')
+                CALL                     1
+                RAISE_VARARGS            1
+
+ 175    L1:     LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR                8 (create_string_buffer)
+                PUSH_NULL
+                LOAD_SMALL_INT          16
+                CALL                     1
+                STORE_FAST               4 (iv)
+
+ 176            NOP
+
+ 177    L2:     LOAD_FAST_BORROW         2 (decrypt)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       30 (to L5)
+        L3:     NOT_TAKEN
+
+ 178    L4:     LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               11 (EVP_DecryptInit_ex + NULL|self)
+                LOAD_FAST_BORROW         3 (ctx)
+                LOAD_GLOBAL             12 (_SM4_ECB)
+                LOAD_CONST               1 (None)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (key, iv)
+                CALL                     5
+                POP_TOP
+                JUMP_FORWARD            28 (to L6)
+
+ 180    L5:     LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               15 (EVP_EncryptInit_ex + NULL|self)
+                LOAD_FAST_BORROW         3 (ctx)
+                LOAD_GLOBAL             12 (_SM4_ECB)
+                LOAD_CONST               1 (None)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (key, iv)
+                CALL                     5
+                POP_TOP
+
+ 181    L6:     LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               17 (EVP_CIPHER_CTX_set_padding + NULL|self)
+                LOAD_FAST_BORROW         3 (ctx)
+                LOAD_SMALL_INT           0
+                CALL                     2
+                POP_TOP
+
+ 182            LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR                8 (create_string_buffer)
+                PUSH_NULL
+                LOAD_GLOBAL             19 (len + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                LOAD_SMALL_INT          16
+                BINARY_OP                0 (+)
+                CALL                     1
+                STORE_FAST               5 (out)
+
+ 183            LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR               20 (c_int)
+                PUSH_NULL
+                LOAD_SMALL_INT           0
+                CALL                     1
+                STORE_FAST               6 (outl)
+
+ 184            LOAD_FAST_BORROW         2 (decrypt)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      109 (to L7)
+                NOT_TAKEN
+
+ 185            LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               23 (EVP_DecryptUpdate + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (ctx, out)
+                LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR               24 (byref)
+                PUSH_NULL
+                LOAD_FAST_BORROW         6 (outl)
+                CALL                     1
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_GLOBAL             19 (len + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                CALL                     5
+                POP_TOP
+
+ 186            LOAD_FAST_BORROW         6 (outl)
+                LOAD_ATTR               26 (value)
+                STORE_FAST               7 (done)
+
+ 187            LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               29 (EVP_DecryptFinal_ex + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (ctx, out)
+                LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR               24 (byref)
+                PUSH_NULL
+                LOAD_FAST_BORROW         6 (outl)
+                CALL                     1
+                CALL                     3
+                POP_TOP
+                JUMP_FORWARD           125 (to L8)
+
+ 189    L7:     LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               31 (EVP_EncryptUpdate + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (ctx, out)
+                LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR               24 (byref)
+                PUSH_NULL
+                LOAD_FAST_BORROW         6 (outl)
+                CALL                     1
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_GLOBAL             19 (len + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                CALL                     1
+                CALL                     5
+                POP_TOP
+
+ 190            LOAD_FAST_BORROW         6 (outl)
+                LOAD_ATTR               26 (value)
+                STORE_FAST               7 (done)
+
+ 191            LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               33 (EVP_EncryptFinal_ex + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (ctx, out)
+                LOAD_GLOBAL              6 (ctypes)
+                LOAD_ATTR               24 (byref)
+                PUSH_NULL
+                LOAD_FAST_BORROW         6 (outl)
+                CALL                     1
+                CALL                     3
+                POP_TOP
+
+ 192            LOAD_FAST_BORROW_LOAD_FAST_BORROW 118 (done, outl)
+                LOAD_ATTR               26 (value)
+                BINARY_OP               13 (+=)
+                STORE_FAST               7 (done)
+
+ 193    L8:     LOAD_FAST_BORROW         5 (out)
+                LOAD_ATTR               34 (raw)
+                LOAD_CONST               1 (None)
+                LOAD_FAST_BORROW         7 (done)
+                BINARY_SLICE
+
+ 195    L9:     LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               37 (EVP_CIPHER_CTX_free + NULL|self)
+                LOAD_FAST_BORROW         3 (ctx)
+                CALL                     1
+                POP_TOP
+                RETURN_VALUE
+
+  --   L10:     PUSH_EXC_INFO
+
+ 195            LOAD_GLOBAL              0 (_crypto)
+                LOAD_ATTR               37 (EVP_CIPHER_CTX_free + NULL|self)
+                LOAD_FAST                3 (ctx)
+                CALL                     1
+                POP_TOP
+                RERAISE                  0
+
+  --   L11:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L10 [0]
+  L4 to L9 -> L10 [0]
+  L10 to L11 -> L11 [1] lasti
+
+
+### [25]   __annotate__  (file=pakcrypto.py) :: line 202, args 1, locals 1, stack 6, consts 4
+202           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [26]   sm4_decrypt_block  (file=pakcrypto.py) :: line 202, args 2, locals 4, stack 9, consts 4
+  --           MAKE_CELL                0 (data)
+               MAKE_CELL                1 (key)
+
+ 202           RESUME                   0
+
+ 203           LOAD_GLOBAL              0 (_HAVE_OSSL_SM4)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       37 (to L1)
+               NOT_TAKEN
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_DEREF               0 (data)
+               CALL                     1
+               LOAD_SMALL_INT          16
+               BINARY_OP                6 (%)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       14 (to L1)
+               NOT_TAKEN
+
+ 204           LOAD_GLOBAL              5 (_sm4_ossl + NULL)
+               LOAD_DEREF               0 (data)
+               LOAD_DEREF               1 (key)
+               LOAD_CONST               1 (True)
+               CALL                     3
+               RETURN_VALUE
+
+ 205   L1:     LOAD_CONST               2 (b'')
+               LOAD_ATTR                7 (join + NULL|self)
+               LOAD_FAST_BORROW         0 (data)
+               LOAD_FAST_BORROW         1 (key)
+               BUILD_TUPLE              2
+               LOAD_CONST               3 (<code object <genexpr> at 0x7aaf62f5f0, file "pakcrypto.py", line 205>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              9 (range + NULL)
+               LOAD_SMALL_INT           0
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_DEREF               0 (data)
+               CALL                     1
+               LOAD_SMALL_INT          16
+               CALL                     3
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               RETURN_VALUE
+
+
+### [27]     <genexpr>  (file=pakcrypto.py) :: line 205, args 2, locals 4, stack 7, consts 2
+  --           COPY_FREE_VARS           2
+
+ 205           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                40 (to L3)
+               STORE_FAST               1 (i)
+               LOAD_GLOBAL              1 (GmalgSM4 + NULL)
+               LOAD_DEREF               3 (key)
+               CALL                     1
+               LOAD_ATTR                3 (decrypt + NULL|self)
+               LOAD_DEREF               2 (data)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 17 (i, i)
+               LOAD_SMALL_INT          16
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           42 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [28]   __annotate__  (file=pakcrypto.py) :: line 208, args 1, locals 1, stack 6, consts 4
+208           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [29]   sm4_encrypt_block  (file=pakcrypto.py) :: line 208, args 2, locals 4, stack 9, consts 4
+  --           MAKE_CELL                0 (data)
+               MAKE_CELL                1 (key)
+
+ 208           RESUME                   0
+
+ 209           LOAD_GLOBAL              0 (_HAVE_OSSL_SM4)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       37 (to L1)
+               NOT_TAKEN
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_DEREF               0 (data)
+               CALL                     1
+               LOAD_SMALL_INT          16
+               BINARY_OP                6 (%)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       14 (to L1)
+               NOT_TAKEN
+
+ 210           LOAD_GLOBAL              5 (_sm4_ossl + NULL)
+               LOAD_DEREF               0 (data)
+               LOAD_DEREF               1 (key)
+               LOAD_CONST               1 (False)
+               CALL                     3
+               RETURN_VALUE
+
+ 211   L1:     LOAD_CONST               2 (b'')
+               LOAD_ATTR                7 (join + NULL|self)
+               LOAD_FAST_BORROW         0 (data)
+               LOAD_FAST_BORROW         1 (key)
+               BUILD_TUPLE              2
+               LOAD_CONST               3 (<code object <genexpr> at 0x7aaf62eab0, file "pakcrypto.py", line 211>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              9 (range + NULL)
+               LOAD_SMALL_INT           0
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_DEREF               0 (data)
+               CALL                     1
+               LOAD_SMALL_INT          16
+               CALL                     3
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               RETURN_VALUE
+
+
+### [30]     <genexpr>  (file=pakcrypto.py) :: line 211, args 2, locals 4, stack 7, consts 2
+  --           COPY_FREE_VARS           2
+
+ 211           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                40 (to L3)
+               STORE_FAST               1 (i)
+               LOAD_GLOBAL              1 (GmalgSM4 + NULL)
+               LOAD_DEREF               3 (key)
+               CALL                     1
+               LOAD_ATTR                3 (encrypt + NULL|self)
+               LOAD_DEREF               2 (data)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 17 (i, i)
+               LOAD_SMALL_INT          16
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           42 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [31]   __annotate__  (file=pakcrypto.py) :: line 214, args 1, locals 1, stack 6, consts 4
+214           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [32]   _sm4_custom_decrypt  (file=pakcrypto.py) :: line 214, args 3, locals 3, stack 4, consts 2
+214           RESUME                   0
+
+217           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (('decrypt_ecb',))
+              IMPORT_NAME              0 (sm4_custom)
+              IMPORT_FROM              1 (decrypt_ecb)
+              STORE_FAST               2 (decrypt_ecb)
+              POP_TOP
+
+218           LOAD_FAST_BORROW         2 (decrypt_ecb)
+              PUSH_NULL
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (data, key)
+              CALL                     2
+              RETURN_VALUE
+
+
+### [33]   __annotate__  (file=pakcrypto.py) :: line 221, args 1, locals 1, stack 6, consts 4
+221           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [34]   _sm4_custom_encrypt  (file=pakcrypto.py) :: line 221, args 3, locals 3, stack 4, consts 2
+221           RESUME                   0
+
+222           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (('encrypt_ecb',))
+              IMPORT_NAME              0 (sm4_custom)
+              IMPORT_FROM              1 (encrypt_ecb)
+              STORE_FAST               2 (encrypt_ecb)
+              POP_TOP
+
+223           LOAD_FAST_BORROW         2 (encrypt_ecb)
+              PUSH_NULL
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (data, key)
+              CALL                     2
+              RETURN_VALUE
+
+
+### [35]   __annotate__  (file=pakcrypto.py) :: line 226, args 1, locals 1, stack 6, consts 4
+226           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [36]   _xor_bytes  (file=pakcrypto.py) :: line 226, args 3, locals 4, stack 6, consts 3
+  --           MAKE_CELL                1 (key)
+
+ 226           RESUME                   0
+
+ 228           LOAD_GLOBAL              1 (bytes + NULL)
+               LOAD_FAST_BORROW         1 (key)
+               BUILD_TUPLE              1
+               LOAD_CONST               1 (<code object <genexpr> at 0x7aab493ee0, file "pakcrypto.py", line 228>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              3 (range + NULL)
+               LOAD_CONST               2 (256)
+               CALL                     1
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               STORE_FAST               2 (table)
+
+ 229           LOAD_FAST_BORROW         0 (data)
+               LOAD_ATTR                5 (translate + NULL|self)
+               LOAD_FAST_BORROW         2 (table)
+               CALL                     1
+               RETURN_VALUE
+
+
+### [37]     <genexpr>  (file=pakcrypto.py) :: line 228, args 2, locals 3, stack 3, consts 1
+  --           COPY_FREE_VARS           1
+
+ 228           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                13 (to L3)
+               STORE_FAST_LOAD_FAST    17 (b, b)
+               LOAD_DEREF               2 (key)
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           15 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [38]   __annotate__  (file=pakcrypto.py) :: line 232, args 1, locals 1, stack 6, consts 4
+232           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('ct')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('key')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [39]   _simple2_prefix  (file=pakcrypto.py) :: line 232, args 7, locals 7, stack 4, consts 4
+232           RESUME                   0
+
+235           LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         0 (ct)
+              CALL                     1
+              LOAD_SMALL_INT           4
+              BINARY_OP                2 (//)
+              STORE_FAST               2 (n)
+
+236           LOAD_FAST_BORROW         2 (n)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              58 (bool(<=))
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+
+237           LOAD_CONST               1 (b'')
+              RETURN_VALUE
+
+238   L1:     LOAD_GLOBAL              2 (int)
+              LOAD_ATTR                5 (from_bytes + NULL|self)
+              LOAD_FAST_BORROW         0 (ct)
+              LOAD_CONST               2 ('little')
+              CALL                     2
+              STORE_FAST               3 (words)
+
+239           LOAD_SMALL_INT           1
+              STORE_FAST               4 (k)
+
+240           LOAD_SMALL_INT           4
+              STORE_FAST               5 (step)
+
+241   L2:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 66 (k, n)
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       43 (to L3)
+              NOT_TAKEN
+
+242           LOAD_FAST_BORROW_LOAD_FAST_BORROW 51 (words, words)
+              LOAD_FAST_BORROW         5 (step)
+              LOAD_SMALL_INT           8
+              BINARY_OP                5 (*)
+              BINARY_OP                3 (<<)
+              BINARY_OP               25 (^=)
+              STORE_FAST               3 (words)
+
+243           LOAD_FAST_BORROW         4 (k)
+              LOAD_SMALL_INT           1
+              BINARY_OP               16 (<<=)
+              STORE_FAST               4 (k)
+
+244           LOAD_FAST_BORROW         5 (step)
+              LOAD_SMALL_INT           1
+              BINARY_OP               16 (<<=)
+              STORE_FAST               5 (step)
+              JUMP_BACKWARD           48 (to L2)
+
+245   L3:     LOAD_FAST_BORROW         3 (words)
+              LOAD_SMALL_INT           1
+              LOAD_FAST_BORROW         2 (n)
+              LOAD_SMALL_INT          32
+              BINARY_OP                5 (*)
+              BINARY_OP                3 (<<)
+              LOAD_SMALL_INT           1
+              BINARY_OP               10 (-)
+              BINARY_OP               14 (&=)
+              STORE_FAST               3 (words)
+
+246           LOAD_FAST_BORROW         1 (key)
+              LOAD_SMALL_INT           1
+              LOAD_FAST_BORROW         2 (n)
+              LOAD_SMALL_INT          32
+              BINARY_OP                5 (*)
+              BINARY_OP                3 (<<)
+              LOAD_SMALL_INT           1
+              BINARY_OP               10 (-)
+              LOAD_CONST               3 (4294967295)
+              BINARY_OP                2 (//)
+              BINARY_OP                5 (*)
+              STORE_FAST               6 (keyn)
+
+247           LOAD_FAST_BORROW_LOAD_FAST_BORROW 54 (words, keyn)
+              BINARY_OP               25 (^=)
+              STORE_FAST               3 (words)
+
+248           LOAD_FAST_BORROW         3 (words)
+              LOAD_ATTR                7 (to_bytes + NULL|self)
+              LOAD_FAST_BORROW         2 (n)
+              LOAD_SMALL_INT           4
+              BINARY_OP                5 (*)
+              LOAD_CONST               2 ('little')
+              CALL                     2
+              RETURN_VALUE
+
+
+### [40]   __annotate__  (file=pakcrypto.py) :: line 251, args 1, locals 1, stack 8, consts 5
+251           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('ciphertext')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('stem')
+              LOAD_GLOBAL              2 (str)
+              LOAD_CONST               3 ('method')
+              LOAD_GLOBAL              4 (int)
+              LOAD_CONST               4 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                4
+              RETURN_VALUE
+
+
+### [41]   decrypt_block  (file=pakcrypto.py) :: line 251, args 5, locals 5, stack 6, consts 3
+251           RESUME                   0
+
+252           LOAD_GLOBAL              1 (is_simple1 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       17 (to L1)
+              NOT_TAKEN
+
+253           LOAD_GLOBAL              3 (_xor_bytes + NULL)
+              LOAD_FAST_BORROW         0 (ciphertext)
+              LOAD_GLOBAL              4 (SIMPLE1_KEY)
+              CALL                     2
+              RETURN_VALUE
+
+254   L1:     LOAD_GLOBAL              7 (is_simple2 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       75 (to L2)
+              NOT_TAKEN
+
+255           LOAD_GLOBAL              8 (struct)
+              LOAD_ATTR               10 (unpack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<I')
+              LOAD_GLOBAL             12 (SIMPLE2_KEY)
+              CALL                     2
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               3 (key)
+
+256           LOAD_GLOBAL             15 (len + NULL)
+              LOAD_FAST_BORROW         0 (ciphertext)
+              CALL                     1
+              LOAD_SMALL_INT           4
+              BINARY_OP                2 (//)
+              STORE_FAST               4 (n)
+
+257           LOAD_GLOBAL             17 (_simple2_prefix + NULL)
+              LOAD_FAST_BORROW         0 (ciphertext)
+              LOAD_CONST               1 (None)
+              LOAD_FAST_BORROW         4 (n)
+              LOAD_SMALL_INT           4
+              BINARY_OP                5 (*)
+              BINARY_SLICE
+              LOAD_FAST_BORROW         3 (key)
+              CALL                     2
+              RETURN_VALUE
+
+258   L2:     LOAD_GLOBAL             19 (is_sm4 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       45 (to L4)
+              NOT_TAKEN
+
+259           LOAD_GLOBAL             21 (_derive_sm4_key_cached + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (stem, method)
+              CALL                     2
+              STORE_FAST               3 (key)
+
+260           LOAD_FAST_BORROW         2 (method)
+              LOAD_GLOBAL             22 (EM_SM4_NEW_BASE)
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       12 (to L3)
+              NOT_TAKEN
+
+261           LOAD_GLOBAL             25 (_sm4_custom_decrypt + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 3 (ciphertext, key)
+              CALL                     2
+              RETURN_VALUE
+
+262   L3:     LOAD_GLOBAL             27 (sm4_decrypt_block + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 3 (ciphertext, key)
+              CALL                     2
+              RETURN_VALUE
+
+263   L4:     LOAD_GLOBAL             29 (ValueError + NULL)
+              LOAD_CONST               2 ('Unknown encryption method: ')
+              LOAD_FAST_BORROW         2 (method)
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              CALL                     1
+              RAISE_VARARGS            1
+
+
+### [42]   __annotate__  (file=pakcrypto.py) :: line 270, args 1, locals 1, stack 4, consts 3
+270           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (bool)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [43]   looks_like_garbage  (file=pakcrypto.py) :: line 270, args 2, locals 3, stack 6, consts 5
+  --           MAKE_CELL                2 (sample)
+
+ 270           RESUME                   0
+
+ 273           LOAD_FAST_BORROW         0 (data)
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L1)
+               NOT_TAKEN
+
+ 274           LOAD_CONST               1 (True)
+               RETURN_VALUE
+
+ 275   L1:     LOAD_FAST_BORROW         0 (data)
+               LOAD_CONST               2 (slice(None, 4096, None))
+               BINARY_OP               26 ([])
+               STORE_DEREF              2 (sample)
+
+ 276           NOP
+
+ 277   L2:     LOAD_GLOBAL              1 (max + NULL)
+               LOAD_FAST_BORROW         2 (sample)
+               BUILD_TUPLE              1
+               LOAD_CONST               3 (<code object <genexpr> at 0x7aab472e50, file "pakcrypto.py", line 277>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              3 (set + NULL)
+               LOAD_DEREF               2 (sample)
+               CALL                     1
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               STORE_FAST               1 (top)
+
+ 280   L3:     LOAD_FAST                1 (top)
+               LOAD_GLOBAL              7 (len + NULL)
+               LOAD_DEREF               2 (sample)
+               CALL                     1
+               LOAD_SMALL_INT          95
+               BINARY_OP                5 (*)
+               LOAD_SMALL_INT         100
+               BINARY_OP                2 (//)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE        3 (to L4)
+               NOT_TAKEN
+
+ 281           LOAD_CONST               1 (True)
+               RETURN_VALUE
+
+ 282   L4:     LOAD_CONST               4 (False)
+               RETURN_VALUE
+
+  --   L5:     PUSH_EXC_INFO
+
+ 278           LOAD_GLOBAL              4 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L7)
+               NOT_TAKEN
+               POP_TOP
+
+ 279   L6:     POP_EXCEPT
+               LOAD_CONST               4 (False)
+               RETURN_VALUE
+
+ 278   L7:     RERAISE                  0
+
+  --   L8:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L5 [0]
+  L5 to L6 -> L8 [1] lasti
+  L7 to L8 -> L8 [1] lasti
+
+
+### [44]     <genexpr>  (file=pakcrypto.py) :: line 277, args 2, locals 3, stack 4, consts 1
+  --           COPY_FREE_VARS           1
+
+ 277           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                22 (to L3)
+               STORE_FAST               1 (b)
+               LOAD_DEREF               2 (sample)
+               LOAD_ATTR                1 (count + NULL|self)
+               LOAD_FAST_BORROW         1 (b)
+               CALL                     1
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           24 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [45]   __annotate__  (file=pakcrypto.py) :: line 285, args 1, locals 1, stack 6, consts 4
+285           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('ciphertext')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('stem')
+              LOAD_GLOBAL              2 (str)
+              LOAD_CONST               3 ('method')
+              LOAD_GLOBAL              4 (int)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [46]   try_decrypt_variants  (file=pakcrypto.py) :: line 285, args 8, locals 8, stack 6, consts 2
+ 285            RETURN_GENERATOR
+                POP_TOP
+        L1:     RESUME                   0
+
+ 288            LOAD_FAST_BORROW         2 (method)
+                BUILD_LIST               1
+                STORE_FAST               3 (order)
+
+ 289            LOAD_GLOBAL              0 (ALT_ENCRYPTION_METHODS)
+                GET_ITER
+        L2:     FOR_ITER                28 (to L5)
+                STORE_FAST               4 (alt)
+
+ 290            LOAD_FAST_BORROW_LOAD_FAST_BORROW 67 (alt, order)
+                CONTAINS_OP              1 (not in)
+        L3:     POP_JUMP_IF_TRUE         3 (to L4)
+                NOT_TAKEN
+                JUMP_BACKWARD           11 (to L2)
+
+ 291    L4:     LOAD_FAST_BORROW         3 (order)
+                LOAD_ATTR                3 (append + NULL|self)
+                LOAD_FAST_BORROW         4 (alt)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           30 (to L2)
+
+ 289    L5:     END_FOR
+                POP_ITER
+
+ 292            LOAD_GLOBAL              5 (set + NULL)
+                CALL                     0
+                STORE_FAST               5 (seen)
+
+ 293            LOAD_FAST_BORROW         3 (order)
+                GET_ITER
+        L6:     FOR_ITER                75 (to L15)
+                STORE_FAST               6 (m)
+
+ 294            LOAD_FAST_BORROW_LOAD_FAST_BORROW 101 (m, seen)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE        3 (to L7)
+                NOT_TAKEN
+
+ 295            JUMP_BACKWARD           11 (to L6)
+
+ 296    L7:     LOAD_FAST_BORROW         5 (seen)
+                LOAD_ATTR                7 (add + NULL|self)
+                LOAD_FAST_BORROW         6 (m)
+                CALL                     1
+                POP_TOP
+
+ 297    L8:     NOP
+
+ 298    L9:     LOAD_GLOBAL              9 (decrypt_block + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (ciphertext, stem)
+                LOAD_FAST_BORROW         6 (m)
+                CALL                     3
+                STORE_FAST               7 (data)
+
+ 301   L10:     LOAD_FAST                7 (data)
+                TO_BOOL
+       L11:     POP_JUMP_IF_TRUE         3 (to L12)
+                NOT_TAKEN
+                JUMP_BACKWARD           51 (to L6)
+       L12:     LOAD_GLOBAL             13 (looks_like_garbage + NULL)
+                LOAD_FAST                7 (data)
+                CALL                     1
+                TO_BOOL
+       L13:     POP_JUMP_IF_FALSE        3 (to L14)
+                NOT_TAKEN
+                JUMP_BACKWARD           70 (to L6)
+
+ 302   L14:     LOAD_FAST_LOAD_FAST    103 (m, data)
+                BUILD_TUPLE              2
+                YIELD_VALUE              0
+                RESUME                   5
+                POP_TOP
+                JUMP_BACKWARD           77 (to L6)
+
+ 293   L15:     END_FOR
+                POP_ITER
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+  --   L16:     PUSH_EXC_INFO
+
+ 299            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L18)
+                NOT_TAKEN
+                POP_TOP
+
+ 300   L17:     POP_EXCEPT
+                JUMP_BACKWARD           95 (to L6)
+
+ 299   L18:     RERAISE                  0
+
+  --   L19:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L20:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+                RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L20 [0] lasti
+  L4 to L8 -> L20 [0] lasti
+  L9 to L10 -> L16 [1]
+  L10 to L11 -> L20 [0] lasti
+  L12 to L13 -> L20 [0] lasti
+  L14 to L16 -> L20 [0] lasti
+  L16 to L17 -> L19 [2] lasti
+  L17 to L18 -> L20 [0] lasti
+  L18 to L19 -> L19 [2] lasti
+  L19 to L20 -> L20 [0] lasti
+
+
+### [47]   __annotate__  (file=pakcrypto.py) :: line 305, args 1, locals 1, stack 8, consts 5
+305           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('plaintext')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('stem')
+              LOAD_GLOBAL              2 (str)
+              LOAD_CONST               3 ('method')
+              LOAD_GLOBAL              4 (int)
+              LOAD_CONST               4 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                4
+              RETURN_VALUE
+
+
+### [48]   encrypt_block  (file=pakcrypto.py) :: line 305, args 8, locals 8, stack 7, consts 5
+305           RESUME                   0
+
+306           LOAD_GLOBAL              1 (is_simple1 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       17 (to L1)
+              NOT_TAKEN
+
+307           LOAD_GLOBAL              3 (_xor_bytes + NULL)
+              LOAD_FAST_BORROW         0 (plaintext)
+              LOAD_GLOBAL              4 (SIMPLE1_KEY)
+              CALL                     2
+              RETURN_VALUE
+
+308   L1:     LOAD_GLOBAL              7 (is_simple2 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE      183 (to L4)
+              NOT_TAKEN
+
+309           LOAD_GLOBAL              9 (len + NULL)
+              LOAD_FAST_BORROW         0 (plaintext)
+              CALL                     1
+              UNARY_NEGATIVE
+              LOAD_GLOBAL             10 (SIMPLE2_BLOCK)
+              BINARY_OP                6 (%)
+              STORE_FAST               3 (pad)
+
+310           LOAD_FAST_BORROW         0 (plaintext)
+              LOAD_CONST               0 (b'\x00')
+              LOAD_FAST_BORROW         3 (pad)
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              STORE_FAST               0 (plaintext)
+
+311           LOAD_GLOBAL             12 (struct)
+              LOAD_ATTR               14 (unpack)
+              PUSH_NULL
+              LOAD_CONST               1 ('<I')
+              LOAD_GLOBAL             16 (SIMPLE2_KEY)
+              CALL                     2
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               4 (rolling)
+
+312           LOAD_GLOBAL             19 (bytearray + NULL)
+              CALL                     0
+              STORE_FAST               5 (out)
+
+313           LOAD_GLOBAL             12 (struct)
+              LOAD_ATTR               14 (unpack)
+              PUSH_NULL
+              LOAD_CONST               2 ('<')
+              LOAD_GLOBAL              9 (len + NULL)
+              LOAD_FAST_BORROW         0 (plaintext)
+              CALL                     1
+              LOAD_SMALL_INT           4
+              BINARY_OP                2 (//)
+              FORMAT_SIMPLE
+              LOAD_CONST               3 ('I')
+              BUILD_STRING             3
+              LOAD_FAST_BORROW         0 (plaintext)
+              CALL                     2
+              GET_ITER
+      L2:     FOR_ITER                41 (to L3)
+              STORE_FAST               6 (x)
+
+314           LOAD_FAST_BORROW         5 (out)
+              LOAD_GLOBAL             12 (struct)
+              LOAD_ATTR               20 (pack)
+              PUSH_NULL
+              LOAD_CONST               1 ('<I')
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 70 (rolling, x)
+              BINARY_OP               12 (^)
+              CALL                     2
+              BINARY_OP               13 (+=)
+              STORE_FAST               5 (out)
+
+315           LOAD_FAST                6 (x)
+              STORE_FAST               4 (rolling)
+              JUMP_BACKWARD           43 (to L2)
+
+313   L3:     END_FOR
+              POP_ITER
+
+316           LOAD_GLOBAL             23 (bytes + NULL)
+              LOAD_FAST_BORROW         5 (out)
+              CALL                     1
+              RETURN_VALUE
+
+317   L4:     LOAD_GLOBAL             25 (is_sm4 + NULL)
+              LOAD_FAST_BORROW         2 (method)
+              CALL                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       80 (to L6)
+              NOT_TAKEN
+
+318           LOAD_GLOBAL              9 (len + NULL)
+              LOAD_FAST_BORROW         0 (plaintext)
+              CALL                     1
+              UNARY_NEGATIVE
+              LOAD_SMALL_INT          16
+              BINARY_OP                6 (%)
+              STORE_FAST               3 (pad)
+
+319           LOAD_FAST_BORROW         0 (plaintext)
+              LOAD_CONST               0 (b'\x00')
+              LOAD_FAST_BORROW         3 (pad)
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              STORE_FAST               0 (plaintext)
+
+320           LOAD_GLOBAL             27 (_derive_sm4_key_cached + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (stem, method)
+              CALL                     2
+              STORE_FAST               7 (key)
+
+321           LOAD_FAST_BORROW         2 (method)
+              LOAD_GLOBAL             28 (EM_SM4_NEW_BASE)
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       12 (to L5)
+              NOT_TAKEN
+
+322           LOAD_GLOBAL             31 (_sm4_custom_encrypt + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 7 (plaintext, key)
+              CALL                     2
+              RETURN_VALUE
+
+323   L5:     LOAD_GLOBAL             33 (sm4_encrypt_block + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 7 (plaintext, key)
+              CALL                     2
+              RETURN_VALUE
+
+324   L6:     LOAD_GLOBAL             35 (ValueError + NULL)
+              LOAD_CONST               4 ('Unknown encryption method: ')
+              LOAD_FAST_BORROW         2 (method)
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              CALL                     1
+              RAISE_VARARGS            1
+
+
+### [49]   __annotate__  (file=pakcrypto.py) :: line 327, args 1, locals 1, stack 6, consts 4
+327           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('chunk')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('cm')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [50]   best_compress  (file=pakcrypto.py) :: line 327, args 8, locals 8, stack 6, consts 4
+ 327            RESUME                   0
+
+ 328            LOAD_FAST_BORROW         1 (cm)
+                LOAD_GLOBAL              0 (CM_ZLIB)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       24 (to L1)
+                NOT_TAKEN
+
+ 329            LOAD_GLOBAL              2 (zlib)
+                LOAD_ATTR                4 (compress)
+                PUSH_NULL
+                LOAD_FAST_BORROW         0 (chunk)
+                LOAD_SMALL_INT           9
+                CALL                     2
+                RETURN_VALUE
+
+ 330    L1:     LOAD_FAST_BORROW         1 (cm)
+                LOAD_GLOBAL              6 (CM_ZSTD)
+                LOAD_GLOBAL              8 (CM_ZSTD_DICT)
+                BUILD_TUPLE              2
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE      158 (to L15)
+                NOT_TAKEN
+
+ 331            LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME              5 (zstandard)
+                STORE_FAST               3 (zstandard)
+
+ 332            LOAD_FAST_BORROW         1 (cm)
+                LOAD_GLOBAL              8 (CM_ZSTD_DICT)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L2)
+                NOT_TAKEN
+                LOAD_FAST                2 (zstd_dict)
+                JUMP_FORWARD             1 (to L3)
+        L2:     LOAD_CONST               1 (None)
+        L3:     STORE_FAST               4 (zd)
+
+ 333            LOAD_FAST_BORROW         4 (zd)
+                POP_JUMP_IF_NONE        12 (to L4)
+                NOT_TAKEN
+                LOAD_GLOBAL             13 (id + NULL)
+                LOAD_FAST_BORROW         4 (zd)
+                CALL                     1
+                JUMP_FORWARD             1 (to L5)
+        L4:     LOAD_SMALL_INT           0
+        L5:     STORE_FAST               5 (did)
+
+ 334            LOAD_GLOBAL             14 (_COMPRESSORS)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 21 (cm, did)
+                BUILD_TUPLE              2
+                CALL                     1
+                STORE_FAST               6 (c)
+
+ 335            LOAD_FAST_BORROW         6 (c)
+                POP_JUMP_IF_NOT_NONE    31 (to L7)
+                NOT_TAKEN
+
+ 336            NOP
+
+ 337    L6:     LOAD_FAST_BORROW         3 (zstandard)
+                LOAD_ATTR               19 (ZstdCompressor + NULL|self)
+                LOAD_SMALL_INT          19
+                LOAD_FAST_BORROW         4 (zd)
+                LOAD_CONST               2 (('level', 'dict_data'))
+                CALL_KW                  2
+                STORE_FAST               6 (c)
+
+ 338            LOAD_FAST_BORROW         6 (c)
+                LOAD_GLOBAL             14 (_COMPRESSORS)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 21 (cm, did)
+                BUILD_TUPLE              2
+                STORE_SUBSCR
+
+ 341    L7:     LOAD_FAST_BORROW         6 (c)
+                POP_JUMP_IF_NONE        19 (to L10)
+                NOT_TAKEN
+
+ 342            NOP
+
+ 343    L8:     LOAD_FAST_BORROW         6 (c)
+                LOAD_ATTR                5 (compress + NULL|self)
+                LOAD_FAST_BORROW         0 (chunk)
+                CALL                     1
+        L9:     RETURN_VALUE
+
+ 346   L10:     LOAD_CONST               3 ((19, 12, 7, 3, 1))
+                GET_ITER
+       L11:     FOR_ITER                37 (to L14)
+                STORE_FAST               7 (lvl)
+
+ 347            NOP
+
+ 348   L12:     LOAD_FAST_BORROW         3 (zstandard)
+                LOAD_ATTR               19 (ZstdCompressor + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 116 (lvl, zd)
+                LOAD_CONST               2 (('level', 'dict_data'))
+                CALL_KW                  2
+                LOAD_ATTR                5 (compress + NULL|self)
+                LOAD_FAST_BORROW         0 (chunk)
+                CALL                     1
+       L13:     SWAP                     2
+                POP_TOP
+                RETURN_VALUE
+
+ 346   L14:     END_FOR
+                POP_ITER
+
+ 351   L15:     LOAD_FAST_BORROW         0 (chunk)
+                RETURN_VALUE
+
+  --   L16:     PUSH_EXC_INFO
+
+ 339            LOAD_GLOBAL             20 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L18)
+                NOT_TAKEN
+                POP_TOP
+
+ 340            LOAD_CONST               1 (None)
+                STORE_FAST               6 (c)
+       L17:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 82 (to L7)
+
+ 339   L18:     RERAISE                  0
+
+  --   L19:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L20:     PUSH_EXC_INFO
+
+ 344            LOAD_GLOBAL             20 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        4 (to L22)
+                NOT_TAKEN
+                POP_TOP
+
+ 345   L21:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 77 (to L10)
+
+ 344   L22:     RERAISE                  0
+
+  --   L23:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L24:     PUSH_EXC_INFO
+
+ 349            LOAD_GLOBAL             20 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L26)
+                NOT_TAKEN
+                POP_TOP
+
+ 350   L25:     POP_EXCEPT
+                JUMP_BACKWARD           93 (to L11)
+
+ 349   L26:     RERAISE                  0
+
+  --   L27:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L6 to L7 -> L16 [0]
+  L8 to L9 -> L20 [0]
+  L12 to L13 -> L24 [1]
+  L16 to L17 -> L19 [1] lasti
+  L18 to L19 -> L19 [1] lasti
+  L20 to L21 -> L23 [1] lasti
+  L22 to L23 -> L23 [1] lasti
+  L24 to L25 -> L27 [2] lasti
+  L26 to L27 -> L27 [2] lasti
+
+
+### [51]   _zstd  (file=pakcrypto.py) :: line 359, args 1, locals 1, stack 2, consts 1
+359           RESUME                   0
+
+361           LOAD_GLOBAL              0 (_ZSTD_OBJ)
+              POP_JUMP_IF_NOT_NONE    21 (to L1)
+              NOT_TAKEN
+
+362           LOAD_SMALL_INT           0
+              LOAD_CONST               0 (None)
+              IMPORT_NAME              1 (zstandard)
+              STORE_FAST               0 (zstandard)
+
+363           LOAD_FAST_BORROW         0 (zstandard)
+              LOAD_ATTR                5 (ZstdDecompressor + NULL|self)
+              CALL                     0
+              STORE_GLOBAL             0 (_ZSTD_OBJ)
+
+364   L1:     LOAD_GLOBAL              0 (_ZSTD_OBJ)
+              RETURN_VALUE
+
+
+### [52]   __annotate__  (file=pakcrypto.py) :: line 367, args 1, locals 1, stack 6, consts 4
+367           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('block')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('cm')
+              LOAD_GLOBAL              2 (int)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [53]   decompress_block  (file=pakcrypto.py) :: line 367, args 7, locals 7, stack 5, consts 3
+ 367            RESUME                   0
+
+ 368            LOAD_FAST_BORROW         2 (cm)
+                LOAD_GLOBAL              0 (CM_NONE)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       12 (to L1)
+                NOT_TAKEN
+
+ 369            LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+                RETURN_VALUE
+
+ 370    L1:     LOAD_FAST_BORROW         2 (cm)
+                LOAD_GLOBAL              4 (CM_ZLIB)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       24 (to L4)
+                NOT_TAKEN
+
+ 371            NOP
+
+ 372    L2:     LOAD_GLOBAL              6 (zlib)
+                LOAD_ATTR                8 (decompress)
+                PUSH_NULL
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+        L3:     RETURN_VALUE
+
+ 375    L4:     LOAD_FAST_BORROW         2 (cm)
+                LOAD_GLOBAL             12 (CM_ZSTD)
+                LOAD_GLOBAL             14 (CM_ZSTD_DICT)
+                BUILD_TUPLE              2
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE      202 (to L21)
+                NOT_TAKEN
+
+ 376            LOAD_FAST_BORROW         2 (cm)
+                LOAD_GLOBAL             12 (CM_ZSTD)
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       27 (to L7)
+                NOT_TAKEN
+
+ 377            NOP
+
+ 378    L5:     LOAD_GLOBAL             17 (_zstd + NULL)
+                CALL                     0
+                LOAD_ATTR                9 (decompress + NULL|self)
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+        L6:     RETURN_VALUE
+
+ 384    L7:     LOAD_SMALL_INT           0
+                LOAD_CONST               1 (None)
+                IMPORT_NAME              9 (zstandard)
+                STORE_FAST               3 (zstandard)
+
+ 385            LOAD_FAST_BORROW         1 (zstd_dict)
+                POP_JUMP_IF_NONE        12 (to L8)
+                NOT_TAKEN
+                LOAD_GLOBAL             21 (id + NULL)
+                LOAD_FAST_BORROW         1 (zstd_dict)
+                CALL                     1
+                JUMP_FORWARD             1 (to L9)
+        L8:     LOAD_SMALL_INT           0
+        L9:     STORE_FAST               4 (did)
+
+ 386            LOAD_GLOBAL             22 (_DECOMP_DICT)
+                LOAD_ATTR               25 (get + NULL|self)
+                LOAD_FAST_BORROW         4 (did)
+                CALL                     1
+                STORE_FAST               5 (d)
+
+ 387            LOAD_FAST_BORROW         5 (d)
+                POP_JUMP_IF_NOT_NONE    29 (to L11)
+                NOT_TAKEN
+
+ 388            NOP
+
+ 389   L10:     LOAD_FAST_BORROW         3 (zstandard)
+                LOAD_ATTR               27 (ZstdDecompressor + NULL|self)
+                LOAD_FAST_BORROW         1 (zstd_dict)
+                LOAD_CONST               2 (('dict_data',))
+                CALL_KW                  1
+                STORE_FAST               5 (d)
+
+ 390            LOAD_FAST_BORROW         5 (d)
+                LOAD_GLOBAL             22 (_DECOMP_DICT)
+                LOAD_FAST_BORROW         4 (did)
+                STORE_SUBSCR
+
+ 393   L11:     LOAD_FAST_BORROW         5 (d)
+                POP_JUMP_IF_NONE        19 (to L14)
+                NOT_TAKEN
+
+ 394            NOP
+
+ 395   L12:     LOAD_FAST_BORROW         5 (d)
+                LOAD_ATTR                9 (decompress + NULL|self)
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+       L13:     RETURN_VALUE
+
+ 398   L14:     LOAD_FAST_BORROW         1 (zstd_dict)
+                LOAD_CONST               1 (None)
+                BUILD_TUPLE              2
+                GET_ITER
+       L15:     FOR_ITER                37 (to L18)
+                STORE_FAST               6 (dd)
+
+ 399            NOP
+
+ 400   L16:     LOAD_FAST_BORROW         3 (zstandard)
+                LOAD_ATTR               27 (ZstdDecompressor + NULL|self)
+                LOAD_FAST_BORROW         6 (dd)
+                LOAD_CONST               2 (('dict_data',))
+                CALL_KW                  1
+                LOAD_ATTR                9 (decompress + NULL|self)
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+       L17:     SWAP                     2
+                POP_TOP
+                RETURN_VALUE
+
+ 398   L18:     END_FOR
+                POP_ITER
+
+ 403            NOP
+
+ 404   L19:     LOAD_GLOBAL              6 (zlib)
+                LOAD_ATTR                8 (decompress)
+                PUSH_NULL
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+       L20:     RETURN_VALUE
+
+ 407   L21:     LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST_BORROW         0 (block)
+                CALL                     1
+                RETURN_VALUE
+
+  --   L22:     PUSH_EXC_INFO
+
+ 373            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       15 (to L24)
+                NOT_TAKEN
+                POP_TOP
+
+ 374            LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST                0 (block)
+                CALL                     1
+                SWAP                     2
+       L23:     POP_EXCEPT
+                RETURN_VALUE
+
+ 373   L24:     RERAISE                  0
+
+  --   L25:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L26:     PUSH_EXC_INFO
+
+ 379            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       57 (to L36)
+                NOT_TAKEN
+                POP_TOP
+
+ 380   L27:     NOP
+
+ 381   L28:     LOAD_GLOBAL              6 (zlib)
+                LOAD_ATTR                8 (decompress)
+                PUSH_NULL
+                LOAD_FAST                0 (block)
+                CALL                     1
+       L29:     SWAP                     2
+       L30:     POP_EXCEPT
+                RETURN_VALUE
+
+  --   L31:     PUSH_EXC_INFO
+
+ 382            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       17 (to L34)
+                NOT_TAKEN
+                POP_TOP
+
+ 383            LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST                0 (block)
+                CALL                     1
+                SWAP                     2
+       L32:     POP_EXCEPT
+                SWAP                     2
+       L33:     POP_EXCEPT
+                RETURN_VALUE
+
+ 382   L34:     RERAISE                  0
+
+  --   L35:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+
+ 379   L36:     RERAISE                  0
+
+  --   L37:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L38:     PUSH_EXC_INFO
+
+ 391            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L40)
+                NOT_TAKEN
+                POP_TOP
+
+ 392            LOAD_CONST               1 (None)
+                STORE_FAST               5 (d)
+       L39:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 214 (to L11)
+
+ 391   L40:     RERAISE                  0
+
+  --   L41:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L42:     PUSH_EXC_INFO
+
+ 396            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        4 (to L44)
+                NOT_TAKEN
+                POP_TOP
+
+ 397   L43:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 209 (to L14)
+
+ 396   L44:     RERAISE                  0
+
+  --   L45:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L46:     PUSH_EXC_INFO
+
+ 401            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L48)
+                NOT_TAKEN
+                POP_TOP
+
+ 402   L47:     POP_EXCEPT
+                JUMP_BACKWARD          223 (to L15)
+
+ 401   L48:     RERAISE                  0
+
+  --   L49:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L50:     PUSH_EXC_INFO
+
+ 405            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       15 (to L52)
+                NOT_TAKEN
+                POP_TOP
+
+ 406            LOAD_GLOBAL              3 (bytes + NULL)
+                LOAD_FAST                0 (block)
+                CALL                     1
+                SWAP                     2
+       L51:     POP_EXCEPT
+                RETURN_VALUE
+
+ 405   L52:     RERAISE                  0
+
+  --   L53:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L22 [0]
+  L5 to L6 -> L26 [0]
+  L10 to L11 -> L38 [0]
+  L12 to L13 -> L42 [0]
+  L16 to L17 -> L46 [1]
+  L19 to L20 -> L50 [0]
+  L22 to L23 -> L25 [1] lasti
+  L24 to L25 -> L25 [1] lasti
+  L26 to L27 -> L37 [1] lasti
+  L28 to L29 -> L31 [1]
+  L29 to L30 -> L37 [1] lasti
+  L31 to L32 -> L35 [2] lasti
+  L32 to L33 -> L37 [1] lasti
+  L34 to L35 -> L35 [2] lasti
+  L35 to L37 -> L37 [1] lasti
+  L38 to L39 -> L41 [1] lasti
+  L40 to L41 -> L41 [1] lasti
+  L42 to L43 -> L45 [1] lasti
+  L44 to L45 -> L45 [1] lasti
+  L46 to L47 -> L49 [2] lasti
+  L48 to L49 -> L49 [2] lasti
+  L50 to L51 -> L53 [1] lasti
+  L52 to L53 -> L53 [1] lasti

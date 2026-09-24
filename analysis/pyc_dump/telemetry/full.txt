@@ -1,0 +1,627 @@
+
+### [0] <module>  (file=telemetry.py) :: line 1, args 0, locals 0, stack 5, consts 15
+  0           RESUME                   0
+
+  2           LOAD_CONST               0 ('IKRAM TOOL - telemetry (OWNER ONLY).\n\nLogin hone par device ka naam + time Telegram par bhejta hai taake owner\nko pata chale ki kaun is tool ko use kar raha hai.\n')
+              STORE_NAME               0 (__doc__)
+
+  7           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (json)
+              STORE_NAME               1 (json)
+
+  8           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (platform)
+              STORE_NAME               2 (platform)
+
+  9           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              3 (subprocess)
+              STORE_NAME               3 (subprocess)
+
+ 10           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              4 (threading)
+              STORE_NAME               4 (threading)
+
+ 11           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              5 (urllib.request)
+              STORE_NAME               6 (urllib)
+
+ 12           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('datetime',))
+              IMPORT_NAME              7 (datetime)
+              IMPORT_FROM              7 (datetime)
+              STORE_NAME               7 (datetime)
+              POP_TOP
+
+ 13           LOAD_SMALL_INT           0
+              LOAD_CONST               3 (('Path',))
+              IMPORT_NAME              8 (pathlib)
+              IMPORT_FROM              9 (Path)
+              STORE_NAME               9 (Path)
+              POP_TOP
+
+ 15           LOAD_CONST               4 ('8704316836:AAHWrtG6pDeI4j6tRy02ryEPESDhp5iEYY0')
+              STORE_NAME              10 (BOT_TOKEN)
+
+ 16           LOAD_CONST               5 ('5625387502')
+              STORE_NAME              11 (CHAT_ID)
+
+ 17           LOAD_CONST               6 ('https://api.telegram.org/bot')
+              LOAD_NAME               10 (BOT_TOKEN)
+              FORMAT_SIMPLE
+              LOAD_CONST               7 ('/sendMessage')
+              BUILD_STRING             3
+              STORE_NAME              12 (API)
+
+ 20           LOAD_CONST               8 (<code object device_name at 0x7aaf78a500, file "telemetry.py", line 20>)
+              MAKE_FUNCTION
+              STORE_NAME              13 (device_name)
+
+ 35           LOAD_CONST               9 (<code object app_version at 0x7aab49b230, file "telemetry.py", line 35>)
+              MAKE_FUNCTION
+              STORE_NAME              14 (app_version)
+
+ 42           LOAD_CONST              14 (('',))
+              LOAD_CONST              10 (<code object send_login at 0x7aab4b1f10, file "telemetry.py", line 42>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              15 (send_login)
+
+ 67           LOAD_CONST              14 (('',))
+              LOAD_CONST              11 (<code object send_error at 0xb400007c00017210, file "telemetry.py", line 67>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              16 (send_error)
+
+ 99           LOAD_NAME               17 (__name__)
+              LOAD_CONST              12 ('__main__')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       19 (to L1)
+              NOT_TAKEN
+
+100           LOAD_NAME               18 (print)
+              PUSH_NULL
+              LOAD_CONST              13 ('Device: ')
+              LOAD_NAME               13 (device_name)
+              PUSH_NULL
+              CALL                     0
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+ 99   L1:     LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   device_name  (file=telemetry.py) :: line 20, args 3, locals 3, stack 8, consts 5
+  20            RESUME                   0
+
+  22            LOAD_CONST               4 (('ro.product.marketname', 'ro.product.model', 'ro.product.device', 'ro.build.product', 'ro.product.name'))
+                STORE_FAST               0 (props)
+
+  24            NOP
+
+  25    L1:     LOAD_FAST_BORROW         0 (props)
+                GET_ITER
+        L2:     FOR_ITER                67 (to L6)
+                STORE_FAST               1 (p)
+
+  26            LOAD_GLOBAL              0 (subprocess)
+                LOAD_ATTR                2 (run)
+                PUSH_NULL
+                LOAD_CONST               1 ('getprop')
+                LOAD_FAST_BORROW         1 (p)
+                BUILD_LIST               2
+                LOAD_CONST               2 (True)
+
+  27            LOAD_CONST               2 (True)
+                LOAD_SMALL_INT           5
+
+  26            LOAD_CONST               3 (('capture_output', 'text', 'timeout'))
+                CALL_KW                  4
+
+  27            LOAD_ATTR                4 (stdout)
+                LOAD_ATTR                7 (strip + NULL|self)
+                CALL                     0
+
+  26            STORE_FAST               2 (out)
+
+  28            LOAD_FAST_BORROW         2 (out)
+                TO_BOOL
+        L3:     POP_JUMP_IF_TRUE         3 (to L4)
+                NOT_TAKEN
+                JUMP_BACKWARD           65 (to L2)
+
+  29    L4:     LOAD_FAST_BORROW         2 (out)
+                SWAP                     2
+                POP_TOP
+        L5:     RETURN_VALUE
+
+  25    L6:     END_FOR
+                POP_ITER
+
+  32    L7:     LOAD_GLOBAL             10 (platform)
+                LOAD_ATTR               12 (node)
+                PUSH_NULL
+                CALL                     0
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE        22 (to L8)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_GLOBAL             10 (platform)
+                LOAD_ATTR               14 (system)
+                PUSH_NULL
+                CALL                     0
+        L8:     RETURN_VALUE
+
+  --    L9:     PUSH_EXC_INFO
+
+  30            LOAD_GLOBAL              8 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        4 (to L11)
+                NOT_TAKEN
+                POP_TOP
+
+  31   L10:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 63 (to L7)
+
+  30   L11:     RERAISE                  0
+
+  --   L12:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L9 [0]
+  L4 to L5 -> L9 [0]
+  L6 to L7 -> L9 [0]
+  L9 to L10 -> L12 [1] lasti
+  L11 to L12 -> L12 [1] lasti
+
+
+### [2]   app_version  (file=telemetry.py) :: line 35, args 0, locals 0, stack 5, consts 2
+  35           RESUME                   0
+
+  36           NOP
+
+  37   L1:     LOAD_GLOBAL              1 (open + NULL)
+               LOAD_GLOBAL              3 (Path + NULL)
+               LOAD_GLOBAL              4 (__file__)
+               CALL                     1
+               LOAD_ATTR                6 (parent)
+               LOAD_CONST               0 ('VERSION')
+               BINARY_OP               11 (/)
+               CALL                     1
+               LOAD_ATTR                9 (read + NULL|self)
+               CALL                     0
+               LOAD_ATTR               11 (strip + NULL|self)
+               CALL                     0
+       L2:     RETURN_VALUE
+
+  --   L3:     PUSH_EXC_INFO
+
+  38           LOAD_GLOBAL             12 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L5)
+               NOT_TAKEN
+               POP_TOP
+
+  39   L4:     POP_EXCEPT
+               LOAD_CONST               1 ('?')
+               RETURN_VALUE
+
+  38   L5:     RERAISE                  0
+
+  --   L6:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L3 [0]
+  L3 to L4 -> L6 [1] lasti
+  L5 to L6 -> L6 [1] lasti
+
+
+### [3]   send_login  (file=telemetry.py) :: line 42, args 2, locals 3, stack 5, consts 5
+  --           MAKE_CELL                0 (extra)
+
+  42           RESUME                   0
+
+  45           LOAD_FAST_BORROW         0 (extra)
+               BUILD_TUPLE              1
+               LOAD_CONST               1 (<code object _send at 0xb400007c70065b70, file "telemetry.py", line 45>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               STORE_FAST               1 (_send)
+
+  64           LOAD_GLOBAL              0 (threading)
+               LOAD_ATTR                2 (Thread)
+               PUSH_NULL
+               LOAD_FAST_BORROW         1 (_send)
+               LOAD_CONST               2 (True)
+               LOAD_CONST               3 (('target', 'daemon'))
+               CALL_KW                  2
+               LOAD_ATTR                5 (start + NULL|self)
+               CALL                     0
+               POP_TOP
+               LOAD_CONST               4 (None)
+               RETURN_VALUE
+
+
+### [4]     _send  (file=telemetry.py) :: line 45, args 4, locals 5, stack 8, consts 14
+  --           COPY_FREE_VARS           1
+
+  45           RESUME                   0
+
+  46           NOP
+
+  47   L1:     LOAD_GLOBAL              1 (app_version + NULL)
+               CALL                     0
+               STORE_FAST               0 (ver)
+
+  49           LOAD_CONST               0 ('🔴 <b>IKRAM TOOL — LIVE USE</b>\n📱 <b>Device:</b> ')
+
+  50           LOAD_GLOBAL              3 (device_name + NULL)
+               CALL                     0
+               FORMAT_SIMPLE
+               LOAD_CONST               1 ('\n🕐 <b>Time:</b> ')
+
+  51           LOAD_GLOBAL              4 (datetime)
+               LOAD_ATTR                6 (now)
+               PUSH_NULL
+               CALL                     0
+               LOAD_ATTR                9 (strftime + NULL|self)
+               LOAD_CONST               2 ('%Y-%m-%d %H:%M:%S')
+               CALL                     1
+               FORMAT_SIMPLE
+               LOAD_CONST               3 ('\n🔢 <b>Version:</b> v')
+
+  52           LOAD_FAST_BORROW         0 (ver)
+               FORMAT_SIMPLE
+               LOAD_CONST               4 ('\n')
+
+  49           BUILD_STRING             7
+
+  48           STORE_FAST               1 (text)
+
+  54           LOAD_DEREF               4 (extra)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       13 (to L2)
+               NOT_TAKEN
+
+  55           LOAD_FAST_BORROW         1 (text)
+               LOAD_DEREF               4 (extra)
+               FORMAT_SIMPLE
+               LOAD_CONST               4 ('\n')
+               BUILD_STRING             2
+               BINARY_OP               13 (+=)
+               STORE_FAST               1 (text)
+
+  56   L2:     LOAD_GLOBAL             10 (json)
+               LOAD_ATTR               12 (dumps)
+               PUSH_NULL
+               LOAD_CONST               5 ('chat_id')
+               LOAD_GLOBAL             14 (CHAT_ID)
+               LOAD_CONST               6 ('text')
+               LOAD_FAST_BORROW         1 (text)
+
+  57           LOAD_CONST               7 ('parse_mode')
+               LOAD_CONST               8 ('HTML')
+
+  56           BUILD_MAP                3
+               CALL                     1
+
+  57           LOAD_ATTR               17 (encode + NULL|self)
+               CALL                     0
+
+  56           STORE_FAST               2 (payload)
+
+  58           LOAD_GLOBAL             18 (urllib)
+               LOAD_ATTR               20 (request)
+               LOAD_ATTR               23 (Request + NULL|self)
+               LOAD_GLOBAL             24 (API)
+               LOAD_FAST_BORROW         2 (payload)
+
+  59           LOAD_CONST               9 ('Content-Type')
+               LOAD_CONST              10 ('application/json')
+               BUILD_MAP                1
+
+  58           LOAD_CONST              11 (('data', 'headers'))
+               CALL_KW                  3
+               STORE_FAST               3 (req)
+
+  60           LOAD_GLOBAL             18 (urllib)
+               LOAD_ATTR               20 (request)
+               LOAD_ATTR               27 (urlopen + NULL|self)
+               LOAD_FAST_BORROW         3 (req)
+               LOAD_SMALL_INT          15
+               LOAD_CONST              12 (('timeout',))
+               CALL_KW                  2
+               POP_TOP
+       L3:     LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+  --   L4:     PUSH_EXC_INFO
+
+  61           LOAD_GLOBAL             28 (Exception)
+               CHECK_EXC_MATCH
+               POP_JUMP_IF_FALSE        5 (to L6)
+               NOT_TAKEN
+               POP_TOP
+
+  62   L5:     POP_EXCEPT
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+  61   L6:     RERAISE                  0
+
+  --   L7:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L4 [0]
+  L4 to L5 -> L7 [1] lasti
+  L6 to L7 -> L7 [1] lasti
+
+
+### [5]   send_error  (file=telemetry.py) :: line 67, args 6, locals 9, stack 6, consts 10
+  --           MAKE_CELL                0 (exc)
+               MAKE_CELL                1 (extra)
+               MAKE_CELL                6 (tb_text)
+
+  67           RESUME                   0
+
+  70           LOAD_SMALL_INT           0
+               LOAD_CONST               1 (None)
+               IMPORT_NAME              0 (traceback)
+               STORE_FAST               2 (traceback)
+
+  71           LOAD_FAST_BORROW         2 (traceback)
+               LOAD_ATTR                3 (format_exc + NULL|self)
+               CALL                     0
+               COPY                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L1)
+               NOT_TAKEN
+               POP_TOP
+               LOAD_CONST               2 ('')
+       L1:     LOAD_ATTR                5 (strip + NULL|self)
+               CALL                     0
+               LOAD_ATTR                7 (split + NULL|self)
+               LOAD_CONST               3 ('\n')
+               CALL                     1
+               GET_ITER
+               LOAD_FAST_AND_CLEAR      3 (l)
+               SWAP                     2
+       L2:     BUILD_LIST               0
+               SWAP                     2
+       L3:     FOR_ITER                 4 (to L4)
+               STORE_FAST_LOAD_FAST    51 (l, l)
+               LIST_APPEND              2
+               JUMP_BACKWARD            6 (to L3)
+       L4:     END_FOR
+               POP_ITER
+       L5:     STORE_FAST               4 (tb_lines)
+               STORE_FAST               3 (l)
+
+  72           LOAD_FAST_BORROW         4 (tb_lines)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       28 (to L6)
+               NOT_TAKEN
+               LOAD_CONST               4 (' | ')
+               LOAD_ATTR                9 (join + NULL|self)
+               LOAD_CONST               5 (<code object <genexpr> at 0x7aab491570, file "telemetry.py", line 72>)
+               MAKE_FUNCTION
+               LOAD_FAST_BORROW         4 (tb_lines)
+               LOAD_CONST               9 (-8)
+               LOAD_CONST               1 (None)
+               BINARY_SLICE
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               JUMP_FORWARD             1 (to L7)
+       L6:     LOAD_CONST               2 ('')
+       L7:     STORE_DEREF              6 (tb_text)
+
+  74           LOAD_FAST_BORROW         0 (exc)
+               LOAD_FAST_BORROW         1 (extra)
+               LOAD_FAST_BORROW         6 (tb_text)
+               BUILD_TUPLE              3
+               LOAD_CONST               6 (<code object _send at 0xb400007c70069d10, file "telemetry.py", line 74>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               STORE_FAST               5 (_send)
+
+  96           LOAD_GLOBAL             10 (threading)
+               LOAD_ATTR               12 (Thread)
+               PUSH_NULL
+               LOAD_FAST_BORROW         5 (_send)
+               LOAD_CONST               7 (True)
+               LOAD_CONST               8 (('target', 'daemon'))
+               CALL_KW                  2
+               LOAD_ATTR               15 (start + NULL|self)
+               CALL                     0
+               POP_TOP
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L8:     SWAP                     2
+               POP_TOP
+
+  71           SWAP                     2
+               STORE_FAST               3 (l)
+               RERAISE                  0
+ExceptionTable:
+  L2 to L5 -> L8 [2]
+
+
+### [6]     <genexpr>  (file=telemetry.py) :: line 72, args 2, locals 2, stack 3, consts 1
+  72           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                20 (to L3)
+               STORE_FAST_LOAD_FAST    17 (l, l)
+               LOAD_ATTR                1 (strip + NULL|self)
+               CALL                     0
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           22 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [7]     _send  (file=telemetry.py) :: line 74, args 4, locals 7, stack 11, consts 18
+  --            COPY_FREE_VARS           3
+
+  74            RESUME                   0
+
+  75            NOP
+
+  76    L1:     LOAD_GLOBAL              1 (app_version + NULL)
+                CALL                     0
+                STORE_FAST               0 (ver)
+
+  78            LOAD_CONST               0 ('⚠️ <b>IKRAM TOOL — ERROR</b>\n📱 <b>Device:</b> ')
+
+  79            LOAD_GLOBAL              3 (device_name + NULL)
+                CALL                     0
+                FORMAT_SIMPLE
+                LOAD_CONST               1 ('\n🕐 <b>Time:</b> ')
+
+  80            LOAD_GLOBAL              4 (datetime)
+                LOAD_ATTR                6 (now)
+                PUSH_NULL
+                CALL                     0
+                LOAD_ATTR                9 (strftime + NULL|self)
+                LOAD_CONST               2 ('%Y-%m-%d %H:%M:%S')
+                CALL                     1
+                FORMAT_SIMPLE
+                LOAD_CONST               3 ('\n🔢 <b>Version:</b> v')
+
+  81            LOAD_FAST_BORROW         0 (ver)
+                FORMAT_SIMPLE
+                LOAD_CONST               4 ('\n❌ <b>Error:</b> ')
+
+  82            LOAD_GLOBAL             11 (type + NULL)
+                LOAD_DEREF               4 (exc)
+                CALL                     1
+                LOAD_ATTR               12 (__name__)
+                FORMAT_SIMPLE
+                LOAD_CONST               5 (': ')
+                LOAD_DEREF               4 (exc)
+                FORMAT_SIMPLE
+                LOAD_CONST               6 ('\n')
+
+  78            BUILD_STRING            11
+
+  77            STORE_FAST               1 (text)
+
+  84            LOAD_DEREF               6 (tb_text)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       14 (to L2)
+                NOT_TAKEN
+
+  85            LOAD_FAST_BORROW         1 (text)
+                LOAD_CONST               7 ('🧭 <b>Where:</b> ')
+                LOAD_DEREF               6 (tb_text)
+                FORMAT_SIMPLE
+                LOAD_CONST               6 ('\n')
+                BUILD_STRING             3
+                BINARY_OP               13 (+=)
+                STORE_FAST               1 (text)
+
+  86    L2:     LOAD_DEREF               5 (extra)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       14 (to L5)
+        L3:     NOT_TAKEN
+
+  87    L4:     LOAD_FAST_BORROW         1 (text)
+                LOAD_CONST               8 ('📄 <b>Detail:</b> ')
+                LOAD_DEREF               5 (extra)
+                FORMAT_SIMPLE
+                LOAD_CONST               6 ('\n')
+                BUILD_STRING             3
+                BINARY_OP               13 (+=)
+                STORE_FAST               1 (text)
+
+  88    L5:     LOAD_GLOBAL             14 (json)
+                LOAD_ATTR               16 (dumps)
+                PUSH_NULL
+                LOAD_CONST               9 ('chat_id')
+                LOAD_GLOBAL             18 (CHAT_ID)
+                LOAD_CONST              10 ('text')
+                LOAD_FAST_BORROW         1 (text)
+
+  89            LOAD_CONST              11 ('parse_mode')
+                LOAD_CONST              12 ('HTML')
+
+  88            BUILD_MAP                3
+                CALL                     1
+
+  89            LOAD_ATTR               21 (encode + NULL|self)
+                CALL                     0
+
+  88            STORE_FAST               2 (payload)
+
+  90            LOAD_GLOBAL             22 (urllib)
+                LOAD_ATTR               24 (request)
+                LOAD_ATTR               27 (Request + NULL|self)
+                LOAD_GLOBAL             28 (API)
+                LOAD_FAST_BORROW         2 (payload)
+
+  91            LOAD_CONST              13 ('Content-Type')
+                LOAD_CONST              14 ('application/json')
+                BUILD_MAP                1
+
+  90            LOAD_CONST              15 (('data', 'headers'))
+                CALL_KW                  3
+                STORE_FAST               3 (req)
+
+  92            LOAD_GLOBAL             22 (urllib)
+                LOAD_ATTR               24 (request)
+                LOAD_ATTR               31 (urlopen + NULL|self)
+                LOAD_FAST_BORROW         3 (req)
+                LOAD_SMALL_INT          15
+                LOAD_CONST              16 (('timeout',))
+                CALL_KW                  2
+                POP_TOP
+        L6:     LOAD_CONST              17 (None)
+                RETURN_VALUE
+
+  --    L7:     PUSH_EXC_INFO
+
+  93            LOAD_GLOBAL             32 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L9)
+                NOT_TAKEN
+                POP_TOP
+
+  94    L8:     POP_EXCEPT
+                LOAD_CONST              17 (None)
+                RETURN_VALUE
+
+  93    L9:     RERAISE                  0
+
+  --   L10:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L3 -> L7 [0]
+  L4 to L6 -> L7 [0]
+  L7 to L8 -> L10 [1] lasti
+  L9 to L10 -> L10 [1] lasti

@@ -117,7 +117,7 @@ def _unpack_one(pakf, out, log=None, progress=None):
     )
     n = 0
     if kind == "ue4":
-        # V111: engines layer auto-tries saved/shipped AES keys now; passing
+        # V112: engines layer auto-tries saved/shipped AES keys now; passing
         # None (instead of the default) lets a user's working key win first.
         aes_key = None
     else:
@@ -1102,4 +1102,5 @@ ikram.pak_costom_pak = pak_costom_pak
 ikram.pak_tool_menu = pak_tool_menu
 
 if __name__ == "__main__":
-    ikram.main()
+    import vip_ui
+    vip_ui.Vip(ikram=ikram).run()

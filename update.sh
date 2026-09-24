@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # =============================================
-#  Ikram Tool - Manual Update (V111)
+#  Ikram Tool - Manual Update (V112)
 #  Auto-update fail ho jaye to ye manual fallback.
 #  Use: bash update.sh   (or:  python3 update.py)
 # =============================================

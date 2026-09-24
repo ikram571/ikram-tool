@@ -1,0 +1,2160 @@
+
+### [0] <module>  (file=update.py) :: line 1, args 0, locals 0, stack 4, consts 33
+  0           RESUME                   0
+
+  1           LOAD_CONST               0 ('IKRAM TOOL - GitHub auto-update (client core).\n\nGitHub release se sabse naya zip (IkramTool.zip) download karta hai,\nextract karta hai, aur installed tool folder me CLEAN-SLATE replace karta\nhai: purani tool files delete, phir poori nayi files fresh copy. Isliye koi\nfile kabhi missing nahi rehti — tool hamesha A-to-Z complete milta hai.\n\nikram.py har start pe `update.py --check` chala ke decide karta hai update\nchahiye ya nahi.\n\nUsage:\n  python3 update.py --check     -> remote|local  (sirf version compare)\n  python3 update.py             -> latest zip download + clean install\n')
+              STORE_NAME               0 (__doc__)
+
+ 15           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (json)
+              STORE_NAME               1 (json)
+
+ 16           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (os)
+              STORE_NAME               2 (os)
+
+ 17           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              3 (shutil)
+              STORE_NAME               3 (shutil)
+
+ 18           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              4 (subprocess)
+              STORE_NAME               4 (subprocess)
+
+ 19           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              5 (sys)
+              STORE_NAME               5 (sys)
+
+ 20           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              6 (threading)
+              STORE_NAME               6 (threading)
+
+ 21           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              7 (urllib.request)
+              STORE_NAME               8 (urllib)
+
+ 22           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              9 (zipfile)
+              STORE_NAME               9 (zipfile)
+
+ 23           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('Path',))
+              IMPORT_NAME             10 (pathlib)
+              IMPORT_FROM             11 (Path)
+              STORE_NAME              11 (Path)
+              POP_TOP
+
+ 25           LOAD_NAME               11 (Path)
+              PUSH_NULL
+              LOAD_NAME               12 (__file__)
+              CALL                     1
+              LOAD_ATTR               27 (resolve + NULL|self)
+              CALL                     0
+              LOAD_ATTR               28 (parent)
+              STORE_NAME              15 (TOOL_DIR)
+
+ 26           LOAD_CONST               3 ('ikram571/ikram-tool')
+              STORE_NAME              16 (REPO)
+
+ 27           LOAD_CONST               4 ('https://api.github.com/repos/{}/releases/latest')
+              LOAD_ATTR               35 (format + NULL|self)
+              LOAD_NAME               16 (REPO)
+              CALL                     1
+              STORE_NAME              18 (API)
+
+ 28           LOAD_CONST               5 ('IkramTool.zip')
+              STORE_NAME              19 (ZIP_NAME)
+
+ 31           LOAD_NAME               20 (hasattr)
+              PUSH_NULL
+              LOAD_NAME                5 (sys)
+              LOAD_ATTR               42 (stdout)
+              LOAD_CONST               6 ('isatty')
+              CALL                     2
+              TO_BOOL
+              POP_JUMP_IF_FALSE       35 (to L1)
+              NOT_TAKEN
+              LOAD_NAME                5 (sys)
+              LOAD_ATTR               42 (stdout)
+              LOAD_ATTR               45 (isatty + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_SMALL_INT           1
+              JUMP_FORWARD             1 (to L2)
+      L1:     LOAD_SMALL_INT           0
+      L2:     STORE_NAME              23 (_TTY)
+
+ 32           LOAD_CONST               7 ('\x1b[0m')
+              STORE_NAME              24 (_R)
+
+ 33           LOAD_CONST               8 ('\x1b[1;38;5;201m')
+              STORE_NAME              25 (_PINK)
+
+ 34           LOAD_CONST               9 ('\x1b[1;38;5;51m')
+              STORE_NAME              26 (_CYAN)
+
+ 35           LOAD_CONST              10 ('\x1b[1;38;5;220m')
+              STORE_NAME              27 (_GOLD)
+
+ 36           LOAD_CONST              11 ('\x1b[1;38;5;82m')
+              STORE_NAME              28 (_GREEN)
+
+ 37           LOAD_CONST              12 ('\x1b[1;38;5;196m')
+              STORE_NAME              29 (_RED)
+
+ 38           LOAD_CONST              13 ('\x1b[2;38;5;244m')
+              STORE_NAME              30 (_DIM)
+
+ 39           LOAD_CONST              14 ('\x1b[1m')
+              STORE_NAME              31 (_BOLD)
+
+ 42           LOAD_CONST              31 ((30,))
+              LOAD_CONST              15 (<code object _pcol at 0x7aaf62eab0, file "update.py", line 42>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              32 (_pcol)
+
+ 48           LOAD_CONST              31 ((30,))
+              LOAD_CONST              16 (<code object _box_top at 0x7aaf62f0f0, file "update.py", line 48>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              33 (_box_top)
+
+ 52           LOAD_CONST              31 ((30,))
+              LOAD_CONST              17 (<code object _box_bot at 0x7aaf62f5f0, file "update.py", line 52>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME              34 (_box_bot)
+
+ 56           LOAD_CONST              18 (<code object _splash at 0xb400007c00017900, file "update.py", line 56>)
+              MAKE_FUNCTION
+              STORE_NAME              35 (_splash)
+
+ 75           LOAD_CONST              19 (<code object version_tuple at 0x7aaf5e9230, file "update.py", line 75>)
+              MAKE_FUNCTION
+              STORE_NAME              36 (version_tuple)
+
+ 84           LOAD_CONST              20 (<code object latest_remote at 0xb400007c8009bf30, file "update.py", line 84>)
+              MAKE_FUNCTION
+              STORE_NAME              37 (latest_remote)
+
+102           LOAD_CONST              21 (<code object _fmt_size at 0x7aaf5e76d0, file "update.py", line 102>)
+              MAKE_FUNCTION
+              STORE_NAME              38 (_fmt_size)
+
+110           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              22 (<code object _Progress at 0x7aaf68ee30, file "update.py", line 110>)
+              MAKE_FUNCTION
+              LOAD_CONST              23 ('_Progress')
+              CALL                     2
+              STORE_NAME              39 (_Progress)
+
+142           BUILD_SET                0
+              LOAD_CONST              32 (frozenset({'.repair', '.ikram_update.zip', 'DROP', 'ikram_key.json', 'repair.zip', 'RESULT', '.ikram_update_tmp', 'VERSION'}))
+              SET_UPDATE               1
+              STORE_NAME              40 (PROTECTED)
+
+154           LOAD_CONST              24 (<code object _clean_replace at 0xb400007d100524d0, file "update.py", line 154>)
+              MAKE_FUNCTION
+              STORE_NAME              41 (_clean_replace)
+
+189           LOAD_CONST              25 (<code object _show_complete at 0xb400007c0001ce90, file "update.py", line 189>)
+              MAKE_FUNCTION
+              STORE_NAME              42 (_show_complete)
+
+204           LOAD_CONST              26 (<code object do_install at 0xb400007bc0018040, file "update.py", line 204>)
+              MAKE_FUNCTION
+              STORE_NAME              43 (do_install)
+
+271           LOAD_CONST              27 (<code object _fix_env at 0xb400007d1004de00, file "update.py", line 271>)
+              MAKE_FUNCTION
+              STORE_NAME              44 (_fix_env)
+
+407           LOAD_CONST              28 (<code object check_only at 0x7aaf7db690, file "update.py", line 407>)
+              MAKE_FUNCTION
+              STORE_NAME              45 (check_only)
+
+418           LOAD_NAME               46 (__name__)
+              LOAD_CONST              29 ('__main__')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       66 (to L4)
+              NOT_TAKEN
+
+419           LOAD_NAME               47 (len)
+              PUSH_NULL
+              LOAD_NAME                5 (sys)
+              LOAD_ATTR               96 (argv)
+              CALL                     1
+              LOAD_SMALL_INT           1
+              COMPARE_OP             148 (bool(>))
+              POP_JUMP_IF_FALSE       34 (to L3)
+              NOT_TAKEN
+              LOAD_NAME                5 (sys)
+              LOAD_ATTR               96 (argv)
+              LOAD_SMALL_INT           1
+              BINARY_OP               26 ([])
+              LOAD_CONST              30 ('--check')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       10 (to L3)
+              NOT_TAKEN
+
+420           LOAD_NAME               45 (check_only)
+              PUSH_NULL
+              CALL                     0
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+422   L3:     LOAD_NAME               43 (do_install)
+              PUSH_NULL
+              CALL                     0
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+418   L4:     LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   _pcol  (file=update.py) :: line 42, args 3, locals 3, stack 7, consts 3
+ 42           RESUME                   0
+
+ 44           LOAD_FAST_BORROW         0 (content)
+              LOAD_ATTR                1 (ljust + NULL|self)
+              LOAD_FAST_BORROW         1 (width)
+              CALL                     1
+              STORE_FAST               2 (text)
+
+ 45           LOAD_CONST               1 ('{}{}{}{}{}')
+              LOAD_ATTR                3 (format + NULL|self)
+              LOAD_GLOBAL              4 (_PINK)
+              LOAD_CONST               2 ('│')
+              LOAD_GLOBAL              6 (_R)
+              LOAD_FAST_BORROW         2 (text)
+              LOAD_GLOBAL              4 (_PINK)
+              CALL                     5
+              RETURN_VALUE
+
+
+### [2]   _box_top  (file=update.py) :: line 48, args 1, locals 1, stack 6, consts 4
+ 48           RESUME                   0
+
+ 49           LOAD_CONST               0 ('{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_PINK)
+              LOAD_CONST               1 ('╭')
+              LOAD_CONST               2 ('─')
+              LOAD_FAST_BORROW         0 (width)
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              LOAD_CONST               3 ('╮')
+              BINARY_OP                0 (+)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              RETURN_VALUE
+
+
+### [3]   _box_bot  (file=update.py) :: line 52, args 1, locals 1, stack 6, consts 4
+ 52           RESUME                   0
+
+ 53           LOAD_CONST               0 ('{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_PINK)
+              LOAD_CONST               1 ('╰')
+              LOAD_CONST               2 ('─')
+              LOAD_FAST_BORROW         0 (width)
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              LOAD_CONST               3 ('╯')
+              BINARY_OP                0 (+)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              RETURN_VALUE
+
+
+### [4]   _splash  (file=update.py) :: line 56, args 7, locals 7, stack 6, consts 8
+ 56           RESUME                   0
+
+ 58           LOAD_SMALL_INT          50
+              STORE_FAST               0 (w)
+
+ 59           LOAD_CONST               1 ('{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_GOLD)
+              LOAD_CONST               2 ('✦')
+              LOAD_FAST_BORROW         0 (w)
+              BINARY_OP                5 (*)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              STORE_FAST               1 (sep)
+
+ 60           LOAD_CONST               3 ('{}{}IKRAM TOOL UPDATE{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              6 (_BOLD)
+              LOAD_GLOBAL              8 (_CYAN)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              STORE_FAST               2 (title)
+
+ 61           LOAD_CONST               4 ('{}📦 PAK  •  📜 LUA{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              8 (_CYAN)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     2
+              STORE_FAST               3 (sub)
+
+ 62           LOAD_FAST_BORROW         0 (w)
+              LOAD_SMALL_INT          13
+              BINARY_OP               10 (-)
+              LOAD_SMALL_INT           2
+              BINARY_OP                2 (//)
+              STORE_FAST               4 (pad_t)
+
+ 63           LOAD_FAST_BORROW         0 (w)
+              LOAD_SMALL_INT          14
+              BINARY_OP               10 (-)
+              LOAD_SMALL_INT           2
+              BINARY_OP                2 (//)
+              STORE_FAST               5 (pad_s)
+
+ 65           LOAD_CONST               5 ('')
+
+ 66           LOAD_FAST_BORROW         1 (sep)
+
+ 67           LOAD_CONST               6 (' ')
+              LOAD_FAST_BORROW         4 (pad_t)
+              BINARY_OP                5 (*)
+              LOAD_FAST_BORROW         2 (title)
+              BINARY_OP                0 (+)
+
+ 68           LOAD_CONST               6 (' ')
+              LOAD_FAST_BORROW         5 (pad_s)
+              BINARY_OP                5 (*)
+              LOAD_FAST_BORROW         3 (sub)
+              BINARY_OP                0 (+)
+
+ 69           LOAD_FAST_BORROW         1 (sep)
+
+ 70           LOAD_CONST               5 ('')
+
+ 64           BUILD_LIST               6
+              STORE_FAST               6 (lines)
+
+ 72           LOAD_CONST               7 ('\n')
+              LOAD_ATTR               11 (join + NULL|self)
+              LOAD_FAST_BORROW         6 (lines)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [5]   version_tuple  (file=update.py) :: line 75, args 3, locals 3, stack 6, consts 3
+  75            RESUME                   0
+
+  76            NOP
+
+  77    L1:     LOAD_GLOBAL              1 (str + NULL)
+                LOAD_FAST_BORROW         0 (v)
+                CALL                     1
+                LOAD_ATTR                3 (lstrip + NULL|self)
+                LOAD_CONST               0 ('vV')
+                CALL                     1
+                LOAD_ATTR                5 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST               0 (v)
+
+  78            LOAD_FAST_BORROW         0 (v)
+                LOAD_ATTR                7 (split + NULL|self)
+                LOAD_CONST               1 ('.')
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      1 (p)
+                SWAP                     2
+        L2:     BUILD_LIST               0
+                SWAP                     2
+        L3:     FOR_ITER                13 (to L6)
+                STORE_FAST_LOAD_FAST    17 (p, p)
+                LOAD_CONST               2 ('')
+                COMPARE_OP             119 (bool(!=))
+        L4:     POP_JUMP_IF_TRUE         3 (to L5)
+                NOT_TAKEN
+                JUMP_BACKWARD           11 (to L3)
+        L5:     LOAD_FAST_BORROW         1 (p)
+                LIST_APPEND              2
+                JUMP_BACKWARD           15 (to L3)
+        L6:     END_FOR
+                POP_ITER
+        L7:     STORE_FAST               2 (parts)
+                STORE_FAST               1 (p)
+
+  79            LOAD_FAST_BORROW         2 (parts)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       28 (to L13)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         2 (parts)
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      1 (p)
+                SWAP                     2
+        L8:     BUILD_LIST               0
+                SWAP                     2
+        L9:     FOR_ITER                14 (to L10)
+                STORE_FAST               1 (p)
+                LOAD_GLOBAL              9 (int + NULL)
+                LOAD_FAST_BORROW         1 (p)
+                CALL                     1
+                LIST_APPEND              2
+                JUMP_BACKWARD           16 (to L9)
+       L10:     END_FOR
+                POP_ITER
+       L11:     SWAP                     2
+                STORE_FAST               1 (p)
+       L12:     RETURN_VALUE
+       L13:     LOAD_SMALL_INT           0
+                BUILD_LIST               1
+       L14:     RETURN_VALUE
+
+  --   L15:     SWAP                     2
+                POP_TOP
+
+  78            SWAP                     2
+                STORE_FAST               1 (p)
+                RERAISE                  0
+
+  --   L16:     SWAP                     2
+                POP_TOP
+
+  79            SWAP                     2
+                STORE_FAST               1 (p)
+                RERAISE                  0
+
+  --   L17:     PUSH_EXC_INFO
+
+  80            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        7 (to L19)
+                NOT_TAKEN
+                POP_TOP
+
+  81            LOAD_SMALL_INT           0
+                BUILD_LIST               1
+                SWAP                     2
+       L18:     POP_EXCEPT
+                RETURN_VALUE
+
+  80   L19:     RERAISE                  0
+
+  --   L20:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L17 [0]
+  L2 to L4 -> L15 [2]
+  L5 to L7 -> L15 [2]
+  L7 to L8 -> L17 [0]
+  L8 to L11 -> L16 [2]
+  L11 to L12 -> L17 [0]
+  L13 to L14 -> L17 [0]
+  L15 to L17 -> L17 [0]
+  L17 to L18 -> L20 [1] lasti
+  L19 to L20 -> L20 [1] lasti
+
+
+### [6]   latest_remote  (file=update.py) :: line 84, args 5, locals 5, stack 7, consts 15
+  84            RESUME                   0
+
+  86            NOP
+
+  87    L1:     LOAD_GLOBAL              0 (urllib)
+                LOAD_ATTR                2 (request)
+                LOAD_ATTR                5 (Request + NULL|self)
+                LOAD_GLOBAL              6 (API)
+                LOAD_CONST               1 ('User-Agent')
+                LOAD_CONST               2 ('ikram-tool')
+                BUILD_MAP                1
+                LOAD_CONST               3 (('headers',))
+                CALL_KW                  2
+                STORE_FAST               0 (req)
+
+  88            LOAD_GLOBAL              0 (urllib)
+                LOAD_ATTR                2 (request)
+                LOAD_ATTR                9 (urlopen + NULL|self)
+                LOAD_FAST_BORROW         0 (req)
+                LOAD_SMALL_INT          30
+                LOAD_CONST               4 (('timeout',))
+                CALL_KW                  2
+                COPY                     1
+                LOAD_SPECIAL             1 (__exit__)
+                SWAP                     2
+                SWAP                     3
+                LOAD_SPECIAL             0 (__enter__)
+                CALL                     0
+        L2:     STORE_FAST               1 (r)
+
+  89            LOAD_GLOBAL             10 (json)
+                LOAD_ATTR               12 (load)
+                PUSH_NULL
+                LOAD_FAST_BORROW         1 (r)
+                CALL                     1
+                STORE_FAST               2 (d)
+
+  88    L3:     LOAD_CONST               5 (None)
+                LOAD_CONST               5 (None)
+                LOAD_CONST               5 (None)
+                CALL                     3
+                POP_TOP
+
+  90    L4:     LOAD_GLOBAL             15 (str + NULL)
+                LOAD_FAST_CHECK          2 (d)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_CONST               6 ('tag_name')
+                LOAD_CONST               7 ('')
+                CALL                     2
+                CALL                     1
+                LOAD_ATTR               19 (lstrip + NULL|self)
+                LOAD_CONST               8 ('vV')
+                CALL                     1
+                STORE_FAST               3 (tag)
+
+  91            LOAD_FAST_BORROW         2 (d)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_CONST               9 ('assets')
+                BUILD_LIST               0
+                CALL                     2
+                GET_ITER
+        L5:     FOR_ITER                44 (to L9)
+                STORE_FAST               4 (a)
+
+  92            LOAD_FAST_BORROW         4 (a)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_CONST              10 ('name')
+                CALL                     1
+                LOAD_GLOBAL             20 (ZIP_NAME)
+                COMPARE_OP              88 (bool(==))
+        L6:     POP_JUMP_IF_TRUE         3 (to L7)
+                NOT_TAKEN
+                JUMP_BACKWARD           31 (to L5)
+
+  93    L7:     LOAD_CONST              11 ('version')
+                LOAD_FAST_BORROW         3 (tag)
+                LOAD_CONST              12 ('url')
+                LOAD_FAST_BORROW         4 (a)
+                LOAD_CONST              13 ('browser_download_url')
+                BINARY_OP               26 ([])
+                BUILD_MAP                2
+                SWAP                     2
+                POP_TOP
+        L8:     RETURN_VALUE
+
+  91    L9:     END_FOR
+                POP_ITER
+
+  94            LOAD_FAST_BORROW         2 (d)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_CONST               9 ('assets')
+                BUILD_LIST               0
+                CALL                     2
+                GET_ITER
+       L10:     FOR_ITER                66 (to L14)
+                STORE_FAST               4 (a)
+
+  95            LOAD_GLOBAL             15 (str + NULL)
+                LOAD_FAST_BORROW         4 (a)
+                LOAD_ATTR               17 (get + NULL|self)
+                LOAD_CONST              10 ('name')
+                LOAD_CONST               7 ('')
+                CALL                     2
+                CALL                     1
+                LOAD_ATTR               23 (endswith + NULL|self)
+                LOAD_CONST              14 ('.zip')
+                CALL                     1
+                TO_BOOL
+       L11:     POP_JUMP_IF_TRUE         3 (to L12)
+                NOT_TAKEN
+                JUMP_BACKWARD           53 (to L10)
+
+  96   L12:     LOAD_CONST              11 ('version')
+                LOAD_FAST_BORROW         3 (tag)
+                LOAD_CONST              12 ('url')
+                LOAD_FAST_BORROW         4 (a)
+                LOAD_CONST              13 ('browser_download_url')
+                BINARY_OP               26 ([])
+                BUILD_MAP                2
+                SWAP                     2
+                POP_TOP
+       L13:     RETURN_VALUE
+
+  94   L14:     END_FOR
+                POP_ITER
+
+  99   L15:     LOAD_CONST               5 (None)
+                RETURN_VALUE
+
+  88   L16:     PUSH_EXC_INFO
+                WITH_EXCEPT_START
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L17)
+                NOT_TAKEN
+                RERAISE                  2
+       L17:     POP_TOP
+       L18:     POP_EXCEPT
+                POP_TOP
+                POP_TOP
+                POP_TOP
+                JUMP_BACKWARD_NO_INTERRUPT 214 (to L4)
+
+  --   L19:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L20:     PUSH_EXC_INFO
+
+  97            LOAD_GLOBAL             24 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L22)
+                NOT_TAKEN
+                POP_TOP
+
+  98   L21:     POP_EXCEPT
+
+  99            LOAD_CONST               5 (None)
+                RETURN_VALUE
+
+  97   L22:     RERAISE                  0
+
+  --   L23:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L20 [0]
+  L2 to L3 -> L16 [2] lasti
+  L3 to L6 -> L20 [0]
+  L7 to L8 -> L20 [0]
+  L9 to L11 -> L20 [0]
+  L12 to L13 -> L20 [0]
+  L14 to L15 -> L20 [0]
+  L16 to L18 -> L19 [4] lasti
+  L18 to L20 -> L20 [0]
+  L20 to L21 -> L23 [1] lasti
+  L22 to L23 -> L23 [1] lasti
+
+
+### [7]   _fmt_size  (file=update.py) :: line 102, args 1, locals 1, stack 4, consts 5
+102           RESUME                   0
+
+103           LOAD_FAST_BORROW         0 (n)
+              LOAD_CONST               0 (1048576)
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       25 (to L1)
+              NOT_TAKEN
+
+104           LOAD_CONST               1 ('{:.1f} MB')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_FAST_BORROW         0 (n)
+              LOAD_CONST               0 (1048576)
+              BINARY_OP               11 (/)
+              CALL                     1
+              RETURN_VALUE
+
+105   L1:     LOAD_FAST_BORROW         0 (n)
+              LOAD_CONST               2 (1024)
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       25 (to L2)
+              NOT_TAKEN
+
+106           LOAD_CONST               3 ('{:.0f} KB')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_FAST_BORROW         0 (n)
+              LOAD_CONST               2 (1024)
+              BINARY_OP               11 (/)
+              CALL                     1
+              RETURN_VALUE
+
+107   L2:     LOAD_CONST               4 ('{} B')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_FAST_BORROW         0 (n)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [8]   _Progress  (file=update.py) :: line 110, args 0, locals 1, stack 1, consts 6
+  --           MAKE_CELL                0 (__classdict__)
+
+ 110           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('_Progress')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT         110
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+ 111           LOAD_CONST               1 ("Premium colored live download box (matches the tool's progress UI).")
+               STORE_NAME               4 (__doc__)
+
+ 113           LOAD_CONST               2 (<code object __init__ at 0x7aaf603b40, file "update.py", line 113>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (__init__)
+
+ 116           LOAD_CONST               3 (<code object show at 0xb400007c8009ffe0, file "update.py", line 116>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (show)
+               LOAD_CONST               4 (('_drawn',))
+               STORE_NAME               7 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               8 (__classdictcell__)
+               LOAD_CONST               5 (None)
+               RETURN_VALUE
+
+
+### [9]     __init__  (file=update.py) :: line 113, args 1, locals 1, stack 2, consts 2
+113           RESUME                   0
+
+114           LOAD_CONST               0 (False)
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               0 (_drawn)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [10]     show  (file=update.py) :: line 116, args 12, locals 12, stack 10, consts 13
+116           RESUME                   0
+
+117           LOAD_GLOBAL              1 (_fmt_size + NULL)
+              LOAD_FAST_BORROW         1 (done)
+              CALL                     1
+              STORE_FAST               3 (sz_done)
+
+118           LOAD_FAST_BORROW         2 (total)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+              LOAD_GLOBAL              1 (_fmt_size + NULL)
+              LOAD_FAST_BORROW         2 (total)
+              CALL                     1
+              JUMP_FORWARD             1 (to L2)
+      L1:     LOAD_CONST               0 ('?')
+      L2:     STORE_FAST               4 (sz_total)
+
+119           LOAD_FAST_BORROW         2 (total)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       25 (to L3)
+              NOT_TAKEN
+              LOAD_GLOBAL              3 (int + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (done, total)
+              BINARY_OP               11 (/)
+              LOAD_SMALL_INT         100
+              BINARY_OP                5 (*)
+              CALL                     1
+              JUMP_FORWARD             1 (to L4)
+      L3:     LOAD_SMALL_INT           0
+      L4:     STORE_FAST               5 (pct)
+
+120           LOAD_SMALL_INT          18
+              STORE_FAST               6 (bar_w)
+
+121           LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (pct, bar_w)
+              BINARY_OP                5 (*)
+              LOAD_SMALL_INT         100
+              BINARY_OP                2 (//)
+              STORE_FAST               7 (filled)
+
+122           LOAD_CONST               1 ('{}{}{}{}')
+              LOAD_ATTR                5 (format + NULL|self)
+
+123           LOAD_GLOBAL              6 (_GREEN)
+              LOAD_CONST               2 ('█')
+              LOAD_FAST_BORROW         7 (filled)
+              BINARY_OP                5 (*)
+              LOAD_GLOBAL              8 (_DIM)
+              LOAD_CONST               3 ('░')
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 103 (bar_w, filled)
+              BINARY_OP               10 (-)
+              BINARY_OP                5 (*)
+
+122           CALL                     4
+              STORE_FAST               8 (bar)
+
+125           LOAD_FAST_BORROW         5 (pct)
+              LOAD_SMALL_INT         100
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE        7 (to L5)
+              NOT_TAKEN
+              LOAD_GLOBAL              6 (_GREEN)
+              JUMP_FORWARD             5 (to L6)
+      L5:     LOAD_GLOBAL             10 (_CYAN)
+      L6:     STORE_FAST               9 (pct_color)
+
+127           LOAD_GLOBAL             13 (_box_top + NULL)
+              LOAD_SMALL_INT          30
+              CALL                     1
+
+128           LOAD_GLOBAL             15 (_pcol + NULL)
+              LOAD_CONST               4 ('  ⬇  Downloading update')
+              CALL                     1
+
+129           LOAD_GLOBAL             15 (_pcol + NULL)
+              LOAD_CONST               5 ('  [{}] {}{:>3}{}%')
+              LOAD_ATTR                5 (format + NULL|self)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 137 (bar, pct_color)
+              LOAD_FAST_BORROW         5 (pct)
+              LOAD_GLOBAL             16 (_R)
+              CALL                     4
+              CALL                     1
+
+130           LOAD_GLOBAL             15 (_pcol + NULL)
+              LOAD_CONST               6 ('  Downloaded: {}')
+              LOAD_ATTR                5 (format + NULL|self)
+              LOAD_FAST_BORROW         3 (sz_done)
+              CALL                     1
+              CALL                     1
+
+131           LOAD_GLOBAL             15 (_pcol + NULL)
+              LOAD_CONST               7 ('  Total: {}')
+              LOAD_ATTR                5 (format + NULL|self)
+              LOAD_FAST_BORROW         4 (sz_total)
+              CALL                     1
+              CALL                     1
+
+132           LOAD_GLOBAL             19 (_box_bot + NULL)
+              LOAD_SMALL_INT          30
+              CALL                     1
+
+126           BUILD_LIST               6
+              STORE_FAST              10 (lines)
+
+134           LOAD_GLOBAL             20 (_TTY)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       56 (to L7)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               22 (_drawn)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       38 (to L7)
+              NOT_TAKEN
+
+135           LOAD_GLOBAL             25 (print + NULL)
+              LOAD_CONST               8 ('\x1b[{}A')
+              LOAD_ATTR                5 (format + NULL|self)
+              LOAD_GLOBAL             27 (len + NULL)
+              LOAD_FAST_BORROW        10 (lines)
+              CALL                     1
+              CALL                     1
+              LOAD_CONST               9 ('')
+              LOAD_CONST              10 (('end',))
+              CALL_KW                  2
+              POP_TOP
+
+136   L7:     LOAD_FAST_BORROW        10 (lines)
+              GET_ITER
+      L8:     FOR_ITER                14 (to L9)
+              STORE_FAST              11 (l)
+
+137           LOAD_GLOBAL             25 (print + NULL)
+              LOAD_FAST_BORROW        11 (l)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           16 (to L8)
+
+136   L9:     END_FOR
+              POP_ITER
+
+138           LOAD_CONST              11 (True)
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR              11 (_drawn)
+              LOAD_CONST              12 (None)
+              RETURN_VALUE
+
+
+### [11]   _clean_replace  (file=update.py) :: line 154, args 7, locals 7, stack 6, consts 8
+ 154            RESUME                   0
+
+ 157            LOAD_GLOBAL              0 (TOOL_DIR)
+                LOAD_ATTR                3 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_TRUE        24 (to L1)
+                NOT_TAKEN
+
+ 158            LOAD_GLOBAL              0 (TOOL_DIR)
+                LOAD_ATTR                5 (mkdir + NULL|self)
+                LOAD_CONST               1 (True)
+                LOAD_CONST               1 (True)
+                LOAD_CONST               2 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 159    L1:     LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                7 (iterdir + NULL|self)
+                CALL                     0
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      1 (f)
+                SWAP                     2
+        L2:     BUILD_SET                0
+                SWAP                     2
+        L3:     FOR_ITER                14 (to L4)
+                STORE_FAST_LOAD_FAST    17 (f, f)
+                LOAD_ATTR                8 (name)
+                SET_ADD                  2
+                JUMP_BACKWARD           16 (to L3)
+        L4:     END_FOR
+                POP_ITER
+        L5:     STORE_FAST               2 (new_names)
+                STORE_FAST               1 (f)
+
+ 160            LOAD_GLOBAL             11 (list + NULL)
+                LOAD_GLOBAL              0 (TOOL_DIR)
+                LOAD_ATTR                7 (iterdir + NULL|self)
+                CALL                     0
+                CALL                     1
+                GET_ITER
+        L6:     FOR_ITER               111 (to L10)
+                STORE_FAST               3 (old)
+
+ 161            LOAD_FAST_BORROW         3 (old)
+                LOAD_ATTR                8 (name)
+                LOAD_GLOBAL             12 (PROTECTED)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE        3 (to L7)
+                NOT_TAKEN
+
+ 162            JUMP_BACKWARD           26 (to L6)
+
+ 163    L7:     LOAD_FAST_BORROW         3 (old)
+                LOAD_ATTR                8 (name)
+                LOAD_FAST_BORROW         2 (new_names)
+                CONTAINS_OP              1 (not in)
+                POP_JUMP_IF_TRUE         3 (to L8)
+                NOT_TAKEN
+                JUMP_BACKWARD           45 (to L6)
+
+ 165    L8:     LOAD_FAST_BORROW         3 (old)
+                LOAD_ATTR               15 (is_dir + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       27 (to L9)
+                NOT_TAKEN
+
+ 166            LOAD_GLOBAL             16 (shutil)
+                LOAD_ATTR               18 (rmtree)
+                PUSH_NULL
+                LOAD_FAST_BORROW         3 (old)
+                LOAD_CONST               1 (True)
+                LOAD_CONST               3 (('ignore_errors',))
+                CALL_KW                  2
+                POP_TOP
+                JUMP_BACKWARD           93 (to L6)
+
+ 168    L9:     LOAD_FAST_BORROW         3 (old)
+                LOAD_ATTR               21 (unlink + NULL|self)
+                LOAD_CONST               1 (True)
+                LOAD_CONST               4 (('missing_ok',))
+                CALL_KW                  1
+                POP_TOP
+                JUMP_BACKWARD          113 (to L6)
+
+ 160   L10:     END_FOR
+                POP_ITER
+
+ 170            LOAD_FAST_BORROW         0 (src)
+                LOAD_ATTR                7 (iterdir + NULL|self)
+                CALL                     0
+                GET_ITER
+       L11:     FOR_ITER               141 (to L14)
+                STORE_FAST               1 (f)
+
+ 171            LOAD_FAST_BORROW         1 (f)
+                LOAD_ATTR                8 (name)
+                LOAD_GLOBAL             12 (PROTECTED)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE        3 (to L12)
+                NOT_TAKEN
+
+ 172            JUMP_BACKWARD           26 (to L11)
+
+ 173   L12:     LOAD_GLOBAL              0 (TOOL_DIR)
+                LOAD_FAST_BORROW         1 (f)
+                LOAD_ATTR                8 (name)
+                BINARY_OP               11 (/)
+                STORE_FAST               4 (dst)
+
+ 174            LOAD_FAST_BORROW         1 (f)
+                LOAD_ATTR               15 (is_dir + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       49 (to L13)
+                NOT_TAKEN
+
+ 175            LOAD_GLOBAL             16 (shutil)
+                LOAD_ATTR               18 (rmtree)
+                PUSH_NULL
+                LOAD_FAST_BORROW         4 (dst)
+                LOAD_CONST               1 (True)
+                LOAD_CONST               3 (('ignore_errors',))
+                CALL_KW                  2
+                POP_TOP
+
+ 176            LOAD_GLOBAL             16 (shutil)
+                LOAD_ATTR               22 (copytree)
+                PUSH_NULL
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (f, dst)
+                CALL                     2
+                POP_TOP
+                JUMP_BACKWARD          119 (to L11)
+
+ 178   L13:     LOAD_GLOBAL             16 (shutil)
+                LOAD_ATTR               24 (copy2)
+                PUSH_NULL
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 20 (f, dst)
+                CALL                     2
+                POP_TOP
+                JUMP_BACKWARD          143 (to L11)
+
+ 170   L14:     END_FOR
+                POP_ITER
+
+ 180            LOAD_CONST               7 (('run.sh', 'install.sh', 'lua_patched', 'luac_patched', 'unluac_rs'))
+                GET_ITER
+       L15:     FOR_ITER                58 (to L19)
+                STORE_FAST               5 (name)
+
+ 181            LOAD_GLOBAL              0 (TOOL_DIR)
+                LOAD_FAST_BORROW         5 (name)
+                BINARY_OP               11 (/)
+                STORE_FAST               6 (p)
+
+ 182            LOAD_FAST_BORROW         6 (p)
+                LOAD_ATTR                3 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L16)
+                NOT_TAKEN
+                JUMP_BACKWARD           40 (to L15)
+
+ 183   L16:     NOP
+
+ 184   L17:     LOAD_FAST_BORROW         6 (p)
+                LOAD_ATTR               27 (chmod + NULL|self)
+                LOAD_CONST               5 (493)
+                CALL                     1
+                POP_TOP
+       L18:     JUMP_BACKWARD           60 (to L15)
+
+ 180   L19:     END_FOR
+                POP_ITER
+                LOAD_CONST               6 (None)
+                RETURN_VALUE
+
+  --   L20:     SWAP                     2
+                POP_TOP
+
+ 159            SWAP                     2
+                STORE_FAST               1 (f)
+                RERAISE                  0
+
+  --   L21:     PUSH_EXC_INFO
+
+ 185            LOAD_GLOBAL             28 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L23)
+                NOT_TAKEN
+                POP_TOP
+
+ 186   L22:     POP_EXCEPT
+                JUMP_BACKWARD           83 (to L15)
+
+ 185   L23:     RERAISE                  0
+
+  --   L24:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L5 -> L20 [2]
+  L17 to L18 -> L21 [1]
+  L21 to L22 -> L24 [2] lasti
+  L23 to L24 -> L24 [2] lasti
+
+
+### [12]   _show_complete  (file=update.py) :: line 189, args 2, locals 2, stack 7, consts 9
+189           RESUME                   0
+
+191           LOAD_SMALL_INT          50
+              STORE_FAST               0 (w)
+
+192           LOAD_CONST               1 ('{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_GREEN)
+              LOAD_CONST               2 ('✦')
+              LOAD_FAST_BORROW         0 (w)
+              BINARY_OP                5 (*)
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              STORE_FAST               1 (green_bar)
+
+193           LOAD_GLOBAL              6 (_TTY)
+              TO_BOOL
+              POP_JUMP_IF_FALSE      119 (to L1)
+              NOT_TAKEN
+
+194           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_CONST               3 ('')
+              CALL                     1
+              POP_TOP
+
+195           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_FAST_BORROW         1 (green_bar)
+              CALL                     1
+              POP_TOP
+
+196           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_CONST               4 ('{}{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_GREEN)
+              LOAD_CONST               5 ('  ✅  UPDATE INSTALLED SUCCESSFULLY!')
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              CALL                     1
+              POP_TOP
+
+197           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_CONST               4 ('{}{}{}{}')
+              LOAD_ATTR                1 (format + NULL|self)
+              LOAD_GLOBAL              2 (_GREEN)
+              LOAD_CONST               6 ('      Restart the tool to continue...')
+              LOAD_GLOBAL              4 (_R)
+              CALL                     3
+              CALL                     1
+              POP_TOP
+
+198           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_FAST_BORROW         1 (green_bar)
+              CALL                     1
+              POP_TOP
+
+199           LOAD_GLOBAL              9 (print + NULL)
+              LOAD_CONST               3 ('')
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               8 (None)
+              RETURN_VALUE
+
+201   L1:     LOAD_GLOBAL              9 (print + NULL)
+              LOAD_CONST               7 ('UPDATE_INSTALLED_SUCCESS')
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               8 (None)
+              RETURN_VALUE
+
+
+### [13]   do_install  (file=update.py) :: line 204, args 17, locals 17, stack 7, consts 26
+ 204            RESUME                   0
+
+ 205            LOAD_GLOBAL              1 (latest_remote + NULL)
+                CALL                     0
+                STORE_FAST               0 (info)
+
+ 206            LOAD_FAST_BORROW         0 (info)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        14 (to L1)
+                NOT_TAKEN
+
+ 207            LOAD_GLOBAL              3 (print + NULL)
+                LOAD_CONST               0 ('NO_RELEASE')
+                CALL                     1
+                POP_TOP
+
+ 208            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 210    L1:     LOAD_GLOBAL              4 (TOOL_DIR)
+                LOAD_CONST               2 ('.ikram_update.zip')
+                BINARY_OP               11 (/)
+                STORE_FAST               1 (zip_path)
+
+ 211            LOAD_GLOBAL              4 (TOOL_DIR)
+                LOAD_CONST               3 ('.ikram_update_tmp')
+                BINARY_OP               11 (/)
+                STORE_FAST               2 (tmp)
+
+ 212            LOAD_GLOBAL              6 (shutil)
+                LOAD_ATTR                8 (rmtree)
+                PUSH_NULL
+                LOAD_FAST_BORROW         2 (tmp)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               5 (('ignore_errors',))
+                CALL_KW                  2
+                POP_TOP
+
+ 213            LOAD_FAST_BORROW         2 (tmp)
+                LOAD_ATTR               11 (mkdir + NULL|self)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               6 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 215            NOP
+
+ 216    L2:     LOAD_GLOBAL             12 (urllib)
+                LOAD_ATTR               14 (request)
+                LOAD_ATTR               17 (Request + NULL|self)
+
+ 217            LOAD_FAST_BORROW         0 (info)
+                LOAD_CONST               7 ('url')
+                BINARY_OP               26 ([])
+                LOAD_CONST               8 ('User-Agent')
+                LOAD_CONST               9 ('ikram-tool')
+                BUILD_MAP                1
+
+ 216            LOAD_CONST              10 (('headers',))
+                CALL_KW                  2
+                STORE_FAST               3 (req)
+
+ 219            LOAD_GLOBAL              3 (print + NULL)
+                LOAD_GLOBAL             19 (_splash + NULL)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 220            LOAD_GLOBAL             21 (_Progress + NULL)
+                CALL                     0
+                STORE_FAST               4 (prog)
+
+ 221            LOAD_GLOBAL             12 (urllib)
+                LOAD_ATTR               14 (request)
+                LOAD_ATTR               23 (urlopen + NULL|self)
+                LOAD_FAST_BORROW         3 (req)
+                LOAD_SMALL_INT         120
+                LOAD_CONST              11 (('timeout',))
+                CALL_KW                  2
+                COPY                     1
+                LOAD_SPECIAL             1 (__exit__)
+                SWAP                     2
+                SWAP                     3
+                LOAD_SPECIAL             0 (__enter__)
+                CALL                     0
+        L3:     STORE_FAST               5 (r)
+
+ 222            LOAD_GLOBAL             25 (int + NULL)
+                LOAD_FAST_BORROW         5 (r)
+                LOAD_ATTR               26 (headers)
+                LOAD_ATTR               29 (get + NULL|self)
+                LOAD_CONST              12 ('Content-Length')
+                CALL                     1
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L4)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_SMALL_INT           0
+        L4:     CALL                     1
+                STORE_FAST               6 (total)
+
+ 223            LOAD_GLOBAL             31 (bytearray + NULL)
+                CALL                     0
+                STORE_FAST               7 (data)
+
+ 224    L5:     NOP
+
+ 225            LOAD_FAST_BORROW         5 (r)
+                LOAD_ATTR               33 (read + NULL|self)
+                LOAD_CONST              13 (65536)
+                CALL                     1
+                STORE_FAST               8 (chunk)
+
+ 226            LOAD_FAST_BORROW         8 (chunk)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L8)
+        L6:     NOT_TAKEN
+
+ 227    L7:     JUMP_FORWARD            37 (to L9)
+
+ 228    L8:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 120 (data, chunk)
+                BINARY_OP               13 (+=)
+                STORE_FAST               7 (data)
+
+ 229            LOAD_FAST_BORROW         4 (prog)
+                LOAD_ATTR               35 (show + NULL|self)
+                LOAD_GLOBAL             37 (len + NULL)
+                LOAD_FAST_BORROW         7 (data)
+                CALL                     1
+                LOAD_FAST_BORROW         6 (total)
+                CALL                     2
+                POP_TOP
+                JUMP_BACKWARD           64 (to L5)
+
+ 221    L9:     LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                CALL                     3
+                POP_TOP
+
+ 230   L10:     LOAD_FAST_BORROW         1 (zip_path)
+                LOAD_ATTR               39 (write_bytes + NULL|self)
+                LOAD_FAST_CHECK          7 (data)
+                CALL                     1
+                POP_TOP
+
+ 232            LOAD_GLOBAL             40 (zipfile)
+                LOAD_ATTR               42 (ZipFile)
+                PUSH_NULL
+                LOAD_FAST_BORROW         1 (zip_path)
+                CALL                     1
+                COPY                     1
+                LOAD_SPECIAL             1 (__exit__)
+                SWAP                     2
+                SWAP                     3
+                LOAD_SPECIAL             0 (__enter__)
+                CALL                     0
+       L11:     STORE_FAST               9 (z)
+
+ 233            LOAD_FAST_BORROW         9 (z)
+                LOAD_ATTR               45 (extractall + NULL|self)
+                LOAD_FAST_BORROW         2 (tmp)
+                CALL                     1
+                POP_TOP
+
+ 232   L12:     LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                LOAD_CONST               1 (None)
+                CALL                     3
+                POP_TOP
+
+ 235   L13:     LOAD_FAST                2 (tmp)
+                STORE_FAST              10 (src)
+
+ 236            LOAD_FAST_BORROW         2 (tmp)
+                LOAD_ATTR               47 (iterdir + NULL|self)
+                CALL                     0
+                GET_ITER
+                LOAD_FAST_AND_CLEAR     11 (p)
+                SWAP                     2
+       L14:     BUILD_LIST               0
+                SWAP                     2
+       L15:     FOR_ITER                28 (to L18)
+                STORE_FAST_LOAD_FAST   187 (p, p)
+                LOAD_ATTR               49 (is_dir + NULL|self)
+                CALL                     0
+                TO_BOOL
+       L16:     POP_JUMP_IF_TRUE         3 (to L17)
+                NOT_TAKEN
+                JUMP_BACKWARD           26 (to L15)
+       L17:     LOAD_FAST_BORROW        11 (p)
+                LIST_APPEND              2
+                JUMP_BACKWARD           30 (to L15)
+       L18:     END_FOR
+                POP_ITER
+       L19:     STORE_FAST              12 (nested)
+                STORE_FAST              11 (p)
+
+ 237            LOAD_GLOBAL             37 (len + NULL)
+                LOAD_FAST_BORROW        12 (nested)
+                CALL                     1
+                LOAD_SMALL_INT           1
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       46 (to L22)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        12 (nested)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                LOAD_CONST              14 ('ikram.pyc')
+                BINARY_OP               11 (/)
+                LOAD_ATTR               51 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE       10 (to L22)
+       L20:     NOT_TAKEN
+
+ 238   L21:     LOAD_FAST_BORROW        12 (nested)
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                STORE_FAST              10 (src)
+
+ 240   L22:     LOAD_GLOBAL             53 (_clean_replace + NULL)
+                LOAD_FAST_BORROW        10 (src)
+                CALL                     1
+                POP_TOP
+
+ 242   L23:     NOP
+
+ 243   L24:     LOAD_CONST              15 ('V')
+                LOAD_GLOBAL             55 (str + NULL)
+                LOAD_FAST_BORROW         0 (info)
+                LOAD_CONST              16 ('version')
+                BINARY_OP               26 ([])
+                CALL                     1
+                LOAD_ATTR               57 (lstrip + NULL|self)
+                LOAD_CONST              17 ('vV')
+                CALL                     1
+                BINARY_OP                0 (+)
+                STORE_FAST              13 (ver)
+
+ 244            LOAD_GLOBAL              4 (TOOL_DIR)
+                LOAD_CONST              18 ('VERSION')
+                BINARY_OP               11 (/)
+                LOAD_ATTR               59 (write_text + NULL|self)
+                LOAD_FAST_BORROW        13 (ver)
+                CALL                     1
+                POP_TOP
+
+ 245            LOAD_GLOBAL              4 (TOOL_DIR)
+                LOAD_CONST              19 ('ikram_key.json')
+                BINARY_OP               11 (/)
+                STORE_FAST              14 (kf)
+
+ 246   L25:     NOP
+
+ 247   L26:     LOAD_GLOBAL             60 (json)
+                LOAD_ATTR               62 (loads)
+                PUSH_NULL
+                LOAD_FAST_BORROW        14 (kf)
+                LOAD_ATTR               65 (read_text + NULL|self)
+                CALL                     0
+                CALL                     1
+                STORE_FAST              15 (d)
+
+ 248            LOAD_FAST_BORROW_LOAD_FAST_BORROW 223 (ver, d)
+                LOAD_CONST              16 ('version')
+                STORE_SUBSCR
+
+ 249            LOAD_FAST_BORROW        14 (kf)
+                LOAD_ATTR               59 (write_text + NULL|self)
+                LOAD_GLOBAL             60 (json)
+                LOAD_ATTR               66 (dumps)
+                PUSH_NULL
+                LOAD_FAST_BORROW        15 (d)
+                LOAD_SMALL_INT           2
+                LOAD_CONST              20 (('indent',))
+                CALL_KW                  2
+                CALL                     1
+                POP_TOP
+
+ 260   L27:     LOAD_GLOBAL             71 (_show_complete + NULL)
+                CALL                     0
+                POP_TOP
+
+ 261            LOAD_GLOBAL              3 (print + NULL)
+                LOAD_CONST              22 ('INSTALLED_OK')
+                CALL                     1
+                POP_TOP
+
+ 262            LOAD_GLOBAL             72 (threading)
+                LOAD_ATTR               74 (Thread)
+                PUSH_NULL
+                LOAD_GLOBAL             76 (_fix_env)
+                LOAD_CONST               4 (True)
+                LOAD_CONST              23 (('target', 'daemon'))
+                CALL_KW                  2
+                LOAD_ATTR               79 (start + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 266   L28:     LOAD_FAST                1 (zip_path)
+                LOAD_ATTR               83 (unlink + NULL|self)
+                LOAD_CONST               4 (True)
+                LOAD_CONST              25 (('missing_ok',))
+                CALL_KW                  1
+                POP_TOP
+
+ 267            LOAD_GLOBAL              6 (shutil)
+                LOAD_ATTR                8 (rmtree)
+                PUSH_NULL
+                LOAD_FAST                2 (tmp)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               5 (('ignore_errors',))
+                CALL_KW                  2
+                POP_TOP
+
+ 268            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 221   L29:     PUSH_EXC_INFO
+                WITH_EXCEPT_START
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L30)
+                NOT_TAKEN
+                RERAISE                  2
+       L30:     POP_TOP
+       L31:     POP_EXCEPT
+                POP_TOP
+                POP_TOP
+                POP_TOP
+                EXTENDED_ARG             1
+                JUMP_BACKWARD_NO_INTERRUPT 487 (to L10)
+
+  --   L32:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+
+ 232   L33:     PUSH_EXC_INFO
+                WITH_EXCEPT_START
+                TO_BOOL
+                POP_JUMP_IF_TRUE         2 (to L34)
+                NOT_TAKEN
+                RERAISE                  2
+       L34:     POP_TOP
+       L35:     POP_EXCEPT
+                POP_TOP
+                POP_TOP
+                POP_TOP
+                EXTENDED_ARG             1
+                JUMP_BACKWARD_NO_INTERRUPT 434 (to L13)
+
+  --   L36:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L37:     SWAP                     2
+                POP_TOP
+
+ 236            SWAP                     2
+                STORE_FAST              11 (p)
+                RERAISE                  0
+
+  --   L38:     PUSH_EXC_INFO
+
+ 250            LOAD_GLOBAL             68 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       28 (to L41)
+                NOT_TAKEN
+                POP_TOP
+
+ 251            LOAD_FAST               14 (kf)
+                LOAD_ATTR               59 (write_text + NULL|self)
+
+ 252            LOAD_CONST              21 ('{\n  "version": "%s",\n  "key_hash": "7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"\n}\n')
+
+ 255            LOAD_FAST               13 (ver)
+
+ 252            BINARY_OP                6 (%)
+
+ 251            CALL                     1
+                POP_TOP
+       L39:     POP_EXCEPT
+       L40:     JUMP_BACKWARD_NO_INTERRUPT 189 (to L27)
+
+ 250   L41:     RERAISE                  0
+
+  --   L42:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L43:     PUSH_EXC_INFO
+
+ 257            LOAD_GLOBAL             68 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        4 (to L45)
+                NOT_TAKEN
+                POP_TOP
+
+ 258   L44:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 206 (to L27)
+
+ 257   L45:     RERAISE                  0
+
+  --   L46:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L47:     PUSH_EXC_INFO
+
+ 263            LOAD_GLOBAL             68 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE       37 (to L51)
+                NOT_TAKEN
+                STORE_FAST              16 (e)
+
+ 264   L48:     LOAD_GLOBAL              3 (print + NULL)
+                LOAD_CONST              24 ('FAIL: {}')
+                LOAD_ATTR               81 (format + NULL|self)
+                LOAD_FAST               16 (e)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+       L49:     POP_EXCEPT
+                LOAD_CONST               1 (None)
+                STORE_FAST              16 (e)
+                DELETE_FAST             16 (e)
+                JUMP_BACKWARD_NO_INTERRUPT 189 (to L28)
+
+  --   L50:     LOAD_CONST               1 (None)
+                STORE_FAST              16 (e)
+                DELETE_FAST             16 (e)
+                RERAISE                  1
+
+ 263   L51:     RERAISE                  0
+
+  --   L52:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L53:     PUSH_EXC_INFO
+
+ 266            LOAD_FAST                1 (zip_path)
+                LOAD_ATTR               83 (unlink + NULL|self)
+                LOAD_CONST               4 (True)
+                LOAD_CONST              25 (('missing_ok',))
+                CALL_KW                  1
+                POP_TOP
+
+ 267            LOAD_GLOBAL              6 (shutil)
+                LOAD_ATTR                8 (rmtree)
+                PUSH_NULL
+                LOAD_FAST                2 (tmp)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               5 (('ignore_errors',))
+                CALL_KW                  2
+                POP_TOP
+                RERAISE                  0
+
+  --   L54:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L47 [0]
+  L3 to L6 -> L29 [2] lasti
+  L7 to L9 -> L29 [2] lasti
+  L9 to L11 -> L47 [0]
+  L11 to L12 -> L33 [2] lasti
+  L12 to L14 -> L47 [0]
+  L14 to L16 -> L37 [2]
+  L17 to L19 -> L37 [2]
+  L19 to L20 -> L47 [0]
+  L21 to L23 -> L47 [0]
+  L24 to L25 -> L43 [0]
+  L26 to L27 -> L38 [0]
+  L27 to L28 -> L47 [0]
+  L29 to L31 -> L32 [4] lasti
+  L31 to L33 -> L47 [0]
+  L33 to L35 -> L36 [4] lasti
+  L35 to L38 -> L47 [0]
+  L38 to L39 -> L42 [1] lasti
+  L39 to L40 -> L43 [0]
+  L40 to L41 -> L47 [0]
+  L41 to L42 -> L42 [1] lasti
+  L42 to L43 -> L43 [0]
+  L43 to L44 -> L46 [1] lasti
+  L44 to L45 -> L47 [0]
+  L45 to L46 -> L46 [1] lasti
+  L46 to L47 -> L47 [0]
+  L47 to L48 -> L52 [1] lasti
+  L48 to L49 -> L50 [1] lasti
+  L49 to L50 -> L53 [0]
+  L50 to L52 -> L52 [1] lasti
+  L52 to L53 -> L53 [0]
+  L53 to L54 -> L54 [1] lasti
+
+
+### [14]   _fix_env  (file=update.py) :: line 271, args 17, locals 17, stack 8, consts 26
+ 271            RESUME                   0
+
+ 272            NOP
+
+ 273    L1:     LOAD_GLOBAL              0 (Path)
+                LOAD_ATTR                2 (home)
+                PUSH_NULL
+                CALL                     0
+                STORE_FAST               0 (home)
+
+ 276    L2:     NOP
+
+ 277    L3:     BUILD_LIST               0
+                STORE_FAST               1 (need)
+
+ 278            LOAD_CONST              23 ((('python', 'python'), ('git', 'git'), ('curl', 'curl'), ('unzip', 'unzip'), ('javac', 'openjdk-17'), ('lua5.3', 'lua53')))
+                GET_ITER
+        L4:     FOR_ITER                52 (to L7)
+                UNPACK_SEQUENCE          2
+                STORE_FAST_STORE_FAST   35 (tool, pkg)
+
+ 286            LOAD_GLOBAL              6 (shutil)
+                LOAD_ATTR                8 (which)
+                PUSH_NULL
+                LOAD_FAST                2 (tool)
+                CALL                     1
+                TO_BOOL
+        L5:     POP_JUMP_IF_FALSE        3 (to L6)
+                NOT_TAKEN
+                JUMP_BACKWARD           35 (to L4)
+
+ 287    L6:     LOAD_FAST                1 (need)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST                3 (pkg)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           54 (to L4)
+
+ 278    L7:     END_FOR
+                POP_ITER
+
+ 288            LOAD_FAST                1 (need)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       59 (to L17)
+        L8:     NOT_TAKEN
+
+ 289    L9:     LOAD_FAST                1 (need)
+                GET_ITER
+       L10:     FOR_ITER                52 (to L16)
+                STORE_FAST               3 (pkg)
+
+ 290            LOAD_GLOBAL             13 (range + NULL)
+                LOAD_SMALL_INT           3
+                CALL                     1
+                GET_ITER
+       L11:     FOR_ITER                34 (to L15)
+                STORE_FAST               4 (_)
+
+ 291   L12:     NOP
+
+ 292   L13:     LOAD_GLOBAL             14 (subprocess)
+                LOAD_ATTR               16 (run)
+                PUSH_NULL
+
+ 293            LOAD_CONST               1 ('pkg')
+                LOAD_CONST               2 ('install')
+                LOAD_CONST               3 ('-y')
+                LOAD_FAST                3 (pkg)
+                BUILD_LIST               4
+
+ 294            LOAD_CONST               4 (True)
+
+ 295            LOAD_CONST               5 (600)
+
+ 292            LOAD_CONST               6 (('capture_output', 'timeout'))
+                CALL_KW                  3
+                POP_TOP
+
+ 297   L14:     POP_TOP
+                JUMP_BACKWARD           50 (to L10)
+
+ 290   L15:     END_FOR
+                POP_ITER
+                JUMP_BACKWARD           54 (to L10)
+
+ 289   L16:     END_FOR
+                POP_ITER
+
+ 300   L17:     NOP
+
+ 301   L18:     LOAD_GLOBAL             14 (subprocess)
+                LOAD_ATTR               16 (run)
+                PUSH_NULL
+
+ 302            BUILD_LIST               0
+                LOAD_CONST              24 (('pkg', 'upgrade', '-y', 'python'))
+                LIST_EXTEND              1
+
+ 303            LOAD_CONST               4 (True)
+
+ 304            LOAD_CONST               5 (600)
+
+ 301            LOAD_CONST               6 (('capture_output', 'timeout'))
+                CALL_KW                  3
+                POP_TOP
+
+ 308   L19:     LOAD_CONST              25 (('rich', 'pycryptodome', 'zstandard', 'gmalg'))
+                GET_ITER
+       L20:     FOR_ITER                51 (to L26)
+                STORE_FAST               5 (lib)
+
+ 309            LOAD_GLOBAL             13 (range + NULL)
+                LOAD_SMALL_INT           3
+                CALL                     1
+                GET_ITER
+       L21:     FOR_ITER                33 (to L25)
+                STORE_FAST               4 (_)
+
+ 310   L22:     NOP
+
+ 311   L23:     LOAD_GLOBAL             14 (subprocess)
+                LOAD_ATTR               16 (run)
+                PUSH_NULL
+
+ 312            LOAD_CONST               7 ('pip')
+                LOAD_CONST               2 ('install')
+                LOAD_FAST                5 (lib)
+                BUILD_LIST               3
+
+ 313            LOAD_CONST               4 (True)
+
+ 314            LOAD_CONST               5 (600)
+
+ 311            LOAD_CONST               6 (('capture_output', 'timeout'))
+                CALL_KW                  3
+                POP_TOP
+
+ 316   L24:     POP_TOP
+                JUMP_BACKWARD           49 (to L20)
+
+ 309   L25:     END_FOR
+                POP_ITER
+                JUMP_BACKWARD           53 (to L20)
+
+ 308   L26:     END_FOR
+                POP_ITER
+
+ 321            LOAD_CONST               8 ('ikram() { PYTHONDONTWRITEBYTECODE=1 MAGIC_NEEDED=$(python3 -c \'import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())\' 2>/dev/null); if ! python3 -c "import sys; from pathlib import Path; p=Path(\'$HOME/Ikram_Tool/ikram_patch.py\'); print(p.exists())" 2>/dev/null | grep -q True; then echo \'  Tool files missing - reinstall karo: install.sh\'; return 1; fi; MAGIC_HAVE=$(python3 -c "import struct; p=open(\'$HOME/Ikram_Tool/ikram.pyc\',\'rb\').read(4); print(p.hex())" 2>/dev/null); if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then echo \'\'; echo \'  ⬆ Python purana hai — upgrade kar raha hoon...\'; pkg upgrade -y python 2>&1 | tail -3; echo \'  ✓ Ab dobara try karo: ikram\'; echo \'\'; return 1; fi; python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"; }')
+
+ 320            STORE_FAST               6 (launcher)
+
+ 334            LOAD_CONST               9 ('\n\n# Ikram Tool launcher\n{}\n')
+                LOAD_ATTR               19 (format + NULL|self)
+                LOAD_FAST                6 (launcher)
+                CALL                     1
+                STORE_FAST               7 (suffix)
+
+ 335            LOAD_FAST                0 (home)
+                LOAD_CONST              10 ('.bashrc')
+                BINARY_OP               11 (/)
+                STORE_FAST               8 (rc)
+
+ 336            LOAD_FAST                8 (rc)
+                LOAD_ATTR               21 (exists + NULL|self)
+                CALL                     0
+                TO_BOOL
+                POP_JUMP_IF_FALSE      174 (to L34)
+       L27:     NOT_TAKEN
+
+ 337            NOP
+
+ 338   L28:     LOAD_FAST                8 (rc)
+                LOAD_ATTR               23 (read_text + NULL|self)
+                LOAD_CONST              11 ('ignore')
+                LOAD_CONST              12 (('errors',))
+                CALL_KW                  1
+                STORE_FAST               9 (text)
+
+ 339            LOAD_CONST              13 ('ikram()')
+                LOAD_FAST                9 (text)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE      108 (to L33)
+                NOT_TAKEN
+
+ 340            BUILD_LIST               0
+                STORE_FAST              10 (lines)
+
+ 341            LOAD_FAST                9 (text)
+                LOAD_ATTR               25 (splitlines + NULL|self)
+                CALL                     0
+                GET_ITER
+       L29:     FOR_ITER                68 (to L32)
+                STORE_FAST              11 (l)
+
+ 342            LOAD_FAST               11 (l)
+                LOAD_ATTR               27 (strip + NULL|self)
+                CALL                     0
+                STORE_FAST              12 (s)
+
+ 343            LOAD_FAST               12 (s)
+                LOAD_ATTR               29 (startswith + NULL|self)
+                LOAD_CONST              13 ('ikram()')
+                CALL                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         8 (to L30)
+                NOT_TAKEN
+                LOAD_FAST               12 (s)
+                LOAD_CONST              14 ('# Ikram Tool launcher')
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L31)
+                NOT_TAKEN
+
+ 344   L30:     JUMP_BACKWARD           51 (to L29)
+
+ 345   L31:     LOAD_FAST               10 (lines)
+                LOAD_ATTR               11 (append + NULL|self)
+                LOAD_FAST               11 (l)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           70 (to L29)
+
+ 341   L32:     END_FOR
+                POP_ITER
+
+ 346            LOAD_CONST              15 ('\n')
+                LOAD_ATTR               31 (join + NULL|self)
+                LOAD_FAST               10 (lines)
+                CALL                     1
+                STORE_FAST               9 (text)
+
+ 347   L33:     LOAD_FAST                9 (text)
+                LOAD_ATTR               33 (rstrip + NULL|self)
+                CALL                     0
+                LOAD_FAST                7 (suffix)
+                BINARY_OP                0 (+)
+                STORE_FAST               9 (text)
+
+ 348            LOAD_FAST                8 (rc)
+                LOAD_ATTR               35 (write_text + NULL|self)
+                LOAD_FAST                9 (text)
+                CALL                     1
+                POP_TOP
+
+ 352   L34:     NOP
+
+ 353   L35:     LOAD_GLOBAL             36 (os)
+                LOAD_ATTR               38 (environ)
+                LOAD_ATTR               41 (get + NULL|self)
+
+ 354            LOAD_CONST              16 ('PREFIX')
+                LOAD_CONST              17 ('/data/data/com.termux/files/usr')
+
+ 353            CALL                     2
+                STORE_FAST              13 (prefix)
+
+ 358   L36:     LOAD_GLOBAL              1 (Path + NULL)
+                LOAD_FAST               13 (prefix)
+                CALL                     1
+                LOAD_CONST              18 ('bin')
+                BINARY_OP               11 (/)
+                STORE_FAST              14 (bindir)
+
+ 359            LOAD_FAST               14 (bindir)
+                LOAD_ATTR               43 (mkdir + NULL|self)
+                LOAD_CONST               4 (True)
+                LOAD_CONST               4 (True)
+                LOAD_CONST              19 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 360            LOAD_FAST               14 (bindir)
+                LOAD_CONST              20 ('ikram')
+                BINARY_OP               11 (/)
+                STORE_FAST              15 (binpath)
+
+ 362            LOAD_CONST              21 ('#!/data/data/com.termux/files/usr/bin/bash\nexport PYTHONDONTWRITEBYTECODE=1\nif ! command -v python3 >/dev/null 2>&1; then\n  echo ""\n  echo "  python3 not found! Install karo:"\n  echo "    pkg update -y && pkg install -y python"\n  echo ""\n  exit 1\nfi\nif [ ! -f "$HOME/Ikram_Tool/ikram_patch.py" ]; then\n  echo ""\n  echo "  ⚠ Tool files missing — khud repair kar raha hoon..."\n  mkdir -p "$HOME/Ikram_Tool"\n  cd "$HOME/Ikram_Tool"\n  curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"\n  TMPX="$HOME/Ikram_Tool/.repair"\n  rm -rf "$TMPX" && mkdir -p "$TMPX"\n  if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n    cp -r "$TMPX"/. "$HOME/Ikram_Tool"/ 2>/dev/null\n    chmod +x "$HOME/Ikram_Tool/run.sh" "$HOME/Ikram_Tool/ikram_patch.py" 2>/dev/null\n    echo "  ✓ Repair done! Tool khul raha hai..."\n    exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\n  fi\n  rm -rf "$TMPX" "$HOME/Ikram_Tool/repair.zip"\n  echo "  ✗ Repair fail. Dobara install karo:"\n  echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"\n  echo ""\n  exit 1\nfi\nMAGIC_NEEDED=$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)\nMAGIC_HAVE=$(python3 -c "\nimport struct\np = open(\'$HOME/Ikram_Tool/ikram.pyc\',\'rb\').read(4)\nprint(p.hex())\n" 2>/dev/null)\nif [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then\n  echo ""\n  echo "  ⬆ Python purana hai — upgrade kar raha hoon..."\n  pkg update -y >/dev/null 2>&1\n  pkg upgrade -y python 2>&1 | tail -3\n  exec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\nfi\nexec python3 "$HOME/Ikram_Tool/ikram_patch.py" "$@"\n')
+
+ 361            STORE_FAST              16 (binlauncher)
+
+ 400            LOAD_FAST               15 (binpath)
+                LOAD_ATTR               35 (write_text + NULL|self)
+                LOAD_FAST               16 (binlauncher)
+                CALL                     1
+                POP_TOP
+
+ 401            LOAD_FAST               15 (binpath)
+                LOAD_ATTR               45 (chmod + NULL|self)
+                LOAD_CONST              22 (493)
+                CALL                     1
+                POP_TOP
+
+ 404   L37:     LOAD_CONST               0 (None)
+                RETURN_VALUE
+
+  --   L38:     PUSH_EXC_INFO
+
+ 274            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L40)
+                NOT_TAKEN
+                POP_TOP
+
+ 275   L39:     POP_EXCEPT
+                LOAD_CONST               0 (None)
+                RETURN_VALUE
+
+ 274   L40:     RERAISE                  0
+
+  --   L41:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L42:     PUSH_EXC_INFO
+
+ 298            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L44)
+                NOT_TAKEN
+                POP_TOP
+
+ 299   L43:     POP_EXCEPT
+                EXTENDED_ARG             1
+                JUMP_BACKWARD          500 (to L11)
+
+ 298   L44:     RERAISE                  0
+
+  --   L45:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L46:     PUSH_EXC_INFO
+
+ 306            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L48)
+                NOT_TAKEN
+                POP_TOP
+
+ 307   L47:     POP_EXCEPT
+                EXTENDED_ARG             1
+                JUMP_BACKWARD_NO_INTERRUPT 448 (to L19)
+
+ 306   L48:     RERAISE                  0
+
+  --   L49:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L50:     PUSH_EXC_INFO
+
+ 317            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L52)
+                NOT_TAKEN
+                POP_TOP
+
+ 318   L51:     POP_EXCEPT
+                EXTENDED_ARG             1
+                JUMP_BACKWARD          451 (to L21)
+
+ 317   L52:     RERAISE                  0
+
+  --   L53:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L54:     PUSH_EXC_INFO
+
+ 349            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        4 (to L56)
+                NOT_TAKEN
+                POP_TOP
+
+ 350   L55:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 204 (to L34)
+
+ 349   L56:     RERAISE                  0
+
+  --   L57:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L58:     PUSH_EXC_INFO
+
+ 356            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L60)
+                NOT_TAKEN
+                POP_TOP
+
+ 357            LOAD_CONST              17 ('/data/data/com.termux/files/usr')
+                STORE_FAST              13 (prefix)
+       L59:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 190 (to L36)
+
+ 356   L60:     RERAISE                  0
+
+  --   L61:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L62:     PUSH_EXC_INFO
+
+ 402            LOAD_GLOBAL              4 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L64)
+                NOT_TAKEN
+                POP_TOP
+
+ 403   L63:     POP_EXCEPT
+
+ 404            LOAD_CONST               0 (None)
+                RETURN_VALUE
+
+ 402   L64:     RERAISE                  0
+
+  --   L65:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L38 [0]
+  L3 to L5 -> L62 [0]
+  L6 to L8 -> L62 [0]
+  L9 to L12 -> L62 [0]
+  L13 to L14 -> L42 [2]
+  L14 to L17 -> L62 [0]
+  L18 to L19 -> L46 [0]
+  L19 to L22 -> L62 [0]
+  L23 to L24 -> L50 [2]
+  L24 to L27 -> L62 [0]
+  L28 to L34 -> L54 [0]
+  L35 to L36 -> L58 [0]
+  L36 to L37 -> L62 [0]
+  L38 to L39 -> L41 [1] lasti
+  L40 to L41 -> L41 [1] lasti
+  L42 to L43 -> L45 [3] lasti
+  L43 to L44 -> L62 [0]
+  L44 to L45 -> L45 [3] lasti
+  L45 to L46 -> L62 [0]
+  L46 to L47 -> L49 [1] lasti
+  L47 to L48 -> L62 [0]
+  L48 to L49 -> L49 [1] lasti
+  L49 to L50 -> L62 [0]
+  L50 to L51 -> L53 [3] lasti
+  L51 to L52 -> L62 [0]
+  L52 to L53 -> L53 [3] lasti
+  L53 to L54 -> L62 [0]
+  L54 to L55 -> L57 [1] lasti
+  L55 to L56 -> L62 [0]
+  L56 to L57 -> L57 [1] lasti
+  L57 to L58 -> L62 [0]
+  L58 to L59 -> L61 [1] lasti
+  L59 to L60 -> L62 [0]
+  L60 to L61 -> L61 [1] lasti
+  L61 to L62 -> L62 [0]
+  L62 to L63 -> L65 [1] lasti
+  L64 to L65 -> L65 [1] lasti
+
+
+### [15]   check_only  (file=update.py) :: line 407, args 3, locals 3, stack 6, consts 6
+407           RESUME                   0
+
+408           LOAD_GLOBAL              1 (latest_remote + NULL)
+              CALL                     0
+              STORE_FAST               0 (info)
+
+409           LOAD_FAST_BORROW         0 (info)
+              TO_BOOL
+              POP_JUMP_IF_TRUE        14 (to L1)
+              NOT_TAKEN
+
+410           LOAD_GLOBAL              3 (print + NULL)
+              LOAD_CONST               0 ('NO_RELEASE')
+              CALL                     1
+              POP_TOP
+
+411           LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+412   L1:     LOAD_GLOBAL              4 (TOOL_DIR)
+              LOAD_CONST               2 ('VERSION')
+              BINARY_OP               11 (/)
+              STORE_FAST               1 (v)
+
+413           LOAD_FAST_BORROW         1 (v)
+              LOAD_ATTR                7 (exists + NULL|self)
+              CALL                     0
+              TO_BOOL
+              POP_JUMP_IF_FALSE       31 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         1 (v)
+              LOAD_ATTR                9 (read_text + NULL|self)
+              CALL                     0
+              LOAD_ATTR               11 (strip + NULL|self)
+              CALL                     0
+              JUMP_FORWARD             1 (to L3)
+      L2:     LOAD_CONST               3 ('0.0.0')
+      L3:     STORE_FAST               2 (local)
+
+414           LOAD_GLOBAL              3 (print + NULL)
+              LOAD_CONST               4 ('{}|{}')
+              LOAD_ATTR               13 (format + NULL|self)
+              LOAD_FAST_BORROW         0 (info)
+              LOAD_CONST               5 ('version')
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         2 (local)
+              CALL                     2
+              CALL                     1
+              POP_TOP
+
+415           LOAD_CONST               1 (None)
+              RETURN_VALUE

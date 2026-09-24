@@ -1,0 +1,28 @@
+# telemetry
+# funcs=8
+# top-level names:
+  API
+  BOT_TOKEN
+  CHAT_ID
+  Path
+  app_version
+  datetime
+  device_name
+  json
+  pathlib
+  platform
+  print
+  send_error
+  send_login
+  subprocess
+  threading
+  urllib
+  urllib.request
+# module str consts:
+  '/sendMessage'
+  '5625387502'
+  '8704316836:AAHWrtG6pDeI4j6tRy02ryEPESDhp5iEYY0'
+  'Device: '
+  'IKRAM TOOL - telemetry (OWNER ONLY).\n\nLogin hone par device ka naam + time Telegram par bhejta hai taake owner\nko pata chale ki kaun is tool ko use kar raha hai.\n'
+  '__main__'
+  'https://api.telegram.org/bot'

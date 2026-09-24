@@ -1,0 +1,3102 @@
+
+### [0] <module>  (file=ue4.py) :: line 1, args 0, locals 0, stack 4, consts 24
+  0           RESUME                   0
+
+  1           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              0 (struct)
+              STORE_NAME               0 (struct)
+
+  2           LOAD_SMALL_INT           0
+              LOAD_CONST               2 (('sha1',))
+              IMPORT_NAME              1 (hashlib)
+              IMPORT_FROM              2 (sha1)
+              STORE_NAME               2 (sha1)
+              POP_TOP
+
+  3           LOAD_SMALL_INT           0
+              LOAD_CONST               3 (('Path',))
+              IMPORT_NAME              3 (pathlib)
+              IMPORT_FROM              4 (Path)
+              STORE_NAME               4 (Path)
+              POP_TOP
+
+  6           LOAD_CONST               4 (1517228769)
+              STORE_NAME               5 (MAGIC)
+
+  7           LOAD_CONST               5 (b'\xe1\x12oZ')
+              STORE_NAME               6 (MAGIC_BYTES)
+
+ 10           LOAD_CONST               6 (<code object align at 0x7aaf68ee30, file "ue4.py", line 10>)
+              MAKE_FUNCTION
+              STORE_NAME               7 (align)
+
+ 14           LOAD_CONST              23 ((1,))
+              LOAD_CONST               7 (<code object unpad at 0x7aaf68e930, file "ue4.py", line 14>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE   1 (defaults)
+              STORE_NAME               8 (unpad)
+
+ 18           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST               8 (<code object Reader at 0x7aab472f70, file "ue4.py", line 18>)
+              MAKE_FUNCTION
+              LOAD_CONST               9 ('Reader')
+              CALL                     2
+              STORE_NAME               9 (Reader)
+
+ 58           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              10 (<code object Writer at 0x7aab4733f0, file "ue4.py", line 58>)
+              MAKE_FUNCTION
+              LOAD_CONST              11 ('Writer')
+              CALL                     2
+              STORE_NAME              10 (Writer)
+
+ 80           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              12 (<code object Block at 0x7aaf68e130, file "ue4.py", line 80>)
+              MAKE_FUNCTION
+              LOAD_CONST              13 ('Block')
+              CALL                     2
+              STORE_NAME              11 (Block)
+
+ 86           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              14 (<code object Entry at 0x7aab490580, file "ue4.py", line 86>)
+              MAKE_FUNCTION
+              LOAD_CONST              15 ('Entry')
+              CALL                     2
+              STORE_NAME              12 (Entry)
+
+114           LOAD_CONST              16 (<code object read_entry at 0xb400007c800a26b0, file "ue4.py", line 114>)
+              MAKE_FUNCTION
+              STORE_NAME              13 (read_entry)
+
+139           LOAD_CONST              17 (<code object write_entry at 0xb400007d1004bdd0, file "ue4.py", line 139>)
+              MAKE_FUNCTION
+              STORE_NAME              14 (write_entry)
+
+161           LOAD_CONST              18 (<code object read_encoded_entry at 0xb400007c800a1120, file "ue4.py", line 161>)
+              MAKE_FUNCTION
+              STORE_NAME              15 (read_encoded_entry)
+
+200           LOAD_CONST              19 (<code object find_magic at 0x7aaf77f290, file "ue4.py", line 200>)
+              MAKE_FUNCTION
+              STORE_NAME              16 (find_magic)
+
+212           LOAD_CONST              20 (<code object aes_ecb_decrypt at 0x7aaf77f430, file "ue4.py", line 212>)
+              MAKE_FUNCTION
+              STORE_NAME              17 (aes_ecb_decrypt)
+
+219           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              21 (<code object Ue4Pak at 0x7aab4c1680, file "ue4.py", line 219>)
+              MAKE_FUNCTION
+              LOAD_CONST              22 ('Ue4Pak')
+              CALL                     2
+              STORE_NAME              18 (Ue4Pak)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   align  (file=ue4.py) :: line 10, args 1, locals 1, stack 2, consts 2
+ 10           RESUME                   0
+
+ 11           LOAD_FAST_BORROW         0 (x)
+              LOAD_SMALL_INT          15
+              BINARY_OP                0 (+)
+              LOAD_CONST               1 (-16)
+              BINARY_OP                1 (&)
+              RETURN_VALUE
+
+
+### [2]   unpad  (file=ue4.py) :: line 14, args 2, locals 2, stack 5, consts 1
+ 14           RESUME                   0
+
+ 15           LOAD_FAST_BORROW         0 (b)
+              LOAD_CONST               0 (None)
+              LOAD_GLOBAL              1 (len + NULL)
+              LOAD_FAST_BORROW         0 (b)
+              CALL                     1
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP               10 (-)
+              BINARY_SLICE
+              RETURN_VALUE
+
+
+### [3]   Reader  (file=ue4.py) :: line 18, args 0, locals 1, stack 2, consts 11
+  --           MAKE_CELL                0 (__classdict__)
+
+  18           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Reader')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          18
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  19           LOAD_CONST              10 ((0,))
+               LOAD_CONST               1 (<code object __init__ at 0x7aaf603690, file "ue4.py", line 19>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME               4 (__init__)
+
+  23           LOAD_CONST               2 (<code object u1 at 0x7aab4c13e0, file "ue4.py", line 23>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (u1)
+
+  28           LOAD_CONST               3 (<code object u4 at 0x7aaf5e76d0, file "ue4.py", line 28>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (u4)
+
+  33           LOAD_CONST               4 (<code object u8 at 0x7aaf5e7840, file "ue4.py", line 33>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (u8)
+
+  38           LOAD_CONST               5 (<code object i4 at 0x7aaf5e7b20, file "ue4.py", line 38>)
+               MAKE_FUNCTION
+               STORE_NAME               8 (i4)
+
+  43           LOAD_CONST               6 (<code object raw at 0x7aaf64a130, file "ue4.py", line 43>)
+               MAKE_FUNCTION
+               STORE_NAME               9 (raw)
+
+  48           LOAD_CONST               7 (<code object fstring at 0x7aaf78a500, file "ue4.py", line 48>)
+               MAKE_FUNCTION
+               STORE_NAME              10 (fstring)
+               LOAD_CONST               8 (('c', 'd'))
+               STORE_NAME              11 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME              12 (__classdictcell__)
+               LOAD_CONST               9 (None)
+               RETURN_VALUE
+
+
+### [4]     __init__  (file=ue4.py) :: line 19, args 3, locals 3, stack 2, consts 1
+ 19           RESUME                   0
+
+ 20           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (data, self)
+              STORE_ATTR               0 (d)
+
+ 21           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (cursor, self)
+              STORE_ATTR               1 (c)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [5]     u1  (file=ue4.py) :: line 23, args 2, locals 2, stack 3, consts 1
+ 23           RESUME                   0
+
+ 24           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (c)
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+ 25           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                2 (c)
+              LOAD_SMALL_INT           1
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               1 (c)
+
+ 26           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [6]     u4  (file=ue4.py) :: line 28, args 2, locals 2, stack 5, consts 1
+ 28           RESUME                   0
+
+ 29           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<I')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (c)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+ 30           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (c)
+              LOAD_SMALL_INT           4
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (c)
+
+ 31           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [7]     u8  (file=ue4.py) :: line 33, args 2, locals 2, stack 5, consts 1
+ 33           RESUME                   0
+
+ 34           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<Q')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (c)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+ 35           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (c)
+              LOAD_SMALL_INT           8
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (c)
+
+ 36           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [8]     i4  (file=ue4.py) :: line 38, args 2, locals 2, stack 5, consts 1
+ 38           RESUME                   0
+
+ 39           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<i')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (c)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+ 40           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (c)
+              LOAD_SMALL_INT           4
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (c)
+
+ 41           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [9]     raw  (file=ue4.py) :: line 43, args 3, locals 3, stack 4, consts 1
+ 43           RESUME                   0
+
+ 44           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (c)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (c)
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP                0 (+)
+              BINARY_SLICE
+              STORE_FAST               2 (v)
+
+ 45           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                2 (c)
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               1 (c)
+
+ 46           LOAD_FAST_BORROW         2 (v)
+              RETURN_VALUE
+
+
+### [10]     fstring  (file=ue4.py) :: line 48, args 3, locals 3, stack 5, consts 8
+ 48           RESUME                   0
+
+ 49           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (i4 + NULL|self)
+              CALL                     0
+              STORE_FAST               1 (n)
+
+ 50           LOAD_FAST_BORROW         1 (n)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+
+ 51           LOAD_CONST               1 ('')
+              RETURN_VALUE
+
+ 52   L1:     LOAD_FAST_BORROW         1 (n)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       60 (to L2)
+              NOT_TAKEN
+
+ 53           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                3 (raw + NULL|self)
+              LOAD_FAST_BORROW         1 (n)
+              UNARY_NEGATIVE
+              LOAD_SMALL_INT           2
+              BINARY_OP                5 (*)
+              CALL                     1
+              STORE_FAST               2 (data)
+
+ 54           LOAD_FAST_BORROW         2 (data)
+              LOAD_ATTR                5 (decode + NULL|self)
+              LOAD_CONST               2 ('utf-16-le')
+              LOAD_CONST               3 ('replace')
+              LOAD_CONST               4 (('errors',))
+              CALL_KW                  2
+              LOAD_ATTR                7 (rstrip + NULL|self)
+              LOAD_CONST               5 ('\x00')
+              CALL                     1
+              RETURN_VALUE
+
+ 55   L2:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                3 (raw + NULL|self)
+              LOAD_FAST_BORROW         1 (n)
+              CALL                     1
+              LOAD_ATTR                7 (rstrip + NULL|self)
+              LOAD_CONST               6 (b'\x00')
+              CALL                     1
+              LOAD_ATTR                5 (decode + NULL|self)
+              LOAD_CONST               7 ('utf-8')
+              LOAD_CONST               3 ('replace')
+              LOAD_CONST               4 (('errors',))
+              CALL_KW                  2
+              RETURN_VALUE
+
+
+### [11]   Writer  (file=ue4.py) :: line 58, args 0, locals 1, stack 1, consts 9
+  --           MAKE_CELL                0 (__classdict__)
+
+  58           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Writer')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          58
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  59           LOAD_CONST               1 (<code object __init__ at 0x7aaf68d830, file "ue4.py", line 59>)
+               MAKE_FUNCTION
+               STORE_NAME               4 (__init__)
+
+  62           LOAD_CONST               2 (<code object u1 at 0x7aaf62f5f0, file "ue4.py", line 62>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (u1)
+
+  65           LOAD_CONST               3 (<code object u4 at 0x7aaf62eab0, file "ue4.py", line 65>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (u4)
+
+  68           LOAD_CONST               4 (<code object u8 at 0x7aaf62f0f0, file "ue4.py", line 68>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (u8)
+
+  71           LOAD_CONST               5 (<code object raw at 0x7aab491570, file "ue4.py", line 71>)
+               MAKE_FUNCTION
+               STORE_NAME               8 (raw)
+
+  74           LOAD_CONST               6 (<code object fstring at 0x7aaf757b40, file "ue4.py", line 74>)
+               MAKE_FUNCTION
+               STORE_NAME               9 (fstring)
+               LOAD_CONST               7 (('out',))
+               STORE_NAME              10 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME              11 (__classdictcell__)
+               LOAD_CONST               8 (None)
+               RETURN_VALUE
+
+
+### [12]     __init__  (file=ue4.py) :: line 59, args 1, locals 1, stack 2, consts 1
+ 59           RESUME                   0
+
+ 60           LOAD_GLOBAL              1 (bytearray + NULL)
+              CALL                     0
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               1 (out)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [13]     u1  (file=ue4.py) :: line 62, args 2, locals 2, stack 7, consts 2
+ 62           RESUME                   0
+
+ 63           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                0 (out)
+              LOAD_GLOBAL              2 (struct)
+              LOAD_ATTR                4 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<B')
+              LOAD_FAST_BORROW         1 (v)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              CALL                     2
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               0 (out)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [14]     u4  (file=ue4.py) :: line 65, args 2, locals 2, stack 7, consts 3
+ 65           RESUME                   0
+
+ 66           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                0 (out)
+              LOAD_GLOBAL              2 (struct)
+              LOAD_ATTR                4 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<I')
+              LOAD_FAST_BORROW         1 (v)
+              LOAD_CONST               1 (4294967295)
+              BINARY_OP                1 (&)
+              CALL                     2
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               0 (out)
+              LOAD_CONST               2 (None)
+              RETURN_VALUE
+
+
+### [15]     u8  (file=ue4.py) :: line 68, args 2, locals 2, stack 6, consts 2
+ 68           RESUME                   0
+
+ 69           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                0 (out)
+              LOAD_GLOBAL              2 (struct)
+              LOAD_ATTR                4 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<Q')
+              LOAD_FAST_BORROW         1 (v)
+              CALL                     2
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               0 (out)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [16]     raw  (file=ue4.py) :: line 71, args 2, locals 2, stack 3, consts 1
+ 71           RESUME                   0
+
+ 72           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                0 (out)
+              LOAD_FAST_BORROW         1 (b)
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               0 (out)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [17]     fstring  (file=ue4.py) :: line 74, args 3, locals 3, stack 8, consts 4
+ 74           RESUME                   0
+
+ 75           LOAD_FAST_BORROW         1 (s)
+              LOAD_ATTR                1 (encode + NULL|self)
+              LOAD_CONST               0 ('utf-8')
+              CALL                     1
+              LOAD_CONST               1 (b'\x00')
+              BINARY_OP                0 (+)
+              STORE_FAST               2 (b)
+
+ 76           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                2 (out)
+              LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (pack)
+              PUSH_NULL
+              LOAD_CONST               2 ('<i')
+              LOAD_GLOBAL              9 (len + NULL)
+              LOAD_FAST_BORROW         2 (b)
+              CALL                     1
+              CALL                     2
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               1 (out)
+
+ 77           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                2 (out)
+              LOAD_FAST_BORROW         2 (b)
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               1 (out)
+              LOAD_CONST               3 (None)
+              RETURN_VALUE
+
+
+### [18]   Block  (file=ue4.py) :: line 80, args 0, locals 1, stack 1, consts 4
+  --           MAKE_CELL                0 (__classdict__)
+
+  80           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Block')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          80
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  81           LOAD_CONST               1 (<code object __init__ at 0x7aaf603f00, file "ue4.py", line 81>)
+               MAKE_FUNCTION
+               STORE_NAME               4 (__init__)
+               LOAD_CONST               2 (('end', 'start'))
+               STORE_NAME               5 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               6 (__classdictcell__)
+               LOAD_CONST               3 (None)
+               RETURN_VALUE
+
+
+### [19]     __init__  (file=ue4.py) :: line 81, args 3, locals 3, stack 2, consts 1
+ 81           RESUME                   0
+
+ 82           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (start, self)
+              STORE_ATTR               0 (start)
+
+ 83           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (end, self)
+              STORE_ATTR               1 (end)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [20]   Entry  (file=ue4.py) :: line 86, args 0, locals 1, stack 2, consts 7
+  --           MAKE_CELL                0 (__classdict__)
+
+  86           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Entry')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT          86
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+  87           LOAD_CONST               6 ((0, 0, 0, None, None, None, 0, 0))
+               LOAD_CONST               2 (<code object __init__ at 0x7aaf62f230, file "ue4.py", line 87>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME               4 (__init__)
+
+  98           LOAD_CONST               3 (<code object is_encrypted at 0x7aab491460, file "ue4.py", line 98>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (is_encrypted)
+
+ 101           LOAD_CONST               4 (<code object serialized_size at 0x7aaf5e9030, file "ue4.py", line 101>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (serialized_size)
+               LOAD_CONST               5 (('blocks', 'compressed', 'compression_block_size', 'compression_slot', 'flags', 'hash', 'offset', 'uncompressed'))
+               STORE_NAME               7 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME               8 (__classdictcell__)
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+
+### [21]     __init__  (file=ue4.py) :: line 87, args 9, locals 9, stack 2, consts 1
+ 87           RESUME                   0
+
+ 89           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (offset, self)
+              STORE_ATTR               0 (offset)
+
+ 90           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (compressed, self)
+              STORE_ATTR               1 (compressed)
+
+ 91           LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (uncompressed, self)
+              STORE_ATTR               2 (uncompressed)
+
+ 92           LOAD_FAST_BORROW_LOAD_FAST_BORROW 64 (compression_slot, self)
+              STORE_ATTR               3 (compression_slot)
+
+ 93           LOAD_FAST_BORROW_LOAD_FAST_BORROW 80 (hash_val, self)
+              STORE_ATTR               4 (hash)
+
+ 94           LOAD_FAST_BORROW_LOAD_FAST_BORROW 96 (blocks, self)
+              STORE_ATTR               5 (blocks)
+
+ 95           LOAD_FAST_BORROW_LOAD_FAST_BORROW 112 (flags, self)
+              STORE_ATTR               6 (flags)
+
+ 96           LOAD_FAST_BORROW_LOAD_FAST_BORROW 128 (compression_block_size, self)
+              STORE_ATTR               7 (compression_block_size)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [22]     is_encrypted  (file=ue4.py) :: line 98, args 1, locals 1, stack 4, consts 1
+ 98           RESUME                   0
+
+ 99           LOAD_GLOBAL              1 (bool + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (flags)
+              LOAD_SMALL_INT           1
+              BINARY_OP                1 (&)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [23]     serialized_size  (file=ue4.py) :: line 101, args 4, locals 4, stack 6, consts 1
+101           RESUME                   0
+
+102           LOAD_SMALL_INT          24
+              STORE_FAST               3 (size)
+
+103           LOAD_FAST_LOAD_FAST     50 (size, compression_u8)
+              TO_BOOL
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_SMALL_INT           1
+              JUMP_FORWARD             1 (to L2)
+      L1:     LOAD_SMALL_INT           4
+      L2:     BINARY_OP               13 (+=)
+              STORE_FAST               3 (size)
+
+104           LOAD_FAST_BORROW         3 (size)
+              LOAD_SMALL_INT          20
+              BINARY_OP               13 (+=)
+              STORE_FAST               3 (size)
+
+105           LOAD_FAST_BORROW         1 (version)
+              LOAD_SMALL_INT           1
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       10 (to L3)
+              NOT_TAKEN
+
+106           LOAD_FAST_BORROW         3 (size)
+              LOAD_SMALL_INT           8
+              BINARY_OP               13 (+=)
+              STORE_FAST               3 (size)
+
+107   L3:     LOAD_FAST_BORROW         1 (version)
+              LOAD_SMALL_INT           3
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       77 (to L6)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (compression_slot)
+              POP_JUMP_IF_NONE        63 (to L6)
+              NOT_TAKEN
+
+108           LOAD_FAST                3 (size)
+              LOAD_SMALL_INT           4
+              LOAD_SMALL_INT          16
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (blocks)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       22 (to L4)
+              NOT_TAKEN
+              LOAD_GLOBAL              5 (len + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (blocks)
+              CALL                     1
+              JUMP_FORWARD             1 (to L5)
+      L4:     LOAD_SMALL_INT           0
+      L5:     BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              BINARY_OP               13 (+=)
+              STORE_FAST               3 (size)
+
+109   L6:     LOAD_FAST_BORROW         1 (version)
+              LOAD_SMALL_INT           3
+              COMPARE_OP             188 (bool(>=))
+              POP_JUMP_IF_FALSE       10 (to L7)
+              NOT_TAKEN
+
+110           LOAD_FAST_BORROW         3 (size)
+              LOAD_SMALL_INT           5
+              BINARY_OP               13 (+=)
+              STORE_FAST               3 (size)
+
+111   L7:     LOAD_FAST_BORROW         3 (size)
+              RETURN_VALUE
+
+
+### [24]   read_entry  (file=ue4.py) :: line 114, args 14, locals 14, stack 10, consts 2
+ 114            RESUME                   0
+
+ 115            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                STORE_FAST               3 (offset)
+
+ 116            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                STORE_FAST               4 (compressed)
+
+ 117            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                STORE_FAST               5 (uncompressed)
+
+ 118            LOAD_FAST_BORROW         2 (compression_u8)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       18 (to L1)
+                NOT_TAKEN
+
+ 119            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                3 (u1 + NULL|self)
+                CALL                     0
+                STORE_FAST               6 (c)
+                JUMP_FORWARD            16 (to L2)
+
+ 121    L1:     LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                5 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST               6 (c)
+
+ 122    L2:     LOAD_FAST_BORROW         6 (c)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L3)
+                NOT_TAKEN
+                LOAD_CONST               1 (None)
+                JUMP_FORWARD             8 (to L4)
+        L3:     LOAD_FAST_BORROW         6 (c)
+                LOAD_SMALL_INT           1
+                BINARY_OP               10 (-)
+        L4:     STORE_FAST               7 (compression_slot)
+
+ 123            LOAD_FAST_BORROW         1 (version)
+                LOAD_SMALL_INT           1
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       17 (to L5)
+                NOT_TAKEN
+
+ 124            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 125    L5:     LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                7 (raw + NULL|self)
+                LOAD_SMALL_INT          20
+                CALL                     1
+                STORE_FAST               8 (hash_val)
+
+ 126            LOAD_CONST               1 (None)
+                STORE_FAST               9 (blocks)
+
+ 127            LOAD_FAST_BORROW         1 (version)
+                LOAD_SMALL_INT           3
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       85 (to L10)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         7 (compression_slot)
+                POP_JUMP_IF_NONE        81 (to L10)
+                NOT_TAKEN
+
+ 128            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                5 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST              10 (count)
+
+ 129            LOAD_GLOBAL              9 (range + NULL)
+                LOAD_FAST_BORROW        10 (count)
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR     11 (_)
+                SWAP                     2
+        L6:     BUILD_LIST               0
+                SWAP                     2
+        L7:     FOR_ITER                43 (to L8)
+                STORE_FAST              11 (_)
+                LOAD_GLOBAL             11 (Block + NULL)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                1 (u8 + NULL|self)
+                CALL                     0
+                CALL                     2
+                LIST_APPEND              2
+                JUMP_BACKWARD           45 (to L7)
+        L8:     END_FOR
+                POP_ITER
+        L9:     STORE_FAST               9 (blocks)
+                STORE_FAST              11 (_)
+
+ 130   L10:     LOAD_SMALL_INT           0
+                STORE_FAST              12 (flags)
+
+ 131            LOAD_SMALL_INT           0
+                STORE_FAST              13 (block_size)
+
+ 132            LOAD_FAST_BORROW         1 (version)
+                LOAD_SMALL_INT           3
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       33 (to L11)
+                NOT_TAKEN
+
+ 133            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                3 (u1 + NULL|self)
+                CALL                     0
+                STORE_FAST              12 (flags)
+
+ 134            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                5 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST              13 (block_size)
+
+ 135   L11:     LOAD_GLOBAL             13 (Entry + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 52 (offset, compressed)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 87 (uncompressed, compression_slot)
+
+ 136            LOAD_FAST_BORROW_LOAD_FAST_BORROW 137 (hash_val, blocks)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 205 (flags, block_size)
+
+ 135            CALL                     8
+                RETURN_VALUE
+
+  --   L12:     SWAP                     2
+                POP_TOP
+
+ 129            SWAP                     2
+                STORE_FAST              11 (_)
+                RERAISE                  0
+ExceptionTable:
+  L6 to L9 -> L12 [2]
+
+
+### [25]   write_entry  (file=ue4.py) :: line 139, args 7, locals 7, stack 5, consts 3
+139            RESUME                   0
+
+140            LOAD_FAST                0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_FAST_BORROW         4 (index)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       13 (to L1)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR                2 (offset)
+               JUMP_FORWARD             1 (to L2)
+       L1:     LOAD_SMALL_INT           0
+       L2:     CALL                     1
+               POP_TOP
+
+141            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR                4 (compressed)
+               CALL                     1
+               POP_TOP
+
+142            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR                6 (uncompressed)
+               CALL                     1
+               POP_TOP
+
+143            LOAD_FAST_BORROW         3 (compression_u8)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       52 (to L5)
+               NOT_TAKEN
+
+144            LOAD_FAST                0 (w)
+               LOAD_ATTR                9 (u1 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               10 (compression_slot)
+               POP_JUMP_IF_NONE        20 (to L3)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               10 (compression_slot)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               JUMP_FORWARD             1 (to L4)
+       L3:     LOAD_SMALL_INT           0
+       L4:     CALL                     1
+               POP_TOP
+               JUMP_FORWARD            50 (to L8)
+
+146    L5:     LOAD_FAST                0 (w)
+               LOAD_ATTR               13 (u4 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               10 (compression_slot)
+               POP_JUMP_IF_NONE        20 (to L6)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               10 (compression_slot)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               JUMP_FORWARD             1 (to L7)
+       L6:     LOAD_SMALL_INT           0
+       L7:     CALL                     1
+               POP_TOP
+
+147    L8:     LOAD_FAST_BORROW         2 (version)
+               LOAD_SMALL_INT           1
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       18 (to L9)
+               NOT_TAKEN
+
+148            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_SMALL_INT           0
+               CALL                     1
+               POP_TOP
+
+149    L9:     LOAD_FAST                0 (w)
+               LOAD_ATTR               15 (raw + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               16 (hash)
+               COPY                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L10)
+               NOT_TAKEN
+               POP_TOP
+               LOAD_CONST               2 (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+      L10:     CALL                     1
+               POP_TOP
+
+150            LOAD_FAST_BORROW         2 (version)
+               LOAD_SMALL_INT           3
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_FALSE      182 (to L15)
+               NOT_TAKEN
+
+151            LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               10 (compression_slot)
+               POP_JUMP_IF_NONE       112 (to L14)
+               NOT_TAKEN
+
+152            LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               18 (blocks)
+               COPY                     1
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L11)
+               NOT_TAKEN
+               POP_TOP
+               BUILD_LIST               0
+      L11:     STORE_FAST               5 (blocks)
+
+153            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR               13 (u4 + NULL|self)
+               LOAD_GLOBAL             21 (len + NULL)
+               LOAD_FAST_BORROW         5 (blocks)
+               CALL                     1
+               CALL                     1
+               POP_TOP
+
+154            LOAD_FAST_BORROW         5 (blocks)
+               GET_ITER
+      L12:     FOR_ITER                57 (to L13)
+               STORE_FAST               6 (b)
+
+155            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_FAST_BORROW         6 (b)
+               LOAD_ATTR               22 (start)
+               CALL                     1
+               POP_TOP
+
+156            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                1 (u8 + NULL|self)
+               LOAD_FAST_BORROW         6 (b)
+               LOAD_ATTR               24 (end)
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD           59 (to L12)
+
+154   L13:     END_FOR
+               POP_ITER
+
+157   L14:     LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR                9 (u1 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               26 (flags)
+               CALL                     1
+               POP_TOP
+
+158            LOAD_FAST_BORROW         0 (w)
+               LOAD_ATTR               13 (u4 + NULL|self)
+               LOAD_FAST_BORROW         1 (e)
+               LOAD_ATTR               28 (compression_block_size)
+               CALL                     1
+               POP_TOP
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+150   L15:     LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+
+### [26]   read_encoded_entry  (file=ue4.py) :: line 161, args 15, locals 17, stack 10, consts 5
+  --            MAKE_CELL                0 (r)
+                MAKE_CELL               15 (bits)
+
+ 161            RESUME                   0
+
+ 162            LOAD_DEREF               0 (r)
+                LOAD_ATTR                1 (u4 + NULL|self)
+                CALL                     0
+                STORE_DEREF             15 (bits)
+
+ 163            LOAD_DEREF              15 (bits)
+                LOAD_SMALL_INT          23
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT          63
+                BINARY_OP                1 (&)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L1)
+                NOT_TAKEN
+                LOAD_CONST               1 (None)
+                JUMP_FORWARD            22 (to L2)
+        L1:     LOAD_DEREF              15 (bits)
+                LOAD_SMALL_INT          23
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT          63
+                BINARY_OP                1 (&)
+                LOAD_SMALL_INT           1
+                BINARY_OP               10 (-)
+        L2:     STORE_FAST               2 (compression)
+
+ 164            LOAD_DEREF              15 (bits)
+                LOAD_CONST               4 (4194304)
+                BINARY_OP                1 (&)
+                LOAD_SMALL_INT           0
+                COMPARE_OP             103 (!=)
+                STORE_FAST               3 (encrypted)
+
+ 165            LOAD_DEREF              15 (bits)
+                LOAD_SMALL_INT           6
+                BINARY_OP                9 (>>)
+                LOAD_CONST               2 (65535)
+                BINARY_OP                1 (&)
+                STORE_FAST               4 (block_count)
+
+ 166            LOAD_DEREF              15 (bits)
+                LOAD_SMALL_INT          63
+                BINARY_OP                1 (&)
+                STORE_FAST               5 (block_size)
+
+ 167            LOAD_FAST_BORROW         5 (block_size)
+                LOAD_SMALL_INT          63
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       18 (to L3)
+                NOT_TAKEN
+
+ 168            LOAD_DEREF               0 (r)
+                LOAD_ATTR                1 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST               5 (block_size)
+                JUMP_FORWARD             9 (to L4)
+
+ 170    L3:     LOAD_FAST_BORROW         5 (block_size)
+                LOAD_SMALL_INT          11
+                BINARY_OP               16 (<<=)
+                STORE_FAST               5 (block_size)
+
+ 172    L4:     LOAD_FAST_BORROW        15 (bits)
+                LOAD_FAST_BORROW         0 (r)
+                BUILD_TUPLE              2
+                LOAD_CONST               3 (<code object var_int at 0x7aaf62f370, file "ue4.py", line 172>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                STORE_FAST               6 (var_int)
+
+ 177            LOAD_FAST_BORROW         6 (var_int)
+                PUSH_NULL
+                LOAD_SMALL_INT          31
+                CALL                     1
+                STORE_FAST               7 (offset)
+
+ 178            LOAD_FAST_BORROW         6 (var_int)
+                PUSH_NULL
+                LOAD_SMALL_INT          30
+                CALL                     1
+                STORE_FAST               8 (uncompressed)
+
+ 179            LOAD_FAST_BORROW         2 (compression)
+                POP_JUMP_IF_NOT_NONE     3 (to L5)
+                NOT_TAKEN
+                LOAD_FAST                8 (uncompressed)
+                JUMP_FORWARD             7 (to L6)
+        L5:     LOAD_FAST_BORROW         6 (var_int)
+                PUSH_NULL
+                LOAD_SMALL_INT          29
+                CALL                     1
+        L6:     STORE_FAST               9 (compressed)
+
+ 181            LOAD_SMALL_INT          52
+                LOAD_SMALL_INT          16
+                LOAD_FAST_BORROW         4 (block_count)
+                BINARY_OP                5 (*)
+                BINARY_OP                0 (+)
+                LOAD_SMALL_INT           1
+                BINARY_OP                0 (+)
+                LOAD_SMALL_INT           4
+                BINARY_OP                0 (+)
+                STORE_FAST              10 (base)
+
+ 183            LOAD_CONST               1 (None)
+                STORE_FAST              11 (blocks)
+
+ 184            LOAD_FAST_BORROW         4 (block_count)
+                LOAD_SMALL_INT           1
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       29 (to L7)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         3 (encrypted)
+                TO_BOOL
+                POP_JUMP_IF_TRUE        21 (to L7)
+                NOT_TAKEN
+
+ 185            LOAD_GLOBAL              3 (Block + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 170 (base, base)
+                LOAD_FAST_BORROW         9 (compressed)
+                BINARY_OP                0 (+)
+                CALL                     2
+                BUILD_LIST               1
+                STORE_FAST              11 (blocks)
+                JUMP_FORWARD           105 (to L11)
+
+ 186    L7:     LOAD_FAST_BORROW         4 (block_count)
+                LOAD_SMALL_INT           0
+                COMPARE_OP             148 (bool(>))
+                POP_JUMP_IF_FALSE       99 (to L11)
+                NOT_TAKEN
+
+ 187            LOAD_FAST               10 (base)
+                STORE_FAST              12 (index)
+
+ 188            BUILD_LIST               0
+                STORE_FAST              11 (blocks)
+
+ 189            LOAD_GLOBAL              5 (range + NULL)
+                LOAD_FAST_BORROW         4 (block_count)
+                CALL                     1
+                GET_ITER
+        L8:     FOR_ITER                79 (to L10)
+                STORE_FAST              13 (_)
+
+ 190            LOAD_DEREF               0 (r)
+                LOAD_ATTR                1 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST              14 (bs)
+
+ 191            LOAD_FAST_BORROW        11 (blocks)
+                LOAD_ATTR                7 (append + NULL|self)
+                LOAD_GLOBAL              3 (Block + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 204 (index, index)
+                LOAD_FAST_BORROW        14 (bs)
+                BINARY_OP                0 (+)
+                CALL                     2
+                CALL                     1
+                POP_TOP
+
+ 192            LOAD_FAST_BORROW         3 (encrypted)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       12 (to L9)
+                NOT_TAKEN
+
+ 193            LOAD_GLOBAL              9 (align + NULL)
+                LOAD_FAST_BORROW        14 (bs)
+                CALL                     1
+                STORE_FAST              14 (bs)
+
+ 194    L9:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 206 (index, bs)
+                BINARY_OP               13 (+=)
+                STORE_FAST              12 (index)
+                JUMP_BACKWARD           81 (to L8)
+
+ 189   L10:     END_FOR
+                POP_ITER
+
+ 196   L11:     LOAD_GLOBAL             11 (Entry + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 121 (offset, compressed)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 130 (uncompressed, compression)
+
+ 197            LOAD_CONST               1 (None)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 179 (blocks, encrypted)
+                LOAD_FAST_BORROW         5 (block_size)
+
+ 196            CALL                     8
+                RETURN_VALUE
+
+
+### [27]     var_int  (file=ue4.py) :: line 172, args 1, locals 3, stack 3, consts 1
+  --           COPY_FREE_VARS           2
+
+ 172           RESUME                   0
+
+ 173           LOAD_DEREF               1 (bits)
+               LOAD_SMALL_INT           1
+               LOAD_FAST_BORROW         0 (bit)
+               BINARY_OP                3 (<<)
+               BINARY_OP                1 (&)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       17 (to L1)
+               NOT_TAKEN
+
+ 174           LOAD_DEREF               2 (r)
+               LOAD_ATTR                1 (u4 + NULL|self)
+               CALL                     0
+               RETURN_VALUE
+
+ 175   L1:     LOAD_DEREF               2 (r)
+               LOAD_ATTR                3 (u8 + NULL|self)
+               CALL                     0
+               RETURN_VALUE
+
+
+### [28]   find_magic  (file=ue4.py) :: line 200, args 5, locals 5, stack 6, consts 4
+200           RESUME                   0
+
+201           LOAD_GLOBAL              1 (max + NULL)
+              LOAD_SMALL_INT           0
+              LOAD_GLOBAL              3 (len + NULL)
+              LOAD_FAST_BORROW         0 (content)
+              CALL                     1
+              LOAD_CONST               1 (4096)
+              BINARY_OP               10 (-)
+              CALL                     2
+              STORE_FAST               1 (tail_start)
+
+202           LOAD_GLOBAL              5 (bytes + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (content, tail_start)
+              LOAD_CONST               2 (None)
+              BINARY_SLICE
+              CALL                     1
+              STORE_FAST               2 (tail)
+
+203           LOAD_CONST               3 (-1)
+              STORE_FAST               3 (pos)
+
+204   L1:     NOP
+
+205           LOAD_FAST_BORROW         2 (tail)
+              LOAD_ATTR                7 (find + NULL|self)
+              LOAD_GLOBAL              8 (MAGIC_BYTES)
+              LOAD_FAST_BORROW         3 (pos)
+              LOAD_SMALL_INT           1
+              BINARY_OP                0 (+)
+              CALL                     2
+              STORE_FAST               4 (i)
+
+206           LOAD_FAST_BORROW         4 (i)
+              LOAD_CONST               3 (-1)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        2 (to L2)
+              NOT_TAKEN
+
+207           JUMP_FORWARD             4 (to L3)
+
+208   L2:     LOAD_FAST                4 (i)
+              STORE_FAST               3 (pos)
+              JUMP_BACKWARD           42 (to L1)
+
+209   L3:     LOAD_FAST_BORROW         3 (pos)
+              LOAD_CONST               3 (-1)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        3 (to L4)
+              NOT_TAKEN
+              LOAD_CONST               2 (None)
+              RETURN_VALUE
+      L4:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 19 (tail_start, pos)
+              BINARY_OP                0 (+)
+              RETURN_VALUE
+
+
+### [29]   aes_ecb_decrypt  (file=ue4.py) :: line 212, args 4, locals 4, stack 6, consts 5
+212           RESUME                   0
+
+213           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (('AES',))
+              IMPORT_NAME              0 (Crypto.Cipher)
+              IMPORT_FROM              1 (AES)
+              STORE_FAST               2 (AES)
+              POP_TOP
+
+214           LOAD_GLOBAL              4 (bytes)
+              LOAD_ATTR                7 (fromhex + NULL|self)
+              LOAD_FAST_BORROW         1 (key)
+              LOAD_ATTR                9 (replace + NULL|self)
+              LOAD_CONST               2 ('0x')
+              LOAD_CONST               3 ('')
+              CALL                     2
+              LOAD_ATTR                9 (replace + NULL|self)
+              LOAD_CONST               4 (' ')
+              LOAD_CONST               3 ('')
+              CALL                     2
+              CALL                     1
+              STORE_FAST               1 (key)
+
+215           LOAD_FAST_BORROW         2 (AES)
+              LOAD_ATTR               11 (new + NULL|self)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (key, AES)
+              LOAD_ATTR               12 (MODE_ECB)
+              CALL                     2
+              STORE_FAST               3 (cipher)
+
+216           LOAD_FAST_BORROW         3 (cipher)
+              LOAD_ATTR               15 (decrypt + NULL|self)
+              LOAD_FAST_BORROW         0 (data)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [30]   Ue4Pak  (file=ue4.py) :: line 219, args 0, locals 1, stack 2, consts 18
+  --           MAKE_CELL                0 (__classdict__)
+
+ 219           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('Ue4Pak')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT         219
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+ 220           LOAD_CONST              16 ((None,))
+               LOAD_CONST               2 (<code object __init__ at 0x7aaf7db690, file "ue4.py", line 220>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME               4 (__init__)
+
+ 228           LOAD_CONST               3 (<code object _parse_footer at 0xb400007d1004e470, file "ue4.py", line 228>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (_parse_footer)
+
+ 246           LOAD_CONST               4 (<code object _read_index_blob at 0x7aaf61d420, file "ue4.py", line 246>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (_read_index_blob)
+
+ 254           LOAD_CONST               5 (<code object _parse_index at 0xb400007d10050b10, file "ue4.py", line 254>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (_parse_index)
+
+ 288           LOAD_CONST               6 (<code object _parse_full_directory_index at 0xb400007c800a7000, file "ue4.py", line 288>)
+               MAKE_FUNCTION
+               STORE_NAME               8 (_parse_full_directory_index)
+
+ 311           LOAD_CONST               7 (<code object files at 0x7aaf68e230, file "ue4.py", line 311>)
+               MAKE_FUNCTION
+               STORE_NAME               9 (files)
+
+ 314           LOAD_CONST               8 (<code object read_file at 0xb400007d10055ec0, file "ue4.py", line 314>)
+               MAKE_FUNCTION
+               STORE_NAME              10 (read_file)
+
+ 341           LOAD_CONST               9 (<code object _compression_method at 0xb400007c70070430, file "ue4.py", line 341>)
+               MAKE_FUNCTION
+               STORE_NAME              11 (_compression_method)
+
+ 353           LOAD_CONST              10 (<code object _decompress at 0x7aaf5e9230, file "ue4.py", line 353>)
+               MAKE_FUNCTION
+               STORE_NAME              12 (_decompress)
+
+ 368           LOAD_CONST              11 (<code object extract_all at 0xb400007c0001ce90, file "ue4.py", line 368>)
+               MAKE_FUNCTION
+               STORE_NAME              13 (extract_all)
+
+ 382           LOAD_CONST              12 (<code object extract_one at 0x7aaf5e9430, file "ue4.py", line 382>)
+               MAKE_FUNCTION
+               STORE_NAME              14 (extract_one)
+
+ 394           LOAD_CONST              13 (<code object size at 0x7aab4b1f10, file "ue4.py", line 394>)
+               MAKE_FUNCTION
+               STORE_NAME              15 (size)
+
+ 398           LOAD_CONST              17 ((None, None, None))
+               LOAD_CONST              14 (<code object repack at 0xb400007bb00158b0, file "ue4.py", line 398>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME              16 (repack)
+               LOAD_CONST              15 (('aes_key', 'compression_u8', 'content', 'dirs', 'encrypted_index', 'entries', 'file_path', 'footer_size', 'index_hash', 'index_offset', 'index_size', 'magic_pos', 'mount_point', 'version'))
+               STORE_NAME              17 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME              18 (__classdictcell__)
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+
+### [31]     __init__  (file=ue4.py) :: line 220, args 4, locals 4, stack 7, consts 2
+ 220           RESUME                   0
+
+ 221           LOAD_GLOBAL              1 (Path + NULL)
+               LOAD_FAST_BORROW         1 (file_path)
+               CALL                     1
+               LOAD_FAST_BORROW         0 (self)
+               STORE_ATTR               1 (file_path)
+
+ 222           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (aes_key, self)
+               STORE_ATTR               2 (aes_key)
+
+ 223           LOAD_GLOBAL              7 (open + NULL)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                2 (file_path)
+               LOAD_CONST               0 ('rb')
+               CALL                     2
+               COPY                     1
+               LOAD_SPECIAL             1 (__exit__)
+               SWAP                     2
+               SWAP                     3
+               LOAD_SPECIAL             0 (__enter__)
+               CALL                     0
+       L1:     STORE_FAST               3 (f)
+
+ 224           LOAD_FAST_BORROW         3 (f)
+               LOAD_ATTR                9 (read + NULL|self)
+               CALL                     0
+               LOAD_FAST_BORROW         0 (self)
+               STORE_ATTR               5 (content)
+
+ 223   L2:     LOAD_CONST               1 (None)
+               LOAD_CONST               1 (None)
+               LOAD_CONST               1 (None)
+               CALL                     3
+               POP_TOP
+
+ 225   L3:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               13 (_parse_footer + NULL|self)
+               CALL                     0
+               POP_TOP
+
+ 226           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               15 (_parse_index + NULL|self)
+               CALL                     0
+               POP_TOP
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+ 223   L4:     PUSH_EXC_INFO
+               WITH_EXCEPT_START
+               TO_BOOL
+               POP_JUMP_IF_TRUE         2 (to L5)
+               NOT_TAKEN
+               RERAISE                  2
+       L5:     POP_TOP
+       L6:     POP_EXCEPT
+               POP_TOP
+               POP_TOP
+               POP_TOP
+               JUMP_BACKWARD_NO_INTERRUPT 50 (to L3)
+
+  --   L7:     COPY                     3
+               POP_EXCEPT
+               RERAISE                  1
+ExceptionTable:
+  L1 to L2 -> L4 [2] lasti
+  L4 to L6 -> L7 [4] lasti
+
+
+### [32]     _parse_footer  (file=ue4.py) :: line 228, args 3, locals 3, stack 6, consts 6
+228           RESUME                   0
+
+229           LOAD_GLOBAL              1 (find_magic + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              CALL                     1
+              STORE_FAST               1 (mp)
+
+230           LOAD_FAST_BORROW         1 (mp)
+              POP_JUMP_IF_NOT_NONE    12 (to L1)
+              NOT_TAKEN
+
+231           LOAD_GLOBAL              5 (ValueError + NULL)
+              LOAD_CONST               1 ('Not a standard Unreal Engine pak (magic not found)')
+              CALL                     1
+              RAISE_VARARGS            1
+
+232   L1:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (mp, self)
+              STORE_ATTR               3 (magic_pos)
+
+233           LOAD_GLOBAL              8 (struct)
+              LOAD_ATTR               10 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               2 ('<I')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT           4
+              BINARY_OP                0 (+)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               6 (version)
+
+234           LOAD_SMALL_INT           1
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               12 (version)
+              SWAP                     2
+              COPY                     2
+              COMPARE_OP              58 (bool(<=))
+              POP_JUMP_IF_FALSE        8 (to L2)
+              NOT_TAKEN
+              LOAD_SMALL_INT          11
+              COMPARE_OP              58 (bool(<=))
+              POP_JUMP_IF_TRUE        27 (to L4)
+              NOT_TAKEN
+              JUMP_FORWARD             1 (to L3)
+      L2:     POP_TOP
+
+235   L3:     LOAD_GLOBAL              5 (ValueError + NULL)
+              LOAD_CONST               3 ('Unsupported pak version: ')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               12 (version)
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              CALL                     1
+              RAISE_VARARGS            1
+
+236   L4:     LOAD_GLOBAL              8 (struct)
+              LOAD_ATTR               10 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               4 ('<Q')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT           8
+              BINARY_OP                0 (+)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               7 (index_offset)
+
+237           LOAD_GLOBAL              8 (struct)
+              LOAD_ATTR               10 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               4 ('<Q')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT          16
+              BINARY_OP                0 (+)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               8 (index_size)
+
+238           LOAD_GLOBAL             19 (bytes + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT          24
+              BINARY_OP                0 (+)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT          44
+              BINARY_OP                0 (+)
+              BINARY_SLICE
+              CALL                     1
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR              10 (index_hash)
+
+239           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               12 (version)
+              LOAD_SMALL_INT           4
+              COMPARE_OP             172 (>=)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE       30 (to L5)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT           1
+              BINARY_OP               10 (-)
+              BINARY_OP               26 ([])
+              LOAD_SMALL_INT           0
+              COMPARE_OP             103 (!=)
+      L5:     LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR              11 (encrypted_index)
+
+240           LOAD_GLOBAL             25 (len + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              CALL                     1
+              LOAD_FAST_BORROW         1 (mp)
+              LOAD_SMALL_INT          17
+              BINARY_OP               10 (-)
+              BINARY_OP               10 (-)
+              STORE_FAST               2 (footer_size)
+
+241           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               12 (version)
+              LOAD_SMALL_INT           8
+              COMPARE_OP              72 (==)
+              COPY                     1
+              TO_BOOL
+              POP_JUMP_IF_FALSE        6 (to L6)
+              NOT_TAKEN
+              POP_TOP
+              LOAD_FAST_BORROW         2 (footer_size)
+              LOAD_SMALL_INT         189
+              COMPARE_OP              72 (==)
+      L6:     LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR              13 (compression_u8)
+
+242           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (footer_size, self)
+              STORE_ATTR              14 (footer_size)
+
+243           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               14 (index_offset)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               16 (index_size)
+              BINARY_OP                0 (+)
+              LOAD_GLOBAL             25 (len + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (content)
+              CALL                     1
+              COMPARE_OP             148 (bool(>))
+              POP_JUMP_IF_FALSE       12 (to L7)
+              NOT_TAKEN
+
+244           LOAD_GLOBAL              5 (ValueError + NULL)
+              LOAD_CONST               5 ('Invalid index offset/size')
+              CALL                     1
+              RAISE_VARARGS            1
+
+243   L7:     LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [33]     _read_index_blob  (file=ue4.py) :: line 246, args 2, locals 2, stack 4, consts 1
+246           RESUME                   0
+
+247           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (content)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (index_offset)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (index_offset)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (index_size)
+              BINARY_OP                0 (+)
+              BINARY_SLICE
+              STORE_FAST               1 (data)
+
+248           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (encrypted_index)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       51 (to L2)
+              NOT_TAKEN
+
+249           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                8 (aes_key)
+              TO_BOOL
+              POP_JUMP_IF_TRUE        12 (to L1)
+              NOT_TAKEN
+
+250           LOAD_GLOBAL             11 (ValueError + NULL)
+              LOAD_CONST               0 ('Index encrypted — AES key chahiye')
+              CALL                     1
+              RAISE_VARARGS            1
+
+251   L1:     LOAD_GLOBAL             13 (aes_ecb_decrypt + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (data, self)
+              LOAD_ATTR                8 (aes_key)
+              CALL                     2
+              STORE_FAST               1 (data)
+
+252   L2:     LOAD_FAST_BORROW         1 (data)
+              RETURN_VALUE
+
+
+### [34]     _parse_index  (file=ue4.py) :: line 254, args 13, locals 13, stack 8, consts 5
+ 254            RESUME                   0
+
+ 255            LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR                1 (_read_index_blob + NULL|self)
+                CALL                     0
+                STORE_FAST               1 (blob)
+
+ 256            LOAD_GLOBAL              3 (Reader + NULL)
+                LOAD_FAST_BORROW         1 (blob)
+                CALL                     1
+                STORE_FAST               2 (r)
+
+ 257            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                5 (fstring + NULL|self)
+                CALL                     0
+                LOAD_FAST_BORROW         0 (self)
+                STORE_ATTR               3 (mount_point)
+
+ 258            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                9 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST               3 (count)
+
+ 259            BUILD_MAP                0
+                LOAD_FAST_BORROW         0 (self)
+                STORE_ATTR               5 (entries)
+
+ 260            BUILD_MAP                0
+                LOAD_FAST_BORROW         0 (self)
+                STORE_ATTR               6 (dirs)
+
+ 261            LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               14 (version)
+                LOAD_SMALL_INT          10
+                COMPARE_OP             188 (bool(>=))
+                EXTENDED_ARG             1
+                POP_JUMP_IF_FALSE      300 (to L8)
+                NOT_TAKEN
+
+ 262            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               17 (u8 + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 263            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                9 (u4 + NULL|self)
+                CALL                     0
+                LOAD_SMALL_INT           0
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE       50 (to L1)
+                NOT_TAKEN
+
+ 264            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               17 (u8 + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 265            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               17 (u8 + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 266            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               19 (raw + NULL|self)
+                LOAD_SMALL_INT          20
+                CALL                     1
+                POP_TOP
+
+ 267    L1:     LOAD_CONST               1 (None)
+                STORE_FAST               4 (fdi_off)
+
+ 268            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                9 (u4 + NULL|self)
+                CALL                     0
+                LOAD_SMALL_INT           0
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE       50 (to L2)
+                NOT_TAKEN
+
+ 269            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               17 (u8 + NULL|self)
+                CALL                     0
+                STORE_FAST               4 (fdi_off)
+
+ 270            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               17 (u8 + NULL|self)
+                CALL                     0
+                STORE_FAST               5 (fdi_size)
+
+ 271            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               19 (raw + NULL|self)
+                LOAD_SMALL_INT          20
+                CALL                     1
+                POP_TOP
+
+ 272    L2:     LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                9 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST               6 (encoded_size)
+
+ 273            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR               19 (raw + NULL|self)
+                LOAD_FAST_BORROW         6 (encoded_size)
+                CALL                     1
+                STORE_FAST               7 (encoded_blob)
+
+ 274            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                9 (u4 + NULL|self)
+                CALL                     0
+                STORE_FAST               8 (non_encoded_count)
+
+ 276            LOAD_GLOBAL             21 (range + NULL)
+                LOAD_FAST_BORROW         8 (non_encoded_count)
+                CALL                     1
+                GET_ITER
+
+ 275            LOAD_FAST_AND_CLEAR      9 (_)
+                SWAP                     2
+        L3:     BUILD_LIST               0
+                SWAP                     2
+
+ 276    L4:     FOR_ITER                35 (to L5)
+                STORE_FAST               9 (_)
+
+ 275            LOAD_GLOBAL             23 (read_entry + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (r, self)
+                LOAD_ATTR               14 (version)
+                LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               24 (compression_u8)
+                CALL                     3
+                LIST_APPEND              2
+                JUMP_BACKWARD           37 (to L4)
+
+ 276    L5:     END_FOR
+                POP_ITER
+
+ 275    L6:     STORE_FAST              10 (non_encoded)
+                STORE_FAST               9 (_)
+
+ 277            LOAD_FAST_BORROW         4 (fdi_off)
+                POP_JUMP_IF_NOT_NONE    12 (to L7)
+                NOT_TAKEN
+
+ 278            LOAD_GLOBAL             27 (ValueError + NULL)
+                LOAD_CONST               2 ('v10+ pak without full directory index unsupported')
+                CALL                     1
+                RAISE_VARARGS            1
+
+ 279    L7:     LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               29 (_parse_full_directory_index + NULL|self)
+                LOAD_FAST_BORROW         4 (fdi_off)
+                LOAD_FAST_CHECK          5 (fdi_size)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 167 (non_encoded, encoded_blob)
+                CALL                     4
+                POP_TOP
+
+ 280            LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+ 281    L8:     LOAD_GLOBAL             21 (range + NULL)
+                LOAD_FAST_BORROW         3 (count)
+                CALL                     1
+                GET_ITER
+        L9:     FOR_ITER                64 (to L10)
+                STORE_FAST               9 (_)
+
+ 282            LOAD_FAST_BORROW         2 (r)
+                LOAD_ATTR                5 (fstring + NULL|self)
+                CALL                     0
+                STORE_FAST              11 (name)
+
+ 283            LOAD_GLOBAL             23 (read_entry + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (r, self)
+                LOAD_ATTR               14 (version)
+                LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               24 (compression_u8)
+                CALL                     3
+                LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               10 (entries)
+                LOAD_FAST_BORROW        11 (name)
+                STORE_SUBSCR
+                JUMP_BACKWARD           66 (to L9)
+
+ 281   L10:     END_FOR
+                POP_ITER
+
+ 284            LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               10 (entries)
+                GET_ITER
+       L11:     FOR_ITER                80 (to L14)
+                STORE_FAST              11 (name)
+
+ 285            LOAD_CONST               3 ('/')
+                LOAD_FAST_BORROW        11 (name)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       26 (to L12)
+                NOT_TAKEN
+                LOAD_FAST_BORROW        11 (name)
+                LOAD_ATTR               31 (rsplit + NULL|self)
+                LOAD_CONST               3 ('/')
+                LOAD_SMALL_INT           1
+                CALL                     2
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                JUMP_FORWARD             1 (to L13)
+       L12:     LOAD_CONST               4 ('')
+       L13:     STORE_FAST              12 (d)
+
+ 286            LOAD_FAST_BORROW         0 (self)
+                LOAD_ATTR               12 (dirs)
+                LOAD_ATTR               33 (setdefault + NULL|self)
+                LOAD_FAST_BORROW        12 (d)
+                BUILD_LIST               0
+                CALL                     2
+                LOAD_ATTR               35 (append + NULL|self)
+                LOAD_FAST_BORROW        11 (name)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           82 (to L11)
+
+ 284   L14:     END_FOR
+                POP_ITER
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+  --   L15:     SWAP                     2
+                POP_TOP
+
+ 275            SWAP                     2
+                STORE_FAST               9 (_)
+                RERAISE                  0
+ExceptionTable:
+  L3 to L6 -> L15 [2]
+
+
+### [35]     _parse_full_directory_index  (file=ue4.py) :: line 288, args 17, locals 17, stack 7, consts 5
+288            RESUME                   0
+
+289            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                0 (content)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 17 (fdi_off, fdi_off)
+               LOAD_FAST_BORROW         2 (fdi_size)
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               STORE_FAST               5 (blob)
+
+290            LOAD_GLOBAL              3 (Reader + NULL)
+               LOAD_FAST_BORROW         5 (blob)
+               CALL                     1
+               STORE_FAST               6 (r)
+
+291            LOAD_FAST_BORROW         6 (r)
+               LOAD_ATTR                5 (u4 + NULL|self)
+               CALL                     0
+               STORE_FAST               7 (dir_count)
+
+292            LOAD_GLOBAL              7 (range + NULL)
+               LOAD_FAST_BORROW         7 (dir_count)
+               CALL                     1
+               GET_ITER
+       L1:     FOR_ITER               250 (to L6)
+               STORE_FAST               8 (_)
+
+293            LOAD_FAST_BORROW         6 (r)
+               LOAD_ATTR                9 (fstring + NULL|self)
+               CALL                     0
+               STORE_FAST               9 (dir_name)
+
+294            LOAD_FAST_BORROW         6 (r)
+               LOAD_ATTR                5 (u4 + NULL|self)
+               CALL                     0
+               STORE_FAST              10 (file_count)
+
+295            LOAD_GLOBAL              7 (range + NULL)
+               LOAD_FAST_BORROW        10 (file_count)
+               CALL                     1
+               GET_ITER
+       L2:     FOR_ITER               200 (to L5)
+               STORE_FAST               8 (_)
+
+296            LOAD_FAST_BORROW         6 (r)
+               LOAD_ATTR                9 (fstring + NULL|self)
+               CALL                     0
+               STORE_FAST              11 (file_name)
+
+297            LOAD_GLOBAL             10 (struct)
+               LOAD_ATTR               12 (unpack_from)
+               PUSH_NULL
+               LOAD_CONST               0 ('<i')
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 86 (blob, r)
+               LOAD_ATTR               14 (c)
+               CALL                     3
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               STORE_FAST              12 (encoded_offset)
+
+298            LOAD_FAST_BORROW         6 (r)
+               COPY                     1
+               LOAD_ATTR               14 (c)
+               LOAD_SMALL_INT           4
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               7 (c)
+
+299            LOAD_FAST_BORROW         9 (dir_name)
+               LOAD_ATTR               17 (strip + NULL|self)
+               LOAD_CONST               1 ('/')
+               CALL                     1
+               LOAD_FAST_BORROW        11 (file_name)
+               BINARY_OP                0 (+)
+               STORE_FAST              13 (path)
+
+300            LOAD_FAST_BORROW        12 (encoded_offset)
+               LOAD_CONST               4 (-2147483648)
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE        3 (to L3)
+               NOT_TAKEN
+
+301            JUMP_BACKWARD          117 (to L2)
+
+302    L3:     LOAD_FAST_BORROW        12 (encoded_offset)
+               LOAD_SMALL_INT           0
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_FALSE       48 (to L4)
+               NOT_TAKEN
+
+303            LOAD_GLOBAL              3 (Reader + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 76 (encoded_blob, encoded_offset)
+               CALL                     2
+               STORE_FAST              14 (er)
+
+304            LOAD_GLOBAL             19 (read_encoded_entry + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 224 (er, self)
+               LOAD_ATTR               20 (version)
+               CALL                     2
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               22 (entries)
+               LOAD_FAST_BORROW        13 (path)
+               STORE_SUBSCR
+               JUMP_BACKWARD          171 (to L2)
+
+306    L4:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 60 (non_encoded, encoded_offset)
+               UNARY_NEGATIVE
+               LOAD_SMALL_INT           1
+               BINARY_OP               10 (-)
+               BINARY_OP               26 ([])
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               22 (entries)
+               LOAD_FAST_BORROW        13 (path)
+               STORE_SUBSCR
+               JUMP_BACKWARD          202 (to L2)
+
+295    L5:     END_FOR
+               POP_ITER
+               JUMP_BACKWARD          252 (to L1)
+
+292    L6:     END_FOR
+               POP_ITER
+
+307            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               22 (entries)
+               GET_ITER
+       L7:     FOR_ITER                80 (to L10)
+               STORE_FAST              15 (name)
+
+308            LOAD_CONST               1 ('/')
+               LOAD_FAST_BORROW        15 (name)
+               CONTAINS_OP              0 (in)
+               POP_JUMP_IF_FALSE       26 (to L8)
+               NOT_TAKEN
+               LOAD_FAST_BORROW        15 (name)
+               LOAD_ATTR               25 (rsplit + NULL|self)
+               LOAD_CONST               1 ('/')
+               LOAD_SMALL_INT           1
+               CALL                     2
+               LOAD_SMALL_INT           0
+               BINARY_OP               26 ([])
+               JUMP_FORWARD             1 (to L9)
+       L8:     LOAD_CONST               2 ('')
+       L9:     STORE_FAST              16 (d)
+
+309            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               26 (dirs)
+               LOAD_ATTR               29 (setdefault + NULL|self)
+               LOAD_FAST_BORROW        16 (d)
+               BUILD_LIST               0
+               CALL                     2
+               LOAD_ATTR               31 (append + NULL|self)
+               LOAD_FAST_BORROW        15 (name)
+               CALL                     1
+               POP_TOP
+               JUMP_BACKWARD           82 (to L7)
+
+307   L10:     END_FOR
+               POP_ITER
+               LOAD_CONST               3 (None)
+               RETURN_VALUE
+
+
+### [36]     files  (file=ue4.py) :: line 311, args 1, locals 1, stack 3, consts 1
+311           RESUME                   0
+
+312           LOAD_GLOBAL              1 (sorted + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (entries)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [37]     read_file  (file=ue4.py) :: line 314, args 13, locals 13, stack 6, consts 3
+314            RESUME                   0
+
+315            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                0 (entries)
+               LOAD_ATTR                3 (get + NULL|self)
+               LOAD_FAST_BORROW         1 (path)
+               CALL                     1
+               STORE_FAST               2 (e)
+
+316            LOAD_FAST_BORROW         2 (e)
+               POP_JUMP_IF_NOT_NONE     3 (to L1)
+               NOT_TAKEN
+
+317            LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+318    L1:     LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR                4 (offset)
+               STORE_FAST               3 (off)
+
+319            LOAD_FAST_BORROW_LOAD_FAST_BORROW 50 (off, e)
+               LOAD_ATTR                7 (serialized_size + NULL|self)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                8 (version)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               10 (compression_u8)
+               CALL                     2
+               BINARY_OP                0 (+)
+               LOAD_GLOBAL             13 (len + NULL)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               14 (content)
+               CALL                     1
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE        3 (to L2)
+               NOT_TAKEN
+
+320            LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+321    L2:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 50 (off, e)
+               LOAD_ATTR                7 (serialized_size + NULL|self)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                8 (version)
+               LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               10 (compression_u8)
+               CALL                     2
+               BINARY_OP                0 (+)
+               STORE_FAST               4 (data_off)
+
+322            LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               17 (is_encrypted + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_FALSE       22 (to L3)
+               NOT_TAKEN
+               LOAD_GLOBAL             19 (align + NULL)
+               LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               20 (compressed)
+               CALL                     1
+               JUMP_FORWARD            11 (to L4)
+       L3:     LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               20 (compressed)
+       L4:     STORE_FAST               5 (total)
+
+323            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               14 (content)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 68 (data_off, data_off)
+               LOAD_FAST_BORROW         5 (total)
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               STORE_FAST               6 (raw)
+
+324            LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               17 (is_encrypted + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_FALSE       68 (to L6)
+               NOT_TAKEN
+
+325            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               22 (aes_key)
+               TO_BOOL
+               POP_JUMP_IF_TRUE        16 (to L5)
+               NOT_TAKEN
+
+326            LOAD_GLOBAL             25 (ValueError + NULL)
+               LOAD_CONST               1 ('Encrypted data — AES key chahiye (')
+               LOAD_FAST_BORROW         1 (path)
+               FORMAT_SIMPLE
+               LOAD_CONST               2 (')')
+               BUILD_STRING             3
+               CALL                     1
+               RAISE_VARARGS            1
+
+327    L5:     LOAD_GLOBAL             27 (aes_ecb_decrypt + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 96 (raw, self)
+               LOAD_ATTR               22 (aes_key)
+               CALL                     2
+               LOAD_CONST               0 (None)
+               LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               20 (compressed)
+               BINARY_SLICE
+               STORE_FAST               6 (raw)
+
+328    L6:     LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               28 (compression_slot)
+               POP_JUMP_IF_NOT_NONE     3 (to L7)
+               NOT_TAKEN
+
+329            LOAD_FAST_BORROW         6 (raw)
+               RETURN_VALUE
+
+330    L7:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               31 (_compression_method + NULL|self)
+               LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               28 (compression_slot)
+               CALL                     1
+               STORE_FAST               7 (comp)
+
+331            LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               32 (blocks)
+               TO_BOOL
+               POP_JUMP_IF_FALSE      132 (to L10)
+               NOT_TAKEN
+
+332            LOAD_GLOBAL             35 (bytearray + NULL)
+               CALL                     0
+               STORE_FAST               8 (out)
+
+333            LOAD_FAST_BORROW         2 (e)
+               LOAD_ATTR               32 (blocks)
+               GET_ITER
+       L8:     FOR_ITER                94 (to L9)
+               STORE_FAST               9 (b)
+
+334            LOAD_FAST_BORROW         9 (b)
+               LOAD_ATTR               36 (end)
+               LOAD_FAST_BORROW         9 (b)
+               LOAD_ATTR               38 (start)
+               BINARY_OP               10 (-)
+               STORE_FAST              10 (bs)
+
+335            LOAD_FAST_BORROW_LOAD_FAST_BORROW 57 (off, b)
+               LOAD_ATTR               38 (start)
+               BINARY_OP                0 (+)
+               STORE_FAST              11 (block_off)
+
+336            LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               14 (content)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 187 (block_off, block_off)
+               LOAD_FAST_BORROW        10 (bs)
+               BINARY_OP                0 (+)
+               BINARY_SLICE
+               STORE_FAST              12 (piece)
+
+337            LOAD_FAST_BORROW_LOAD_FAST_BORROW 128 (out, self)
+               LOAD_ATTR               41 (_decompress + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 199 (piece, comp)
+               CALL                     2
+               BINARY_OP               13 (+=)
+               STORE_FAST               8 (out)
+               JUMP_BACKWARD           96 (to L8)
+
+333    L9:     END_FOR
+               POP_ITER
+
+338            LOAD_GLOBAL             43 (bytes + NULL)
+               LOAD_FAST_BORROW         8 (out)
+               CALL                     1
+               RETURN_VALUE
+
+339   L10:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               41 (_decompress + NULL|self)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 103 (raw, comp)
+               CALL                     2
+               RETURN_VALUE
+
+
+### [38]     _compression_method  (file=ue4.py) :: line 341, args 7, locals 7, stack 8, consts 6
+341           RESUME                   0
+
+342           BUILD_LIST               0
+              LOAD_CONST               5 (('zlib', 'gzip', 'oodle', 'zstd', 'lz4'))
+              LIST_EXTEND              1
+              STORE_FAST               2 (default)
+
+343           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (version)
+              LOAD_SMALL_INT           8
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       18 (to L2)
+              NOT_TAKEN
+
+344           LOAD_FAST_BORROW         1 (slot)
+              LOAD_SMALL_INT           3
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE        9 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 33 (default, slot)
+              BINARY_OP               26 ([])
+              RETURN_VALUE
+      L1:     LOAD_CONST               1 ('none')
+              RETURN_VALUE
+
+345   L2:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (magic_pos)
+              LOAD_SMALL_INT          44
+              BINARY_OP                0 (+)
+              STORE_FAST               3 (off)
+
+346           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (compression_u8)
+              TO_BOOL
+              POP_JUMP_IF_FALSE        3 (to L3)
+              NOT_TAKEN
+              LOAD_SMALL_INT           4
+              JUMP_FORWARD             1 (to L4)
+      L3:     LOAD_SMALL_INT           5
+      L4:     STORE_FAST               4 (slots)
+
+347           LOAD_GLOBAL              7 (range + NULL)
+              LOAD_FAST_BORROW         4 (slots)
+              CALL                     1
+              GET_ITER
+      L5:     FOR_ITER               160 (to L9)
+              STORE_FAST               5 (i)
+
+348           LOAD_GLOBAL              9 (bytes + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               10 (content)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (off, i)
+              LOAD_SMALL_INT          32
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 53 (off, i)
+              LOAD_SMALL_INT          32
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              LOAD_SMALL_INT          32
+              BINARY_OP                0 (+)
+              BINARY_SLICE
+              CALL                     1
+              LOAD_ATTR               13 (split + NULL|self)
+              LOAD_CONST               2 (b'\x00')
+              CALL                     1
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              LOAD_ATTR               15 (decode + NULL|self)
+              LOAD_CONST               3 ('ignore')
+              LOAD_CONST               4 (('errors',))
+              CALL_KW                  1
+              STORE_FAST               6 (name)
+
+349           LOAD_FAST_BORROW_LOAD_FAST_BORROW 81 (i, slot)
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_TRUE         3 (to L6)
+              NOT_TAKEN
+              JUMP_BACKWARD          106 (to L5)
+
+350   L6:     LOAD_FAST_BORROW         6 (name)
+              TO_BOOL
+              POP_JUMP_IF_FALSE       19 (to L7)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         6 (name)
+              LOAD_ATTR               17 (lower + NULL|self)
+              CALL                     0
+              SWAP                     2
+              POP_TOP
+              RETURN_VALUE
+      L7:     LOAD_FAST_BORROW         1 (slot)
+              LOAD_GLOBAL             19 (len + NULL)
+              LOAD_FAST_BORROW         2 (default)
+              CALL                     1
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       11 (to L8)
+              NOT_TAKEN
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 33 (default, slot)
+              BINARY_OP               26 ([])
+              SWAP                     2
+              POP_TOP
+              RETURN_VALUE
+      L8:     LOAD_CONST               1 ('none')
+              SWAP                     2
+              POP_TOP
+              RETURN_VALUE
+
+347   L9:     END_FOR
+              POP_ITER
+
+351           LOAD_CONST               1 ('none')
+              RETURN_VALUE
+
+
+### [39]     _decompress  (file=ue4.py) :: line 353, args 7, locals 7, stack 4, consts 6
+353           RESUME                   0
+
+354           LOAD_FAST_BORROW         2 (comp)
+              LOAD_CONST               0 ('zlib')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       22 (to L1)
+              NOT_TAKEN
+
+355           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              0 (zlib)
+              STORE_FAST               3 (zlib)
+
+356           LOAD_FAST_BORROW         3 (zlib)
+              LOAD_ATTR                3 (decompress + NULL|self)
+              LOAD_FAST_BORROW         1 (data)
+              CALL                     1
+              RETURN_VALUE
+
+357   L1:     LOAD_FAST_BORROW         2 (comp)
+              LOAD_CONST               2 ('gzip')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       22 (to L2)
+              NOT_TAKEN
+
+358           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              2 (gzip)
+              STORE_FAST               4 (gzip)
+
+359           LOAD_FAST_BORROW         4 (gzip)
+              LOAD_ATTR                3 (decompress + NULL|self)
+              LOAD_FAST_BORROW         1 (data)
+              CALL                     1
+              RETURN_VALUE
+
+360   L2:     LOAD_FAST_BORROW         2 (comp)
+              LOAD_CONST               3 ('zstd')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       36 (to L3)
+              NOT_TAKEN
+
+361           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              3 (zstandard)
+              STORE_FAST               5 (zstandard)
+
+362           LOAD_FAST_BORROW         5 (zstandard)
+              LOAD_ATTR                9 (ZstdDecompressor + NULL|self)
+              CALL                     0
+              LOAD_ATTR                3 (decompress + NULL|self)
+              LOAD_FAST_BORROW         1 (data)
+              CALL                     1
+              RETURN_VALUE
+
+363   L3:     LOAD_FAST_BORROW         2 (comp)
+              LOAD_CONST               4 ('lz4')
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       32 (to L4)
+              NOT_TAKEN
+
+364           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              5 (lz4.block)
+              STORE_FAST               6 (lz4)
+
+365           LOAD_FAST_BORROW         6 (lz4)
+              LOAD_ATTR               12 (block)
+              LOAD_ATTR                3 (decompress + NULL|self)
+              LOAD_FAST_BORROW         1 (data)
+              CALL                     1
+              RETURN_VALUE
+
+366   L4:     LOAD_GLOBAL             15 (ValueError + NULL)
+              LOAD_CONST               5 ('Unsupported compression: ')
+              LOAD_FAST_BORROW         2 (comp)
+              FORMAT_SIMPLE
+              BUILD_STRING             2
+              CALL                     1
+              RAISE_VARARGS            1
+
+
+### [40]     extract_all  (file=ue4.py) :: line 368, args 8, locals 8, stack 6, consts 7
+368           RESUME                   0
+
+369           LOAD_GLOBAL              1 (Path + NULL)
+              LOAD_FAST_BORROW         1 (out_dir)
+              CALL                     1
+              STORE_FAST               2 (out)
+
+370           LOAD_SMALL_INT           0
+              STORE_FAST               3 (n)
+
+371           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                3 (files + NULL|self)
+              CALL                     0
+              GET_ITER
+      L1:     FOR_ITER               139 (to L3)
+              STORE_FAST               4 (path)
+
+372           LOAD_FAST_BORROW         4 (path)
+              LOAD_ATTR                5 (strip + NULL|self)
+              LOAD_CONST               1 ('/')
+              CALL                     1
+              LOAD_ATTR                7 (lstrip + NULL|self)
+              LOAD_CONST               2 ('.')
+              CALL                     1
+              STORE_FAST               5 (safe)
+
+373           LOAD_FAST_BORROW         5 (safe)
+              LOAD_ATTR                9 (replace + NULL|self)
+              LOAD_CONST               3 ('..')
+              LOAD_CONST               4 ('__')
+              CALL                     2
+              STORE_FAST               5 (safe)
+
+374           LOAD_FAST_BORROW_LOAD_FAST_BORROW 37 (out, safe)
+              BINARY_OP               11 (/)
+              STORE_FAST               6 (dst)
+
+375           LOAD_FAST_BORROW         6 (dst)
+              LOAD_ATTR               10 (parent)
+              LOAD_ATTR               13 (mkdir + NULL|self)
+              LOAD_CONST               5 (True)
+              LOAD_CONST               5 (True)
+              LOAD_CONST               6 (('parents', 'exist_ok'))
+              CALL_KW                  2
+              POP_TOP
+
+376           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               15 (read_file + NULL|self)
+              LOAD_FAST_BORROW         4 (path)
+              CALL                     1
+              STORE_FAST               7 (data)
+
+377           LOAD_FAST_BORROW         7 (data)
+              POP_JUMP_IF_NOT_NONE     3 (to L2)
+              NOT_TAKEN
+              JUMP_BACKWARD          113 (to L1)
+
+378   L2:     LOAD_FAST_BORROW         6 (dst)
+              LOAD_ATTR               17 (write_bytes + NULL|self)
+              LOAD_FAST_BORROW         7 (data)
+              CALL                     1
+              POP_TOP
+
+379           LOAD_FAST_BORROW         3 (n)
+              LOAD_SMALL_INT           1
+              BINARY_OP               13 (+=)
+              STORE_FAST               3 (n)
+              JUMP_BACKWARD          141 (to L1)
+
+371   L3:     END_FOR
+              POP_ITER
+
+380           LOAD_FAST_BORROW         3 (n)
+              RETURN_VALUE
+
+
+### [41]     extract_one  (file=ue4.py) :: line 382, args 6, locals 6, stack 5, consts 8
+382           RESUME                   0
+
+384           LOAD_FAST_BORROW         2 (path)
+              LOAD_ATTR                1 (strip + NULL|self)
+              LOAD_CONST               1 ('/')
+              CALL                     1
+              LOAD_ATTR                3 (lstrip + NULL|self)
+              LOAD_CONST               2 ('.')
+              CALL                     1
+              STORE_FAST               3 (safe)
+
+385           LOAD_FAST_BORROW         3 (safe)
+              LOAD_ATTR                5 (replace + NULL|self)
+              LOAD_CONST               3 ('..')
+              LOAD_CONST               4 ('__')
+              CALL                     2
+              STORE_FAST               3 (safe)
+
+386           LOAD_GLOBAL              7 (Path + NULL)
+              LOAD_FAST_BORROW         1 (out_dir)
+              CALL                     1
+              LOAD_FAST_BORROW         3 (safe)
+              BINARY_OP               11 (/)
+              STORE_FAST               4 (dst)
+
+387           LOAD_FAST_BORROW         4 (dst)
+              LOAD_ATTR                8 (parent)
+              LOAD_ATTR               11 (mkdir + NULL|self)
+              LOAD_CONST               5 (True)
+              LOAD_CONST               5 (True)
+              LOAD_CONST               6 (('parents', 'exist_ok'))
+              CALL_KW                  2
+              POP_TOP
+
+388           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               13 (read_file + NULL|self)
+              LOAD_FAST_BORROW         2 (path)
+              CALL                     1
+              STORE_FAST               5 (data)
+
+389           LOAD_FAST_BORROW         5 (data)
+              POP_JUMP_IF_NOT_NONE     3 (to L1)
+              NOT_TAKEN
+
+390           LOAD_CONST               7 ((False, 0))
+              RETURN_VALUE
+
+391   L1:     LOAD_FAST_BORROW         4 (dst)
+              LOAD_ATTR               15 (write_bytes + NULL|self)
+              LOAD_FAST_BORROW         5 (data)
+              CALL                     1
+              POP_TOP
+
+392           LOAD_CONST               5 (True)
+              LOAD_GLOBAL             17 (len + NULL)
+              LOAD_FAST_BORROW         5 (data)
+              CALL                     1
+              BUILD_TUPLE              2
+              RETURN_VALUE
+
+
+### [42]     size  (file=ue4.py) :: line 394, args 3, locals 3, stack 3, consts 1
+394           RESUME                   0
+
+395           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (entries)
+              LOAD_ATTR                3 (get + NULL|self)
+              LOAD_FAST_BORROW         1 (path)
+              CALL                     1
+              STORE_FAST               2 (e)
+
+396           LOAD_FAST_BORROW         2 (e)
+              POP_JUMP_IF_NONE        13 (to L1)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         2 (e)
+              LOAD_ATTR                4 (compressed)
+              RETURN_VALUE
+      L1:     LOAD_SMALL_INT           0
+              RETURN_VALUE
+
+
+### [43]     repack  (file=ue4.py) :: line 398, args 18, locals 20, stack 9, consts 7
+  --            MAKE_CELL                0 (self)
+                MAKE_CELL               18 (out)
+
+ 398            RESUME                   0
+
+ 399            LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT          10
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       12 (to L1)
+                NOT_TAKEN
+
+ 400            LOAD_GLOBAL              3 (ValueError + NULL)
+                LOAD_CONST               1 ('v10+ repack abhi supported nahi (sirf extract)')
+                CALL                     1
+                RAISE_VARARGS            1
+
+ 401    L1:     LOAD_FAST                2 (replacements)
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L2)
+                NOT_TAKEN
+                POP_TOP
+                BUILD_MAP                0
+        L2:     STORE_FAST               2 (replacements)
+
+ 402            LOAD_FAST                3 (add_files)
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L3)
+                NOT_TAKEN
+                POP_TOP
+                BUILD_MAP                0
+        L3:     STORE_FAST               3 (add_files)
+
+ 403            LOAD_FAST                4 (delete)
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE        11 (to L4)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_GLOBAL              5 (set + NULL)
+                CALL                     0
+        L4:     STORE_FAST               4 (delete)
+
+ 405            LOAD_GLOBAL              7 (bytearray + NULL)
+                CALL                     0
+                STORE_DEREF             18 (out)
+
+ 406            BUILD_MAP                0
+                STORE_FAST               5 (new_entries)
+
+ 407            LOAD_GLOBAL              9 (list + NULL)
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR               11 (files + NULL|self)
+                CALL                     0
+                CALL                     1
+                LOAD_FAST_BORROW         3 (add_files)
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      6 (p)
+                SWAP                     2
+        L5:     BUILD_LIST               0
+                SWAP                     2
+        L6:     FOR_ITER                23 (to L9)
+                STORE_FAST_LOAD_FAST   102 (p, p)
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR               12 (entries)
+                CONTAINS_OP              1 (not in)
+        L7:     POP_JUMP_IF_TRUE         3 (to L8)
+                NOT_TAKEN
+                JUMP_BACKWARD           21 (to L6)
+        L8:     LOAD_FAST_BORROW         6 (p)
+                LIST_APPEND              2
+                JUMP_BACKWARD           25 (to L6)
+        L9:     END_FOR
+                POP_ITER
+       L10:     SWAP                     2
+                STORE_FAST               6 (p)
+                BINARY_OP                0 (+)
+                STORE_FAST               7 (order)
+
+ 409            LOAD_FAST_BORROW        18 (out)
+                LOAD_FAST_BORROW         0 (self)
+                BUILD_TUPLE              2
+                LOAD_CONST               2 (<code object write_data_record at 0xb400007c000176b0, file "ue4.py", line 409>)
+                MAKE_FUNCTION
+                SET_FUNCTION_ATTRIBUTE   8 (closure)
+                STORE_FAST               8 (write_data_record)
+
+ 422            LOAD_FAST_BORROW         7 (order)
+                GET_ITER
+       L11:     FOR_ITER                74 (to L16)
+                STORE_FAST               9 (path)
+
+ 423            LOAD_FAST_BORROW_LOAD_FAST_BORROW 148 (path, delete)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE        3 (to L12)
+                NOT_TAKEN
+
+ 424            JUMP_BACKWARD           11 (to L11)
+
+ 425   L12:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 146 (path, replacements)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       10 (to L13)
+                NOT_TAKEN
+
+ 426            LOAD_FAST_BORROW_LOAD_FAST_BORROW 41 (replacements, path)
+                BINARY_OP               26 ([])
+                STORE_FAST              10 (data)
+                JUMP_FORWARD            38 (to L15)
+
+ 427   L13:     LOAD_FAST_BORROW_LOAD_FAST_BORROW 147 (path, add_files)
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       10 (to L14)
+                NOT_TAKEN
+
+ 428            LOAD_FAST_BORROW_LOAD_FAST_BORROW 57 (add_files, path)
+                BINARY_OP               26 ([])
+                STORE_FAST              10 (data)
+                JUMP_FORWARD            23 (to L15)
+
+ 430   L14:     LOAD_DEREF               0 (self)
+                LOAD_ATTR               15 (read_file + NULL|self)
+                LOAD_FAST_BORROW         9 (path)
+                CALL                     1
+                STORE_FAST              10 (data)
+
+ 431            LOAD_FAST_BORROW        10 (data)
+                POP_JUMP_IF_NOT_NONE     3 (to L15)
+                NOT_TAKEN
+
+ 432            JUMP_BACKWARD           64 (to L11)
+
+ 433   L15:     LOAD_FAST_BORROW         8 (write_data_record)
+                PUSH_NULL
+                LOAD_FAST_BORROW        10 (data)
+                CALL                     1
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 89 (new_entries, path)
+                STORE_SUBSCR
+                JUMP_BACKWARD           76 (to L11)
+
+ 422   L16:     END_FOR
+                POP_ITER
+
+ 435            LOAD_GLOBAL             17 (len + NULL)
+                LOAD_DEREF              18 (out)
+                CALL                     1
+                STORE_FAST              11 (index_offset)
+
+ 436            LOAD_GLOBAL             19 (Writer + NULL)
+                CALL                     0
+                STORE_FAST              12 (w)
+
+ 437            LOAD_FAST_BORROW        12 (w)
+                LOAD_ATTR               21 (fstring + NULL|self)
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR               22 (mount_point)
+                CALL                     1
+                POP_TOP
+
+ 438            LOAD_FAST_BORROW        12 (w)
+                LOAD_ATTR               25 (u4 + NULL|self)
+                LOAD_GLOBAL             17 (len + NULL)
+                LOAD_FAST_BORROW         5 (new_entries)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 439            LOAD_GLOBAL             27 (sorted + NULL)
+                LOAD_FAST_BORROW         5 (new_entries)
+                CALL                     1
+                GET_ITER
+       L17:     FOR_ITER                62 (to L18)
+                STORE_FAST               9 (path)
+
+ 440            LOAD_FAST_BORROW        12 (w)
+                LOAD_ATTR               21 (fstring + NULL|self)
+                LOAD_FAST_BORROW         9 (path)
+                CALL                     1
+                POP_TOP
+
+ 441            LOAD_GLOBAL             29 (write_entry + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 197 (w, new_entries)
+                LOAD_FAST_BORROW         9 (path)
+                BINARY_OP               26 ([])
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR               30 (compression_u8)
+                LOAD_CONST               3 (True)
+                LOAD_CONST               4 (('index',))
+                CALL_KW                  5
+                POP_TOP
+                JUMP_BACKWARD           64 (to L17)
+
+ 439   L18:     END_FOR
+                POP_ITER
+
+ 442            LOAD_GLOBAL             33 (bytes + NULL)
+                LOAD_FAST_BORROW        12 (w)
+                LOAD_ATTR               34 (out)
+                CALL                     1
+                STORE_FAST              13 (index_buf)
+
+ 443            LOAD_GLOBAL             37 (sha1 + NULL)
+                LOAD_FAST_BORROW        13 (index_buf)
+                CALL                     1
+                LOAD_ATTR               39 (digest + NULL|self)
+                CALL                     0
+                STORE_FAST              14 (index_hash)
+
+ 444            LOAD_DEREF              18 (out)
+                LOAD_FAST_BORROW        13 (index_buf)
+                BINARY_OP               13 (+=)
+                STORE_DEREF             18 (out)
+
+ 446            LOAD_GLOBAL             19 (Writer + NULL)
+                CALL                     0
+                STORE_FAST              15 (fw)
+
+ 447            LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT           7
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       18 (to L19)
+                NOT_TAKEN
+
+ 448            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               41 (u8 + NULL|self)
+                LOAD_SMALL_INT           0
+                CALL                     1
+                POP_TOP
+
+ 449   L19:     LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT           4
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       18 (to L20)
+                NOT_TAKEN
+
+ 450            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               43 (u1 + NULL|self)
+                LOAD_SMALL_INT           0
+                CALL                     1
+                POP_TOP
+
+ 451   L20:     LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               25 (u4 + NULL|self)
+                LOAD_GLOBAL             44 (MAGIC)
+                CALL                     1
+                POP_TOP
+
+ 452            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               25 (u4 + NULL|self)
+                LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                CALL                     1
+                POP_TOP
+
+ 453            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               41 (u8 + NULL|self)
+                LOAD_FAST_BORROW        11 (index_offset)
+                CALL                     1
+                POP_TOP
+
+ 454            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               41 (u8 + NULL|self)
+                LOAD_GLOBAL             17 (len + NULL)
+                LOAD_FAST_BORROW        13 (index_buf)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 455            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               47 (raw + NULL|self)
+                LOAD_FAST_BORROW        14 (index_hash)
+                CALL                     1
+                POP_TOP
+
+ 456            LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT           9
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       18 (to L21)
+                NOT_TAKEN
+
+ 457            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               43 (u1 + NULL|self)
+                LOAD_SMALL_INT           0
+                CALL                     1
+                POP_TOP
+
+ 458   L21:     LOAD_DEREF               0 (self)
+                LOAD_ATTR                0 (version)
+                LOAD_SMALL_INT           8
+                COMPARE_OP             188 (bool(>=))
+                POP_JUMP_IF_FALSE       58 (to L26)
+                NOT_TAKEN
+
+ 459            LOAD_DEREF               0 (self)
+                LOAD_ATTR               30 (compression_u8)
+                TO_BOOL
+                POP_JUMP_IF_FALSE        3 (to L22)
+                NOT_TAKEN
+                LOAD_SMALL_INT           4
+                JUMP_FORWARD             1 (to L23)
+       L22:     LOAD_SMALL_INT           5
+       L23:     STORE_FAST              16 (slots)
+
+ 460            LOAD_GLOBAL             49 (range + NULL)
+                LOAD_FAST_BORROW        16 (slots)
+                CALL                     1
+                GET_ITER
+       L24:     FOR_ITER                20 (to L25)
+                STORE_FAST              17 (_)
+
+ 461            LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               47 (raw + NULL|self)
+                LOAD_CONST               6 (b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           22 (to L24)
+
+ 460   L25:     END_FOR
+                POP_ITER
+
+ 462   L26:     LOAD_GLOBAL             51 (Path + NULL)
+                LOAD_FAST_BORROW         1 (out_path)
+                CALL                     1
+                LOAD_ATTR               52 (parent)
+                LOAD_ATTR               55 (mkdir + NULL|self)
+                LOAD_CONST               3 (True)
+                LOAD_CONST               3 (True)
+                LOAD_CONST               5 (('parents', 'exist_ok'))
+                CALL_KW                  2
+                POP_TOP
+
+ 463            LOAD_GLOBAL             51 (Path + NULL)
+                LOAD_FAST_BORROW         1 (out_path)
+                CALL                     1
+                LOAD_ATTR               57 (write_bytes + NULL|self)
+                LOAD_GLOBAL             33 (bytes + NULL)
+                LOAD_DEREF              18 (out)
+                CALL                     1
+                LOAD_GLOBAL             33 (bytes + NULL)
+                LOAD_FAST_BORROW        15 (fw)
+                LOAD_ATTR               34 (out)
+                CALL                     1
+                BINARY_OP                0 (+)
+                CALL                     1
+                POP_TOP
+
+ 464            LOAD_GLOBAL             17 (len + NULL)
+                LOAD_FAST_BORROW         5 (new_entries)
+                CALL                     1
+                RETURN_VALUE
+
+  --   L27:     SWAP                     2
+                POP_TOP
+
+ 407            SWAP                     2
+                STORE_FAST               6 (p)
+                RERAISE                  0
+ExceptionTable:
+  L5 to L7 -> L27 [3]
+  L8 to L10 -> L27 [3]
+
+
+### [44]       write_data_record  (file=ue4.py) :: line 409, args 4, locals 6, stack 11, consts 5
+  --           COPY_FREE_VARS           2
+
+ 409           RESUME                   0
+
+ 410           LOAD_GLOBAL              1 (Entry + NULL)
+               LOAD_SMALL_INT           0
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_FAST_BORROW         0 (data)
+               CALL                     1
+               LOAD_GLOBAL              3 (len + NULL)
+               LOAD_FAST_BORROW         0 (data)
+               CALL                     1
+
+ 411           LOAD_CONST               1 (None)
+               LOAD_GLOBAL              5 (sha1 + NULL)
+               LOAD_FAST_BORROW         0 (data)
+               CALL                     1
+               LOAD_ATTR                7 (digest + NULL|self)
+               CALL                     0
+
+ 412           LOAD_CONST               1 (None)
+               LOAD_SMALL_INT           0
+               LOAD_SMALL_INT           0
+
+ 410           LOAD_CONST               2 (('offset', 'compressed', 'uncompressed', 'compression_slot', 'hash_val', 'blocks', 'flags', 'compression_block_size'))
+               CALL_KW                  8
+               STORE_FAST               1 (e)
+
+ 414           LOAD_GLOBAL              3 (len + NULL)
+               LOAD_DEREF               4 (out)
+               CALL                     1
+               STORE_FAST               2 (record_start)
+
+ 415           LOAD_GLOBAL              9 (Writer + NULL)
+               CALL                     0
+               STORE_FAST               3 (w)
+
+ 416           LOAD_GLOBAL             11 (write_entry + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 49 (w, e)
+               LOAD_DEREF               5 (self)
+               LOAD_ATTR               12 (version)
+               LOAD_DEREF               5 (self)
+               LOAD_ATTR               14 (compression_u8)
+               LOAD_CONST               3 (False)
+               LOAD_CONST               4 (('index',))
+               CALL_KW                  5
+               POP_TOP
+
+ 417           LOAD_DEREF               4 (out)
+               LOAD_FAST_BORROW         3 (w)
+               LOAD_ATTR               16 (out)
+               BINARY_OP               13 (+=)
+               STORE_DEREF              4 (out)
+
+ 418           LOAD_DEREF               4 (out)
+               LOAD_FAST_BORROW         0 (data)
+               BINARY_OP               13 (+=)
+               STORE_DEREF              4 (out)
+
+ 419           LOAD_FAST_BORROW_LOAD_FAST_BORROW 33 (record_start, e)
+               STORE_ATTR               9 (offset)
+
+ 420           LOAD_FAST_BORROW         1 (e)
+               RETURN_VALUE

@@ -1,0 +1,32 @@
+# lua_protect
+# funcs=25
+# top-level names:
+  Path
+  _ALL_VERSIONS
+  _B64_STRIP
+  _LCG_A
+  _LCG_C
+  _LCG_M
+  _LOADER_TMPL
+  _MAGIC
+  _SECRET
+  _compile_one
+  _compile_one_named
+  _decrypt_blob
+  _encrypt_blob
+  _extract_b64
+  _lcg_stream
+  _seed_from
+  _split_parts
+  base64
+  compile
+  is_protected
+  pathlib
+  protect_compile
+  re
+  tempfile
+  unprotect_blob
+# module str consts:
+  '-- IKRAMPROT v3 protected chunk (DO NOT EDIT)\nlocal _z = {}\nlocal function _Y(t)\n  local _r = {}\n  for _i = 1, #t do _r[_i] = string.sub(t, _i, _i) end\n  return _r\nend\nlocal _C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"\nlocal _T = {}\nfor _i = 1, 64 do _T[string.sub(_C, _i, _i)] = _i - 1 end\nlocal _D = function(_p0, _p1, _p2)\n  local _q = _p0 .. _p1 .. _p2\n  local _R = _Y(_q)\n  local _L = {}\n  for _i = #_R, 1, -1 do _L[#_L + 1] = _R[_i] end\n  local _b64 = table.concat(_L, "")\n  local _bytes = {}\n  local _ptr = 1\n  local _b, _n = 0, 0\n  for _pos = 1, #_b64 do\n    local _ch = string.sub(_b64, _pos, _pos)\n    if _ch ~= "=" then\n      local _v = _T[_ch]\n      if _v == nil then _v = 0 end\n      _b = (_b * 64) + _v\n      _n = _n + 6\n      if _n >= 8 then\n        _n = _n - 8\n        _bytes[_ptr] = math.floor(_b / (2 ^ _n)) % 256\n        _ptr = _ptr + 1\n        _b = _b % (2 ^ _n)\n      end\n    end\n  end\n  local _seed = _bytes[1] + (_bytes[2] * 256) + (_bytes[3] * 65536) + (_bytes[4] * 16777216)\n  local _a, _c, _m = 0x19660D, 0x3C6EF35F, 0x100000000\n  local _s = _seed\n  local _out = {}\n  for _j = 5, #_bytes do\n    _s = (_s * _a + _c) % _m\n    local _k = math.floor((_s / 256) % 256)\n    _out[_j - 4] = string.char((_bytes[_j] - _k + 256) % 256)\n  end\n  return table.concat(_out, "")\nend\n{{{BLOBS}}}\nlocal _ld = loadstring or load\nlocal _err = "unknown"\nfor _i = 1, #_B do\n  local _raw = _D(_B[_i][2], _B[_i][3], _B[_i][4])\n  local _ok, _res = pcall(function()\n    return _ld(_raw, "@ikramprotected", "b")\n  end)\n  if _ok and type(_res) == "function" then\n    _res()\n    return\n  end\n  _err = tostring(_res)\nend\nerror("corrupt chunk: " .. _err, 0)\n'
+  'IKRAMPROT'
+  '[^A-Za-z0-9+/=]'

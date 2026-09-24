@@ -1,0 +1,28 @@
+# ue4
+# funcs=45
+# top-level names:
+  Block
+  Entry
+  MAGIC
+  MAGIC_BYTES
+  Path
+  Reader
+  Ue4Pak
+  Writer
+  aes_ecb_decrypt
+  align
+  find_magic
+  hashlib
+  pathlib
+  read_encoded_entry
+  read_entry
+  sha1
+  struct
+  unpad
+  write_entry
+# module str consts:
+  'Block'
+  'Entry'
+  'Reader'
+  'Ue4Pak'
+  'Writer'

@@ -1,0 +1,26 @@
+# lua_ops
+# funcs=16
+# top-level names:
+  LUA_VERSION_HINTS
+  Path
+  UNLUAC_URLS
+  _find_luac
+  compile_batch
+  compile_lua
+  decompile_lua
+  decompile_lua_partial
+  detect_lua
+  ensure_unluac_jar
+  find_unluac_jar
+  pathlib
+  shutil
+  subprocess
+  unluac_dir
+# module str consts:
+  'Lua 5.1'
+  'Lua 5.2'
+  'Lua 5.3'
+  'Lua 5.4'
+  'LuaJIT'
+  'https://downloads.sourceforge.net/project/unluac/Unstable/unluac_2025_12_23.jar'
+  'https://sourceforge.net/projects/unluac/files/latest/download'

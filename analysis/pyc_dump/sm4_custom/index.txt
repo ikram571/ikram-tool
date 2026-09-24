@@ -1,0 +1,25 @@
+# sm4_custom
+# funcs=24
+# top-level names:
+  _CK
+  _FK
+  _S_BOX
+  _bs
+  _expand_key
+  _rol32
+  _t0
+  _t1
+  bytes
+  decrypt_block
+  decrypt_ecb
+  encrypt_block
+  encrypt_ecb
+  functools
+  lru_cache
+  print
+  self_test
+  struct
+# module str consts:
+  'Custom SM4 variant (CHEN TOOL X) — modified S-Box + same round structure.\n\nTencent pak encrypts some files with a NON-standard SM4 whose S-Box differs\nfrom the official one (CHEN_LUA_PAK / GRW tooling). Standard gmalg SM4 cannot\ndecrypt those. This module implements the variant end-to-end (pure Python,\nno gmalg dependency) so both S-Boxes can be tried.\n\nS-Box reference: CHEN_TOOL_X/sm4_variant/sm4.py\n'
+  '__main__'
+  'custom SM4 self-test OK'

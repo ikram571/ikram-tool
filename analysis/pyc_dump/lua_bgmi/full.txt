@@ -1,0 +1,3062 @@
+
+### [0] <module>  (file=lua_bgmi.py) :: line 1, args 0, locals 0, stack 6, consts 20
+  0           RESUME                   0
+
+  2           LOAD_CONST               0 ("BGMI / PUBG Mobile Lua bytecode converter.\n\nReal-game (BGMI/PUBG) .luac files use a custom format on top of Lua 5.3:\n  * standard 33-byte Lua 5.3 header\n  * strings stored as 1-byte size (0xFF + u32 for long), content XOR'd\n    with a 32-byte key\n  * opcodes remapped (custom order)\n\nThis module converts BGMI bytecode <-> standard Lua 5.3 bytecode so the\nstandard toolchain (unluac / luac 5.3) can be used on real game files.\n")
+              STORE_NAME               0 (__doc__)
+
+ 13           LOAD_SMALL_INT           0
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              1 (struct)
+              STORE_NAME               1 (struct)
+
+ 15           LOAD_NAME                2 (bytes)
+              PUSH_NULL
+              BUILD_LIST               0
+
+ 16           LOAD_SMALL_INT          17
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          33
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          54
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          71
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          70
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT          87
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         167
+
+ 15           LIST_APPEND              1
+
+ 16           LOAD_SMALL_INT         141
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         157
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         132
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         144
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         216
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         171
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT           0
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT         140
+
+ 15           LIST_APPEND              1
+
+ 17           LOAD_SMALL_INT          53
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          38
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          26
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         247
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         228
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT          88
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT           5
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         184
+
+ 15           LIST_APPEND              1
+
+ 18           LOAD_SMALL_INT         179
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          21
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT           7
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         208
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          44
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT          30
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         143
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         246
+
+ 15           LIST_APPEND              1
+
+ 19           LOAD_SMALL_INT         200
+
+ 15           LIST_APPEND              1
+              CALL                     1
+              STORE_NAME               3 (STRING_XOR_KEY)
+
+ 22           BUILD_MAP                0
+              STORE_NAME               4 (BGMI_TO_STD)
+
+ 23           LOAD_NAME                5 (range)
+              PUSH_NULL
+              LOAD_SMALL_INT          17
+              CALL                     1
+              GET_ITER
+      L1:     FOR_ITER                15 (to L2)
+              STORE_NAME               6 (_op)
+
+ 24           LOAD_NAME                6 (_op)
+              LOAD_SMALL_INT          13
+              BINARY_OP                0 (+)
+              LOAD_NAME                4 (BGMI_TO_STD)
+              LOAD_NAME                6 (_op)
+              STORE_SUBSCR
+              JUMP_BACKWARD           17 (to L1)
+
+ 23   L2:     END_FOR
+              POP_ITER
+
+ 25           LOAD_NAME                5 (range)
+              PUSH_NULL
+              LOAD_SMALL_INT          17
+              LOAD_SMALL_INT          30
+              CALL                     2
+              GET_ITER
+      L3:     FOR_ITER                15 (to L4)
+              STORE_NAME               6 (_op)
+
+ 26           LOAD_NAME                6 (_op)
+              LOAD_SMALL_INT          17
+              BINARY_OP               10 (-)
+              LOAD_NAME                4 (BGMI_TO_STD)
+              LOAD_NAME                6 (_op)
+              STORE_SUBSCR
+              JUMP_BACKWARD           17 (to L3)
+
+ 25   L4:     END_FOR
+              POP_ITER
+
+ 27           LOAD_NAME                5 (range)
+              PUSH_NULL
+              LOAD_SMALL_INT          30
+              LOAD_SMALL_INT          47
+              CALL                     2
+              GET_ITER
+      L5:     FOR_ITER                 8 (to L6)
+              STORE_NAME               6 (_op)
+
+ 28           LOAD_NAME                6 (_op)
+              LOAD_NAME                4 (BGMI_TO_STD)
+              LOAD_NAME                6 (_op)
+              STORE_SUBSCR
+              JUMP_BACKWARD           10 (to L5)
+
+ 27   L6:     END_FOR
+              POP_ITER
+
+ 29           LOAD_NAME                7 (dict)
+              PUSH_NULL
+              LOAD_NAME                8 (sorted)
+              PUSH_NULL
+              LOAD_NAME                4 (BGMI_TO_STD)
+              LOAD_ATTR               19 (items + NULL|self)
+              CALL                     0
+              CALL                     1
+              CALL                     1
+              STORE_NAME               4 (BGMI_TO_STD)
+
+ 31           BUILD_MAP                0
+              STORE_NAME              10 (STD_TO_BGMI)
+
+ 32           LOAD_NAME                8 (sorted)
+              PUSH_NULL
+              LOAD_NAME                4 (BGMI_TO_STD)
+              CALL                     1
+              GET_ITER
+      L7:     FOR_ITER                26 (to L9)
+              STORE_NAME              11 (bgmi_op)
+
+ 33           LOAD_NAME                4 (BGMI_TO_STD)
+              LOAD_NAME               11 (bgmi_op)
+              BINARY_OP               26 ([])
+              STORE_NAME              12 (std_op)
+
+ 34           LOAD_NAME               12 (std_op)
+              LOAD_NAME               10 (STD_TO_BGMI)
+              CONTAINS_OP              1 (not in)
+              POP_JUMP_IF_TRUE         3 (to L8)
+              NOT_TAKEN
+              JUMP_BACKWARD           21 (to L7)
+
+ 35   L8:     LOAD_NAME               11 (bgmi_op)
+              LOAD_NAME               10 (STD_TO_BGMI)
+              LOAD_NAME               12 (std_op)
+              STORE_SUBSCR
+              JUMP_BACKWARD           28 (to L7)
+
+ 32   L9:     END_FOR
+              POP_ITER
+
+ 37           BUILD_LIST               0
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           1
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           1
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 38           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           2
+
+ 37           LIST_APPEND              1
+
+ 39           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           2
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           2
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           2
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           1
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           0
+
+ 37           LIST_APPEND              1
+
+ 40           LOAD_SMALL_INT           3
+
+ 37           LIST_APPEND              1
+              STORE_NAME              13 (STD_FMT)
+
+ 43           LOAD_SMALL_INT          33
+              STORE_NAME              14 (HEADER_SIZE)
+
+ 46           LOAD_CONST               2 (<code object __annotate__ at 0x7aaf9eef30, file "lua_bgmi.py", line 46>)
+              MAKE_FUNCTION
+              LOAD_CONST               3 (<code object is_bgmi at 0x7aaf603690, file "lua_bgmi.py", line 46>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              15 (is_bgmi)
+
+ 50           LOAD_CONST               4 (<code object __annotate__ at 0x7aaf68d730, file "lua_bgmi.py", line 50>)
+              MAKE_FUNCTION
+              LOAD_CONST               5 (<code object _clean_text at 0xb400007c7006afd0, file "lua_bgmi.py", line 50>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              16 (_clean_text)
+
+ 73           LOAD_CONST               6 (<code object __annotate__ at 0x7aab490580, file "lua_bgmi.py", line 73>)
+              MAKE_FUNCTION
+              LOAD_CONST               7 (<code object _probe_format at 0x7aaf757b40, file "lua_bgmi.py", line 73>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              17 (_probe_format)
+
+ 91           LOAD_CONST               8 (<code object _probe_func at 0xb400007bb0011f60, file "lua_bgmi.py", line 91>)
+              MAKE_FUNCTION
+              STORE_NAME              18 (_probe_func)
+
+154           LOAD_CONST               9 (<code object __annotate__ at 0x7aaf68e030, file "lua_bgmi.py", line 154>)
+              MAKE_FUNCTION
+              LOAD_CONST              10 (<code object detect_format at 0xb400007c800a37f0, file "lua_bgmi.py", line 154>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              19 (detect_format)
+
+189           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              11 (<code object _R at 0x7aab4b2170, file "lua_bgmi.py", line 189>)
+              MAKE_FUNCTION
+              LOAD_CONST              12 ('_R')
+              CALL                     2
+              STORE_NAME              20 (_R)
+
+248           LOAD_BUILD_CLASS
+              PUSH_NULL
+              LOAD_CONST              13 (<code object _W at 0x7aaf62f5f0, file "lua_bgmi.py", line 248>)
+              MAKE_FUNCTION
+              LOAD_CONST              14 ('_W')
+              CALL                     2
+              STORE_NAME              21 (_W)
+
+312           LOAD_CONST              15 (<code object _cvt_func at 0xb400007c90016100, file "lua_bgmi.py", line 312>)
+              MAKE_FUNCTION
+              STORE_NAME              22 (_cvt_func)
+
+397           LOAD_CONST              16 (<code object __annotate__ at 0x7aaf68ed30, file "lua_bgmi.py", line 397>)
+              MAKE_FUNCTION
+              LOAD_CONST              17 (<code object bgmi_to_std at 0xb400007c0001b9c0, file "lua_bgmi.py", line 397>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              23 (bgmi_to_std)
+
+412           LOAD_CONST              18 (<code object __annotate__ at 0x7aaf68de30, file "lua_bgmi.py", line 412>)
+              MAKE_FUNCTION
+              LOAD_CONST              19 (<code object std_to_bgmi at 0xb400007c000168d0, file "lua_bgmi.py", line 412>)
+              MAKE_FUNCTION
+              SET_FUNCTION_ATTRIBUTE  16 (annotate)
+              STORE_NAME              24 (std_to_bgmi)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [1]   __annotate__  (file=lua_bgmi.py) :: line 46, args 1, locals 1, stack 4, consts 3
+ 46           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (bool)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [2]   is_bgmi  (file=lua_bgmi.py) :: line 46, args 1, locals 1, stack 3, consts 1
+ 46           RESUME                   0
+
+ 47           LOAD_GLOBAL              1 (detect_format + NULL)
+              LOAD_FAST_BORROW         0 (data)
+              CALL                     1
+              LOAD_CONST               0 ('bgmi')
+              COMPARE_OP              72 (==)
+              RETURN_VALUE
+
+
+### [3]   __annotate__  (file=lua_bgmi.py) :: line 50, args 1, locals 1, stack 2, consts 2
+ 50           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('return')
+              LOAD_GLOBAL              0 (bool)
+              BUILD_MAP                1
+              RETURN_VALUE
+
+
+### [4]   _clean_text  (file=lua_bgmi.py) :: line 50, args 6, locals 6, stack 5, consts 7
+ 50            RESUME                   0
+
+ 53            LOAD_GLOBAL              1 (isinstance + NULL)
+               LOAD_FAST_BORROW         0 (s)
+               LOAD_GLOBAL              2 (str)
+               CALL                     2
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L1)
+               NOT_TAKEN
+
+ 54            LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+ 55    L1:     LOAD_FAST_BORROW         0 (s)
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L2)
+               NOT_TAKEN
+
+ 56            LOAD_CONST               2 (True)
+               RETURN_VALUE
+
+ 57    L2:     LOAD_SMALL_INT           0
+               STORE_FAST               1 (total)
+
+ 58            LOAD_SMALL_INT           0
+               STORE_FAST               2 (ok)
+
+ 59            LOAD_SMALL_INT           0
+               STORE_FAST               3 (bad)
+
+ 60            LOAD_FAST_BORROW         0 (s)
+               LOAD_CONST               3 (slice(None, 64, None))
+               BINARY_OP               26 ([])
+               GET_ITER
+       L3:     FOR_ITER               121 (to L10)
+               STORE_FAST               4 (ch)
+
+ 61            LOAD_FAST_BORROW         1 (total)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               1 (total)
+
+ 62            LOAD_GLOBAL              5 (ord + NULL)
+               LOAD_FAST_BORROW         4 (ch)
+               CALL                     1
+               STORE_FAST               5 (o)
+
+ 63            LOAD_FAST_BORROW         5 (o)
+               LOAD_CONST               4 (65533)
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_TRUE        15 (to L4)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         5 (o)
+               LOAD_SMALL_INT          32
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_TRUE         8 (to L4)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         5 (o)
+               LOAD_SMALL_INT         127
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       12 (to L5)
+               NOT_TAKEN
+
+ 64    L4:     LOAD_FAST_BORROW         3 (bad)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               3 (bad)
+
+ 65            JUMP_BACKWARD           55 (to L3)
+
+ 66    L5:     LOAD_FAST_BORROW         4 (ch)
+               LOAD_CONST               5 (' .-_/:\\()[]{}@+#!?=,;\'"')
+               CONTAINS_OP              0 (in)
+               POP_JUMP_IF_TRUE        51 (to L9)
+               NOT_TAKEN
+               LOAD_SMALL_INT          32
+               LOAD_FAST                5 (o)
+               SWAP                     2
+               COPY                     2
+               COMPARE_OP              58 (bool(<=))
+               POP_JUMP_IF_FALSE        8 (to L6)
+               NOT_TAKEN
+               LOAD_SMALL_INT         127
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_TRUE        36 (to L9)
+               NOT_TAKEN
+               JUMP_FORWARD             1 (to L7)
+       L6:     POP_TOP
+       L7:     LOAD_FAST_BORROW         5 (o)
+               LOAD_SMALL_INT         128
+               COMPARE_OP             188 (bool(>=))
+               POP_JUMP_IF_TRUE         3 (to L8)
+               NOT_TAKEN
+               JUMP_BACKWARD           88 (to L3)
+       L8:     LOAD_FAST_BORROW         4 (ch)
+               LOAD_ATTR                7 (isalnum + NULL|self)
+               CALL                     0
+               TO_BOOL
+               POP_JUMP_IF_TRUE         3 (to L9)
+               NOT_TAKEN
+               JUMP_BACKWARD          112 (to L3)
+
+ 67    L9:     LOAD_FAST_BORROW         2 (ok)
+               LOAD_SMALL_INT           1
+               BINARY_OP               13 (+=)
+               STORE_FAST               2 (ok)
+               JUMP_BACKWARD          123 (to L3)
+
+ 60   L10:     END_FOR
+               POP_ITER
+
+ 68            LOAD_FAST_BORROW         3 (bad)
+               TO_BOOL
+               POP_JUMP_IF_FALSE        3 (to L11)
+               NOT_TAKEN
+
+ 69            LOAD_CONST               1 (False)
+               RETURN_VALUE
+
+ 70   L11:     LOAD_FAST_BORROW         2 (ok)
+               LOAD_GLOBAL              9 (max + NULL)
+               LOAD_SMALL_INT           1
+               LOAD_FAST_BORROW         1 (total)
+               CALL                     2
+               BINARY_OP               11 (/)
+               LOAD_CONST               6 (0.85)
+               COMPARE_OP             132 (>)
+               RETURN_VALUE
+
+
+### [5]   __annotate__  (file=lua_bgmi.py) :: line 73, args 1, locals 1, stack 6, consts 4
+ 73           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('to_std')
+              LOAD_GLOBAL              2 (bool)
+              LOAD_CONST               3 ('return')
+              LOAD_GLOBAL              2 (bool)
+              BUILD_MAP                3
+              RETURN_VALUE
+
+
+### [6]   _probe_format  (file=lua_bgmi.py) :: line 73, args 4, locals 4, stack 5, consts 5
+  73            RESUME                   0
+
+  80            NOP
+
+  81    L1:     LOAD_FAST_BORROW         0 (data)
+                LOAD_SMALL_INT          13
+                BINARY_OP               26 ([])
+                LOAD_CONST               4 ((4, 8))
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_FALSE       10 (to L2)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_SMALL_INT          13
+                BINARY_OP               26 ([])
+                JUMP_FORWARD             1 (to L3)
+        L2:     LOAD_SMALL_INT           4
+        L3:     STORE_FAST               2 (sizet)
+
+  82            LOAD_GLOBAL              1 (_R + NULL)
+                LOAD_FAST_LOAD_FAST      1 (data, to_std)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L4)
+                NOT_TAKEN
+                LOAD_FAST                2 (sizet)
+                JUMP_FORWARD             1 (to L5)
+        L4:     LOAD_SMALL_INT           4
+        L5:     LOAD_CONST               1 (('sizet',))
+                CALL_KW                  2
+                STORE_FAST               3 (r)
+
+  83            LOAD_GLOBAL              2 (HEADER_SIZE)
+                LOAD_FAST_BORROW         3 (r)
+                STORE_ATTR               2 (p)
+
+  84            LOAD_FAST_BORROW         3 (r)
+                LOAD_ATTR                7 (byte + NULL|self)
+                CALL                     0
+                POP_TOP
+
+  85            LOAD_GLOBAL              9 (_probe_func + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 49 (r, to_std)
+                LOAD_SMALL_INT           0
+                CALL                     3
+                POP_TOP
+
+  86    L6:     LOAD_CONST               2 (True)
+                RETURN_VALUE
+
+  --    L7:     PUSH_EXC_INFO
+
+  87            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        5 (to L9)
+                NOT_TAKEN
+                POP_TOP
+
+  88    L8:     POP_EXCEPT
+                LOAD_CONST               3 (False)
+                RETURN_VALUE
+
+  87    L9:     RERAISE                  0
+
+  --   L10:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L1 to L6 -> L7 [0]
+  L7 to L8 -> L10 [1] lasti
+  L9 to L10 -> L10 [1] lasti
+
+
+### [7]   _probe_func  (file=lua_bgmi.py) :: line 91, args 14, locals 14, stack 7, consts 15
+ 91            RESUME                   0
+
+ 92            LOAD_FAST_BORROW         2 (depth)
+               LOAD_SMALL_INT          64
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L1)
+               NOT_TAKEN
+
+ 93            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               1 ('proto depth')
+               CALL                     1
+               RAISE_VARARGS            1
+
+ 94    L1:     LOAD_FAST_BORROW         1 (to_std)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       13 (to L2)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                2 (bgmi_str)
+               JUMP_FORWARD            11 (to L3)
+       L2:     LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                4 (std_str)
+       L3:     STORE_FAST               3 (sread)
+
+ 95            LOAD_FAST_BORROW         3 (sread)
+               PUSH_NULL
+               CALL                     0
+               POP_TOP
+
+ 96            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                7 (i32 + NULL|self)
+               CALL                     0
+               POP_TOP
+
+ 97            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                7 (i32 + NULL|self)
+               CALL                     0
+               POP_TOP
+
+ 98            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                9 (byte + NULL|self)
+               CALL                     0
+               POP_TOP
+
+ 99            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                9 (byte + NULL|self)
+               CALL                     0
+               POP_TOP
+
+100            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                9 (byte + NULL|self)
+               CALL                     0
+               POP_TOP
+
+101            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST               4 (csz)
+
+102            LOAD_FAST_BORROW         4 (csz)
+               LOAD_CONST              11 (1048576)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L4)
+               NOT_TAKEN
+
+103            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               2 ('codesize')
+               CALL                     1
+               RAISE_VARARGS            1
+
+104    L4:     LOAD_FAST_BORROW         0 (r)
+               COPY                     1
+               LOAD_ATTR               12 (p)
+               LOAD_FAST_BORROW         4 (csz)
+               LOAD_SMALL_INT           4
+               BINARY_OP                5 (*)
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               6 (p)
+
+105            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST               5 (nk)
+
+106            LOAD_FAST_BORROW         5 (nk)
+               LOAD_CONST              11 (1048576)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L5)
+               NOT_TAKEN
+
+107            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               3 ('numk')
+               CALL                     1
+               RAISE_VARARGS            1
+
+108    L5:     LOAD_GLOBAL             15 (range + NULL)
+               LOAD_FAST_BORROW         5 (nk)
+               CALL                     1
+               GET_ITER
+       L6:     FOR_ITER               119 (to L12)
+               STORE_FAST               6 (_)
+
+109            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                9 (byte + NULL|self)
+               CALL                     0
+               STORE_FAST               7 (t)
+
+110            LOAD_FAST_BORROW         7 (t)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE        3 (to L7)
+               NOT_TAKEN
+
+111            JUMP_BACKWARD           28 (to L6)
+
+112    L7:     LOAD_FAST_BORROW         7 (t)
+               LOAD_SMALL_INT           1
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       19 (to L8)
+               NOT_TAKEN
+
+113            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                9 (byte + NULL|self)
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD           53 (to L6)
+
+114    L8:     LOAD_FAST_BORROW         7 (t)
+               LOAD_SMALL_INT           3
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       19 (to L9)
+               NOT_TAKEN
+
+115            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               17 (f64 + NULL|self)
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD           78 (to L6)
+
+116    L9:     LOAD_FAST_BORROW         7 (t)
+               LOAD_SMALL_INT          19
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       19 (to L10)
+               NOT_TAKEN
+
+117            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               19 (i64 + NULL|self)
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD          103 (to L6)
+
+118   L10:     LOAD_FAST_BORROW         7 (t)
+               LOAD_CONST              12 ((4, 20))
+               CONTAINS_OP              0 (in)
+               POP_JUMP_IF_TRUE         3 (to L11)
+               NOT_TAKEN
+               JUMP_BACKWARD          112 (to L6)
+
+119   L11:     LOAD_FAST_BORROW         3 (sread)
+               PUSH_NULL
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD          121 (to L6)
+
+108   L12:     END_FOR
+               POP_ITER
+
+120            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST               8 (nups)
+
+121            LOAD_FAST_BORROW         8 (nups)
+               LOAD_CONST              13 (65536)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L13)
+               NOT_TAKEN
+
+122            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               4 ('numupvals')
+               CALL                     1
+               RAISE_VARARGS            1
+
+123   L13:     LOAD_FAST_BORROW         0 (r)
+               COPY                     1
+               LOAD_ATTR               12 (p)
+               LOAD_FAST_BORROW         8 (nups)
+               LOAD_SMALL_INT           2
+               BINARY_OP                5 (*)
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               6 (p)
+
+124            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST               9 (npts)
+
+125            LOAD_FAST_BORROW         9 (npts)
+               LOAD_CONST              13 (65536)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L14)
+               NOT_TAKEN
+
+126            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               5 ('numprotos')
+               CALL                     1
+               RAISE_VARARGS            1
+
+127   L14:     LOAD_GLOBAL             15 (range + NULL)
+               LOAD_FAST_BORROW         9 (npts)
+               CALL                     1
+               GET_ITER
+      L15:     FOR_ITER                22 (to L16)
+               STORE_FAST               6 (_)
+
+128            LOAD_GLOBAL             21 (_probe_func + NULL)
+               LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (r, to_std)
+               LOAD_FAST_BORROW         2 (depth)
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               CALL                     3
+               POP_TOP
+               JUMP_BACKWARD           24 (to L15)
+
+127   L16:     END_FOR
+               POP_ITER
+
+129            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST              10 (nln)
+
+130            LOAD_FAST_BORROW        10 (nln)
+               LOAD_CONST              14 (16777216)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L17)
+               NOT_TAKEN
+
+131            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               6 ('sizelineinfo')
+               CALL                     1
+               RAISE_VARARGS            1
+
+132   L17:     LOAD_FAST_BORROW         1 (to_std)
+               TO_BOOL
+               POP_JUMP_IF_FALSE       93 (to L19)
+               NOT_TAKEN
+
+133            LOAD_FAST_BORROW         0 (r)
+               COPY                     1
+               LOAD_ATTR               12 (p)
+               LOAD_FAST_BORROW        10 (nln)
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               6 (p)
+
+134            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST              11 (nab)
+
+135            LOAD_FAST_BORROW        11 (nab)
+               LOAD_CONST              14 (16777216)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L18)
+               NOT_TAKEN
+
+136            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               7 ('sizeabslineinfo')
+               CALL                     1
+               RAISE_VARARGS            1
+
+137   L18:     LOAD_FAST_BORROW         0 (r)
+               COPY                     1
+               LOAD_ATTR               12 (p)
+               LOAD_FAST_BORROW        11 (nab)
+               LOAD_SMALL_INT           8
+               BINARY_OP                5 (*)
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               6 (p)
+               JUMP_FORWARD            32 (to L20)
+
+139   L19:     LOAD_FAST_BORROW         0 (r)
+               COPY                     1
+               LOAD_ATTR               12 (p)
+               LOAD_FAST_BORROW        10 (nln)
+               LOAD_SMALL_INT           4
+               BINARY_OP                5 (*)
+               BINARY_OP               13 (+=)
+               SWAP                     2
+               STORE_ATTR               6 (p)
+
+140   L20:     LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST              12 (nloc)
+
+141            LOAD_FAST_BORROW        12 (nloc)
+               LOAD_CONST              13 (65536)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L21)
+               NOT_TAKEN
+
+142            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               8 ('sizelocvars')
+               CALL                     1
+               RAISE_VARARGS            1
+
+143   L21:     LOAD_GLOBAL             15 (range + NULL)
+               LOAD_FAST_BORROW        12 (nloc)
+               CALL                     1
+               GET_ITER
+      L22:     FOR_ITER                42 (to L23)
+               STORE_FAST               6 (_)
+
+144            LOAD_FAST_BORROW         3 (sread)
+               PUSH_NULL
+               CALL                     0
+               POP_TOP
+
+145            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                7 (i32 + NULL|self)
+               CALL                     0
+               POP_TOP
+
+146            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR                7 (i32 + NULL|self)
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD           44 (to L22)
+
+143   L23:     END_FOR
+               POP_ITER
+
+147            LOAD_FAST_BORROW         0 (r)
+               LOAD_ATTR               11 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST              13 (nupn)
+
+148            LOAD_FAST_BORROW        13 (nupn)
+               LOAD_CONST              13 (65536)
+               COMPARE_OP             148 (bool(>))
+               POP_JUMP_IF_FALSE       12 (to L24)
+               NOT_TAKEN
+
+149            LOAD_GLOBAL              1 (ValueError + NULL)
+               LOAD_CONST               9 ('sizeupvalues')
+               CALL                     1
+               RAISE_VARARGS            1
+
+150   L24:     LOAD_GLOBAL             15 (range + NULL)
+               LOAD_FAST_BORROW        13 (nupn)
+               CALL                     1
+               GET_ITER
+      L25:     FOR_ITER                10 (to L26)
+               STORE_FAST               6 (_)
+
+151            LOAD_FAST_BORROW         3 (sread)
+               PUSH_NULL
+               CALL                     0
+               POP_TOP
+               JUMP_BACKWARD           12 (to L25)
+
+150   L26:     END_FOR
+               POP_ITER
+               LOAD_CONST              10 (None)
+               RETURN_VALUE
+
+
+### [8]   __annotate__  (file=lua_bgmi.py) :: line 154, args 1, locals 1, stack 4, consts 3
+154           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              2 (str)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [9]   detect_format  (file=lua_bgmi.py) :: line 154, args 9, locals 9, stack 5, consts 11
+ 154            RESUME                   0
+
+ 156            LOAD_FAST_BORROW         0 (data)
+                LOAD_CONST               1 (slice(None, 4, None))
+                BINARY_OP               26 ([])
+                LOAD_CONST               2 (b'\x1bLua')
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE        3 (to L1)
+                NOT_TAKEN
+
+ 157            LOAD_CONST               3 ('unknown')
+                RETURN_VALUE
+
+ 158    L1:     NOP
+
+ 159    L2:     LOAD_GLOBAL              1 (_R + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_SMALL_INT           4
+                LOAD_CONST               4 (('sizet',))
+                CALL_KW                  2
+                STORE_FAST               1 (r)
+
+ 160            LOAD_GLOBAL              2 (HEADER_SIZE)
+                LOAD_FAST_BORROW         1 (r)
+                STORE_ATTR               2 (p)
+
+ 161            LOAD_FAST_BORROW         1 (r)
+                LOAD_ATTR                7 (byte + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 162            LOAD_FAST_BORROW         1 (r)
+                LOAD_ATTR                9 (bgmi_str + NULL|self)
+                CALL                     0
+                STORE_FAST               2 (bgmi_name)
+
+ 165    L3:     NOP
+
+ 166    L4:     LOAD_GLOBAL              1 (_R + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_SMALL_INT           4
+                LOAD_CONST               4 (('sizet',))
+                CALL_KW                  2
+                STORE_FAST               3 (r2)
+
+ 167            LOAD_GLOBAL              2 (HEADER_SIZE)
+                LOAD_FAST_BORROW         3 (r2)
+                STORE_ATTR               2 (p)
+
+ 168            LOAD_FAST_BORROW         3 (r2)
+                LOAD_ATTR                7 (byte + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 169            LOAD_FAST_BORROW         3 (r2)
+                LOAD_ATTR               13 (std_str + NULL|self)
+                CALL                     0
+                STORE_FAST               4 (std_name)
+
+ 172    L5:     LOAD_GLOBAL             15 (_clean_text + NULL)
+                LOAD_FAST_BORROW         2 (bgmi_name)
+                CALL                     1
+                STORE_FAST               5 (bgmi_clean)
+
+ 173            LOAD_GLOBAL             15 (_clean_text + NULL)
+                LOAD_FAST_BORROW         4 (std_name)
+                CALL                     1
+                STORE_FAST               6 (std_clean)
+
+ 174            LOAD_FAST_BORROW         5 (bgmi_clean)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       11 (to L6)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         6 (std_clean)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L6)
+                NOT_TAKEN
+
+ 175            LOAD_CONST               6 ('bgmi')
+                RETURN_VALUE
+
+ 176    L6:     LOAD_FAST_BORROW         6 (std_clean)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       11 (to L7)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         5 (bgmi_clean)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L7)
+                NOT_TAKEN
+
+ 177            LOAD_CONST               7 ('std')
+                RETURN_VALUE
+
+ 180    L7:     LOAD_GLOBAL             17 (_probe_format + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_CONST               8 (True)
+                LOAD_CONST               9 (('to_std',))
+                CALL_KW                  2
+                STORE_FAST               7 (bgmi_ok)
+
+ 181            LOAD_GLOBAL             17 (_probe_format + NULL)
+                LOAD_FAST_BORROW         0 (data)
+                LOAD_CONST              10 (False)
+                LOAD_CONST               9 (('to_std',))
+                CALL_KW                  2
+                STORE_FAST               8 (std_ok)
+
+ 182            LOAD_FAST_BORROW         7 (bgmi_ok)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       11 (to L8)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         8 (std_ok)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L8)
+                NOT_TAKEN
+
+ 183            LOAD_CONST               6 ('bgmi')
+                RETURN_VALUE
+
+ 184    L8:     LOAD_FAST_BORROW         8 (std_ok)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       11 (to L9)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         7 (bgmi_ok)
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L9)
+                NOT_TAKEN
+
+ 185            LOAD_CONST               7 ('std')
+                RETURN_VALUE
+
+ 186    L9:     LOAD_CONST               3 ('unknown')
+                RETURN_VALUE
+
+  --   L10:     PUSH_EXC_INFO
+
+ 163            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L12)
+                NOT_TAKEN
+                POP_TOP
+
+ 164            LOAD_CONST               5 (None)
+                STORE_FAST               2 (bgmi_name)
+       L11:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 194 (to L3)
+
+ 163   L12:     RERAISE                  0
+
+  --   L13:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+       L14:     PUSH_EXC_INFO
+
+ 170            LOAD_GLOBAL             10 (Exception)
+                CHECK_EXC_MATCH
+                POP_JUMP_IF_FALSE        6 (to L16)
+                NOT_TAKEN
+                POP_TOP
+
+ 171            LOAD_CONST               5 (None)
+                STORE_FAST               4 (std_name)
+       L15:     POP_EXCEPT
+                JUMP_BACKWARD_NO_INTERRUPT 156 (to L5)
+
+ 170   L16:     RERAISE                  0
+
+  --   L17:     COPY                     3
+                POP_EXCEPT
+                RERAISE                  1
+ExceptionTable:
+  L2 to L3 -> L10 [0]
+  L4 to L5 -> L14 [0]
+  L10 to L11 -> L13 [1] lasti
+  L12 to L13 -> L13 [1] lasti
+  L14 to L15 -> L17 [1] lasti
+  L16 to L17 -> L17 [1] lasti
+
+
+### [10]   _R  (file=lua_bgmi.py) :: line 189, args 0, locals 1, stack 2, consts 13
+  --           MAKE_CELL                0 (__classdict__)
+
+ 189           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('_R')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT         189
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+ 190           LOAD_CONST              12 ((4,))
+               LOAD_CONST               1 (<code object __init__ at 0x7aab493cc0, file "lua_bgmi.py", line 190>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   1 (defaults)
+               STORE_NAME               4 (__init__)
+
+ 195           LOAD_CONST               2 (<code object byte at 0x7aab4c1140, file "lua_bgmi.py", line 195>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (byte)
+
+ 200           LOAD_CONST               3 (<code object i32 at 0x7aaf5e76d0, file "lua_bgmi.py", line 200>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (i32)
+
+ 205           LOAD_CONST               4 (<code object u32 at 0x7aaf5e7840, file "lua_bgmi.py", line 205>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (u32)
+
+ 210           LOAD_CONST               5 (<code object i64 at 0x7aaf5e7b20, file "lua_bgmi.py", line 210>)
+               MAKE_FUNCTION
+               STORE_NAME               8 (i64)
+
+ 215           LOAD_CONST               6 (<code object f64 at 0x7aaf5e79b0, file "lua_bgmi.py", line 215>)
+               MAKE_FUNCTION
+               STORE_NAME               9 (f64)
+
+ 220           LOAD_CONST               7 (<code object raw at 0x7aaf5e7c90, file "lua_bgmi.py", line 220>)
+               MAKE_FUNCTION
+               STORE_NAME              10 (raw)
+
+ 225           LOAD_CONST               8 (<code object bgmi_str at 0x7aaf7db870, file "lua_bgmi.py", line 225>)
+               MAKE_FUNCTION
+               STORE_NAME              11 (bgmi_str)
+
+ 234           LOAD_CONST               9 (<code object std_str at 0xb400007c70069d10, file "lua_bgmi.py", line 234>)
+               MAKE_FUNCTION
+               STORE_NAME              12 (std_str)
+               LOAD_CONST              10 (('d', 'p', 'sizet'))
+               STORE_NAME              13 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME              14 (__classdictcell__)
+               LOAD_CONST              11 (None)
+               RETURN_VALUE
+
+
+### [11]     __init__  (file=lua_bgmi.py) :: line 190, args 3, locals 3, stack 3, consts 2
+190           RESUME                   0
+
+191           LOAD_GLOBAL              1 (bytearray + NULL)
+              LOAD_FAST_BORROW         1 (d)
+              CALL                     1
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               1 (d)
+
+192           LOAD_SMALL_INT           0
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               2 (p)
+
+193           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (sizet, self)
+              STORE_ATTR               3 (sizet)
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [12]     byte  (file=lua_bgmi.py) :: line 195, args 2, locals 2, stack 3, consts 1
+195           RESUME                   0
+
+196           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (p)
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+197           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                2 (p)
+              LOAD_SMALL_INT           1
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               1 (p)
+
+198           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [13]     i32  (file=lua_bgmi.py) :: line 200, args 2, locals 2, stack 5, consts 1
+200           RESUME                   0
+
+201           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<i')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+202           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (p)
+              LOAD_SMALL_INT           4
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (p)
+
+203           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [14]     u32  (file=lua_bgmi.py) :: line 205, args 2, locals 2, stack 5, consts 1
+205           RESUME                   0
+
+206           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<I')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+207           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (p)
+              LOAD_SMALL_INT           4
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (p)
+
+208           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [15]     i64  (file=lua_bgmi.py) :: line 210, args 2, locals 2, stack 5, consts 1
+210           RESUME                   0
+
+211           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<q')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+212           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (p)
+              LOAD_SMALL_INT           8
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (p)
+
+213           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [16]     f64  (file=lua_bgmi.py) :: line 215, args 2, locals 2, stack 5, consts 1
+215           RESUME                   0
+
+216           LOAD_GLOBAL              0 (struct)
+              LOAD_ATTR                2 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               0 ('<d')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                6 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (v)
+
+217           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                6 (p)
+              LOAD_SMALL_INT           8
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               3 (p)
+
+218           LOAD_FAST_BORROW         1 (v)
+              RETURN_VALUE
+
+
+### [17]     raw  (file=lua_bgmi.py) :: line 220, args 3, locals 3, stack 6, consts 1
+220           RESUME                   0
+
+221           LOAD_GLOBAL              1 (bytes + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (p)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                4 (p)
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP                0 (+)
+              BINARY_SLICE
+              CALL                     1
+              STORE_FAST               2 (v)
+
+222           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR                4 (p)
+              LOAD_FAST_BORROW         1 (n)
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               2 (p)
+
+223           LOAD_FAST_BORROW         2 (v)
+              RETURN_VALUE
+
+
+### [18]     bgmi_str  (file=lua_bgmi.py) :: line 225, args 2, locals 3, stack 8, consts 6
+  --           MAKE_CELL                2 (enc)
+
+ 225           RESUME                   0
+
+ 226           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                1 (byte + NULL|self)
+               CALL                     0
+               STORE_FAST               1 (sz)
+
+ 227           LOAD_FAST_BORROW         1 (sz)
+               LOAD_SMALL_INT         255
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE       17 (to L1)
+               NOT_TAKEN
+
+ 228           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                3 (u32 + NULL|self)
+               CALL                     0
+               STORE_FAST               1 (sz)
+
+ 229   L1:     LOAD_FAST_BORROW         1 (sz)
+               LOAD_SMALL_INT           0
+               COMPARE_OP              88 (bool(==))
+               POP_JUMP_IF_FALSE        3 (to L2)
+               NOT_TAKEN
+
+ 230           LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+ 231   L2:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                5 (raw + NULL|self)
+               LOAD_FAST_BORROW         1 (sz)
+               LOAD_SMALL_INT           1
+               BINARY_OP               10 (-)
+               CALL                     1
+               STORE_DEREF              2 (enc)
+
+ 232           LOAD_GLOBAL              7 (bytes + NULL)
+               LOAD_FAST_BORROW         2 (enc)
+               BUILD_TUPLE              1
+               LOAD_CONST               2 (<code object <genexpr> at 0x7aaf62eab0, file "lua_bgmi.py", line 232>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL              9 (range + NULL)
+               LOAD_GLOBAL             11 (len + NULL)
+               LOAD_DEREF               2 (enc)
+               CALL                     1
+               CALL                     1
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               LOAD_ATTR               13 (decode + NULL|self)
+               LOAD_CONST               3 ('utf-8')
+               LOAD_CONST               4 ('replace')
+               LOAD_CONST               5 (('errors',))
+               CALL_KW                  2
+               RETURN_VALUE
+
+
+### [19]       <genexpr>  (file=lua_bgmi.py) :: line 232, args 2, locals 3, stack 5, consts 2
+  --           COPY_FREE_VARS           1
+
+ 232           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                39 (to L3)
+               STORE_FAST               1 (i)
+               LOAD_DEREF               2 (enc)
+               LOAD_FAST_BORROW         1 (i)
+               BINARY_OP               26 ([])
+               LOAD_GLOBAL              0 (STRING_XOR_KEY)
+               LOAD_FAST_BORROW         1 (i)
+               LOAD_SMALL_INT          32
+               BINARY_OP                6 (%)
+               BINARY_OP               26 ([])
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           41 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [20]     std_str  (file=lua_bgmi.py) :: line 234, args 2, locals 2, stack 5, consts 7
+234           RESUME                   0
+
+235           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (byte + NULL|self)
+              CALL                     0
+              STORE_FAST               1 (sz)
+
+236           LOAD_FAST_BORROW         1 (sz)
+              LOAD_SMALL_INT         255
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE      171 (to L2)
+              NOT_TAKEN
+
+237           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (sizet)
+              LOAD_SMALL_INT           8
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       78 (to L1)
+              NOT_TAKEN
+
+238           LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               1 ('<Q')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                8 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               10 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (sz)
+
+239           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR               10 (p)
+              LOAD_SMALL_INT           8
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               5 (p)
+              JUMP_FORWARD            76 (to L2)
+
+241   L1:     LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (unpack_from)
+              PUSH_NULL
+              LOAD_CONST               2 ('<I')
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                8 (d)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               10 (p)
+              CALL                     3
+              LOAD_SMALL_INT           0
+              BINARY_OP               26 ([])
+              STORE_FAST               1 (sz)
+
+242           LOAD_FAST_BORROW         0 (self)
+              COPY                     1
+              LOAD_ATTR               10 (p)
+              LOAD_SMALL_INT           4
+              BINARY_OP               13 (+=)
+              SWAP                     2
+              STORE_ATTR               5 (p)
+
+243   L2:     LOAD_FAST_BORROW         1 (sz)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE        3 (to L3)
+              NOT_TAKEN
+
+244           LOAD_CONST               3 (None)
+              RETURN_VALUE
+
+245   L3:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               13 (raw + NULL|self)
+              LOAD_FAST_BORROW         1 (sz)
+              LOAD_SMALL_INT           1
+              BINARY_OP               10 (-)
+              CALL                     1
+              LOAD_ATTR               15 (decode + NULL|self)
+              LOAD_CONST               4 ('utf-8')
+              LOAD_CONST               5 ('replace')
+              LOAD_CONST               6 (('errors',))
+              CALL_KW                  2
+              RETURN_VALUE
+
+
+### [21]   _W  (file=lua_bgmi.py) :: line 248, args 0, locals 1, stack 1, consts 14
+  --           MAKE_CELL                0 (__classdict__)
+
+ 248           RESUME                   0
+               LOAD_NAME                0 (__name__)
+               STORE_NAME               1 (__module__)
+               LOAD_CONST               0 ('_W')
+               STORE_NAME               2 (__qualname__)
+               LOAD_SMALL_INT         248
+               STORE_NAME               3 (__firstlineno__)
+               LOAD_LOCALS
+               STORE_DEREF              0 (__classdict__)
+
+ 249           LOAD_CONST               1 (<code object __init__ at 0x7aaf68e130, file "lua_bgmi.py", line 249>)
+               MAKE_FUNCTION
+               STORE_NAME               4 (__init__)
+
+ 252           LOAD_CONST               2 (<code object byte at 0x7aab4733f0, file "lua_bgmi.py", line 252>)
+               MAKE_FUNCTION
+               STORE_NAME               5 (byte)
+
+ 255           LOAD_CONST               3 (<code object i32 at 0x7aaf62f0f0, file "lua_bgmi.py", line 255>)
+               MAKE_FUNCTION
+               STORE_NAME               6 (i32)
+
+ 258           LOAD_CONST               4 (<code object u32 at 0x7aaf62f230, file "lua_bgmi.py", line 258>)
+               MAKE_FUNCTION
+               STORE_NAME               7 (u32)
+
+ 261           LOAD_CONST               5 (<code object i64 at 0x7aaf62f370, file "lua_bgmi.py", line 261>)
+               MAKE_FUNCTION
+               STORE_NAME               8 (i64)
+
+ 264           LOAD_CONST               6 (<code object f64 at 0x7aaf62f4b0, file "lua_bgmi.py", line 264>)
+               MAKE_FUNCTION
+               STORE_NAME               9 (f64)
+
+ 267           LOAD_CONST               7 (<code object raw at 0x7aab491570, file "lua_bgmi.py", line 267>)
+               MAKE_FUNCTION
+               STORE_NAME              10 (raw)
+
+ 270           LOAD_CONST               8 (<code object std_str at 0xb400007c000176b0, file "lua_bgmi.py", line 270>)
+               MAKE_FUNCTION
+               STORE_NAME              11 (std_str)
+
+ 283           LOAD_CONST               9 (<code object bgmi_str at 0xb400007c70066b10, file "lua_bgmi.py", line 283>)
+               MAKE_FUNCTION
+               STORE_NAME              12 (bgmi_str)
+
+ 297           LOAD_CONST              10 (<code object instr at 0xb400007c7006a990, file "lua_bgmi.py", line 297>)
+               MAKE_FUNCTION
+               STORE_NAME              13 (instr)
+
+ 308           LOAD_CONST              11 (<code object get at 0x7aaf68e230, file "lua_bgmi.py", line 308>)
+               MAKE_FUNCTION
+               STORE_NAME              14 (get)
+               LOAD_CONST              12 (('b',))
+               STORE_NAME              15 (__static_attributes__)
+               LOAD_FAST_BORROW         0 (__classdict__)
+               STORE_NAME              16 (__classdictcell__)
+               LOAD_CONST              13 (None)
+               RETURN_VALUE
+
+
+### [22]     __init__  (file=lua_bgmi.py) :: line 249, args 1, locals 1, stack 2, consts 1
+249           RESUME                   0
+
+250           LOAD_GLOBAL              1 (bytearray + NULL)
+              CALL                     0
+              LOAD_FAST_BORROW         0 (self)
+              STORE_ATTR               1 (b)
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [23]     byte  (file=lua_bgmi.py) :: line 252, args 2, locals 2, stack 4, consts 2
+252           RESUME                   0
+
+253           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (append + NULL|self)
+              LOAD_FAST_BORROW         1 (v)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [24]     i32  (file=lua_bgmi.py) :: line 255, args 2, locals 2, stack 6, consts 2
+255           RESUME                   0
+
+256           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (extend + NULL|self)
+              LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<i')
+              LOAD_FAST_BORROW         1 (v)
+              CALL                     2
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [25]     u32  (file=lua_bgmi.py) :: line 258, args 2, locals 2, stack 6, consts 2
+258           RESUME                   0
+
+259           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (extend + NULL|self)
+              LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<I')
+              LOAD_FAST_BORROW         1 (v)
+              CALL                     2
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [26]     i64  (file=lua_bgmi.py) :: line 261, args 2, locals 2, stack 6, consts 2
+261           RESUME                   0
+
+262           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (extend + NULL|self)
+              LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<q')
+              LOAD_FAST_BORROW         1 (v)
+              CALL                     2
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [27]     f64  (file=lua_bgmi.py) :: line 264, args 2, locals 2, stack 6, consts 2
+264           RESUME                   0
+
+265           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (extend + NULL|self)
+              LOAD_GLOBAL              4 (struct)
+              LOAD_ATTR                6 (pack)
+              PUSH_NULL
+              LOAD_CONST               0 ('<d')
+              LOAD_FAST_BORROW         1 (v)
+              CALL                     2
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               1 (None)
+              RETURN_VALUE
+
+
+### [28]     raw  (file=lua_bgmi.py) :: line 267, args 2, locals 2, stack 3, consts 1
+267           RESUME                   0
+
+268           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                0 (b)
+              LOAD_ATTR                3 (extend + NULL|self)
+              LOAD_FAST_BORROW         1 (d)
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [29]     std_str  (file=lua_bgmi.py) :: line 270, args 4, locals 4, stack 4, consts 2
+270           RESUME                   0
+
+271           LOAD_FAST_BORROW         1 (s)
+              POP_JUMP_IF_NOT_NONE    20 (to L1)
+              NOT_TAKEN
+
+272           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (byte + NULL|self)
+              LOAD_SMALL_INT           0
+              CALL                     1
+              POP_TOP
+
+273           LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+274   L1:     LOAD_GLOBAL              3 (isinstance + NULL)
+              LOAD_FAST_BORROW         1 (s)
+              LOAD_GLOBAL              4 (str)
+              CALL                     2
+              TO_BOOL
+              POP_JUMP_IF_FALSE       18 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         1 (s)
+              LOAD_ATTR                7 (encode + NULL|self)
+              LOAD_CONST               1 ('utf-8')
+              CALL                     1
+              JUMP_FORWARD             1 (to L3)
+      L2:     LOAD_FAST                1 (s)
+      L3:     STORE_FAST               2 (e)
+
+275           LOAD_GLOBAL              9 (len + NULL)
+              LOAD_FAST_BORROW         2 (e)
+              CALL                     1
+              LOAD_SMALL_INT           1
+              BINARY_OP                0 (+)
+              STORE_FAST               3 (sz)
+
+276           LOAD_FAST_BORROW         3 (sz)
+              LOAD_SMALL_INT         255
+              COMPARE_OP              18 (bool(<))
+              POP_JUMP_IF_FALSE       19 (to L4)
+              NOT_TAKEN
+
+277           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (byte + NULL|self)
+              LOAD_FAST_BORROW         3 (sz)
+              CALL                     1
+              POP_TOP
+              JUMP_FORWARD            34 (to L5)
+
+279   L4:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (byte + NULL|self)
+              LOAD_SMALL_INT         255
+              CALL                     1
+              POP_TOP
+
+280           LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               11 (u32 + NULL|self)
+              LOAD_FAST_BORROW         3 (sz)
+              CALL                     1
+              POP_TOP
+
+281   L5:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR               13 (raw + NULL|self)
+              LOAD_FAST_BORROW         2 (e)
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               0 (None)
+              RETURN_VALUE
+
+
+### [30]     bgmi_str  (file=lua_bgmi.py) :: line 283, args 4, locals 5, stack 8, consts 3
+  --           MAKE_CELL                4 (p)
+
+ 283           RESUME                   0
+
+ 284           LOAD_FAST_BORROW         1 (s)
+               POP_JUMP_IF_NOT_NONE    20 (to L1)
+               NOT_TAKEN
+
+ 285           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                1 (byte + NULL|self)
+               LOAD_SMALL_INT           0
+               CALL                     1
+               POP_TOP
+
+ 286           LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+ 287   L1:     LOAD_GLOBAL              3 (isinstance + NULL)
+               LOAD_FAST_BORROW         1 (s)
+               LOAD_GLOBAL              4 (str)
+               CALL                     2
+               TO_BOOL
+               POP_JUMP_IF_FALSE       18 (to L2)
+               NOT_TAKEN
+               LOAD_FAST_BORROW         1 (s)
+               LOAD_ATTR                7 (encode + NULL|self)
+               LOAD_CONST               1 ('utf-8')
+               CALL                     1
+               JUMP_FORWARD             1 (to L3)
+       L2:     LOAD_FAST                1 (s)
+       L3:     STORE_DEREF              4 (p)
+
+ 288           LOAD_GLOBAL              9 (bytes + NULL)
+               LOAD_FAST_BORROW         4 (p)
+               BUILD_TUPLE              1
+               LOAD_CONST               2 (<code object <genexpr> at 0x7aaf62f730, file "lua_bgmi.py", line 288>)
+               MAKE_FUNCTION
+               SET_FUNCTION_ATTRIBUTE   8 (closure)
+               LOAD_GLOBAL             11 (range + NULL)
+               LOAD_GLOBAL             13 (len + NULL)
+               LOAD_DEREF               4 (p)
+               CALL                     1
+               CALL                     1
+               GET_ITER
+               CALL                     0
+               CALL                     1
+               STORE_FAST               2 (e)
+
+ 289           LOAD_GLOBAL             13 (len + NULL)
+               LOAD_FAST_BORROW         2 (e)
+               CALL                     1
+               LOAD_SMALL_INT           1
+               BINARY_OP                0 (+)
+               STORE_FAST               3 (sz)
+
+ 290           LOAD_FAST_BORROW         3 (sz)
+               LOAD_SMALL_INT         255
+               COMPARE_OP              18 (bool(<))
+               POP_JUMP_IF_FALSE       19 (to L4)
+               NOT_TAKEN
+
+ 291           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                1 (byte + NULL|self)
+               LOAD_FAST_BORROW         3 (sz)
+               CALL                     1
+               POP_TOP
+               JUMP_FORWARD            34 (to L5)
+
+ 293   L4:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR                1 (byte + NULL|self)
+               LOAD_SMALL_INT         255
+               CALL                     1
+               POP_TOP
+
+ 294           LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               15 (u32 + NULL|self)
+               LOAD_FAST_BORROW         3 (sz)
+               CALL                     1
+               POP_TOP
+
+ 295   L5:     LOAD_FAST_BORROW         0 (self)
+               LOAD_ATTR               17 (raw + NULL|self)
+               LOAD_FAST_BORROW         2 (e)
+               CALL                     1
+               POP_TOP
+               LOAD_CONST               0 (None)
+               RETURN_VALUE
+
+
+### [31]       <genexpr>  (file=lua_bgmi.py) :: line 288, args 2, locals 3, stack 5, consts 2
+  --           COPY_FREE_VARS           1
+
+ 288           RETURN_GENERATOR
+               POP_TOP
+       L1:     RESUME                   0
+               LOAD_FAST                0 (.0)
+       L2:     FOR_ITER                39 (to L3)
+               STORE_FAST               1 (i)
+               LOAD_DEREF               2 (p)
+               LOAD_FAST_BORROW         1 (i)
+               BINARY_OP               26 ([])
+               LOAD_GLOBAL              0 (STRING_XOR_KEY)
+               LOAD_FAST_BORROW         1 (i)
+               LOAD_SMALL_INT          32
+               BINARY_OP                6 (%)
+               BINARY_OP               26 ([])
+               BINARY_OP               12 (^)
+               YIELD_VALUE              0
+               RESUME                   5
+               POP_TOP
+               JUMP_BACKWARD           41 (to L2)
+       L3:     END_FOR
+               POP_ITER
+               LOAD_CONST               1 (None)
+               RETURN_VALUE
+
+  --   L4:     CALL_INTRINSIC_1         3 (INTRINSIC_STOPITERATION_ERROR)
+               RERAISE                  1
+ExceptionTable:
+  L1 to L4 -> L4 [0] lasti
+
+
+### [32]     instr  (file=lua_bgmi.py) :: line 297, args 10, locals 10, stack 3, consts 6
+297           RESUME                   0
+
+298           LOAD_FAST_BORROW         8 (fmt)
+              LOAD_SMALL_INT           0
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       74 (to L1)
+              NOT_TAKEN
+
+299           LOAD_FAST_BORROW         1 (op)
+              LOAD_SMALL_INT          63
+              BINARY_OP                1 (&)
+              LOAD_FAST_BORROW         2 (A)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT           6
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              LOAD_FAST_BORROW         4 (C)
+              LOAD_CONST               1 (511)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT          14
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              LOAD_FAST_BORROW         3 (B)
+              LOAD_CONST               1 (511)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT          23
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              STORE_FAST               9 (r)
+              JUMP_FORWARD           155 (to L4)
+
+300   L1:     LOAD_FAST_BORROW         8 (fmt)
+              LOAD_SMALL_INT           1
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       53 (to L2)
+              NOT_TAKEN
+
+301           LOAD_FAST_BORROW         1 (op)
+              LOAD_SMALL_INT          63
+              BINARY_OP                1 (&)
+              LOAD_FAST_BORROW         2 (A)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT           6
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              LOAD_FAST_BORROW         5 (Bx)
+              LOAD_CONST               2 (262143)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT          14
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              STORE_FAST               9 (r)
+              JUMP_FORWARD            96 (to L4)
+
+302   L2:     LOAD_FAST_BORROW         8 (fmt)
+              LOAD_SMALL_INT           2
+              COMPARE_OP              88 (bool(==))
+              POP_JUMP_IF_FALSE       60 (to L3)
+              NOT_TAKEN
+
+303           LOAD_FAST_BORROW         1 (op)
+              LOAD_SMALL_INT          63
+              BINARY_OP                1 (&)
+              LOAD_FAST_BORROW         2 (A)
+              LOAD_SMALL_INT         255
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT           6
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              LOAD_FAST_BORROW         6 (sBx)
+              LOAD_CONST               3 (131071)
+              BINARY_OP                0 (+)
+              LOAD_CONST               2 (262143)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT          14
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              STORE_FAST               9 (r)
+              JUMP_FORWARD            30 (to L4)
+
+305   L3:     LOAD_FAST_BORROW         1 (op)
+              LOAD_SMALL_INT          63
+              BINARY_OP                1 (&)
+              LOAD_FAST_BORROW         7 (Ax)
+              LOAD_CONST               4 (67108863)
+              BINARY_OP                1 (&)
+              LOAD_SMALL_INT           6
+              BINARY_OP                3 (<<)
+              BINARY_OP                7 (|)
+              STORE_FAST               9 (r)
+
+306   L4:     LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                1 (u32 + NULL|self)
+              LOAD_FAST_BORROW         9 (r)
+              CALL                     1
+              POP_TOP
+              LOAD_CONST               5 (None)
+              RETURN_VALUE
+
+
+### [33]     get  (file=lua_bgmi.py) :: line 308, args 1, locals 1, stack 3, consts 1
+308           RESUME                   0
+
+309           LOAD_GLOBAL              1 (bytes + NULL)
+              LOAD_FAST_BORROW         0 (self)
+              LOAD_ATTR                2 (b)
+              CALL                     1
+              RETURN_VALUE
+
+
+### [34]   _cvt_func  (file=lua_bgmi.py) :: line 312, args 33, locals 33, stack 11, consts 11
+ 312            RESUME                   0
+
+ 313            LOAD_FAST_BORROW         2 (to_std)
+                TO_BOOL
+                POP_JUMP_IF_FALSE       25 (to L1)
+                NOT_TAKEN
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                0 (bgmi_str)
+                LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                2 (std_str)
+                BUILD_TUPLE              2
+                JUMP_FORWARD            23 (to L2)
+        L1:     LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                2 (std_str)
+                LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                0 (bgmi_str)
+                BUILD_TUPLE              2
+        L2:     UNPACK_SEQUENCE          2
+                STORE_FAST_STORE_FAST   52 (rs, ws)
+
+ 314            LOAD_FAST_BORROW         2 (to_std)
+                TO_BOOL
+                POP_JUMP_IF_FALSE        7 (to L3)
+                NOT_TAKEN
+                LOAD_GLOBAL              4 (BGMI_TO_STD)
+                JUMP_FORWARD             5 (to L4)
+        L3:     LOAD_GLOBAL              6 (STD_TO_BGMI)
+        L4:     STORE_FAST               5 (opmap)
+
+ 315            LOAD_FAST_BORROW         4 (ws)
+                PUSH_NULL
+                LOAD_FAST_BORROW         3 (rs)
+                PUSH_NULL
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 316            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 317            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               10 (b)
+                LOAD_CONST               8 (-4)
+                LOAD_CONST               1 (None)
+                BINARY_SLICE
+                STORE_FAST               6 (ldef)
+
+ 318            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 319            LOAD_GLOBAL             12 (struct)
+                LOAD_ATTR               14 (unpack)
+                PUSH_NULL
+                LOAD_CONST               2 ('<i')
+                LOAD_GLOBAL             17 (bytes + NULL)
+                LOAD_FAST_BORROW         6 (ldef)
+                CALL                     1
+                CALL                     2
+                LOAD_SMALL_INT           0
+                BINARY_OP               26 ([])
+                STORE_FAST               7 (ldef_val)
+
+ 320            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 321            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 322            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 323            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST               8 (csz)
+
+ 324            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW         8 (csz)
+                CALL                     1
+                POP_TOP
+
+ 325            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW         8 (csz)
+                CALL                     1
+                GET_ITER
+        L5:     FOR_ITER               201 (to L9)
+                STORE_FAST               9 (_)
+
+ 326            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              10 (raw)
+
+ 327            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT          63
+                BINARY_OP                1 (&)
+                STORE_FAST              11 (bop)
+
+ 328            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT           6
+                BINARY_OP                9 (>>)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                STORE_FAST              12 (A)
+
+ 329            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT          23
+                BINARY_OP                9 (>>)
+                LOAD_CONST               3 (511)
+                BINARY_OP                1 (&)
+                STORE_FAST              13 (B)
+
+ 330            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT          14
+                BINARY_OP                9 (>>)
+                LOAD_CONST               3 (511)
+                BINARY_OP                1 (&)
+                STORE_FAST              14 (C)
+
+ 331            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT          14
+                BINARY_OP                9 (>>)
+                LOAD_CONST               4 (262143)
+                BINARY_OP                1 (&)
+                STORE_FAST              15 (Bx)
+
+ 332            LOAD_FAST_BORROW        15 (Bx)
+                LOAD_CONST               5 (131071)
+                BINARY_OP               10 (-)
+                STORE_FAST              16 (sBx)
+
+ 333            LOAD_FAST_BORROW        10 (raw)
+                LOAD_SMALL_INT           6
+                BINARY_OP                9 (>>)
+                LOAD_CONST               6 (67108863)
+                BINARY_OP                1 (&)
+                STORE_FAST              17 (Ax)
+
+ 334            LOAD_FAST_BORROW         5 (opmap)
+                LOAD_ATTR               25 (get + NULL|self)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 187 (bop, bop)
+                CALL                     2
+                COPY                     1
+                TO_BOOL
+                POP_JUMP_IF_TRUE         3 (to L6)
+                NOT_TAKEN
+                POP_TOP
+                LOAD_SMALL_INT           0
+        L6:     STORE_FAST              18 (sop)
+
+ 335            LOAD_FAST_BORROW        18 (sop)
+                LOAD_GLOBAL             27 (len + NULL)
+                LOAD_GLOBAL             28 (STD_FMT)
+                CALL                     1
+                COMPARE_OP              18 (bool(<))
+                POP_JUMP_IF_FALSE       14 (to L7)
+                NOT_TAKEN
+                LOAD_GLOBAL             28 (STD_FMT)
+                LOAD_FAST_BORROW        18 (sop)
+                BINARY_OP               26 ([])
+                JUMP_FORWARD             1 (to L8)
+        L7:     LOAD_SMALL_INT           0
+        L8:     STORE_FAST              19 (fmt)
+
+ 336            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               31 (instr + NULL|self)
+                LOAD_FAST_BORROW        18 (sop)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 205 (A, B)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 239 (C, Bx)
+                LOAD_FAST_BORROW        16 (sBx)
+                LOAD_FAST_BORROW        17 (Ax)
+                LOAD_FAST_BORROW        19 (fmt)
+                CALL                     8
+                POP_TOP
+                JUMP_BACKWARD          203 (to L5)
+
+ 325    L9:     END_FOR
+                POP_ITER
+
+ 337            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              20 (nk)
+
+ 338            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW        20 (nk)
+                CALL                     1
+                POP_TOP
+
+ 339            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        20 (nk)
+                CALL                     1
+                GET_ITER
+       L10:     FOR_ITER               187 (to L16)
+                STORE_FAST               9 (_)
+
+ 340            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                STORE_FAST              21 (t)
+
+ 341            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW        21 (t)
+                CALL                     1
+                POP_TOP
+
+ 342            LOAD_FAST_BORROW        21 (t)
+                LOAD_SMALL_INT           0
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE        3 (to L11)
+                NOT_TAKEN
+
+ 343            JUMP_BACKWARD           45 (to L10)
+
+ 344   L11:     LOAD_FAST_BORROW        21 (t)
+                LOAD_SMALL_INT           1
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       34 (to L12)
+                NOT_TAKEN
+
+ 345            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           85 (to L10)
+
+ 346   L12:     LOAD_FAST_BORROW        21 (t)
+                LOAD_SMALL_INT           3
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       34 (to L13)
+                NOT_TAKEN
+
+ 347            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               33 (f64 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               33 (f64 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD          125 (to L10)
+
+ 348   L13:     LOAD_FAST_BORROW        21 (t)
+                LOAD_SMALL_INT          19
+                COMPARE_OP              88 (bool(==))
+                POP_JUMP_IF_FALSE       34 (to L14)
+                NOT_TAKEN
+
+ 349            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               35 (i64 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               35 (i64 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD          165 (to L10)
+
+ 350   L14:     LOAD_FAST_BORROW        21 (t)
+                LOAD_CONST               9 ((4, 20))
+                CONTAINS_OP              0 (in)
+                POP_JUMP_IF_TRUE         3 (to L15)
+                NOT_TAKEN
+                JUMP_BACKWARD          174 (to L10)
+
+ 351   L15:     LOAD_FAST_BORROW         4 (ws)
+                PUSH_NULL
+                LOAD_FAST_BORROW         3 (rs)
+                PUSH_NULL
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD          189 (to L10)
+
+ 339   L16:     END_FOR
+                POP_ITER
+
+ 352            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              22 (nups)
+
+ 353            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW        22 (nups)
+                CALL                     1
+                POP_TOP
+
+ 354            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        22 (nups)
+                CALL                     1
+                GET_ITER
+       L17:     FOR_ITER                65 (to L18)
+                STORE_FAST               9 (_)
+
+ 355            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 356            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           67 (to L17)
+
+ 354   L18:     END_FOR
+                POP_ITER
+
+ 357            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              23 (npts)
+
+ 358            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW        23 (npts)
+                CALL                     1
+                POP_TOP
+
+ 359            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        23 (npts)
+                CALL                     1
+                GET_ITER
+       L19:     FOR_ITER                15 (to L20)
+                STORE_FAST               9 (_)
+
+ 360            LOAD_GLOBAL             37 (_cvt_func + NULL)
+                LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (r, w)
+                LOAD_FAST_BORROW         2 (to_std)
+                CALL                     3
+                POP_TOP
+                JUMP_BACKWARD           17 (to L19)
+
+ 359   L20:     END_FOR
+                POP_ITER
+
+ 361            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              24 (nln)
+
+ 362            LOAD_FAST_BORROW         2 (to_std)
+                TO_BOOL
+                POP_JUMP_IF_FALSE      200 (to L29)
+                NOT_TAKEN
+
+ 363            BUILD_LIST               0
+                STORE_FAST              25 (lines)
+
+ 364            LOAD_FAST                7 (ldef_val)
+                STORE_FAST              26 (cur)
+
+ 365            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        24 (nln)
+                CALL                     1
+                GET_ITER
+       L21:     FOR_ITER                61 (to L24)
+                STORE_FAST               9 (_)
+
+ 366            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               19 (byte + NULL|self)
+                CALL                     0
+                STORE_FAST              27 (d)
+
+ 367            LOAD_FAST               26 (cur)
+                LOAD_FAST_BORROW        27 (d)
+                LOAD_SMALL_INT         127
+                COMPARE_OP              58 (bool(<=))
+                POP_JUMP_IF_FALSE        3 (to L22)
+                NOT_TAKEN
+                LOAD_FAST               27 (d)
+                JUMP_FORWARD             8 (to L23)
+       L22:     LOAD_FAST_BORROW        27 (d)
+                LOAD_CONST               7 (256)
+                BINARY_OP               10 (-)
+       L23:     BINARY_OP               13 (+=)
+                STORE_FAST              26 (cur)
+
+ 368            LOAD_FAST_BORROW        25 (lines)
+                LOAD_ATTR               39 (append + NULL|self)
+                LOAD_FAST_BORROW        26 (cur)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           63 (to L21)
+
+ 365   L24:     END_FOR
+                POP_ITER
+
+ 369            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_GLOBAL             27 (len + NULL)
+                LOAD_FAST_BORROW        25 (lines)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 370            LOAD_FAST_BORROW        25 (lines)
+                GET_ITER
+       L25:     FOR_ITER                20 (to L26)
+                STORE_FAST              28 (ln)
+
+ 371            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                LOAD_FAST_BORROW        28 (ln)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           22 (to L25)
+
+ 370   L26:     END_FOR
+                POP_ITER
+
+ 372            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              29 (nab)
+
+ 373            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        29 (nab)
+                CALL                     1
+                GET_ITER
+       L27:     FOR_ITER                35 (to L28)
+                STORE_FAST               9 (_)
+
+ 374            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                POP_TOP
+
+ 375            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                POP_TOP
+                JUMP_BACKWARD           37 (to L27)
+
+ 373   L28:     END_FOR
+                POP_ITER
+                JUMP_FORWARD           148 (to L36)
+
+ 377   L29:     LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        24 (nln)
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      9 (_)
+                SWAP                     2
+       L30:     BUILD_LIST               0
+                SWAP                     2
+       L31:     FOR_ITER                18 (to L32)
+                STORE_FAST_LOAD_FAST   144 (_, r)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                CALL                     0
+                LIST_APPEND              2
+                JUMP_BACKWARD           20 (to L31)
+       L32:     END_FOR
+                POP_ITER
+       L33:     STORE_FAST              25 (lines)
+                STORE_FAST               9 (_)
+
+ 378            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_GLOBAL             27 (len + NULL)
+                LOAD_FAST_BORROW        25 (lines)
+                CALL                     1
+                CALL                     1
+                POP_TOP
+
+ 379            LOAD_FAST                7 (ldef_val)
+                STORE_FAST              30 (prev)
+
+ 380            LOAD_FAST_BORROW        25 (lines)
+                GET_ITER
+       L34:     FOR_ITER                58 (to L35)
+                STORE_FAST              28 (ln)
+
+ 381            LOAD_GLOBAL             41 (max + NULL)
+                LOAD_CONST              10 (-128)
+                LOAD_GLOBAL             43 (min + NULL)
+                LOAD_SMALL_INT         127
+                LOAD_FAST_BORROW        28 (ln)
+                LOAD_FAST_BORROW        30 (prev)
+                BINARY_OP               10 (-)
+                CALL                     2
+                CALL                     2
+                STORE_FAST              27 (d)
+
+ 382            LOAD_FAST               28 (ln)
+                STORE_FAST              30 (prev)
+
+ 383            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               19 (byte + NULL|self)
+                LOAD_FAST_BORROW        27 (d)
+                LOAD_SMALL_INT         255
+                BINARY_OP                1 (&)
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           60 (to L34)
+
+ 380   L35:     END_FOR
+                POP_ITER
+
+ 384            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_SMALL_INT           0
+                CALL                     1
+                POP_TOP
+
+ 385   L36:     LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              31 (nloc)
+
+ 386            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW        31 (nloc)
+                CALL                     1
+                POP_TOP
+
+ 387            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        31 (nloc)
+                CALL                     1
+                GET_ITER
+       L37:     FOR_ITER                78 (to L38)
+                STORE_FAST               9 (_)
+
+ 388            LOAD_FAST_BORROW         4 (ws)
+                PUSH_NULL
+                LOAD_FAST_BORROW         3 (rs)
+                PUSH_NULL
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 389            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+
+ 390            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR                9 (i32 + NULL|self)
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           80 (to L37)
+
+ 387   L38:     END_FOR
+                POP_ITER
+
+ 391            LOAD_FAST_BORROW         0 (r)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                CALL                     0
+                STORE_FAST              32 (nupn)
+
+ 392            LOAD_FAST_BORROW         1 (w)
+                LOAD_ATTR               21 (u32 + NULL|self)
+                LOAD_FAST_BORROW        32 (nupn)
+                CALL                     1
+                POP_TOP
+
+ 393            LOAD_GLOBAL             23 (range + NULL)
+                LOAD_FAST_BORROW        32 (nupn)
+                CALL                     1
+                GET_ITER
+       L39:     FOR_ITER                16 (to L40)
+                STORE_FAST               9 (_)
+
+ 394            LOAD_FAST_BORROW         4 (ws)
+                PUSH_NULL
+                LOAD_FAST_BORROW         3 (rs)
+                PUSH_NULL
+                CALL                     0
+                CALL                     1
+                POP_TOP
+                JUMP_BACKWARD           18 (to L39)
+
+ 393   L40:     END_FOR
+                POP_ITER
+                LOAD_CONST               1 (None)
+                RETURN_VALUE
+
+  --   L41:     SWAP                     2
+                POP_TOP
+
+ 377            SWAP                     2
+                STORE_FAST               9 (_)
+                RERAISE                  0
+ExceptionTable:
+  L30 to L33 -> L41 [2]
+
+
+### [35]   __annotate__  (file=lua_bgmi.py) :: line 397, args 1, locals 1, stack 4, consts 3
+397           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [36]   bgmi_to_std  (file=lua_bgmi.py) :: line 397, args 4, locals 4, stack 6, consts 8
+397           RESUME                   0
+
+399           LOAD_FAST_BORROW         0 (data)
+              LOAD_CONST               1 (slice(None, 4, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               2 (b'\x1bLua')
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+400           LOAD_GLOBAL              1 (ValueError + NULL)
+              LOAD_CONST               3 ('Not a valid Lua bytecode file')
+              CALL                     1
+              RAISE_VARARGS            1
+
+401   L1:     LOAD_GLOBAL              3 (_R + NULL)
+              LOAD_FAST_BORROW         0 (data)
+              LOAD_SMALL_INT           4
+              LOAD_CONST               4 (('sizet',))
+              CALL_KW                  2
+              STORE_FAST               1 (r)
+
+402           LOAD_GLOBAL              5 (_W + NULL)
+              CALL                     0
+              STORE_FAST               2 (w)
+
+403           LOAD_GLOBAL              7 (bytearray + NULL)
+              LOAD_FAST_BORROW         0 (data)
+              LOAD_CONST               5 (None)
+              LOAD_GLOBAL              8 (HEADER_SIZE)
+              BINARY_SLICE
+              CALL                     1
+              STORE_FAST               3 (hdr)
+
+404           LOAD_SMALL_INT           4
+              LOAD_FAST_BORROW         3 (hdr)
+              LOAD_SMALL_INT          13
+              STORE_SUBSCR
+
+405           LOAD_FAST_BORROW         2 (w)
+              LOAD_ATTR               11 (raw + NULL|self)
+              LOAD_FAST_BORROW         3 (hdr)
+              CALL                     1
+              POP_TOP
+
+406           LOAD_GLOBAL              8 (HEADER_SIZE)
+              LOAD_FAST_BORROW         1 (r)
+              STORE_ATTR               6 (p)
+
+407           LOAD_FAST_BORROW         2 (w)
+              LOAD_ATTR               15 (byte + NULL|self)
+              LOAD_FAST_BORROW         1 (r)
+              LOAD_ATTR               15 (byte + NULL|self)
+              CALL                     0
+              CALL                     1
+              POP_TOP
+
+408           LOAD_GLOBAL             17 (_cvt_func + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 18 (r, w)
+              LOAD_CONST               6 (True)
+              LOAD_CONST               7 (('to_std',))
+              CALL_KW                  3
+              POP_TOP
+
+409           LOAD_FAST_BORROW         2 (w)
+              LOAD_ATTR               19 (get + NULL|self)
+              CALL                     0
+              RETURN_VALUE
+
+
+### [37]   __annotate__  (file=lua_bgmi.py) :: line 412, args 1, locals 1, stack 4, consts 3
+412           RESUME                   0
+              LOAD_FAST_BORROW         0 (format)
+              LOAD_SMALL_INT           2
+              COMPARE_OP             132 (>)
+              POP_JUMP_IF_FALSE        3 (to L1)
+              NOT_TAKEN
+              LOAD_COMMON_CONSTANT     1 (NotImplementedError)
+              RAISE_VARARGS            1
+      L1:     LOAD_CONST               1 ('data')
+              LOAD_GLOBAL              0 (bytes)
+              LOAD_CONST               2 ('return')
+              LOAD_GLOBAL              0 (bytes)
+              BUILD_MAP                2
+              RETURN_VALUE
+
+
+### [38]   std_to_bgmi  (file=lua_bgmi.py) :: line 412, args 5, locals 5, stack 6, consts 9
+412           RESUME                   0
+
+414           LOAD_FAST_BORROW         0 (data)
+              LOAD_CONST               1 (slice(None, 4, None))
+              BINARY_OP               26 ([])
+              LOAD_CONST               2 (b'\x1bLua')
+              COMPARE_OP             119 (bool(!=))
+              POP_JUMP_IF_FALSE       12 (to L1)
+              NOT_TAKEN
+
+415           LOAD_GLOBAL              1 (ValueError + NULL)
+              LOAD_CONST               3 ('Not a valid standard Lua 5.3 bytecode')
+              CALL                     1
+              RAISE_VARARGS            1
+
+416   L1:     LOAD_FAST_BORROW         0 (data)
+              LOAD_SMALL_INT          13
+              BINARY_OP               26 ([])
+              LOAD_CONST               8 ((4, 8))
+              CONTAINS_OP              0 (in)
+              POP_JUMP_IF_FALSE       10 (to L2)
+              NOT_TAKEN
+              LOAD_FAST_BORROW         0 (data)
+              LOAD_SMALL_INT          13
+              BINARY_OP               26 ([])
+              JUMP_FORWARD             1 (to L3)
+      L2:     LOAD_SMALL_INT           4
+      L3:     STORE_FAST               1 (sizet)
+
+417           LOAD_GLOBAL              3 (_R + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (data, sizet)
+              LOAD_CONST               4 (('sizet',))
+              CALL_KW                  2
+              STORE_FAST               2 (r)
+
+418           LOAD_GLOBAL              5 (_W + NULL)
+              CALL                     0
+              STORE_FAST               3 (w)
+
+419           LOAD_GLOBAL              7 (bytearray + NULL)
+              LOAD_FAST_BORROW         0 (data)
+              LOAD_CONST               5 (None)
+              LOAD_GLOBAL              8 (HEADER_SIZE)
+              BINARY_SLICE
+              CALL                     1
+              STORE_FAST               4 (hdr)
+
+420           LOAD_SMALL_INT           4
+              LOAD_FAST_BORROW         4 (hdr)
+              LOAD_SMALL_INT          13
+              STORE_SUBSCR
+
+421           LOAD_FAST_BORROW         3 (w)
+              LOAD_ATTR               11 (raw + NULL|self)
+              LOAD_FAST_BORROW         4 (hdr)
+              CALL                     1
+              POP_TOP
+
+422           LOAD_GLOBAL              8 (HEADER_SIZE)
+              LOAD_FAST_BORROW         2 (r)
+              STORE_ATTR               6 (p)
+
+423           LOAD_FAST_BORROW         3 (w)
+              LOAD_ATTR               15 (byte + NULL|self)
+              LOAD_FAST_BORROW         2 (r)
+              LOAD_ATTR               15 (byte + NULL|self)
+              CALL                     0
+              CALL                     1
+              POP_TOP
+
+424           LOAD_GLOBAL             17 (_cvt_func + NULL)
+              LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (r, w)
+              LOAD_CONST               6 (False)
+              LOAD_CONST               7 (('to_std',))
+              CALL_KW                  3
+              POP_TOP
+
+425           LOAD_FAST_BORROW         3 (w)
+              LOAD_ATTR               19 (get + NULL|self)
+              CALL                     0
+              RETURN_VALUE
