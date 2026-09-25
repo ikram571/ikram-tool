@@ -1,4 +1,4 @@
-"""IkramTool V117 — Lua Intelligence Engine.
+"""IkramTool V118 — Lua Intelligence Engine.
 
 Full multi-tier decompile cascade + game-ready validator + honest reporting.
 
@@ -45,11 +45,30 @@ LUA_KEYWORDS = ("function", "local", "return", "end", "if", "then", "else",
 
 STRUCTURE_TOKENS = ("function", "if", "while", "for", "repeat", "do", "end")
 
-_XOR_LENGTHS = (1, 2, 4, 8, 16, 32, 64, 128)
 _LUA_MAGICS = (b"\x1bLuaQ", b"\x1bLuaR", b"\x1bLuaS", b"\x1bLuaT",
                b"\x1bLua", b"\x1bLJ")
 
-VERSION = "v117"
+# Full 12-byte headers used as known plaintext by the key sweep. A real chunk
+# header is deterministic (signature, version, format byte, LUAC_DATA tail),
+# so using all 12 bytes instead of a 5-byte magic is what makes key recovery
+# reliable and lets it cover key lengths up to 12 with zero guessing. Anything
+# longer cannot be recovered from the header alone, and the sweep would rather
+# report nothing than hand back a wrong key.
+_LUA_DATA = b"\x19\x93\x0d\x0a\x1a\x0a"
+_LUA_HEADERS = tuple(
+    b"\x1bLua" + bytes((v,)) + b"\x00" + _LUA_DATA
+    for v in (0x51, 0x52, 0x53, 0x54)
+) + (b"\x1bLJ\x01" + b"\x00" * 5, b"\x1bLJ\x02" + b"\x00" * 5)
+
+# Recoverable key lengths are bounded by how much known plaintext exists, so
+# the range is derived from the header length rather than hand-written. A
+# 12-byte header pins a 12-byte repeating key completely; beyond that the
+# remaining key bytes are not determined by anything we know, so guessing
+# would only manufacture corrupt chunks. This is why the old 16/32/64/128
+# entries were quietly dead: `_xor_key_recover` rejected them on sight.
+_XOR_LENGTHS = tuple(range(1, len(_LUA_HEADERS[0]) + 1))
+
+VERSION = "v118"
 
 # Offsets a wrapper may occupy before the real chunk starts. The offset is
 # never trusted on its own: find_wrapper only accepts one where a real
@@ -251,6 +270,28 @@ def validate(text: str) -> dict:
     }
 
 
+def validate_source(text: str) -> dict:
+    """Gate for a file that is ALREADY readable Lua source.
+
+    The 8-check validator exists to catch decompiler garbage. Running it on a
+    genuine source file is the wrong test: a real data module (PUBG Mobile's
+    pubgm_patch.lua is 32 lines of assignments plus one table) fails
+    'keywords >= 5' and 'structures >= 2' while compiling perfectly. The
+    question that actually matters for source is whether luac accepts it and
+    whether it is text at all, so that is what gets checked here.
+    """
+    text = text or ""
+    checks = {
+        "not empty": bool(text.strip()),
+        "no binary lines": _binary_line_ratio(text) < 0.5,
+        "garbage < 2%": _garbage_ratio(text) < 0.02,
+        "compiles with luac": _mega._compiles_as_lua(text),
+    }
+    passed = [k for k, v in checks.items() if v]
+    return {"checks": checks, "passed": len(passed), "total": len(checks),
+            "score": len(passed), "ok": len(passed) == len(checks)}
+
+
 def _quality_label(score: int, total: int = 8) -> str:
     if score >= total:
         return "Excellent"
@@ -376,41 +417,83 @@ def _unluac_jar(data: bytes, timeout=90) -> str | None:
 
 
 def _ljd_decompile(data: bytes, timeout=60) -> str | None:
-    """LuaJIT decompiler (Andrian Nord ljd) via bundled deps/ljd."""
+    """LuaJIT decompiler (Andrian Nord ljd) via bundled deps/ljd.
+
+    The full ljd chain is rawdump parse -> ljd.tools.decompile (the actual
+    bytecode-to-AST pass) -> ljd.lua.writer (Lua source out). Skipping
+    decompile() and writing pseudoasm instead yields a disassembly listing,
+    not source, which no source validator can ever accept.
+    """
     if not LJD_DIR.is_dir():
         return None
     import sys
+    tools = None
     try:
         old = list(sys.path)
         sys.path.insert(0, str(LJD_DIR))
         from ljd.rawdump import parser
-        import ljd.pseudoasm.writer as writer
+        import ljd.tools as tools
+        import ljd.lua.writer as lua_writer
     except Exception:
         return None
     finally:
         sys.path[:] = old
     import io as _io, tempfile, os, contextlib
+    sink = _io.StringIO()
+    tmp = tempfile.NamedTemporaryFile(prefix="ljd_", suffix=".luac", delete=False)
     try:
-        tmp = tempfile.NamedTemporaryFile(prefix="ljd_", suffix=".luac", delete=False)
         tmp.write(data)
         tmp.close()
-        try:
-            header, proto = None, None
-            with contextlib.redirect_stderr(_io.StringIO()):
-                res = parser.parse(tmp.name)
-                if isinstance(res, tuple) and len(res) >= 2:
-                    header, proto = res[0], res[1]
+        with contextlib.redirect_stderr(sink), contextlib.redirect_stdout(sink):
+            header, proto = parser.parse(tmp.name)
             if header is None:
                 return None
+            ast = tools.decompile(header, proto)
             buf = _io.StringIO()
-            with contextlib.redirect_stderr(_io.StringIO()):
-                writer.write(buf, header, proto)
-            txt = buf.getvalue()
-            return txt if txt and txt.strip() else None
-        finally:
-            os.unlink(tmp.name)
+            lua_writer.write(buf, ast)
+        txt = buf.getvalue()
+        return txt if txt and txt.strip() else None
     except Exception:
         return None
+    finally:
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+
+
+def _luadec(data: bytes, timeout=90) -> str | None:
+    """luadec (Lua 5.x bytecode decompiler) — optional, only if on PATH.
+
+    Luadec's CLI is `luadec [options] file.lua`, so the chunk goes to a temp
+    file rather than stdin. Not bundled: it is a large C build, so it is only
+    used on devices where the user installed it themselves.
+    """
+    exe = shutil.which("luadec")
+    if not exe:
+        return None
+    fd, tmp = tempfile.mkstemp(suffix=".luac")
+    try:
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        p = subprocess.run([exe, tmp], capture_output=True, timeout=timeout)
+        if p.returncode != 0:
+            return None
+        txt = p.stdout.decode("utf-8", errors="replace")
+        if not txt.strip():
+            return None
+        if "function " not in txt and "local " not in txt and txt.strip().count("\n") < 2:
+            return None
+        return txt
+    except subprocess.TimeoutExpired:
+        return None
+    except Exception:
+        return None
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
 
 
 def _string_extraction(data: bytes) -> list:
@@ -422,19 +505,38 @@ def _string_extraction(data: bytes) -> list:
 
 def _xor_sweep(data: bytes) -> list:
     """Tier-4 sweep: recover repeating XOR/additive keys against known lua
-    magic at the file start (and a few early offsets). Returns [(label, dec)].
+    headers, at the file start and at a few early offsets. Returns
+    [(label, dec)] where dec is the bare chunk with any prefix dropped.
+
+    The prefix is dropped on purpose. A real protected game file is a wrapper
+    followed by an encrypted body, so the bytes from `offset` onward ARE the
+    chunk: keeping the wrapper in place would leave the engines looking at
+    wrapper+chunk, which no decompiler accepts. At offset 0 this is
+    byte-identical to decrypting the whole file.
     """
     found = []
     if _lua_family_at(data[:12])[0]:
         return found            # already a bare chunk: nothing to decrypt
-    for offset in (0, 1, 2, 4, 8, 16, 32, 64, 128, 256):
+    # Offsets are dense for the first 16 bytes on purpose: loaders put a
+    # 1/2/3/4-byte magic in front of the body, and a power-of-two list simply
+    # skipped a 3-byte "TPF" header. After that the steps widen, since large
+    # prefixes are rare and each offset costs a full key search.
+    for offset in list(range(17)) + [24, 32, 48, 64, 96, 128, 192, 256]:
         if offset + 4 > len(data):
             break
         window = data[offset:]
-        for plain in _LUA_MAGICS:
-            if len(plain) > len(window):
-                continue
-            for key_len in _XOR_LENGTHS:
+        # key_len is the OUTER loop on purpose. Trying every header at
+        # key_len=1 before touching key_len=8 is what stops the sweep from
+        # settling on a longer key that merely *looks* like a valid header:
+        # assuming the wrong version byte mangles that one byte and the size
+        # field, and the resulting chunk still parses far enough to slip past
+        # a header check while carrying corrupted bytes.
+        for key_len in _XOR_LENGTHS:
+            if key_len > len(window):
+                break
+            for plain in _LUA_HEADERS:
+                if len(plain) > len(window):
+                    continue
                 for mode, fn in (("xor", _mega._xor_key_recover),
                                  ("add", _mega._add_key_recover)):
                     key = fn(window, plain, key_len)
@@ -442,24 +544,19 @@ def _xor_sweep(data: bytes) -> list:
                         continue
                     if not any(key):
                         continue          # all-zero key is a no-op, not a decrypt
-                    dec = bytearray(data)
-                    for i in range(offset, len(dec)):
+                    dec = bytearray(window)
+                    for i in range(len(dec)):
                         if mode == "xor":
                             dec[i] ^= key[i % key_len]
                         else:
                             dec[i] = (dec[i] - key[i % key_len]) & 0xFF
-                    head = bytes(dec[:8])
-                    good = False
-                    if head[:4] == b"\x1bLua" and len(head) >= 5 and 0x51 <= head[4] <= 0x54:
-                        good = True
-                    elif head[:3] == b"\x1bLJ" and len(head) >= 4 and head[3] <= 0x0B:
-                        good = True
-                    elif _mega._detect_dialect(bytes(dec[:128])):
-                        good = True
-                    if good:
-                        found.append(("%s key (len %d)" % (mode.upper(), key_len),
-                                      bytes(dec)))
-                        return found
+                    if not _lua_family_at(bytes(dec[:12]))[0]:
+                        continue
+                    if not _mega._loads_ok(bytes(dec)):
+                        continue      # plausible header, but the body is not real
+                    found.append(("%s key (len %d)" % (mode.upper(), key_len),
+                                  bytes(dec)))
+                    return found
     return found
 
 
@@ -496,17 +593,20 @@ def run(src, out_dir, progress=None) -> dict:
         attempts.append(("Input", "file is empty"))
         return _finish_failure(src, out_dir, stem, meta, attempts)
 
-    # plain source text pass-through (readable as-is) — only when the header
-    # carries NO lua magic (compiled chunks never qualify, whatever entropy).
-    if meta["kind"] == "unknown":
+    # Plain source pass-through. detect_report already proved this file has no
+    # lua magic and reads as source, so running six decompilers over it is
+    # pointless — and worse, the disassembly fallback would then save noise
+    # that looks like a result. Keep the file, prove it compiles, be done.
+    if meta["kind"] == "readable Lua source":
         text = data.decode("utf-8", errors="replace")
-        if _mega._looks_like_lua_source(text) or _mega._compiles_as_lua(text):
+        v = validate_source(text)
+        if v["ok"]:
             final = out_dir / (stem + "_decompiled.lua")
             final.write_text(text, encoding="utf-8")
-            v = validate(text)
             why = "readable source (as-is)"
             attempts.append(("Source passthrough",
-                             "%d/8 validator score (readable source is trusted)" % v["score"]))
+                             "already Lua source, compiles with luac (%d/%d checks)"
+                             % (v["score"], v["total"])))
             return {
                 "ok": True, "status": "success", "out": final,
                 "disasm_path": None, "fail_path": None,
@@ -514,6 +614,9 @@ def run(src, out_dir, progress=None) -> dict:
                 "lines": len([l for l in text.splitlines() if l.strip()]),
                 "quality": why, "msg": why,
             }
+        attempts.append(("Source passthrough",
+                         "reads as source but fails %s"
+                         % ", ".join(k for k, o in v["checks"].items() if not o)))
 
     bytes_for_methods = data
     decrypt_note = ""
@@ -565,11 +668,11 @@ def run(src, out_dir, progress=None) -> dict:
 
     # order depends on detected family
     if meta["family"] == "LuaJIT":
-        order = ("mega", "unluacrs", "unluac", "ljd", "luajit")
+        order = ("mega", "unluacrs", "unluac", "ljd", "luadec", "luajit")
     elif meta["family"] and meta["family"].startswith("Lua 5."):
-        order = ("mega", "unluacrs", "unluac", "luacdis")
+        order = ("mega", "unluacrs", "unluac", "luadec", "luacdis")
     else:
-        order = ("mega", "unluacrs", "unluac", "ljd", "luacdis", "luajit")
+        order = ("mega", "unluacrs", "unluac", "ljd", "luadec", "luacdis", "luajit")
 
     for step in order:
         # ----- TIER 1 — mega_lua game engine (the proven core)
@@ -678,6 +781,31 @@ def run(src, out_dir, progress=None) -> dict:
                 attempts.append(("ljd", "output rejected by validator (%d/8)" % v["score"]))
             else:
                 attempts.append(("ljd", "could not parse chunk (unsupported opcodes)"))
+        # ----- TIER 2 — luadec (optional; only runs when the user installed it)
+        elif step == "luadec":
+            if not _on_path("luadec"):
+                continue
+            _phase(progress, "luadec...")
+            text = _luadec(bytes_for_methods)
+            if text:
+                v = validate(text)
+                if v["ok"]:
+                    final = out_dir / (stem + "_decompiled.lua")
+                    final.write_text(text, encoding="utf-8")
+                    quality = "%s (%d/8)%s | avg line %.1f" % (
+                        _quality_label(v["score"]), v["score"], decrypt_note,
+                        v["avg_line"])
+                    return {
+                        "ok": True, "status": "success", "out": final,
+                        "disasm_path": None, "fail_path": None,
+                        "meta": meta, "attempts": attempts + [(
+                            "luadec", "validated %d/8" % v["score"])],
+                        "lines": len([l for l in text.splitlines() if l.strip()]),
+                        "quality": quality, "msg": "luadec decompile",
+                    }
+                attempts.append(("luadec", "output rejected by validator (%d/8)" % v["score"]))
+            else:
+                attempts.append(("luadec", "failed to parse this chunk"))
         # ----- TIER 3 — built-in disassemblers
         elif step == "luacdis":
             for name, txt in _luac_disasm(bytes_for_methods):
@@ -799,8 +927,7 @@ def tool_table() -> list:
     row("luac 5.4", shutil.which("luac5.4"), "pkg install lua54")
     row("luajit", shutil.which("luajit"), "pkg install luajit")
     row("ljd (LuaJIT)", LJD_DIR.is_dir(), "bundled deps/ljd" if LJD_DIR.is_dir() else "missing")
-    row("luadec", shutil.which("luadec"), "optional (not packaged)")
-    row("r2 (last resort)", shutil.which("r2"), "pkg install radare2" if not shutil.which("r2") else "radare2")
+    row("luadec", shutil.which("luadec"), "optional, used when present")
     return rows
 
 

@@ -142,6 +142,26 @@ def _zlib_section_at(data: bytes, i: int):
     return used, chunk
 
 
+def _zlib_stream_at(data: bytes):
+    """Decompress a single whole-buffer zlib stream, or return None.
+
+    The section walker below exists for the game's concatenated 78xx layout,
+    but an ordinary `zlib.compress()` of a Lua chunk is a one-shot stream.
+    Gating that behind the 4096-byte section heuristic made every small
+    compressed Lua module invisible, so this tries the plain case first and
+    lets the real validator decide whether the result is worth anything.
+    """
+    if len(data) < 8 or data[0] != 0x78 or data[1] not in _ZLIB_SECTION_MAGIC2:
+        return None
+    try:
+        out = zlib.decompress(data)
+    except Exception:
+        return None
+    if not out or out[:4] in (b"\x1bLua", b"\x1bLJ"):
+        return (len(data), out)
+    return None
+
+
 def _reconstruct_zlib_sections(data: bytes):
     """Greedily concatenate every consecutive raw-deflate section.
 
@@ -149,6 +169,9 @@ def _reconstruct_zlib_sections(data: bytes):
     skips inter-section padding (0e / 00s / CLMM markers). Returns the joined
     reflate as bytes, or None when nothing section-like is present.
     """
+    single = _zlib_stream_at(data)
+    if single is not None:
+        return single[1]
     n = len(data)
     if n < 4096:
         return None
@@ -189,10 +212,16 @@ def _looks_like_zlib_container(data: bytes) -> bool:
     Deliberately skips anything that already carries a Lua-family header, so
     normal BGMI chunks (whose instruction streams can contain 0x78/0x0e bytes)
     are never fed to the section walker.
+
+    A single whole-buffer zlib stream is recognised at any size, because that
+    check is self-validating: it only fires when the inflate actually yields a
+    Lua header, which no arbitrary instruction stream will do by accident.
     """
-    if len(data) < 4096:
-        return False
     if data[:4] in (b"\x1bLua", b"\x1bLJ", b"\x1bul"):
+        return False
+    if _zlib_stream_at(data) is not None:
+        return True
+    if len(data) < 4096:
         return False
     n = len(data)
     if data[0] == 0x78 and data[1] in _ZLIB_SECTION_MAGIC2:

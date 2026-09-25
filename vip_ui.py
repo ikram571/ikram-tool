@@ -1,4 +1,4 @@
-"""IkramTool V112 — VIP shell.
+"""IkramTool V118 — VIP shell.
 
 Owns the screen: header, menu loops, submenus, folder status, prompts,
 PROCEED box, progress frames, status boxes, invalid-input box, theme
@@ -17,7 +17,7 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v117"
+VERSION = "v118"
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
