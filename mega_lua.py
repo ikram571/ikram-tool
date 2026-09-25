@@ -255,6 +255,14 @@ def detect_lua(src) -> str:
         return "unknown"
     if not data:
         return "unknown"
+    if data[:4] == b"IKRM":
+        try:
+            import ikram_upgrade as _ik
+            if _ik.is_protected(data):
+                return "Lua 5.3"
+        except Exception:
+            return "unknown"
+        return "unknown"
     dia = _detect_dialect(data)
     if dia == "luajit":
         return "LuaJIT"
@@ -277,6 +285,19 @@ def detect_lua(src) -> str:
         re.M,
     ):
         return "Lua source"
+    # minimal/single-line Lua (`print("hi")`, `x = 1`) still has to route to
+    # the protected compiler — never fall through to the legacy path just
+    # because it carries no fn/require signature.  Compile-probe is the
+    # authoritative check; gate it with a cheap printable-ratio guard so the
+    # DROP scan never pays a subprocess for obvious binary blobs.
+    try:
+        sample = data[:2048]
+        printable = sum(1 for b in sample if 32 <= b < 127 or b in (9, 10, 13))
+        if printable / max(1, len(sample)) >= 0.8:
+            if _compiles_as_lua(data[:81920].decode("utf-8", errors="replace")):
+                return "Lua source"
+    except Exception:
+        pass
     # packed / encrypted game Lua: route to the auto-decrypt cascade so a
     # recoverable key still yields ONE readable game-ready file, otherwise
     # an honest "key unknown" message (never a silent flat dump).
@@ -2802,6 +2823,21 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
     data = read_bytes(src)
     stem = Path(src).stem
 
+    if data[:4] == b"IKRM":
+        try:
+            import ikram_upgrade as _ik
+        except Exception:
+            _ik = None
+        if _ik is not None and _ik.is_protected(data):
+            _phase(progress, "IKRM wrapper detected, decrypting...")
+            data = _ik.try_unwrap(data)
+            if data is None:
+                return [("Decompile", False, out_root / (stem + "_GAME.lua"),
+                         ("IKRM wrapper present but the payload failed the "
+                          "checksum/decrypt — the file is corrupted or was "
+                          "re-encrypted by another key. No *_GAME.lua was "
+                          "written."))]
+
     if _is_nadeem_protected(data):
         _phase(progress, "Encrypted file detected")
         return [("Decompile", False, out_root / (stem + "_GAME.lua"),
@@ -3015,6 +3051,31 @@ def compile_bgmi(src, out, progress=None, strip=False) -> tuple:
         text = data.decode("utf-8", errors="replace")
         _phase(progress, "Compiling with patched luac...")
         std = _compile_std(text, strip=strip)
+        try:
+            import ikram_upgrade
+            protected = ikram_upgrade.enabled()
+        except Exception:
+            protected = False
+        if protected:
+            _phase(progress, "Checking proto registers (pre-inflation)...")
+            stats = ikram_upgrade.register_stats(std)
+            reg_msg = ""
+            if stats is not None and stats.get("max"):
+                flag = "WARNING: max proto register %d > 255 (game cap)" % stats["max"] \
+                    if stats["max"] > 255 else \
+                    "max proto register %d (game cap 255)" % stats["max"]
+                reg_msg = " | " + flag
+            _phase(progress, "Inflating with dead protos (IKRM)...")
+            inflated = ikram_upgrade.stage1_inflate(std)
+            _phase(progress, "Converting to BGMI bytecode...")
+            bgmi = _std_to_bgmi(inflated)
+            _phase(progress, "Encrypting (IKRM stage-3 wrapper)...")
+            final = ikram_upgrade.stage3_wrap(bgmi)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(final)
+            msg = "OK -> BGMI bytecode (%d B, IKRM-protected, final %d B%s)" % (
+                len(bgmi), len(final), reg_msg)
+            return True, msg
         _phase(progress, "Converting to BGMI bytecode...")
         bgmi = _std_to_bgmi(std)
         out.parent.mkdir(parents=True, exist_ok=True)

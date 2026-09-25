@@ -95,9 +95,9 @@ FIX = pathlib.Path(os.environ.get(
     "FIX_ROOT",
     "/data/data/com.termux/files/home/opencode/IkramTool Project/Pakfiles For Testing"))
 try:
-    from lua_ops import detect_lua
     from lua_bgmi import detect_format, is_bgmi
     import univ
+    from univ import detect as detect_lua
     import lua_pipeline
     td = tempfile.mkdtemp()
     src = Path(td) / "t.lua"
@@ -115,9 +115,16 @@ try:
         k = detect_lua(good_luac)
         check("detect compiled lua", k not in (None, "unsupported", "unknown"),
               str(k))
-        fmt = detect_format(good_luac.read_bytes())
+        import ikram_upgrade
+        check("compile output is IKRM-protected",
+              ikram_upgrade.is_protected(good_luac.read_bytes()))
+        payload = ikram_upgrade.try_unwrap(good_luac.read_bytes())
+        check("IKRM unwrap valid bgmi", payload is not None)
+        if payload is None:
+            payload = good_luac.read_bytes()
+        fmt = detect_format(payload)
         check("bgmi detect_format", bool(fmt))
-        meta = lua_pipeline.detect_report(good_luac.read_bytes())
+        meta = lua_pipeline.detect_report(payload)
         check("detect_report magic kind", meta["kind"] == "standard Lua bytecode",
               str(meta))
         check("detect_report band defined", meta["band"] in (

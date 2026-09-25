@@ -348,6 +348,17 @@ def run(src, out_dir, progress=None) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = src.stem
     data = src.read_bytes()
+    try:
+        import ikram_upgrade as _ik
+    except Exception:
+        _ik = None
+    if _ik is not None and _ik.is_protected(data):
+        _phase(progress, "IKRM wrapper detected, decrypting...")
+        data = _ik.try_unwrap(data)
+        if data is None:
+            meta = detect_report(b"")
+            return _finish_failure(src, out_dir, stem, meta, [
+                ("IKRM", "wrapper decrypt failed (checksum/size mismatch)")])
     meta = detect_report(data)
     attempts = []
 

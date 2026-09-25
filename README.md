@@ -1,11 +1,15 @@
 # IkramTool
-![Version](https://img.shields.io/badge/version-v114-blue)
+![Version](https://img.shields.io/badge/version-v115-blue)
 ![Platform](https://img.shields.io/badge/platform-Termux-green)
 ![Status](https://img.shields.io/badge/status-stable-success)
 
 **PAK / LUA Modding Tool** — built for Termux (PUBG / BGMI)
 
 Unpack, inject, repack, costom-pak files · Compile/decompile lua.
+**V115 — IKRM-Protected Compile:** every Lua compile now ships encrypted +
+inflation-armored (2–4 MB dead-proto payload, per-file HKDF-SHA256 rotating
+key, `IKRM` wrapper) so decompilers are rejected at byte 0; Decompile and the
+internal pipeline auto-decrypt IKRM files so round-trips keep working.
 **V114 — VIP Rebuild:** 11 colour themes, boxed menus + live progress,
 fixed DROP/RESULT folder system, and the original compiled pak/lua
 engines kept intact (delegated 1:1, verified byte-exact).

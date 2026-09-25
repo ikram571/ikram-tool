@@ -36,7 +36,7 @@ rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT "
 rm -rf "$STAGE"/original "$STAGE"/logs
 rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
 rm -rf "$STAGE"/.git "$STAGE"/.github
-rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools
+rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools "$STAGE"/dev_work
 rm -f "$STAGE"/luac.out
 # Docs are for the repo, not for the runtime zip — the zip ships ONLY files
 # the tool needs to run and do its work.

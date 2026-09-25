@@ -1,5 +1,30 @@
 # Changelog
 
+## V115
+
+### Features — IKRM-protected Compile (every Lua compile now ships armored)
+- **Compile is protected by default:** every Lua compile now runs the full
+  IKRM pipeline — dead-proto inflation (2–4 MB payload) + per-file HKDF-SHA256
+  rotating-key encryption + `IKRM` wrapper header + SHA-256 checksum — so the
+  output cannot be decompiled or re-read by automated tools (unluac.jar,
+  unluac_rs, ljd, luadec all reject at byte 0).
+- **Tool internals stay compatible:** Decompile and the internal pipeline
+  auto-detect the `IKRM` wrapper and decrypt before working, so
+  compile → decompile round-trips keep working; corrupted payloads get an
+  honest error instead of a silent dump.
+- **Every source shape routes to the protected compiler:** single-line /
+  minimal scripts (`print("X")`, `x = 1`) now classify as Lua source and hit
+  the protected path instead of falling through to the legacy unprotected
+  compiler.
+- **UI, paths and messages are identical** — same menu labels, same
+  DROP/RESULT flow, same `OK -> BGMI bytecode (...)` message (now with an
+  `IKRM-protected` note + register check). Kill-switch `IKRM_PROTECT=0` still
+  reproduces the old exact output.
+
+### Notes
+- Game/loader side must strip the `IKRM` wrapper before use — reference
+  decryptor logic is `stage3_unwrap` (ikram_upgrade.py).
+
 ## V114
 
 ### Bug fixes
