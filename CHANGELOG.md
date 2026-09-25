@@ -1,5 +1,21 @@
 # Changelog
 
+## V116
+
+### Bug fixes
+- **Install-layout paths fixed:** on the installed layout the tool resolves
+  DROP/RESULT to the lowercase outer `drop`/`result` folder (where you drop
+  and collect files). The end-to-end flow suite now runs against the real
+  installed layout and every scenario passes (unpack, inject, repack,
+  costom-pak, clear, lua round-trip) — on top of the release-layout suite.
+- **Trailing fix in minute phrasing** — banner now shows the current version
+  instead of a stale "v114" label (menu header + exit box).
+
+### Notes
+- Runtime payload identical to V115 apart from the display-version sources;
+  published so the update channel can roll everyone from V115 to a clean
+  all-green build after V115 was removed.
+
 ## V115
 
 ### Features — IKRM-protected Compile (every Lua compile now ships armored)

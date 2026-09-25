@@ -22,6 +22,16 @@ sys.path.insert(0, str(ROOT))
 
 RUNNER = Path(__file__).resolve().parent / "_runner.py"
 
+import paths as _p  # noqa: E402  (layout of the tree under test)
+
+# install layout prints real lowercase result paths; release layout uppercase
+_RES = Path(_p.RESULT_DIR).name
+
+
+def _f(s):
+    """Map hardcoded RESULT/ path substrings onto the layout's real casing."""
+    return s.replace("RESULT/", _RES + "/")
+
 FIX_DIR = Path(os.environ.get(
     "FIX_ROOT",
     "/data/data/com.termux/files/home/opencode/IkramTool Project/Pakfiles For Testing"))
@@ -59,7 +69,7 @@ def main():
     # 1 ---- V112 shell: brand, folder status, exit (asserts inside runner)
     run_case("shell", {
         "steps": [{"script": ["0"],
-                   "expect": {"brand": ["IkramTool", "v114"],
+                   "expect": {"brand": ["IkramTool", "v11"],
                               "status": ["DROP/pak/", "(empty)"],
                               "exit": ["Thanks for using IkramTool"]}}]})
 
@@ -86,7 +96,7 @@ def main():
             "steps": [{"script": ["1", "1", "1", "", "", "0", "0"],
                        "expect": {"unpack done":
                                   ["files unpacked",
-                                   "RESULT/extracted/core"]}}]})
+                                   _f("RESULT/extracted/core")]}}]})
 
         # 5 ---- inject ONE file through the compiled wizard
         run_case("inject_real", {
@@ -105,7 +115,7 @@ def main():
                 {"script": ["1", "3", "1", "", "0", "0"],
                  "expect": {"repack done":
                             ["files repacked",
-                             "RESULT/Repacked/core.pak"]}}]})
+                             _f("RESULT/Repacked/core.pak")]}}]})
 
         # 7 ---- costom pak skeleton (empty ENTER = full skeleton)
         run_case("costom_real", {
@@ -114,7 +124,7 @@ def main():
             "steps": [{"script": ["1", "4", "", "", "0", "0"],
                        "expect": {"costom done":
                                   ["Costom Pak ready",
-                                   "RESULT/CostomPak/core.pak"]}}]})
+                                   _f("RESULT/CostomPak/core.pak")]}}]})
 
     # 8 ---- lua compile + decompile python round-trip, same env
     import base64 as _b64

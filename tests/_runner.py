@@ -60,8 +60,11 @@ def build_env():
     home = Path(tempfile.mkdtemp(prefix="ikram_scn_"))
     base = home / "tool"
     base.mkdir(parents=True, exist_ok=True)
+    remap_base = Path(_paths.BASE_DIR).resolve()
+    paths_real = {n: getattr(_paths, n)
+                  for n in dir(_paths)
+                  if isinstance(getattr(_paths, n, None), Path)}
     for mod in (ikram_patch.ikram,):
-        real_base = Path(mod.__file__).resolve().parent
         for name in dir(mod):
             try:
                 v = getattr(mod, name)
@@ -69,29 +72,48 @@ def build_env():
                 continue
             if isinstance(v, Path):
                 rp = v.resolve()
-                if str(rp) == str(real_base) or str(rp).startswith(
-                        str(real_base) + os.sep):
-                    setattr(mod, name, base / rp.relative_to(real_base))
-    real_base = Path(_paths.BASE_DIR).resolve()
-    for name in dir(_paths):
-        try:
-            v = getattr(_paths, name)
-        except Exception:
-            continue
-        if isinstance(v, Path):
-            rp = v.resolve()
-            if str(rp) == str(real_base) or str(rp).startswith(
-                    str(real_base) + os.sep):
-                setattr(_paths, name, base / rp.relative_to(real_base))
+                if str(rp) == str(remap_base) or str(rp).startswith(
+                        str(remap_base) + os.sep):
+                    setattr(mod, name, base / rp.relative_to(remap_base))
+    for name, v in paths_real.items():
+        rp = v.resolve()
+        if str(rp) == str(remap_base) or str(rp).startswith(
+                str(remap_base) + os.sep):
+            setattr(_paths, name, base / rp.relative_to(remap_base))
+    global _DROP_ROOT, _RESULT_ROOT
+    drop_root = _paths.DROP_DIR
+    result_root = _paths.RESULT_DIR
+    if (not str(drop_root).startswith(str(base)) or
+            not str(result_root).startswith(str(base))):
+        print("FATAL: DROP/RESULT not remapped under base: %s | %s" %
+              (drop_root, result_root))
+        sys.exit(2)
+    _DROP_ROOT = drop_root
+    _RESULT_ROOT = result_root
     mod = ikram_patch.ikram
-    mod.DROP = base / "DROP"
-    mod.RESULT = base / "RESULT"
+    mod.DROP = drop_root
+    mod.RESULT = result_root
     for sub in ("pak", "lua", "inject"):
-        (base / "DROP" / sub).mkdir(parents=True, exist_ok=True)
+        (drop_root / sub).mkdir(parents=True, exist_ok=True)
     for sub in ("extracted", "injected", "lua", "processed",
                 "CostomPak", "Repacked"):
-        (base / "RESULT" / sub).mkdir(parents=True, exist_ok=True)
-    return home, base
+        (result_root / sub).mkdir(parents=True, exist_ok=True)
+    return home, base, drop_root, result_root
+
+
+_DROP_ROOT = None
+_RESULT_ROOT = None
+
+
+def _rel(base, rel):
+    """Map a plan-relative key onto the remapped layout of the tree under
+    test. install layout keys are lowercase drop/result; release layout keys
+    are uppercase DROP/RESULT; the module constants carry the truth."""
+    if rel.startswith("DROP/"):
+        return _DROP_ROOT / rel[len("DROP/"):]
+    if rel.startswith("RESULT/"):
+        return _RESULT_ROOT / rel[len("RESULT/"):]
+    return base / rel
 
 
 def stage_fixtures(base, fixtures):
@@ -101,7 +123,7 @@ def stage_fixtures(base, fixtures):
             data = _b64.b64decode(src["b64_text"])
         else:
             data = Path(src).read_bytes()
-        p = base / rel
+        p = _rel(base, rel)
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes(data)
 
@@ -129,15 +151,15 @@ def boot(base, script):
 
 
 def run_plan(plan):
-    home, base = build_env()
+    home, base, drop_root, result_root = build_env()
     stage_fixtures(base, plan.get("fixtures"))
     out_all = ""
 
     if plan.get("inject"):
-        # pick a basename appearing exactly once inside DROP/pak so mode ALL
-        # resolves automatically without a folder-picker prompt
+        # pick a basename appearing exactly once inside the layout DROP/pak
+        # so mode ALL resolves automatically without a folder-picker prompt
         import pak as _pak
-        paks = sorted((base / "DROP" / "pak").glob("*.pak"))
+        paks = sorted((drop_root / "pak").glob("*.pak"))
         if paks:
             with _pak.PakReader(paks[0]) as r:
                 fmap = r.full_paths()
@@ -150,7 +172,7 @@ def run_plan(plan):
                     target = name
                     break
             if target:
-                (base / "DROP" / "inject" / target).write_bytes(
+                (drop_root / "inject" / target).write_bytes(
                     b"V112-INJECT-PROBE\n")
             plan["_inject_target"] = target
 
@@ -161,17 +183,17 @@ def run_plan(plan):
             check(name, all(s in out for s in substrs))
 
     for rel in plan.get("exists", []):
-        check("exists %s" % rel, (base / rel).exists())
+        check("exists %s" % rel, _rel(base, rel).exists())
     for rel in plan.get("gone", []):
-        check("gone %s" % rel, not (base / rel).exists())
+        check("gone %s" % rel, not _rel(base, rel).exists())
     for rel, want in plan.get("content", {}).items():
-        p = base / rel
+        p = _rel(base, rel)
         got = p.read_bytes() if p.is_file() else None
         check("content %s" % rel, got == want)
 
     if plan.get("inject") and plan.get("_inject_target"):
         tgt = plan["_inject_target"]
-        pak = base / "RESULT" / "injected" / "core.pak"
+        pak = result_root / "injected" / "core.pak"
         if pak.is_file():
             import pak as _pak
             with _pak.PakReader(pak) as r:
