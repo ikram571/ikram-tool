@@ -17,7 +17,7 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v116"
+VERSION = "v117"
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"

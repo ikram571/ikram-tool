@@ -1,17 +1,21 @@
-"""IkramTool V112 — Lua Intelligence Engine (Phase Final upgrade).
+"""IkramTool V117 — Lua Intelligence Engine.
 
 Full multi-tier decompile cascade + game-ready validator + honest reporting.
 
-Detection: header magic (standard Lua 1B 4C 75 61 51..54 / LuaJIT 1B 4C 4A)
-+ Shannon entropy bands (<4.0 source, 4.0-6.5 bytecode, 6.5-7.5 lightly
-encrypted, >7.5 encrypted).
+Detection (auto, no user input needed): IKRM wrapper, bare magic (standard
+Lua 1B 4C 75 61 50..54 / LuaJIT 1B 4C 4A 01..03 / Luau 1B 62 75 6C 75),
+magic behind a wrapper (PUBG/BGMI/UE4 length prefix, TPF loader, filler),
+readable source, then Shannon entropy bands (<4.0 source, 4.0-6.5 bytecode,
+6.5-7.5 lightly encrypted, >7.5 encrypted) to infer an encrypted chunk.
 
 Tiers (tried in order, first fully-validated pass wins):
+  T0 wrapper   strip a proven PUBG/BGMI/UE4 length prefix so every engine
+                downstream sees a normal header.
   T4 pre-pass   XOR / additive key sweep (key lengths 1,2,4,8,16,32,64,128)
                 + string-extraction heuristic for encrypted candidates.
-  T1 standard   mega_lua game engine (BGMI+standard+LuaJIT), unluac.jar,
-                unluac_rs, luadec (if installed).
-  T2 luajit     unluac.jar, ljd rawdump->pseudoasm, luajit -bL.
+  T1 standard   mega_lua game engine (BGMI+standard+LuaJIT), unluac_rs,
+                unluac.jar, luadec (if installed).
+  T2 luajit     unluac_rs, unluac.jar, ljd rawdump->pseudoasm, luajit -bL.
   T3 disasm     luac -l -l listing, luajit -bL (-bl), r2 pdl (if installed).
   T5 large      >1MB files: scaled timeouts; chunk-split is refused honestly
                 (unsafe on arbitrary protection) and reported as such.
@@ -45,7 +49,14 @@ _XOR_LENGTHS = (1, 2, 4, 8, 16, 32, 64, 128)
 _LUA_MAGICS = (b"\x1bLuaQ", b"\x1bLuaR", b"\x1bLuaS", b"\x1bLuaT",
                b"\x1bLua", b"\x1bLJ")
 
-VERSION = "v116"
+VERSION = "v117"
+
+# Offsets a wrapper may occupy before the real chunk starts. The offset is
+# never trusted on its own: find_wrapper only accepts one where a real
+# Lua/LuaJIT/Luau header actually parses, so PUBG Mobile / BGMI / UE4
+# length prefixes, TPF-style loader blocks and fixed mod fillers are all
+# handled by the same proof-based check.
+_WRAPPER_SCAN = (1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 24, 32, 48, 64, 96, 128, 256)
 
 
 # ---------------------------------------------------------------- detection
@@ -69,29 +80,110 @@ def entropy_band(e: float) -> str:
     return "encrypted"
 
 
+def _lua_family_at(head: bytes):
+    """(family, kind) for a real Lua/LuaJIT/Luau header, else (None, None).
+
+    Version-byte check only, deliberately matching V116's rule so no chunk
+    that used to decompile can stop decompiling. Adds LuaJIT 0x03 and Luau,
+    which V116 reported as 'unknown'. Mirrors mega_lua._detect_dialect so
+    detection and the cascade never disagree about the family.
+    """
+    if len(head) < 5:
+        return None, None
+    if head[:4] == b"\x1bLua" and 0x51 <= head[4] <= 0x54:
+        return "Lua 5.%d" % (head[4] - 0x50), "standard Lua bytecode"
+    if head[:4] == b"\x1bLua" and head[4] == 0x50:
+        return "Lua 5.0", "standard Lua bytecode"
+    if head[:3] == b"\x1bLJ" and head[3] in (0x01, 0x02, 0x03):
+        return "LuaJIT", "LuaJIT bytecode"
+    if head[:4] == b"\x1bulu":
+        return "Luau", "Luau bytecode"
+    return None, None
+
+
+def find_wrapper(data: bytes) -> int:
+    """Byte offset where the real Lua chunk starts, 0 when there is no wrapper.
+
+    Proves a candidate offset with a real family header instead of guessing:
+    the bytes at that offset must parse as Lua/LuaJIT/Luau.
+    """
+    for off in _WRAPPER_SCAN:
+        if off + 12 > len(data):
+            break
+        fam, _k = _lua_family_at(data[off:off + 12])
+        if fam:
+            return off
+    return 0
+
+
 def detect_report(data: bytes) -> dict:
-    """Magic + entropy -> family/dialect/entropy/kind labels."""
+    """Deep auto-detect -> family/dialect/entropy/kind/protection labels.
+
+    Order: IKRM wrapper, then a bare magic, then a wrapped magic, then
+    source, then encryption inference. Never guesses a family it cannot prove.
+    """
     e = shannon_entropy(data)
     head = data[:8]
-    if head[:4] == b"\x1bLua" and len(head) >= 5 and 0x51 <= head[4] <= 0x54:
-        family = "Lua 5.%d" % (head[4] - 0x50)
-        kind = "standard Lua bytecode"
-    elif head[:3] == b"\x1bLJ":
-        family = "LuaJIT"
-        kind = "LuaJIT bytecode"
-    elif not data:
-        family = None
-        kind = "empty"
-    else:
-        family = None
-        kind = "unknown"
-    return {
-        "family": family,
-        "kind": kind,
+    report = {
+        "family": None,
+        "kind": "unknown",
         "entropy": round(e, 3),
         "band": entropy_band(e),
         "magic": head[:5].hex(),
+        "wrapper": 0,
+        "protection": None,
     }
+
+    if not data:
+        report["kind"] = "empty"
+        return report
+
+    # --- IKRM (IkramTool's own wrapper) — checked before everything else
+    if data[:4] == b"IKRM":
+        report["family"] = "IKRM"
+        report["kind"] = "IKRM protected chunk"
+        report["protection"] = "ikrm"
+        return report
+
+    # --- bare magic
+    fam, kind = _lua_family_at(head)
+    if fam:
+        report["family"] = fam
+        report["kind"] = kind
+        return report
+
+    # --- magic behind a wrapper (PUBG/BGMI length prefix, TPF loader, filler)
+    off = find_wrapper(data)
+    if off:
+        fam, kind = _lua_family_at(data[off:off + 12])
+        report["family"] = fam
+        report["kind"] = "%s (wrapped, %d-byte header)" % (kind, off)
+        report["wrapper"] = off
+        return report
+
+    # --- readable source
+    try:
+        text = data[:4096].decode("utf-8", errors="strict")
+        if _mega._looks_like_lua_source(text) or _mega._compiles_as_lua(text):
+            report["family"] = "Lua source"
+            report["kind"] = "readable Lua source"
+            return report
+    except (UnicodeDecodeError, ValueError):
+        pass
+
+    # --- encrypted / obfuscated: infer from entropy + structure
+    if e >= 6.5:
+        report["family"] = None
+        report["kind"] = "encrypted chunk (no readable header)"
+        report["protection"] = "encrypted"
+        return report
+
+    # No magic, not source, not high entropy: still not trustworthy as a chunk,
+    # so the key sweep must run and the report must not claim "unknown".
+    report["family"] = None
+    report["kind"] = "obfuscated chunk (no readable header)"
+    report["protection"] = "obfuscated"
+    return report
 
 
 def _garbage_ratio(text: str) -> float:
@@ -219,6 +311,40 @@ def _luajit_disasm(data: bytes) -> list:
     return res
 
 
+def _unluac_rs(data: bytes, timeout=120) -> str | None:
+    """Bundled Rust unluac_rs — the fastest standard-Lua tier.
+
+    Same shape as _unluac_jar: returns text or None. Kept as its own tier so a
+    meg_lua miss does not cost the whole file when the Rust engine can read it.
+    """
+    exe = _mega.UNLUAC_RS
+    if not Path(exe).exists():
+        return None
+    fd, tmp = tempfile.mkstemp(suffix=".luac")
+    try:
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        p = subprocess.run([str(exe), "-i", tmp],
+                           capture_output=True, timeout=timeout)
+        if p.returncode != 0:
+            return None
+        txt = p.stdout.decode("utf-8", errors="replace")
+        if not txt.strip():
+            return None
+        if "function " not in txt and "local " not in txt and txt.strip().count("\n") < 2:
+            return None
+        return txt
+    except subprocess.TimeoutExpired:
+        return None
+    except Exception:
+        return None
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
 def _unluac_jar(data: bytes, timeout=90) -> str | None:
     jar = _mega.UNLUAC_JAR
     if not Path(jar).exists():
@@ -299,6 +425,8 @@ def _xor_sweep(data: bytes) -> list:
     magic at the file start (and a few early offsets). Returns [(label, dec)].
     """
     found = []
+    if _lua_family_at(data[:12])[0]:
+        return found            # already a bare chunk: nothing to decrypt
     for offset in (0, 1, 2, 4, 8, 16, 32, 64, 128, 256):
         if offset + 4 > len(data):
             break
@@ -312,6 +440,8 @@ def _xor_sweep(data: bytes) -> list:
                     key = fn(window, plain, key_len)
                     if key is None:
                         continue
+                    if not any(key):
+                        continue          # all-zero key is a no-op, not a decrypt
                     dec = bytearray(data)
                     for i in range(offset, len(dec)):
                         if mode == "xor":
@@ -389,8 +519,26 @@ def run(src, out_dir, progress=None) -> dict:
     decrypt_note = ""
     dec_src = src
 
+    # ----- TIER 0 — wrapper strip (PUBG/BGMI/UE4 length prefix, TPF loader).
+    # detect_report already proved a real family header sits at meta["wrapper"];
+    # hand the engines the bare chunk so every tier sees a normal header.
+    if meta["wrapper"]:
+        off = meta["wrapper"]
+        _phase(progress, "Stripping %d-byte wrapper..." % off)
+        data = data[off:]
+        bytes_for_methods = data
+        dec_tmp = out_dir / ("_tmp_%s_strip.luac" % stem)
+        dec_tmp.write_bytes(data)
+        dec_src = dec_tmp
+        decrypt_note = " | stripped %d-byte wrapper" % off
+        attempts.append(("Wrapper strip",
+                         "%d-byte header removed, real chunk starts at offset %d"
+                         % (off, off)))
+
     # ----- TIER 4 — encryption bypass prepass (before any decompiler)
-    if meta["band"] in ("lightly encrypted", "encrypted") or meta["kind"] == "unknown":
+    if (meta["protection"]
+            or meta["band"] in ("lightly encrypted", "encrypted")
+            or meta["kind"] == "unknown"):
         _phase(progress, "Encryption sweep...")
         sweep = _xor_sweep(data)
         if sweep:
@@ -417,11 +565,11 @@ def run(src, out_dir, progress=None) -> dict:
 
     # order depends on detected family
     if meta["family"] == "LuaJIT":
-        order = ("mega", "unluac", "ljd", "luajit")
+        order = ("mega", "unluacrs", "unluac", "ljd", "luajit")
     elif meta["family"] and meta["family"].startswith("Lua 5."):
-        order = ("mega", "unluac", "luacdis")
+        order = ("mega", "unluacrs", "unluac", "luacdis")
     else:
-        order = ("mega", "unluac", "ljd", "luacdis", "luajit")
+        order = ("mega", "unluacrs", "unluac", "ljd", "luacdis", "luajit")
 
     for step in order:
         # ----- TIER 1 — mega_lua game engine (the proven core)
@@ -459,6 +607,30 @@ def run(src, out_dir, progress=None) -> dict:
                                         ", ".join(k for k, okk in v["checks"].items() if not okk))))
                 else:
                     attempts.append((label, "%s" % str(msg)[:120]))
+        # ----- TIER 1/2 — unluac_rs (bundled Rust engine, fastest)
+        elif step == "unluacrs":
+            _phase(progress, "unluac_rs...")
+            text = _unluac_rs(bytes_for_methods)
+            if text:
+                v = validate(text)
+                if v["ok"]:
+                    final = out_dir / (stem + "_decompiled.lua")
+                    final.write_text(text, encoding="utf-8")
+                    quality = "%s (%d/8)%s | avg line %.1f" % (
+                        _quality_label(v["score"]), v["score"], decrypt_note,
+                        v["avg_line"])
+                    return {
+                        "ok": True, "status": "success", "out": final,
+                        "disasm_path": None, "fail_path": None,
+                        "meta": meta, "attempts": attempts + [(
+                            "unluac_rs", "validated %d/8" % v["score"])],
+                        "lines": len([l for l in text.splitlines() if l.strip()]),
+                        "quality": quality, "msg": "unluac_rs decompile",
+                    }
+                attempts.append(("unluac_rs", "output rejected by validator (%d/8: %s)"
+                                 % (v["score"], ", ".join(k for k, o in v["checks"].items() if not o))))
+            else:
+                attempts.append(("unluac_rs", "failed to parse this chunk"))
         # ----- TIER 1/2 — unluac.jar (standard + LuaJIT)
         elif step == "unluac":
             _phase(progress, "unluac.jar...")
@@ -567,7 +739,14 @@ def _write_failed(src, out_dir, stem, meta, attempts, validator=None) -> Path:
         "File      : %s" % src.name,
         "Size      : %s bytes" % src.stat().st_size,
         "Detected  : %s" % meta["kind"],
+        "Family    : %s" % (meta["family"] or "unresolved"),
         "Entropy   : %.3f (%s)" % (meta["entropy"], meta["band"]),
+    ]
+    if meta.get("wrapper"):
+        lines.append("Wrapper   : %d-byte header stripped" % meta["wrapper"])
+    if meta.get("protection"):
+        lines.append("Protection: %s" % meta["protection"])
+    lines += [
         "",
         "Methods tried:",
     ]
