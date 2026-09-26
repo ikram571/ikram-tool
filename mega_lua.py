@@ -945,6 +945,9 @@ def _legacy_crypto():
     return _LEGACY_CACHE
 
 
+_LJ_PROBE = None
+
+
 def _luajit_probe_header():
     """Header the local LuaJIT toolchain actually writes (cached).
 
@@ -964,7 +967,8 @@ def _luajit_probe_header():
         with tempfile.NamedTemporaryFile("w", suffix=".lua", delete=False) as f:
             f.write("_G._p = 1\n")
             srcp = f.name
-        out = tempfile.mktemp(suffix=".ljprobe")
+        fd, out = tempfile.mkstemp(suffix=".ljprobe")
+        os.close(fd)
         try:
             r = m._compile_luajit(srcp, out)
             if r is None:

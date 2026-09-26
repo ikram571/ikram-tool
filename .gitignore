@@ -9,3 +9,4 @@ output/
 original/
 logs/
 dev_work/
+*.bak_*

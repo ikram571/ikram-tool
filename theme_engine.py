@@ -1,7 +1,8 @@
-"""IkramTool VIP theme engine (V112).
+"""IkramTool VIP theme engine (V119).
 
 One terminal-aware ANSI colour engine. Every colour the tool prints comes
-from here — 256-colour palettes, 10 built-in themes, one persisted selection.
+from here — the full 256-colour palette, 267 themes (11 hand-tuned plus one
+generated per xterm-256 code), one persisted selection.
 
 Config lives at `~/.ikramtool/config` (not inside the tool dir, so a
 clean-slate auto-update never wipes the user's chosen theme).
@@ -33,6 +34,150 @@ ROLES = (
     "prompt", "separator", "success", "error", "warn", "accent", "primary",
     "info",
 )
+
+# ---- xterm-256 colour space --------------------------------------------------
+# Theme.paint_code() can emit ANY 256-colour code, so the theme list covers the
+# entire cube: each of the 256 codes gets its own theme, generated from that
+# code's real RGB. Tints/shades are snapped back into the cube with
+# _nearest_cube() so every role stays a colour the terminal can actually paint.
+
+_LEVELS = (0, 95, 135, 175, 215, 255)
+
+_SYS16_RGB = (
+    (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
+    (0, 0, 128), (128, 0, 128), (0, 128, 128), (192, 192, 192),
+    (128, 128, 128), (255, 0, 0), (0, 255, 0), (255, 255, 0),
+    (0, 0, 255), (255, 0, 255), (0, 255, 255), (255, 255, 255),
+)
+
+_SYS16_NAMES = (
+    "Black", "Maroon", "Green", "Olive", "Navy", "Purple", "Teal", "Silver",
+    "Grey", "Red", "Lime", "Yellow", "Blue", "Fuchsia", "Aqua", "White",
+)
+
+
+def ansi_rgb(code):
+    """xterm-256 code -> (r, g, b)."""
+    if code < 16:
+        return _SYS16_RGB[code]
+    if code < 232:
+        i = code - 16
+        return (_LEVELS[i // 36], _LEVELS[(i // 6) % 6], _LEVELS[i % 6])
+    v = 8 + (code - 232) * 10
+    return (v, v, v)
+
+
+def _nearest_level(v):
+    """Index into _LEVELS of the closest cube level to v (ties -> lower)."""
+    v = min(255, max(0, int(v)))
+    best_i, best_d = 0, None
+    for i, lv in enumerate(_LEVELS):
+        d = abs(lv - v)
+        if best_d is None or d < best_d:
+            best_d = d
+            best_i = i
+    return best_i
+
+
+def _nearest_cube(r, g, b):
+    """Nearest 6x6x6 cube code (16-231) to an arbitrary RGB triple.
+
+    The cube is a Cartesian product of the six levels, so the closest cube
+    point is the per-channel closest level. Verified identical to a full
+    216-point scan over 50k random RGB triples.
+    """
+    return 16 + 36 * _nearest_level(r) + 6 * _nearest_level(g) + _nearest_level(b)
+
+
+def _family(r, g, b):
+    """Hue family word for a cube colour."""
+    if r and g and b:
+        return "Pearl" if max(r, g, b) - min(r, g, b) <= 20 else "Pastel"
+    if r and b:
+        return "Magenta"
+    if r and g:
+        return "Gold" if r == g else "Orange"
+    if g and b:
+        return "Teal" if g == b else "Aqua"
+    if r:
+        return "Red"
+    if g:
+        return "Green"
+    if b:
+        return "Blue"
+    return "Black"
+
+
+def _shade_it(rgb, factor):
+    r, g, b = rgb
+    return tuple(min(255, max(0, int(round(v * factor)))) for v in rgb)
+
+
+def _palette_for(code):
+    """Build a complete 15-role palette around one xterm-256 code.
+
+    Same-hue family for the structural roles (border / title / secondary), a
+    fixed semantic set for success / error / warn so status text is never
+    unreadable, and text/dim flipped automatically on light backgrounds.
+    """
+    rgb = ansi_rgb(code)
+    light_bg = sum(rgb) / 3.0 > 150
+
+    base = code
+    tint = _nearest_cube(*_shade_it(rgb, 1.0 if not light_bg else 0.72))
+    deep = _nearest_cube(*_shade_it(rgb, 0.42))
+    soft = _nearest_cube(*_shade_it(rgb, 1.35 if not light_bg else 0.55))
+
+    return dict(
+        primary=base,
+        secondary=soft,
+        accent=tint,
+        border=base,
+        border_dark=deep,
+        title=soft if not light_bg else deep,
+        number=tint,
+        text=235 if light_bg else 231,
+        dim=245 if light_bg else 252,
+        prompt=soft,
+        separator=deep,
+        success=22 if light_bg else 46,
+        error=160 if light_bg else 196,
+        warn=130 if light_bg else 214,
+        info=soft,
+        bg=_shade_it(rgb, 0.22 if not light_bg else 0.30),
+    )
+
+
+def _generate_palettes():
+    """Every xterm-256 code -> a uniquely named palette.
+
+    Returns (mapping, names-in-order). Codes already covered by a hand-tuned
+    palette above are still generated here under a numeric name, so the whole
+    256-colour space is reachable and nothing is skipped.
+    """
+    out = {}
+    order = []
+    used = set()
+
+    for code in range(256):
+        if code < 16:
+            name = _SYS16_NAMES[code]
+        elif code < 232:
+            # "<Family> <code>" — unique by construction, short enough for the
+            # menu, and the trailing number is the real xterm-256 code, which is
+            # exactly what Theme.paint_code() takes.
+            name = "%s %d" % (_family(*ansi_rgb(code)), code)
+        else:
+            name = "Grey %d" % code
+
+        assert name not in used, "duplicate generated theme name %r" % name
+        used.add(name)
+
+        out[name] = _palette_for(code)
+        order.append(name)
+
+    return out, order
+
 
 _PALETTES = {
     "Original Color": dict(
@@ -117,6 +262,31 @@ _EMOJI = {
     "Ice White": "🤍", "Sunset Orange": "🧡", "Ocean Teal": "🩵",
     "Lava": "🔴",
 }
+
+# ---- the full 256-colour theme set ------------------------------------------
+# The 11 hand-tuned palettes above stay at 1-11 exactly as shipped. Everything
+# the 256-colour cube can express is appended after them, so the THEMES menu
+# offers the whole palette instead of a hand-picked dozen. The menu in
+# vip_ui.themes_menu() is generated from this tuple, so it grows on its own and
+# no menu structure changes.
+
+_GEN_PALETTES, _GEN_ORDER = _generate_palettes()
+
+for _n in _GEN_ORDER:
+    _PALETTES.setdefault(_n, _GEN_PALETTES[_n])
+
+THEMES = THEMES + tuple(_GEN_ORDER)
+
+THEME_NAMES = {n: n for n in THEMES}
+
+_GEN_EMOJI = (
+    "🎨", "🌈", "✨", "💠", "🔷", "🔶", "🟥", "🟧", "🟨", "🟩",
+    "🟦", "🟪", "⬛", "⬜", "🔺", "🔻", "💠", "🕯", "🔱", "⚜",
+)
+for _i, _n in enumerate(_GEN_ORDER):
+    _EMOJI.setdefault(_n, _GEN_EMOJI[_i % len(_GEN_EMOJI)])
+
+del _GEN_PALETTES, _GEN_ORDER, _n, _i
 
 
 def is_tty(stream=None) -> bool:
@@ -210,14 +380,6 @@ class Theme:
     def numbers(self, text):
         """Number slots: the theme's number colour."""
         return self.apply(text, "number")
-
-    def paint_code(self, text, code, bold=True):
-        """Exact ANSI colour by 256-code (V111 `_vip_num` cycle)."""
-        text = "" if text is None else str(text)
-        fg = _fansi(code, bold=bold)
-        if not fg:
-            return text
-        return fg + text + RESET
 
 
 def load_theme() -> Theme:

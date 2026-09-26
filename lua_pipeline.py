@@ -1,4 +1,4 @@
-"""IkramTool V118 — Lua Intelligence Engine.
+"""IkramTool V119 — Lua Intelligence Engine.
 
 Full multi-tier decompile cascade + game-ready validator + honest reporting.
 
@@ -30,6 +30,7 @@ Validator — 8 checks, ALL must pass (matches the game-ready standard):
 """
 import math
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -68,7 +69,7 @@ _LUA_HEADERS = tuple(
 # entries were quietly dead: `_xor_key_recover` rejected them on sight.
 _XOR_LENGTHS = tuple(range(1, len(_LUA_HEADERS[0]) + 1))
 
-VERSION = "v118"
+VERSION = "v119"
 
 # Offsets a wrapper may occupy before the real chunk starts. The offset is
 # never trusted on its own: find_wrapper only accepts one where a real
@@ -76,6 +77,17 @@ VERSION = "v118"
 # length prefixes, TPF-style loader blocks and fixed mod fillers are all
 # handled by the same proof-based check.
 _WRAPPER_SCAN = (1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 24, 32, 48, 64, 96, 128, 256)
+
+# Layer peeling scans its own offsets because `find_wrapper` only accepts an
+# offset where a *readable* Lua header parses. An encrypted body has no
+# readable header, so a wrapper in front of AES/zlib is invisible to it.
+# Dense for the first 17 bytes (loaders use 1-4 byte magics), then wider.
+_LAYER_SCAN = tuple(list(range(17)) + [24, 32, 48, 64, 96, 128, 192, 256])
+
+# A file nests at most a handful of layers deep. The cap also stops a
+# pathological input from spinning: every pass either peels one real layer
+# or returns, so this is a hard ceiling on work, not a retry budget.
+_MAX_LAYERS = 6
 
 
 # ---------------------------------------------------------------- detection
@@ -239,6 +251,20 @@ def _structure_count(text: str) -> int:
     return max(count, 0)
 
 
+# A table key assignment at the head of a line. Pure data modules (PUBG's
+# QuestConfig, UIConfig, task_ui_configs) are hundreds of lines of these and
+# contain no function/if/for at all, so counting only control-flow tokens
+# rejects their decompiles even when the output is perfect.
+_TABLE_ASSIGN = re.compile(
+    r"^\s*(?:local\s+)?(?:[A-Za-z_]\w*\s*=\s*[^=]|\[[^\]]+\]\s*=\s*[^=])",
+    re.MULTILINE,
+)
+
+
+def _table_assign_count(text: str) -> int:
+    return len(_TABLE_ASSIGN.findall(text or ""))
+
+
 def validate(text: str) -> dict:
     """Run the 8 checks; return check keys, score and passed flag."""
     text = text or ""
@@ -247,12 +273,13 @@ def validate(text: str) -> dict:
     lower = text.lower()
     keywords = sum(k in lower for k in LUA_KEYWORDS)
     structures = _structure_count(text)
+    assigns = _table_assign_count(text)
     checks = {
         "len > 50": len(text) > 50,
         "keywords >= 5": keywords >= 5,
         "garbage < 2%": _garbage_ratio(text) < 0.02,
         "? < 1%": (text.count("?") / max(1, len(text))) < 0.01,
-        "structures >= 2": structures >= 2,
+        "structures >= 2": structures >= 2 or assigns >= 2,
         "avg line 5..300": 5 <= avg <= 300,
         "round-trip recompile": _mega._compiles_as_lua(text),
         "no binary lines": _binary_line_ratio(text) < 0.5,
@@ -267,6 +294,7 @@ def validate(text: str) -> dict:
         "avg_line": round(avg, 1),
         "keywords": keywords,
         "structures": structures,
+        "assigns": assigns,
     }
 
 
@@ -503,6 +531,164 @@ def _string_extraction(data: bytes) -> list:
     return [s.decode("latin-1") for s in seqs]
 
 
+def _layer_plausible(cand: bytes, ik) -> bool:
+    """Would peeling continue from `cand`, or has a bare chunk surfaced?
+
+    A layer can legitimately reveal another layer instead of the final chunk,
+    so a zlib container or a fresh IKRM header counts as progress. Anything
+    else is a wrong guess and is dropped before it can corrupt a later pass.
+    """
+    if not cand or len(cand) < 8:
+        return False
+    if _lua_family_at(cand[:12])[0]:
+        return True
+    if ik is not None and ik.is_protected(cand):
+        return True
+    if _mega._looks_like_zlib_container(cand):
+        return True
+    return False
+
+
+def _inflate_at(data: bytes, off: int):
+    """Inflate a zlib stream that starts at `off`. Returns bytes or None.
+
+    wbits 15 is a zlib wrapper, -15 is raw deflate, 47 auto-detects gzip.
+    The multi-section reconstruction is the fallback for files that store
+    several deflate blocks in one container instead of one framed stream.
+    """
+    if off >= len(data):
+        return None
+    try:
+        import zlib
+    except Exception:
+        return None
+    for wbits in (15, -15, 47):
+        try:
+            d = zlib.decompressobj(wbits)
+            out = d.decompress(data[off:]) + d.flush()
+            if out:
+                return out
+        except Exception:
+            continue
+    try:
+        out = _mega._reconstruct_zlib_sections(data[off:])
+        if out:
+            return out
+    except Exception:
+        pass
+    return None
+
+
+def _aes_key_at(data: bytes, off: int):
+    """Cheaply test which known AES key, if any, decrypts a header at `off`.
+
+    Only the first 32 bytes are decrypted. A chunk's first bytes are its
+    signature and version, so 32 bytes is enough to prove the key is right,
+    and it turns a full-file decrypt per candidate into a 32-byte one. That
+    matters: the scan visits ~25 offsets x 7 keys x 2 modes, which is 350
+    full-file decrypts if the probe is skipped.
+    """
+    head = data[off:off + 32]
+    if len(head) < 32:
+        return None
+    try:
+        from Crypto.Cipher import AES
+    except Exception:
+        return None
+    for key in _mega._AES_KEYS:
+        for mode, mk in (("ECB", lambda k: AES.new(k, AES.MODE_ECB)),
+                         ("CBC", lambda k: AES.new(k, AES.MODE_CBC,
+                                                   data[off:off + 16]))):
+            try:
+                probe = mk(key).decrypt(head)
+            except Exception:
+                continue
+            if _lua_family_at(probe[:12])[0]:
+                return key, mode
+    return None
+
+
+def _aes_body_at(data: bytes, off: int, key: bytes, mode: str):
+    """Full AES decrypt of `data[off:]` with an already-proven key/mode."""
+    try:
+        from Crypto.Cipher import AES
+        from Crypto.Util.Padding import unpad
+    except Exception:
+        return None
+    body = data[off:]
+    if not body:
+        return None
+    try:
+        if mode == "CBC":
+            iv, body = body[:16], body[16:]
+            if len(body) < 16 or len(body) % 16:
+                return None
+            return unpad(AES.new(key, AES.MODE_CBC, iv).decrypt(body), 16)
+        full = body[: len(body) - len(body) % 16] if len(body) % 16 else body
+        if len(full) < 16:
+            return None
+        return unpad(AES.new(key, AES.MODE_ECB).decrypt(full), 16)
+    except Exception:
+        return None
+
+
+def _peel_layers(data: bytes, ik) -> tuple:
+    """Peel stacked protection until a bare chunk remains.
+
+    Real game files stack layers: an IKRM container whose payload is itself
+    AES-encrypted, a loader prefix in front of a compressed body, a wrapper
+    around an IKRM blob. The V118 pipeline unwrapped exactly one layer, so
+    every composed case failed while each single layer passed.
+
+    Each pass peels one layer and re-validates before looping, so a wrong
+    guess is discarded instead of being compounded by the next pass. The
+    peel order is fixed and cheapest-first: bare chunk, IKRM, then prefix
+    scan (IKRM / zlib / AES). Returns (chunk_or_None, [labels]).
+    """
+    notes = []
+    for _ in range(_MAX_LAYERS):
+        if not data:
+            return None, notes
+        if _lua_family_at(data[:12])[0]:
+            return data, notes
+        if ik is not None and ik.is_protected(data):
+            nxt = ik.try_unwrap(data)
+            if nxt:
+                notes.append("IKRM container unwrapped")
+                data = nxt
+                continue
+        peeled = None
+        for off in _LAYER_SCAN:
+            if off >= len(data):
+                break
+            body = data[off:]
+            if ik is not None and ik.is_protected(body):
+                nxt = ik.try_unwrap(body)
+                if nxt:
+                    peeled = ("IKRM container unwrapped @%d" % off, nxt)
+                    break
+            if body[:1] in (b"\x78", b"\x1f", b"\x5e"):
+                nxt = _inflate_at(data, off)
+                if nxt and _layer_plausible(nxt, ik):
+                    peeled = ("zlib inflated @%d" % off, nxt)
+                    break
+            hit = _aes_key_at(data, off)
+            if hit:
+                key, mode = hit
+                nxt = _aes_body_at(data, off, key, mode)
+                if nxt and _layer_plausible(nxt, ik):
+                    peeled = ("AES-%s %s decrypted @%d"
+                              % (mode, key[:8].hex(), off), nxt)
+                    break
+        if peeled is None:
+            break
+        notes.append(peeled[0])
+        data = peeled[1]
+    if _lua_family_at(data[:12])[0]:
+        return data, notes
+    return None, notes
+
+
 def _xor_sweep(data: bytes) -> list:
     """Tier-4 sweep: recover repeating XOR/additive keys against known lua
     headers, at the file start and at a few early offsets. Returns
@@ -575,23 +761,43 @@ def run(src, out_dir, progress=None) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = src.stem
     data = src.read_bytes()
+    # Captured here because a decompiler may unlink the input it was handed,
+    # and the failure report still has to be able to name the file's size.
+    src_size = len(data)
     try:
         import ikram_upgrade as _ik
     except Exception:
         _ik = None
-    if _ik is not None and _ik.is_protected(data):
-        _phase(progress, "IKRM wrapper detected, decrypting...")
-        data = _ik.try_unwrap(data)
-        if data is None:
-            meta = detect_report(b"")
-            return _finish_failure(src, out_dir, stem, meta, [
-                ("IKRM", "wrapper decrypt failed (checksum/size mismatch)")])
     meta = detect_report(data)
     attempts = []
-
+    bytes_for_methods = data
+    decrypt_note = ""
+    dec_src = src
     if not data:
         attempts.append(("Input", "file is empty"))
-        return _finish_failure(src, out_dir, stem, meta, attempts)
+        return _finish_failure(src, out_dir, stem, meta, attempts, src_size)
+
+    # ----- TIER -1 — peel stacked protection. Runs before detection so the
+    # report describes the chunk the engines will actually see. V118 unwrapped
+    # a single IKRM layer here and nothing else, which left every composed
+    # file (IKRM-around-AES, prefix-around-zlib, ...) failing.
+    if (_ik is not None and _ik.is_protected(data)) or not _lua_family_at(data[:12])[0]:
+        _phase(progress, "Peeling protection layers...")
+        peeled, notes = _peel_layers(data, _ik)
+        for note in notes:
+            attempts.append(("Layer peel", note))
+        if peeled is not None and len(peeled) != len(data):
+            data = peeled
+            bytes_for_methods = data
+            meta = detect_report(data)
+            decrypt_note = " | " + "; ".join(notes)
+            dec_tmp = out_dir / ("_tmp_%s_peel.luac" % stem)
+            dec_tmp.write_bytes(data)
+            dec_src = dec_tmp
+
+    if not data:
+        attempts.append(("Input", "file is empty after layer peel"))
+        return _finish_failure(src, out_dir, stem, meta, attempts, src_size)
 
     # Plain source pass-through. detect_report already proved this file has no
     # lua magic and reads as source, so running six decompilers over it is
@@ -617,10 +823,6 @@ def run(src, out_dir, progress=None) -> dict:
         attempts.append(("Source passthrough",
                          "reads as source but fails %s"
                          % ", ".join(k for k, o in v["checks"].items() if not o)))
-
-    bytes_for_methods = data
-    decrypt_note = ""
-    dec_src = src
 
     # ----- TIER 0 — wrapper strip (PUBG/BGMI/UE4 length prefix, TPF loader).
     # detect_report already proved a real family header sits at meta["wrapper"];
@@ -846,7 +1048,7 @@ def run(src, out_dir, progress=None) -> dict:
             }
 
     # ----- TIER 7 — honest failure (never garbage)
-    return _finish_failure(src, out_dir, stem, meta, attempts)
+    return _finish_failure(src, out_dir, stem, meta, attempts, src_size)
 
 
 def _phase(progress, text: str) -> None:
@@ -858,14 +1060,30 @@ def _phase(progress, text: str) -> None:
 
 
 # ---------------------------------------------------------------- reporting
-def _write_failed(src, out_dir, stem, meta, attempts, validator=None) -> Path:
+def _safe_size(src, known=None):
+    """Byte size for the failure report, tolerating a vanished input.
+
+    A decompiler handed the caller's file may unlink it while probing. The
+    report still has to be written, so prefer the size captured before any
+    engine ran and only stat the file when that is unavailable.
+    """
+    if known is not None:
+        return known
+    try:
+        return src.stat().st_size
+    except OSError:
+        return "unknown (input removed by a decompiler)"
+
+
+def _write_failed(src, out_dir, stem, meta, attempts, validator=None,
+                  src_size=None) -> Path:
     fail = out_dir / (stem + "_FAILED.txt")
     now = time.strftime("%Y-%m-%d %H:%M:%S")
     lines = [
         "IkramTool %s — decompile FAILED" % VERSION,
         "Timestamp : %s" % now,
         "File      : %s" % src.name,
-        "Size      : %s bytes" % src.stat().st_size,
+        "Size      : %s bytes" % _safe_size(src, src_size),
         "Detected  : %s" % meta["kind"],
         "Family    : %s" % (meta["family"] or "unresolved"),
         "Entropy   : %.3f (%s)" % (meta["entropy"], meta["band"]),
@@ -897,8 +1115,8 @@ def _write_failed(src, out_dir, stem, meta, attempts, validator=None) -> Path:
     return fail
 
 
-def _finish_failure(src, out_dir, stem, meta, attempts) -> dict:
-    fail = _write_failed(src, out_dir, stem, meta, attempts)
+def _finish_failure(src, out_dir, stem, meta, attempts, src_size=None) -> dict:
+    fail = _write_failed(src, out_dir, stem, meta, attempts, src_size=src_size)
     return {
         "ok": False, "status": "failed", "out": None,
         "disasm_path": None, "fail_path": fail,

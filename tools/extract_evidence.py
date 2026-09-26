@@ -1,3 +1,4 @@
+import ast
 import re, pathlib, collections
 
 root = pathlib.Path("analysis/pyc_dump")
@@ -15,7 +16,7 @@ for f in root.glob("*/full.txt"):
         m = RE_CONST.search(ln)
         if m:
             try:
-                s = eval(m.group(1))
+                s = ast.literal_eval(m.group(1))
                 strs[(mod, s)] += 1
             except Exception:
                 pass

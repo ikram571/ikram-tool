@@ -37,6 +37,9 @@ rm -rf "$STAGE"/original "$STAGE"/logs
 rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
 rm -rf "$STAGE"/.git "$STAGE"/.github
 rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools "$STAGE"/dev_work
+# Timestamped pre-edit backups live beside their sources in the working tree.
+# They must never ship to users.
+find "$STAGE" -name '*.bak_*' -delete
 rm -f "$STAGE"/luac.out
 # Docs are for the repo, not for the runtime zip — the zip ships ONLY files
 # the tool needs to run and do its work.
