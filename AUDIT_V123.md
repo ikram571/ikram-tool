@@ -22,6 +22,7 @@ sha256(IkramTool.zip) = 3fec7ff61416cf1218d1c811f7d9c88e5316473da6d6884be960d732
 | `ikram_patch.py` | +43 | Baki ENTER branch delegates to the same full-content builder |
 | `tests/test_update_gate.py` | +267 | New: 65 assertions on gate order, re-exec, offline, version compare, data survival |
 | `tests/test_costom_pak.py` | +133 − | Rewritten: 25 assertions on selection, bytes, naming, verification, cleanup |
+| `tests/test_baki_costom_pak.py` | new | 10 assertions pinning the Baki ENTER branch to full content |
 | `tests/flow_test.py` | +28 | Updated for the new prompts |
 | `VERSION`, `ikram_key.json` | ±1 | Version stamp → V123; **key hash unchanged** |
 
@@ -150,6 +151,15 @@ delegates to the same `engines.build_custom_pak` the VIP menu uses
 (call sites `ikram_patch.py:981`, `:1007`), so both entry points emit the same
 bytes and clean up their session in a `finally`.
 
+**Found while testing it, and left in place:** the UE4 *non*-ENTER branch
+(`ikram_patch.py:1010`) packs an **empty temp dir** and returns `(0, 0)` — it
+builds a valid empty shell, never a copy of the targeted folder. That is the
+original design, but `pak_costom_pak`'s docstring claims "a pak with that
+folder's files at FULL content", which this branch does not deliver. The new
+suite asserts the branch's real guarantee (non-empty, repak-readable shell,
+reports zero copied files) rather than the overstated docstring. Fixing the
+behaviour, or the docstring, is a separate change and is not in V123.
+
 ## Phase 5 — Tests
 
 | Suite | Result |
@@ -161,6 +171,7 @@ bytes and clean up their session in a `finally`.
 | `tests/test_decompile_safety.py` | 40 passed, 0 failed |
 | `tests/flow_test.py` | ALL FLOW TESTS GREEN |
 | `tests/test_release_e2e.py` | ALL 13 RELEASE GATES GREEN |
+| `tests/test_baki_costom_pak.py` | 10 passed, 0 failed (added post-release) |
 | Full suite (13 suites) | all passed |
 
 `test_updater_safety` drives a real `do_install()` against a real payload over
@@ -214,7 +225,8 @@ Static checks: Python AST parse on every changed module, `bash -n` on
 3. **No AES-encrypted fixture.** Bundled `repak 0.2.3 pack` exposes no
    encryption option, so an encrypted-input fixture could not be built. The
    unencrypted path is covered.
-4. **No dedicated Baki regression.** The Baki change is structurally identical
-   to the tested VIP path and both call sites were inspected, but it has no
-   permanent test of its own.
+4. **The UE4 non-ENTER Baki branch builds an empty shell**, not a copy of the
+   targeted folder, while `pak_costom_pak`'s docstring promises full content
+   (Phase 4). Pre-existing, now pinned by a test that asserts the real
+   behaviour. Behaviour or docstring needs a follow-up decision.
 5. The `test_decompile_safety` 39/1 flake in Phase 5 remains unreproduced.
