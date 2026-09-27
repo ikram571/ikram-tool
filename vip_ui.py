@@ -384,7 +384,7 @@ class Vip:
             self.box.draw_menu([
                 ("1", "📦 PAK TOOL (UNPACK, INJECT, REPACK)",
                  ["unpack, inject, repack pak files",
-                  "COSTOM PAK: make empty pak all-in-one (option 4)"]),
+                  "COSTOM PAK: build a pak with full file content (option 4)"]),
                 ("2", "📜 LUA TOOL (COMPILING, DECOMPILING)",
                  ["compile / decompile lua (auto-detect)"]),
                 ("3", "🎨 THEMES",
@@ -414,11 +414,10 @@ class Vip:
               "3) old pak files are NEVER touched",
               "OUTPUT: RESULT/Repacked/"]),
             ("4", "📦 Costom Pak",
-             ["WORK: make an empty pak.",
-              "ENTER (no typing) = ALL folders + all file names",
-              "but EMPTY files (real in game when injected).",
-              "number = pick 1 folder · typed path = only that",
-              "path + its files copied (not empty).",
+             ["WORK: build a new pak from a base pak.",
+              "1) pick the base pak from DROP/pak",
+              "2) pick the paths: number, path, or ENTER = ALL",
+              "every selected file keeps its FULL original content.",
               "PUT FILE IN: DROP/pak",
               "OUTPUT: RESULT/CostomPak/"]),
         ]
@@ -572,6 +571,98 @@ class Vip:
         self.pause(1.0)
         self.reset_term()
 
+    # ------------------------------------------------------- auto update
+    def _update_gate(self):
+        """Check GitHub for a newer release BEFORE the key screen, and
+        re-exec into it when there is one.
+
+        The compiled core's main() has always done this (check_updates_auto ->
+        os.execv -> key_lock) but nothing calls main() any more: this file
+        drives the menus now, so the update chain was severed and an old
+        install stayed on its old version forever while the key screen opened
+        exactly as it always had.
+
+        Rules this keeps:
+          - the check is bounded (update.VERSION_CHECK_TIMEOUT) and any
+            failure is silent: no network, no problem, straight to the key
+          - comparison is integer-based via update.version_tuple, so
+            V100 < V119 < V120 < V122 and equal versions are skipped
+          - DROP/ and RESULT/ are never touched (update.PROTECTED, plus the
+            case-insensitive guard inside it)
+          - the re-exec happens only after update.do_install() reported a
+            complete, verified install, so a failed update leaves the running
+            version working
+        """
+        try:
+            import update
+        except Exception:
+            return
+        try:
+            info = update.latest_remote()
+        except Exception:
+            info = None
+        if not info:
+            return
+        local = _read_version()
+        try:
+            newer = (update.version_tuple(info.get("version", "0"))
+                     > update.version_tuple(local))
+        except Exception:
+            newer = False
+        if not newer:
+            return
+        self.cls()
+        self.write(self.box.draw_box([
+            self.box.draw_labeled_row("Installed", local.upper(), "dim", "text"),
+            self.box.draw_labeled_row("Latest", ("V" + str(
+                info.get("version", "")).lstrip("vV")), "dim", "success"),
+            "",
+            "  Updating now, please wait...",
+        ], "thick", title="UPDATE AVAILABLE") + "\n")
+        self.pause(1.0)
+        try:
+            ok = bool(update.do_install())
+        except Exception:
+            ok = False
+        if not ok:
+            self.write(self.box.draw_box([
+                "  Update could not be applied.",
+                "  Continuing with the current version.",
+            ], "light", color_role="warn") + "\n")
+            self.pause(1.5)
+            return
+        self.write(self.box.draw_box([
+            "  Updated to %s successfully!"
+            % ("V" + str(info.get("version", "")).lstrip("vV")),
+            "  Restarting...",
+        ], "rounded", color_role="success") + "\n")
+        self.pause(1.0)
+        self.reset_term()
+        # Re-exec rather than continue: this process is already running the
+        # old code, so without the re-exec the user would keep using the
+        # version they just replaced until they launched a second time.
+        self.flush()
+        try:
+            import os
+            # absolutise argv[0]: a relative script path would be re-resolved
+            # against whatever CWD the re-exec ends up with.
+            argv = list(sys.argv)
+            try:
+                argv[0] = str(paths.ROOT / os.path.basename(argv[0]))
+            except Exception:
+                pass
+            os.execv(sys.executable, [sys.executable] + argv)
+        except Exception:
+            pass
+
+    def flush(self):
+        for stream in (self.stream, sys.stdout, sys.stderr):
+            try:
+                stream.flush()
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------- key screen
     def _key_gate(self):
         """True = key accepted, carry on. False = leave, tool is done.
 
@@ -597,6 +688,8 @@ class Vip:
     # ------------------------------------------------------------- run
     def run(self):
         paths.ensure_dirs()
+        # Update first, then the key — the same order the compiled core used.
+        self._update_gate()
         if self.ikram is not None:
             if not self._key_gate():
                 return

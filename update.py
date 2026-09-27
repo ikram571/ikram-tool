@@ -150,6 +150,12 @@ class _Progress:
 
 
 # keep these during an update replace (user data + version state)
+#
+# Matching is case-insensitive (see _is_protected). It used to be an exact
+# set, and on a pre-.engine install TOOL_DIR *is* the tool root, so the
+# lowercase drop/ and result/ that the current installer creates were moved
+# into the backup on update and deleted with it — the user's files gone, and
+# ensure_dirs() quietly making empty folders in their place on next launch.
 PROTECTED = {
     "DROP",
     "RESULT",
@@ -160,6 +166,17 @@ PROTECTED = {
     ".repair",
     "repair.zip",
 }
+
+
+def _is_protected(name):
+    """True when a top-level entry must survive an update untouched.
+
+    Case-insensitive, because the same folder is spelled drop/ in the
+    installed layout and DROP/ in the release layout, and only one of the two
+    was in the old exact-match set.
+    """
+    low = str(name).lower()
+    return any(low == p.lower() for p in PROTECTED)
 
 # A payload without the tool's own entry points is not an update, it is a
 # broken or truncated download. The old installer deleted the whole runtime
@@ -271,13 +288,13 @@ def _clean_replace(src):
     moved, installed = [], []
     try:
         for old in list(TOOL_DIR.iterdir()):
-            if old.name in PROTECTED or old.name == BACKUP_DIR:
+            if _is_protected(old.name) or old.name == BACKUP_DIR:
                 continue
             shutil.move(str(old), str(backup / old.name))
             moved.append(old.name)
 
         for f in src.iterdir():
-            if f.name in PROTECTED:
+            if _is_protected(f.name):
                 continue
             dst = TOOL_DIR / f.name
             if f.is_dir():

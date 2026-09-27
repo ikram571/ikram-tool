@@ -176,13 +176,13 @@ def main():
                              _f("RESULT/Repacked/core.pak")]}}]})
 
         # 7 ---- costom pak against a real template, if one is present.
-        #         The output name carries a timestamp, so match it by glob and
-        #         the confirmation text is the new one, not the old wording.
+        #         The output keeps the source pak's name, so match it by glob
+        #         and the confirmation text is the new one, not the old wording.
         run_case("costom_real", {
             "fixtures": dict(pak),
-            "exists": ["RESULT/CostomPak/costom_*.pak"],
-            "steps": [{"script": ["1", "4", "y", "", "0", "0"],
-                       "expect": {"costom done": ["Costom PAK created"]}}]})
+            "exists": ["RESULT/CostomPak/*.pak"],
+            "steps": [{"script": ["1", "4", "1", "", "", "y", "0", "0"],
+                       "expect": {"costom done": ["Custom PAK built"]}}]})
 
     # 7b ---- same four PAK options against a GENERATED ue4 pak, so they are
     #          covered even when the upstream Tencent fixture is absent.
@@ -211,23 +211,25 @@ def main():
                 {"script": ["1", "3", "1", "", "0", "0"],
                  "expect": {"repack done": ["files repacked"]}}]})
 
-        # option 4: costom pak. Y=proceed, ENTER=every path (all empty bodies)
+        # option 4: costom pak. The answer order is the live one:
+        # pick the pak by number, ENTER for every path, keep the default
+        # name, then confirm. Every body keeps its original content.
         run_case("synth_costom", {
             "fixtures": dict(spak),
-            "steps": [{"script": ["1", "4", "y", "", "0", "0"],
-                       "expect": {"costom built": ["Costom PAK created"]}}]})
+            "steps": [{"script": ["1", "4", "1", "", "", "y", "0", "0"],
+                       "expect": {"costom built": ["full original content"]}}]})
 
-        # option 4 again, but one FOLDER only (the menu numbers folders)
+        # option 4 again, but ONE numbered path (the menu numbers paths)
         run_case("synth_costom_one", {
             "fixtures": dict(spak),
-            "steps": [{"script": ["1", "4", "y", "3", "0", "0"],
-                       "expect": {"costom one": ["2 path(s)"]}}]})
+            "steps": [{"script": ["1", "4", "1", "3", "", "y", "0", "0"],
+                       "expect": {"costom one": ["1 path(s)"]}}]})
 
         # option 4 with a typed path: that branch COPIES the real bytes
         run_case("synth_costom_copy", {
             "fixtures": dict(spak),
-            "steps": [{"script": ["1", "4", "y", "data.lua", "0", "0"],
-                       "expect": {"costom copy": ["COPIED from the original"]}}]})
+            "steps": [{"script": ["1", "4", "1", "data.lua", "", "y", "0", "0"],
+                       "expect": {"costom copy": ["full original content"]}}]})
 
         # option 4 with nothing to read: clean error, no crash
         run_case("synth_costom_nopak", {

@@ -928,6 +928,23 @@ def _trim_tencent_pad(path, log=None):
         return
 
 
+def _build_full_content_custom(pakf, out, wanted, log=None, aes_key=None):
+    """Build a costom pak whose every selected file keeps its ORIGINAL bytes.
+
+    Used by the ENTER (all paths) branch of the Baki menu, which used to write
+    empty bodies through _inject_skeleton. The engine call is the same one the
+    VIP menu uses, so both entry points produce the same bytes, and the temp
+    session is removed whether the build worked or not.
+    """
+    log = log or (lambda *a, **k: None)
+    workdir = _engines.custom_session_dir()
+    try:
+        return _engines.build_custom_pak(
+            pakf, out, wanted, workdir, aes_key=aes_key, log=log)
+    finally:
+        _engines.cleanup_custom_session(workdir)
+
+
 def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                      empty_name=None):
     """Build a COSTOM pak from source pakf:
@@ -957,8 +974,13 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                 version = getattr(r, "version_num", 14)
             mount = r.mount_point
             if target == _SKELETON:
-                # ENTER pressed: ALL folders + ALL file names, EMPTY bodies.
-                return _inject_skeleton(r, out, mount, log)
+                # ENTER pressed: ALL file names, and now with their REAL
+                # content — the old _inject_skeleton wrote 0-byte bodies,
+                # which produced a pak the game could not read.
+                every = sorted(p for p in r.full_paths())
+                n, nbytes = _build_full_content_custom(
+                    pakf, out, every, log=log, aes_key=aes_key)
+                return len(chain), n
             if empty_name is not None:
                 got = _inject_empty_file(
                     r, out, target, empty_name, mount, version, log
@@ -977,6 +999,14 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
             _trim_tencent_pad(out, log)
             return len(chain), 0
     if kind == "ue4":
+        if target == _SKELETON:
+            # Same rule as the tencent branch above: ENTER = every file, with
+            # its real content, not an empty shell.
+            p = _engines.ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+            every = sorted(p.files())
+            n, nbytes = _build_full_content_custom(
+                pakf, out, every, log=log, aes_key=aes_key)
+            return 0, n
         log("  engine: repak-pack (standard UE4)")
         repak = _engines.find_repak()
         if repak is None:
@@ -1008,7 +1038,8 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
 
 def pak_costom_pak():
     """COSTOM PAK — pak pick → folder pick (number / 0 cancel / custom path) →
-    empty pak with just that folder chain -> RESULT/CostomPak/<same name>.pak"""
+    a pak with that folder's files at FULL content -> RESULT/CostomPak/<same
+    name>.pak. ENTER (all paths) keeps every file's real bytes too."""
     paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
     if not paks:
         ikram.show_error(
@@ -1069,8 +1100,8 @@ def pak_costom_pak():
         )
         if target == _SKELETON:
             ikram.console.print(
-                "    [bold {}]•[/] ALL folders + all file names, EMPTY bodies".format(
-                    ikram.MUTED
+                "    [bold {}]•[/] {} file(s) copied with FULL content".format(
+                    ikram.MUTED, nfiles
                 )
             )
         elif target:
@@ -1111,7 +1142,7 @@ def pak_tool_menu():
             ("[3]", "📦 Repack PAK",
              "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\n3) old pak files are NEVER touched\nOUTPUT: RESULT/Repacked/"),
             ("[4]", "📦 Costom Pak",
-             "WORK: make an empty pak.\nENTER (no typing) = ALL folders +\nall file names but EMPTY files\n(real in game when you inject into it).\nnumber = pick 1 folder · typed path = only\nthat path + its files copied (not empty).\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
+             "WORK: build a new pak from a base pak.\n1) pick the base pak from DROP/pak\n2) pick the paths: number, path, or ENTER = ALL\nevery selected file keeps its FULL original\ncontent (no 0-byte files).\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
             ("[0]", "Back", "back to main menu"),
         ]
         t = ikram.build_menu_table(opts)

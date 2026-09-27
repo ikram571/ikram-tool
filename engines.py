@@ -18,6 +18,7 @@ import importlib.util
 import os
 import shutil
 import tempfile
+import time
 from pathlib import Path, PurePath
 
 MAGIC_BYTES = b"\xe1\x12\x6f\x5a"
@@ -275,8 +276,13 @@ def _key_candidates(aes_key=None):
 
 
 def _try_ue4_key(pakf, key_hex):
-    """True when this key parses the pak AND its first entries read back."""
-    key = bytes.fromhex(key_hex)
+    """True when this key parses the pak AND its first entries read back.
+
+    key_hex=None is a real candidate, not a skipped one: it asks "is this pak
+    encrypted at all?", which is the question that decides whether a key
+    should be used.
+    """
+    key = bytes.fromhex(key_hex) if key_hex else None
     p = ue4mod().Ue4Pak(pakf, aes_key=key)
     ents = list(p.files())
     if not ents:
@@ -295,8 +301,18 @@ def _try_ue4_key(pakf, key_hex):
 
 def _resolve_ue4_key(pakf, aes_key=None, log=None):
     """AES key for a UE4 pak. None given -> auto-try saved-then-default keys,
-    persist whichever one works first. Falls back to the shipped default so
-    existing behaviour is never a regression."""
+    persist whichever one works first.
+
+    The last candidate tried is "no key at all", and that case is now returned
+    as None. Most UE4 paks are not encrypted, and handing one of them a key it
+    was never encrypted with is not a harmless default: the index still parses,
+    so every path list looks right, and the failure only shows up later as
+    "Error -3 while decompressing data" on the first real read. Falling back to
+    a default key therefore turned a perfectly readable pak into a broken one.
+    A pak that genuinely needs a key we do not have still gets the old default
+    (so an encrypted pak behaves exactly as it did before) and still fails
+    loudly on read rather than silently.
+    """
     log = log or (lambda *a, **k: None)
     if _khex(aes_key):
         return aes_key
@@ -315,6 +331,13 @@ def _resolve_ue4_key(pakf, aes_key=None, log=None):
                 return h
         except Exception:
             continue
+    # Nothing matched — most likely the pak is simply not encrypted.
+    try:
+        if _try_ue4_key(pakf, None):
+            log("  ue4 key: none needed (unencrypted pak)")
+            return None
+    except Exception:
+        pass
     log("  ue4 key: none matched (%d tried) — default fallback" % len(tried))
     return _khex(aes_key) or DEFAULT_UE4_KEYS[0]
 
@@ -632,6 +655,303 @@ def costom_pak(pakf, out, paths_wanted, aes_key=None, log=None, copy=False):
                         delete=[q for q in sorted(p.files()) if q not in wanted])
 
     raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
+
+
+# ======================================================================
+# CUSTOM PAK — full-content build (the Costom PAK option, done properly)
+# ======================================================================
+#
+# The rule this whole block exists to enforce: every file in the output pak
+# carries its ORIGINAL bytes from the source pak. A 0-byte entry is a bug
+# here, not a feature — the shipped costom_pak() above writes empty bodies
+# on purpose, which is what made "select a path" produce a pak the game
+# could not read.
+#
+# Flow (one temp session, cleaned up by the caller in a finally:):
+#   1. extract the source pak WITH its content into workdir/source
+#   2. show that inventory to the user (real sizes, so an empty or
+#      unreadable entry is visible before anything is picked)
+#   3. pack the selected paths back out of the temp tree
+#   4. read the finished pak back and compare every byte
+CUSTOM_SESSION_PREFIX = "ikram_custom_"
+
+
+def custom_session_dir(tag=None):
+    """A fresh /tmp/ikram_custom_<timestamp>/ workdir for one build.
+
+    gettempdir() rather than a literal "/tmp": on Termux TMPDIR is the
+    package tmpdir, and hardcoding /tmp there would either fail or scatter
+    build leftovers somewhere the user never cleans. The name keeps the
+    ikram_custom_<timestamp> shape either way.
+    """
+    stamp = tag or time.strftime("%Y%m%d_%H%M%S")
+    return Path(tempfile.gettempdir()) / (CUSTOM_SESSION_PREFIX + stamp)
+
+
+def cleanup_custom_session(workdir):
+    """Remove a build session. Never raises — this runs in a finally."""
+    try:
+        shutil.rmtree(Path(workdir), ignore_errors=True)
+    except Exception:
+        pass
+
+
+def custom_pak_inventory(pakf, workdir, aes_key=None, log=None):
+    """Extract pakf WITH its content and return {internal path: size}.
+
+    The extraction is the proof the pak is readable and the source of the
+    sizes shown to the user. It is also the byte source for the UE4 build.
+    Returns an empty dict if the pak cannot be read at all.
+    """
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    src = Path(workdir) / "source"
+    if src.exists():
+        shutil.rmtree(src, ignore_errors=True)
+    src.mkdir(parents=True, exist_ok=True)
+    log("  reading %s (full content)…" % pakf.name)
+    unpack_pak(pakf, src, aes_key=aes_key, log=log)
+    out = {}
+    for p in sorted(src.rglob("*")):
+        if p.is_file() and not p.name.startswith("."):
+            rel = str(p.relative_to(src)).replace("\\", "/")
+            try:
+                out[rel] = p.stat().st_size
+            except OSError:
+                out[rel] = 0
+    return out
+
+
+def _inventory_root(workdir, inventory):
+    """Where the extracted tree actually put the files.
+
+    UE4 unpacks under the pak's mount point (``../../../`` collapses away,
+    but a real ShadowTrackerExtra mount leaves a leading folder), and a
+    tencent extract may or may not. Rather than guess, look for the first
+    inventory entry and fall back to the tree root.
+    """
+    base = Path(workdir) / "source"
+    probe = next(iter(inventory), None)
+    if not probe or (base / probe).is_file():
+        return base
+    for p in (base.iterdir() if base.is_dir() else ()):
+        if p.is_dir() and (p / probe).is_file():
+            return p
+    return base
+
+
+def _chain_dirs_for(paths_wanted):
+    """Every ancestor folder of the selection, in PakWriter index form."""
+    chain = set()
+    for fp in paths_wanted:
+        parts = [p for p in str(fp).replace("\\", "/").split("/") if p]
+        for i in range(1, len(parts)):
+            chain.add("/".join(parts[:i]) + "/")
+    return sorted(chain)
+
+
+def _read_from_tree(root, wanted):
+    """{internal path: bytes} read out of the extracted tree."""
+    bodies = {}
+    for fp in wanted:
+        p = Path(root) / fp
+        if not p.is_file():
+            # mount-point prefix mismatch: find it by its tail
+            tail = fp.split("/")[-1]
+            hit = None
+            for cand in Path(root).rglob(tail):
+                if cand.is_file() and str(cand).replace("\\", "/").endswith(fp):
+                    hit = cand
+                    break
+            if hit is None:
+                raise ValueError("extracted tree is missing %s" % fp[:70])
+            p = hit
+        bodies[fp] = p.read_bytes()
+    return bodies
+
+
+def _verify_custom_pak(out, wanted, sizes, aes_key, log=None):
+    """Read the pak that was just written back and prove the content is there.
+
+    A build that reports success without this can ship 0-byte files, which is
+    the exact failure this option is being fixed for, so this checks two
+    things per selected path: the entry is in the finished pak at all, and its
+    decompressed size matches the source byte for byte. Returns (ok, message).
+    """
+    log = log or (lambda *a, **k: None)
+    out = Path(out)
+    if not out.is_file() or out.stat().st_size == 0:
+        return False, "no pak was written"
+    kind = detect_kind(out)
+    got, size_of = {}, {}
+    try:
+        if kind == "tencent":
+            with pakmod().PakReader(out) as pak:
+                for fp, e in pak.full_paths().items():
+                    got[fp] = True
+                    size_of[fp] = getattr(e, "size", None)
+        else:
+            p = ue4mod().Ue4Pak(out, aes_key=aes_key)
+            got = {fp: True for fp in p.files()}
+            size_of = {fp: p.size(fp) for fp in got}
+    except Exception as exc:
+        return False, "written pak cannot be read back (%s)" % exc
+    missing = [p for p in wanted if p not in got]
+    if missing:
+        return False, ("%d selected path(s) missing from the output, "
+                       "first: %s" % (len(missing), missing[0][:60]))
+    empty = [p for p in wanted if not size_of.get(p)]
+    if empty:
+        return False, ("%d path(s) came back empty, first: %s"
+                       % (len(empty), empty[0][:60]))
+    short = [p for p in wanted
+             if sizes.get(p) is not None and size_of.get(p) != sizes[p]]
+    if short:
+        return False, ("%d path(s) do not match the source size, first: %s "
+                       "(%s in the source, %s in the output)"
+                       % (len(short), short[0][:50], sizes.get(short[0]),
+                          size_of.get(short[0])))
+    return True, ("%d path(s) verified in the output pak, every one the "
+                  "original size" % len(got))
+
+
+def _drop_output(out, log):
+    """Delete a pak we are about to report as never written."""
+    try:
+        if Path(out).is_file():
+            Path(out).unlink()
+            log("  removed the incomplete output pak")
+    except OSError:
+        pass
+
+
+def build_custom_pak(pakf, out, wanted, workdir, aes_key=None, log=None,
+                     progress=None):
+    """Build a pak holding EXACTLY `wanted`, each with its original bytes.
+
+    workdir is a custom_session_dir() that custom_pak_inventory() has already
+    extracted into; the UE4 bytes come from there, and the tencent bytes come
+    from the source pak's own reuse path (the compiled writer splices the
+    original compressed/encrypted blocks, which is the only way to keep them
+    byte-identical).
+
+    progress: optional callable(done, total, label) for the UI frame.
+    Returns (count, total_bytes). Raises on any failure so the caller can
+    report the engine's own error and leave nothing half-written.
+    """
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    out = Path(out)
+    wanted = [p for p in dict.fromkeys(wanted)]
+    if not wanted:
+        raise ValueError("no paths were selected")
+    kind = detect_kind(pakf)
+    inventory = custom_pak_inventory(pakf, workdir, aes_key=aes_key, log=log)
+    if not inventory:
+        raise ValueError("the source pak has no readable files")
+    root = _inventory_root(workdir, inventory)
+    unknown = [p for p in wanted if p not in inventory]
+    if unknown:
+        raise ValueError("path not in this pak: %s" % unknown[0][:70])
+    empty = [p for p in wanted if inventory.get(p, 0) == 0]
+    if empty:
+        raise ValueError("source entry is 0 bytes: %s" % empty[0][:70])
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists():
+        out.unlink()
+
+    def tick(i, label):
+        if progress:
+            progress(i, len(wanted), label)
+
+    tick(0, "reading source")
+    try:
+        if kind == "tencent":
+            log("  engine: ikram-custom (tencent) — full content")
+            with pakmod().PakReader(pakf) as r:
+                table = r.full_paths()
+                sel = {}
+                for fp in wanted:
+                    e = table.get(fp)
+                    if e is None:
+                        for cand, ce in table.items():
+                            if cand.lower() == fp.lower():
+                                e = ce
+                                break
+                    if e is None:
+                        raise ValueError("entry vanished from the source: %s" % fp[:70])
+                    sel[fp] = e
+                r.dirs = {d: {} for d in _chain_dirs_for(wanted)}
+                for fp, e in sorted(sel.items()):
+                    d, _, nm = fp.rpartition("/")
+                    r.dirs.setdefault((d + "/") if d else "", {})[nm] = e
+                r.files = [e for _, e in sorted(sel.items())]
+                # Reuse-path safety: a single-block encrypted entry must be
+                # spliced over its full aligned window or the tail bleeds into
+                # the next entry. Mirrors the shipped _align_block_windows.
+                try:
+                    pc = pakmod().pc
+                    for e in sel.values():
+                        blocks = getattr(e, "compressed_blocks", None)
+                        if not (blocks and getattr(e, "encrypted", False)):
+                            continue
+                        if len(blocks) != 1:
+                            continue
+                        em = getattr(e, "encryption_method", None)
+                        if not em:
+                            continue
+                        want = pc.align_encrypted_size(e.size, em)
+                        span = sum(b.end - b.start for b in blocks)
+                        if span < want:
+                            blocks[-1].end += want - span
+                except Exception:
+                    pass
+                edits = []
+                for i, (fp, e) in enumerate(sorted(sel.items()), 1):
+                    edits.append((fp, (r.read_entry(e), None, e.stem)))
+                    tick(i, fp.rpartition("/")[2] or fp)
+                pakmod().PakWriter(r).inject_files(edits, str(out), force_add=False)
+            try:
+                from ikram_patch import _trim_tencent_pad
+                _trim_tencent_pad(out, log)
+            except Exception:
+                pass
+        else:
+            log("  engine: python-ue4 (standard UE4) — full content")
+            bodies = _read_from_tree(root, wanted)
+            p = ue4mod().Ue4Pak(pakf, aes_key=_resolve_ue4_key(pakf, aes_key, log))
+            existing = set(p.files())
+            for i, fp in enumerate(wanted, 1):
+                tick(i, fp.rpartition("/")[2] or fp)
+            p.repack(str(out),
+                     add_files={fp: bodies[fp] for fp in wanted},
+                     delete=sorted(q for q in existing if q not in wanted))
+    except Exception:
+        # A half-written pak in RESULT/CostomPak is worse than no pak: the
+        # next run would find it in the folder and offer it as a base. The UI
+        # says "nothing was written", so make that true here rather than
+        # leaving a corpse for the user to puzzle over.
+        _drop_output(out, log)
+        raise
+    # Both engines are verified the same way: the finished pak is read back
+    # and every selected entry must be there at its original size.
+    tick(len(wanted), "verifying")
+    try:
+        ok, why = _verify_custom_pak(out, wanted, inventory, aes_key, log=log)
+    except Exception:
+        _drop_output(out, log)
+        raise
+    if not ok:
+        _drop_output(out, log)
+        raise ValueError(why)
+    log("  %s" % why)
+    total = 0
+    for fp in wanted:
+        try:
+            total += (Path(root) / fp).stat().st_size
+        except OSError:
+            pass
+    return len(wanted), total
 
 
 def engine_status():
