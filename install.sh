@@ -575,12 +575,65 @@ if [ ! -f "$TMPX/ikram.pyc" ]; then
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# clean old files (safe now — the new unzip has finished)
-rm -rf "$TARGET/.engine"
-# drop/result are always real — NEVER deleted (they hold user files)
-mkdir -p "$TARGET/drop" "$TARGET/result"
+# Validate the WHOLE payload before a single existing file is touched. A
+# payload missing the tool's own entry points is not an update, it is a broken
+# or truncated download.
+_missing=""
+for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
+             run.sh update.py; do
+    [ -f "$TMPX/$_need" ] || _missing="$_missing $_need"
+done
+if [ -n "$_missing" ]; then
+    fail "Downloaded package is incomplete — missing:$_missing"
+    printf "${C_RED}${C_BOLD}    Nothing was changed. Try again with a better connection.${C_RESET}\n"
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# Install as a transaction, not a delete-then-copy. The old runtime is MOVED
+# aside, the new one is copied in, and the result is verified. If any step
+# fails the partial copy is dropped and the previous runtime is moved straight
+# back, so a failed reinstall can never leave the user with no tool at all.
+# drop/result hold the user's files and are never touched.
+OLDENG="$TARGET/.engine.old"
+rm -rf "$OLDENG"
+if [ -d "$TARGET/.engine" ]; then
+    mv "$TARGET/.engine" "$OLDENG" || {
+        fail "Could not set the old engine aside — install stopped."
+        printf "${C_RED}${C_BOLD}    Nothing was changed.${C_RESET}\n"
+        rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+        exit 1
+    }
+fi
+mkdir -p "$TARGET/.engine" "$TARGET/drop" "$TARGET/result"
 # copy from temp -> .engine/ (engine hidden; drop/result real at root)
-cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null
+if ! cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null; then
+    rm -rf "$TARGET/.engine"
+    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+    fail "Install failed while copying — your previous version was restored."
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# verify the copy really landed before declaring victory
+_vmissing=""
+for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
+             run.sh update.py; do
+    [ -f "$TARGET/.engine/$_need" ] || _vmissing="$_vmissing $_need"
+done
+if [ -n "$_vmissing" ]; then
+    rm -rf "$TARGET/.engine"
+    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+    fail "Install incomplete — missing:$_vmissing"
+    printf "${C_GOLD}             your previous version was restored.${C_RESET}\n"
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# The new runtime is verified and live. Only now is the old one discarded, and
+# only now are stale root-level engine files removed. A legacy flat install
+# leaves ikram.pyc/ikram_patch.py/run.sh in the root, and keeping them would
+# leave two engines on disk where the root run.sh would keep launching the old
+# one forever.
+rm -rf "$OLDENG"
+rm -f "$TARGET/ikram.pyc" "$TARGET/ikram_patch.py" "$TARGET/run.sh" 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — always created (fresh install starts empty)
 # V114 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
@@ -594,7 +647,7 @@ mkdir -p "$TARGET/drop/pak" "$TARGET/drop/lua" "$TARGET/drop/inject" \
 # engine now lives in .engine/ — DROP/RESULT symlink (engine __file__-relative to root drop/result)
 ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
 ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"
-if [ -f "$TARGET/.engine/ikram.pyc" ] || [ -f "$TARGET/ikram.pyc" ]; then
+if [ -f "$TARGET/.engine/ikram.pyc" ] && [ -f "$TARGET/.engine/ikram_patch.py" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else

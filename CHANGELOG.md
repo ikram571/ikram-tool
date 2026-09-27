@@ -1,18 +1,86 @@
 # Changelog
 
+## V121
+
+### Bug fixes — a failed reinstall could leave you with no tool at all
+- **The installer is now a transaction instead of a delete-then-copy.** This is
+  the same hole V120 closed in the *updater*, in the *installer*. `install.sh`
+  ran `rm -rf .engine` and then `cp -r` with the copy's stderr thrown away and
+  its exit code never checked — and the script has no `set -e`, so a failed copy
+  did not stop it. A full disk, a permission problem, or a Ctrl-C in that window
+  left the user with a deleted engine and a half-written replacement, and the
+  only way back was a manual reinstall.
+- **The whole payload is now validated before anything is touched.** All eight
+  required entry points (`ikram.pyc`, `ikram_patch.py`, `menus.py`, `engines.py`,
+  `paths.py`, `vip_ui.py`, `run.sh`, `update.py`) must be present in the
+  extracted package first. A truncated download is refused with the list of what
+  is missing and an explicit "Nothing was changed."
+- **The old runtime is moved aside, never deleted,** the new one is copied in,
+  and the copy is then verified entry point by entry point. If any step fails,
+  the partial copy is dropped and the previous version is moved straight back.
+- **The success message can no longer be a lie.** The old final check accepted
+  either `.engine/ikram.pyc` *or* a stale root-level `ikram.pyc`. On a legacy
+  flat install that stale file survived, so a completely empty `.engine` could
+  still report "Tool installed."
+- **Legacy split-brain installs are cleaned up.** Pre-`.engine` versions left
+  `ikram.pyc`, `ikram_patch.py` and `run.sh` in the install root next to the new
+  `.engine/`, so the old root `run.sh` would keep launching the old engine
+  forever. They are now removed — but only after the new install is verified.
+
+### Also fixed
+- **The banner can no longer lie about the version.** `vip_ui._read_version()`
+  had a hardcoded `"v120"` fallback. Any environment where `VERSION` is not
+  readable — including the test sandbox, which remaps paths away from the repo —
+  silently showed that frozen literal instead of the real version, so a version
+  bump could go green across the suites and still ship a wrong banner. The
+  fallback chain is now the `VERSION` file, then `ikram_key.json` (which the
+  updater rewrites on every install), then the literal string `unknown`, which is
+  obviously wrong rather than plausibly stale. The test harness now stages the
+  real metadata so the production path is what gets exercised.
+- **`release.sh` no longer hardcodes a version** in its push message.
+
+### Tests
+- The install section is extracted verbatim out of `install.sh` and run against a
+  sandbox with failures injected, so the shipped shell text is what gets tested:
+  fresh install, reinstall over a working install, truncated payload (must change
+  nothing), copy failure (must restore the previous engine), and a legacy flat
+  install (must clean the stale root engine while keeping the user's files).
+  20 checks, all green.
+- **Every published release was verified to auto-update to this version.** For
+  each of V105, V106, V107, V108, V109, V110, V111, V113, V114, V116, V118 and
+  V119: that release's real zip was installed using that release's own layout,
+  then that version's **own** updater was run — because the update is performed
+  by whichever version the user currently has, not by the new one. All twelve
+  reached V120, all twelve kept `DROP/` and `RESULT/` intact, all twelve ended
+  with a correct activation-key hash, and all twelve still booted afterwards.
+  The four flat-layout versions (V105–V108) and the eight `.engine` versions
+  were both covered.
+
+### Notes
+- The V120 changelog overstated what its updater fix did; the correction is
+  recorded in that entry rather than quietly rewritten.
+- UI, menu text, menu flow, colors, engine order and the DROP/RESULT layout are
+  unchanged. This release touches installation safety only.
+
 ## V120
 
-### Bug fixes — the tool could freeze with no error, and the updater could uninstall it
-- **Updater no longer wipes the install (worst bug in this release):** the old
-  installer deleted the running tool's files first and copied the new payload
-  second, with nothing in between. A download that stopped early therefore
-  left the tool uninstalled, with no error and no way back except a manual
-  reinstall. The install is now a transaction: the payload is validated first
-  (all required entry points present, file count sane), extraction is guarded
-  against archive entries that write outside the staging directory, the old
-  runtime is **moved aside** instead of deleted, the new set is copied and then
-  verified, and every failure path restores the previous install. DROP, RESULT,
-  VERSION and the activation key are never touched.
+### Bug fixes — the tool could freeze with no error, and the updater stopped telling the truth
+- **The updater is now a verified transaction, and cannot half-apply:** the
+  payload is validated first (every required entry point must be present, file
+  count sane), extraction is guarded against archive entries that write outside
+  the staging directory, the old runtime is **moved aside** instead of deleted,
+  the new set is copied and then verified, and every failure path restores the
+  previous install. DROP, RESULT, VERSION and the activation key are never
+  touched.
+  - *Correction, V121:* the original V120 note claimed the old updater
+    "deleted the running tool's files first and copied the new payload second,
+    with nothing in between", and that a stopped download therefore left users
+    uninstalled. That was wrong about the updater. Its replacement removed only
+    files **absent from the new zip** and always downloaded before touching
+    anything on disk, so an interrupted download could not have uninstalled
+    anyone. The genuine delete-then-copy hole was in `install.sh`, which was not
+    touched until V121 — see that entry.
+
 - **Updates report the truth:** `do_install` returns a real success value,
   `INSTALLED_OK` is printed only after a complete verified install, a refused
   payload prints `UPDATE_ABORTED` with the reason, and `update.sh` (which runs

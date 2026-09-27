@@ -16,6 +16,7 @@ Exit 0 = all checks ok; every check prints one line:
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -61,6 +62,8 @@ def build_env():
     base = home / "tool"
     base.mkdir(parents=True, exist_ok=True)
     remap_base = Path(_paths.BASE_DIR).resolve()
+    # captured before any remapping, so version metadata can be staged in
+    _REAL_ROOT = remap_base
     paths_real = {n: getattr(_paths, n)
                   for n in dir(_paths)
                   if isinstance(getattr(_paths, n, None), Path)}
@@ -98,6 +101,15 @@ def build_env():
     for sub in ("extracted", "injected", "lua", "processed",
                 "CostomPak", "Repacked"):
         (result_root / sub).mkdir(parents=True, exist_ok=True)
+
+    # Stage the real version metadata into the remapped root. Without this the
+    # sandbox has no VERSION file, and the banner resolves through its fallback
+    # instead of the production path — which is precisely how a version bump can
+    # go green here and still ship a wrong banner.
+    for _meta in ("VERSION", "ikram_key.json"):
+        _src = _REAL_ROOT / _meta
+        if _src.is_file():
+            shutil.copy2(_src, base / _meta)
     return home, base, drop_root, result_root
 
 

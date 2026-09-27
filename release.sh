@@ -65,7 +65,7 @@ if ! unzip -tq "$ZIP" >/dev/null 2>&1; then
 fi
 echo "[*] Archive OK: $(du -h "$ZIP" | cut -f1), $(unzip -l "$ZIP" | tail -1 | awk '{print $2}') entries"
 
-echo "[*] Pushing V120 source to origin/main..."
+echo "[*] Pushing $VERSION source to origin/main..."
 git -C "$SOURCE_DIR" push origin main
 
 echo "[*] Uploading to GitHub..."

@@ -21,9 +21,17 @@ import paths
 def _read_version():
     """Single source of truth is the VERSION file next to this module.
 
-    Reading it beats a second hardcoded literal: the banner used to sit at
-    v119 while VERSION/ikram_key/changelog were already bumped, which is
-    exactly the drift this removes.
+    There is deliberately no hardcoded version literal in this function. The
+    literal that used to sit here was worse than no fallback at all: every
+    sandbox that remaps paths away from the repo has no VERSION file, so the
+    banner silently showed that frozen literal instead of the real version —
+    which is how a version bump can pass the unit suites and still ship a
+    wrong banner.
+
+    Fallback chain, in order of authority:
+      1. the VERSION file
+      2. ikram_key.json, which the updater rewrites on every install
+      3. "unknown" — loud and obviously wrong, never a plausible number
     """
     try:
         v = (paths.ROOT / "VERSION").read_text(encoding="utf-8").strip()
@@ -31,7 +39,15 @@ def _read_version():
             return v.lower()
     except Exception:
         pass
-    return "v120"
+    try:
+        import json
+        v = json.loads((paths.ROOT / "ikram_key.json").read_text(
+            encoding="utf-8")).get("version", "")
+        if v:
+            return str(v).strip().lower()
+    except Exception:
+        pass
+    return "unknown"
 
 
 VERSION = _read_version()
