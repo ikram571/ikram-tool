@@ -1,4 +1,4 @@
-"""IkramTool VIP theme engine (V119).
+"""IkramTool VIP theme engine.
 
 One terminal-aware ANSI colour engine. Every colour the tool prints comes
 from here — the full 256-colour palette, 267 themes (11 hand-tuned plus one

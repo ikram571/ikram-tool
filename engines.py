@@ -18,7 +18,7 @@ import importlib.util
 import os
 import shutil
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePath
 
 MAGIC_BYTES = b"\xe1\x12\x6f\x5a"
 REPAK_TIMEOUT = 1800
@@ -475,6 +475,119 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
             else:
                 adds[rel] = data
         return p.repack(str(out), replacements=repl, add_files=adds)
+
+    raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
+
+
+def list_pak_paths(pakf, aes_key=None, log=None):
+    """Every file path declared by a pak, without extracting anything.
+
+    Used by the Costom PAK option, which needs the template's file list to
+    build a new pak that declares the same names with empty contents.
+    """
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    kind = detect_kind(pakf)
+    if kind == "tencent":
+        with pakmod().PakReader(pakf) as pak:
+            return sorted(pak.full_paths())
+    if kind == "ue4":
+        aes_key = _resolve_ue4_key(pakf, aes_key or None, log)
+        p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        return sorted(p.files())
+    raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
+
+
+def pack_folders(all_paths):
+    """Every distinct folder that holds a file, shallowest first.
+
+    A pak stores one flat list of full paths, so a folder is just a shared
+    prefix. Offering the prefixes is what lets the Costom PAK option present a
+    numbered FOLDER list instead of a wall of file names.
+    """
+    folders = set()
+    for p in all_paths:
+        parts = p.replace("\\", "/").split("/")
+        for i in range(1, len(parts)):
+            folders.add("/".join(parts[:i]))
+    return sorted(folders, key=lambda f: (f.count("/"), f))
+
+
+def _read_bodies(pakf, kind, names, aes_key, log):
+    """Real file contents pulled back out of the template pack.
+
+    Only used when the user typed a path, which the menu promises is copied
+    with its contents rather than stored empty.
+    """
+    bodies = {}
+    if kind == "tencent":
+        with pakmod().PakReader(pakf) as pak:
+            # PakReader keeps a {path: entry} map from the index; read_entry
+            # needs the entry object, not the name.
+            table = {}
+            for attr in ("files", "dirs"):
+                src = getattr(pak, attr, None)
+                if isinstance(src, dict):
+                    table.update(src)
+            for name in names:
+                entry = table.get(name) or table.get(PurePath(name))
+                if entry is None:
+                    raise ValueError("entry vanished from the template: %s" % name[:60])
+                bodies[name] = pak.read_entry(entry)
+            return bodies
+    p = ue4mod().Ue4Pak(pakf, aes_key=_resolve_ue4_key(pakf, aes_key or None, log))
+    for name in names:
+        bodies[name] = p.read_file(name)
+    return bodies
+
+
+def costom_pak(pakf, out, paths_wanted, aes_key=None, log=None, copy=False):
+    """Build a pak that DECLARES `paths_wanted` into a new pack.
+
+    This is the Costom PAK trick: the game reads the index, sees the files it
+    expects, and creates them itself, so the tool never has to ship real
+    content for them. Bodies are written as zero bytes on purpose — that is
+    the whole point of the option, not a bug.
+
+    `copy=True` stores each wanted file's real bytes instead. The menu offers
+    that when the user types a path, because a typed path is a request to pull
+    that file (and anything under it) across as it already is.
+    """
+    log = log or (lambda *a, **k: None)
+    pakf = Path(pakf)
+    out = Path(out)
+    kind = detect_kind(pakf)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists():
+        out.unlink()
+    wanted = list(paths_wanted)
+    if copy:
+        log("  copying %d file(s) out of the template" % len(wanted))
+        bodies = _read_bodies(pakf, kind, wanted, aes_key, log)
+    else:
+        bodies = {q: b"" for q in wanted}
+
+    if kind == "tencent":
+        log("  engine: ikram-custom (tencent) — %s costom pak"
+            % ("copied" if copy else "empty-body"))
+        with pakmod().PakReader(pakf) as pak:
+            edits = [(p, (bodies.get(p, b""), None, PurePath(p).name)) for p in wanted]
+            return pakmod().PakWriter(pak).inject_files(
+                edits, str(out), force_add=True)
+
+    if kind == "ue4":
+        aes_key = _resolve_ue4_key(pakf, aes_key or None, log)
+        p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
+        # delete= is what makes a subset: without it repack() keeps every
+        # original entry, so asking for one path would still yield the whole
+        # pak. Never route this through `repak pack`: repak 0.2.3 writes a
+        # corrupt index when a pack mixes a 0-byte entry with other entries,
+        # which is exactly the shape a costom pak is.
+        log("  engine: python-ue4 (standard UE4) — %s costom pak"
+            % ("copied" if copy else "empty-body"))
+        return p.repack(str(out),
+                        add_files={q: bodies[q] for q in wanted},
+                        delete=[q for q in sorted(p.files()) if q not in wanted])
 
     raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
 

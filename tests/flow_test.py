@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -36,6 +37,37 @@ FIX_DIR = Path(os.environ.get(
     "FIX_ROOT",
     "/data/data/com.termux/files/home/opencode/IkramTool Project/Pakfiles For Testing"))
 FIX_PAK = FIX_DIR / "core_patch_4.6.0.21537.pak" if FIX_DIR.is_dir() else None
+
+
+def synth_pak():
+    """Build a real UE4 pak with the bundled repak.
+
+    The upstream fixture is a Tencent pak that is not in the repo, which used
+    to skip every real-PAK scenario. A genuine pak of either kind is still a
+    real pak for the purposes of these flows, so generate one instead of
+    leaving options 1-4 untested.
+    """
+    import shutil
+    import subprocess
+    repak = _p.ROOT / "repak"
+    if not repak.is_file():
+        return None
+    out = Path(tempfile.mkdtemp(prefix="ikram_synthpak_"))
+    tree = out / "tree" / "ShadowTrackerExtra"
+    (tree / "Config").mkdir(parents=True, exist_ok=True)
+    (tree / "Content").mkdir(parents=True, exist_ok=True)
+    (tree / "Config" / "GameUserSettings.ini").write_bytes(b"res=1080p\n")
+    (tree / "Content" / "gameplay.lua").write_bytes(b"return 42\n")
+    (tree / "Content" / "data.lua").write_bytes(b"a,b=1,2\n")
+    pak = out / "synth.pak"
+    r = subprocess.run(
+        [str(repak), "pack", str(out / "tree"), "--mount-point", "../../../",
+         "--version", "V8B", "--compression", "Zlib", str(pak)],
+        capture_output=True, text=True)
+    if r.returncode != 0 or not pak.is_file():
+        shutil.rmtree(out, ignore_errors=True)
+        return None
+    return pak
 
 FAILS = []
 
@@ -67,9 +99,13 @@ def main():
     FIX = str(FIX_PAK) if FIX_PAK and FIX_PAK.is_file() else None
 
     # 1 ---- V112 shell: brand, folder status, exit (asserts inside runner)
+    # The version in the banner must come from the VERSION file, not a
+    # hardcoded literal here: a literal like "v11" silently matched v110-v119
+    # and then failed for v120, which is how drift hides.
+    _ver = (_p.ROOT / "VERSION").read_text(encoding="utf-8").strip().lower()
     run_case("shell", {
         "steps": [{"script": ["0"],
-                   "expect": {"brand": ["IkramTool", "v11"],
+                   "expect": {"brand": ["IkramTool", _ver],
                               "status": ["DROP/pak/", "(empty)"],
                               "exit": ["Thanks for using IkramTool"]}}]})
 
@@ -117,14 +153,66 @@ def main():
                             ["files repacked",
                              _f("RESULT/Repacked/core.pak")]}}]})
 
-        # 7 ---- costom pak skeleton (empty ENTER = full skeleton)
+        # 7 ---- costom pak against a real template, if one is present.
+        #         The output name carries a timestamp, so match it by glob and
+        #         the confirmation text is the new one, not the old wording.
         run_case("costom_real", {
             "fixtures": dict(pak),
-            "exists": ["RESULT/CostomPak/core.pak"],
-            "steps": [{"script": ["1", "4", "", "", "0", "0"],
-                       "expect": {"costom done":
-                                  ["Costom Pak ready",
-                                   _f("RESULT/CostomPak/core.pak")]}}]})
+            "exists": ["RESULT/CostomPak/costom_*.pak"],
+            "steps": [{"script": ["1", "4", "y", "", "0", "0"],
+                       "expect": {"costom done": ["Costom PAK created"]}}]})
+
+    # 7b ---- same four PAK options against a GENERATED ue4 pak, so they are
+    #          covered even when the upstream Tencent fixture is absent.
+    SYNTH = synth_pak()
+    if SYNTH:
+        spak = {"DROP/pak/synth.pak": str(SYNTH)}
+        run_case("synth_unpack", {
+            "fixtures": dict(spak),
+            "exists": [_f("RESULT/processed")],
+            "steps": [{"script": ["1", "1", "1", "", "", "0", "0"],
+                       "expect": {"unpack done": ["files unpacked"]}}]})
+
+        run_case("synth_inject", {
+            "fixtures": dict(spak),
+            "inject": True,
+            "exists": [_f("RESULT/injected")],
+            "steps": [{"script": ["1", "2", "1", "", "2", "", "0", "0"],
+                       "expect": {"inject done": ["INJECTED", "injected"]}}]})
+
+        # repack needs a folder that was unpacked first
+        run_case("synth_repack", {
+            "fixtures": dict(spak),
+            "exists": [_f("RESULT/Repacked")],
+            "steps": [
+                {"script": ["1", "1", "1", "", "", "0", "0"]},
+                {"script": ["1", "3", "1", "", "0", "0"],
+                 "expect": {"repack done": ["files repacked"]}}]})
+
+        # option 4: costom pak. Y=proceed, ENTER=every path (all empty bodies)
+        run_case("synth_costom", {
+            "fixtures": dict(spak),
+            "steps": [{"script": ["1", "4", "y", "", "0", "0"],
+                       "expect": {"costom built": ["Costom PAK created"]}}]})
+
+        # option 4 again, but one FOLDER only (the menu numbers folders)
+        run_case("synth_costom_one", {
+            "fixtures": dict(spak),
+            "steps": [{"script": ["1", "4", "y", "3", "0", "0"],
+                       "expect": {"costom one": ["2 path(s)"]}}]})
+
+        # option 4 with a typed path: that branch COPIES the real bytes
+        run_case("synth_costom_copy", {
+            "fixtures": dict(spak),
+            "steps": [{"script": ["1", "4", "y", "data.lua", "0", "0"],
+                       "expect": {"costom copy": ["COPIED from the original"]}}]})
+
+        # option 4 with nothing to read: clean error, no crash
+        run_case("synth_costom_nopak", {
+            "steps": [{"script": ["1", "4", "", "0", "0"],
+                       "expect": {"costom no pak": ["No PAK found"]}}]})
+    else:
+        print("SKIP  synth_* (could not build a pak with repak)")
 
     # 8 ---- lua compile + decompile python round-trip, same env
     import base64 as _b64

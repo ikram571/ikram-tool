@@ -1,4 +1,4 @@
-"""IkramTool V119 — VIP shell.
+"""IkramTool — VIP shell.
 
 Owns the screen: header, menu loops, submenus, folder status, prompts,
 PROCEED box, progress frames, status boxes, invalid-input box, theme
@@ -17,7 +17,24 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v119"
+
+def _read_version():
+    """Single source of truth is the VERSION file next to this module.
+
+    Reading it beats a second hardcoded literal: the banner used to sit at
+    v119 while VERSION/ikram_key/changelog were already bumped, which is
+    exactly the drift this removes.
+    """
+    try:
+        v = (paths.ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        if v:
+            return v.lower()
+    except Exception:
+        pass
+    return "v120"
+
+
+VERSION = _read_version()
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
@@ -121,12 +138,21 @@ class Vip:
             _w(text)
 
     def _ask(self, prompt):
-        """Read one line. Overridable in tests."""
+        """Read one line. Overridable in tests.
+
+        Sets `_eof` when the input stream is gone. Every re-prompt loop must
+        check it: input() keeps raising EOFError forever on a closed stdin, so
+        a naive "not valid -> ask again" loop spins at 100% CPU instead of
+        letting the tool exit.
+        """
+        self._eof = False
         try:
             ans = input(prompt)
         except EOFError:
+            self._eof = True
             return ""
         except KeyboardInterrupt:
+            self._eof = True
             return ""
         if is_tty():
             # Termux doesn't echo the Enter newline — advance the cursor so
@@ -134,6 +160,10 @@ class Vip:
             # the "Choose ..." prompt.
             self.write("\n")
         return ans
+
+    def _eof_answered(self, prompt=""):
+        """_ask() plus a flag telling the caller the stream just closed."""
+        return self._ask(prompt), bool(getattr(self, "_eof", False))
 
     def cls(self):
         if is_tty():
@@ -290,9 +320,14 @@ class Vip:
     def prompt_in(self, choices, label):
         while True:
             self.write("  " + self.theme.apply(label, "prompt") + " ")
-            ans = self._ask("").strip().lower()
+            ans, eof = self._eof_answered("")
+            ans = ans.strip().lower()
             if ans in choices:
                 return ans
+            if eof:
+                # stdin is gone: treat as back so the menu unwinds instead of
+                # re-asking forever.
+                return choices[-1] if choices else "0"
             self.invalid_box()
 
     def invalid_box(self):
@@ -339,11 +374,15 @@ class Vip:
                     + "      " + self.theme.apply("[ N ] Cancel", "warn"))
         self.write(self.box.draw_box(rows, "thick", title="Proceed?") + "\n")
         self.write("  " + self.theme.apply("Proceed? (Y/N) ", "prompt") + " ")
-        ans = self._ask("").strip().lower()
+        ans, eof = self._eof_answered("")
+        ans = ans.strip().lower()
         while ans not in ("y", "n"):
+            if eof:
+                return False
             self.invalid_box()
             self.write("  " + self.theme.apply("Proceed? (Y/N) ", "prompt") + " ")
-            ans = self._ask("").strip().lower()
+            ans, eof = self._eof_answered("")
+            ans = ans.strip().lower()
         return ans == "y"
 
     def confirm_box(self, title, label, yes_label="Delete"):
@@ -354,11 +393,15 @@ class Vip:
             + "      " + self.theme.apply("[ N ] Cancel", "warn"),
         ], "heavy", title=title) + "\n")
         self.write("  " + self.theme.apply("Confirm? (Y/N) ", "prompt") + " ")
-        ans = self._ask("").strip().lower()
+        ans, eof = self._eof_answered("")
+        ans = ans.strip().lower()
         while ans not in ("y", "n"):
+            if eof:
+                return False
             self.invalid_box()
             self.write("  " + self.theme.apply("Confirm? (Y/N) ", "prompt") + " ")
-            ans = self._ask("").strip().lower()
+            ans, eof = self._eof_answered("")
+            ans = ans.strip().lower()
         return ans == "y"
 
     # ------------------------------------------------------------- returns
@@ -442,7 +485,7 @@ class Vip:
                 if want:
                     frame = ProgressFrame(self, title="Installing missing tools")
                     results = lua_pipeline.install_missing(progress=frame)
-                    frame.close(cur="Finished")
+                    frame.show(pct=100, cur="Finished")
                     ok_n = sum(1 for _c, ok, _t in results if ok)
                     self.cls()
                     self.write(self.box.draw_box([

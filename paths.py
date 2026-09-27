@@ -36,6 +36,9 @@ else:
     _DROP = BASE_DIR / "DROP"
     _RESULT = BASE_DIR / "RESULT"
 
+# Public alias: the directory the tool's own files live in (VERSION, assets).
+ROOT = _F
+
 DROP_PAK = _DROP / "pak"
 DROP_LUA = _DROP / "lua"
 DROP_INJECT = _DROP / "inject"

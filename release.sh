@@ -46,17 +46,37 @@ rm -f "$STAGE"/luac.out
 rm -f "$STAGE"/README.md "$STAGE"/INSTRUCTIONS.txt "$STAGE"/CHANGELOG.md "$STAGE"/.gitignore
 
 # Stamp the new version into VERSION + ikram_key.json (key_hash unchanged).
+# The hash is read from the existing ikram_key.json, never retyped here, so
+# there is exactly one place the activation hash lives.
+KEY_HASH="$("${TERMUX_PREFIX:-/data/data/com.termux/files/usr}/bin/python3" -c \
+  "import json;print(json.load(open('ikram_key.json'))['key_hash'])")"
 echo "$VERSION" > "$STAGE/VERSION"
-printf '{\n  "version": "%s",\n  "key_hash": "7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"\n}\n' "$VERSION" > "$STAGE/ikram_key.json"
+printf '{\n  "version": "%s",\n  "key_hash": "%s"\n}\n' "$VERSION" "$KEY_HASH" > "$STAGE/ikram_key.json"
 
 cd "$STAGE"
 # KEEP .pyc: they are required. Only drop __pycache__ junk.
 zip -r "$ZIP" . -x "__pycache__/*" -x "*/__pycache__/*"
 
+# Prove the archive before announcing it. A zip that cannot even list itself is
+# not something to hand to users.
+if ! unzip -tq "$ZIP" >/dev/null 2>&1; then
+  echo "[x] The built archive is corrupt — refusing to upload."
+  exit 1
+fi
+echo "[*] Archive OK: $(du -h "$ZIP" | cut -f1), $(unzip -l "$ZIP" | tail -1 | awk '{print $2}') entries"
+
+echo "[*] Pushing V120 source to origin/main..."
+git -C "$SOURCE_DIR" push origin main
+
 echo "[*] Uploading to GitHub..."
-gh release create "$VERSION" "$ZIP" \
+if ! gh release create "$VERSION" "$ZIP" \
   --repo ikram571/ikram-tool \
   --title "Ikram Tool $VERSION" \
-  --notes "Ikram Tool $VERSION" || true
+  --notes "Ikram Tool $VERSION"; then
+  # This used to be `|| true`, which printed "Done! Users can now auto-update"
+  # after a release that did not exist.
+  echo "[x] Release $VERSION was NOT created — users cannot auto-update to it."
+  exit 1
+fi
 
-echo "[+] Done! Users can now auto-update."
+echo "[+] Done! Release $VERSION is live. Users can now auto-update."

@@ -29,6 +29,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import zlib
 from pathlib import Path
 
@@ -58,13 +59,41 @@ UNLUAC_JAR_TIMEOUT = 180  # base seconds; jar is slower to warm up
 PROBE_TIMEOUT = 30        # seconds; validation probes must never block detection
 MAX_SCALED_TIMEOUT = 3600 # absolute ceiling so nothing pins the UI forever
 
+# Wall-clock ceiling for one decompile request, set by the pipeline before the
+# cascade starts. Without it every tier uses its own generous timeout and seven
+# tiers in a row can run for many minutes; with it a tier that starts late is
+# clamped to whatever budget is actually left, so the whole request honours the
+# user-visible limit instead of overshooting it by one long engine run.
+_HARD_DEADLINE = [0.0]  # 0.0 means "no deadline set"
+
+
+def set_hard_deadline(when: float) -> None:
+    _HARD_DEADLINE[0] = float(when or 0.0)
+
+
+def clear_hard_deadline() -> None:
+    _HARD_DEADLINE[0] = 0.0
+
+
+def _budget_left() -> float:
+    if _HARD_DEADLINE[0] <= 0.0:
+        return float("inf")
+    return _HARD_DEADLINE[0] - time.monotonic()
+
 
 def _scaled_timeout(base: int, size: int) -> int:
     """Timeout that grows with the input so no line-count / byte-count wall
-    exists: base + ~5s per extra MB, capped at MAX_SCALED_TIMEOUT."""
+    exists: base + ~5s per extra MB, capped at MAX_SCALED_TIMEOUT, then
+    clamped to the remaining request budget so a cascade cannot overshoot."""
     if size <= 0:
-        return base
-    return min(MAX_SCALED_TIMEOUT, int(base + max(0.0, (size - (2 << 20)) / (1 << 20)) * 5.0))
+        secs = base
+    else:
+        secs = min(MAX_SCALED_TIMEOUT,
+                   int(base + max(0.0, (size - (2 << 20)) / (1 << 20)) * 5.0))
+    left = _budget_left()
+    if left != float("inf"):
+        secs = max(1, min(secs, int(left)))
+    return secs
 
 
 def _phase(progress, text: str) -> None:

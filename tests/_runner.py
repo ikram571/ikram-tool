@@ -157,14 +157,18 @@ def run_plan(plan):
 
     if plan.get("inject"):
         # pick a basename appearing exactly once inside the layout DROP/pak
-        # so mode ALL resolves automatically without a folder-picker prompt
-        import pak as _pak
+        # so mode ALL resolves automatically without a folder-picker prompt.
+        # engines.list_pak_paths is kind-aware: PakReader is Tencent-only and
+        # would blow up on a UE4 fixture.
+        import engines as _eng
         paks = sorted((drop_root / "pak").glob("*.pak"))
         if paks:
-            with _pak.PakReader(paks[0]) as r:
-                fmap = r.full_paths()
+            try:
+                paths_in_pak = _eng.list_pak_paths(paks[0])
+            except Exception:
+                paths_in_pak = []
             by_name = {}
-            for pth in fmap:
+            for pth in paths_in_pak:
                 by_name.setdefault(Path(pth).name, []).append(pth)
             target = None
             for name, plist in by_name.items():
@@ -183,7 +187,14 @@ def run_plan(plan):
             check(name, all(s in out for s in substrs))
 
     for rel in plan.get("exists", []):
-        check("exists %s" % rel, _rel(base, rel).exists())
+        target = _rel(base, rel)
+        # a glob lets a case assert on output whose name carries a timestamp,
+        # which is how the costom pak ships
+        if any(ch in rel for ch in "*?["):
+            check("exists %s" % rel, any(target.parent.glob(target.name)),
+                  "no match under %s" % target.parent)
+        else:
+            check("exists %s" % rel, target.exists())
     for rel in plan.get("gone", []):
         check("gone %s" % rel, not _rel(base, rel).exists())
     for rel, want in plan.get("content", {}).items():
@@ -193,13 +204,27 @@ def run_plan(plan):
 
     if plan.get("inject") and plan.get("_inject_target"):
         tgt = plan["_inject_target"]
-        pak = result_root / "injected" / "core.pak"
-        if pak.is_file():
-            import pak as _pak
-            with _pak.PakReader(pak) as r:
-                got = r.read_entry(r.full_paths()[tgt])
-            okc = got == b"V112-INJECT-PROBE\n"
-            check("inject byte-exact", okc)
+        # the output pak is named after the input, whatever that was called
+        inj_dir = result_root / "injected"
+        paks = sorted(inj_dir.glob("*.pak")) if inj_dir.is_dir() else []
+        if paks:
+            pak = paks[0]
+            # verify through the engine layer so both pak kinds work
+            import engines as _eng
+            import tempfile as _tf
+            with _tf.TemporaryDirectory(prefix="ikram_injchk_") as _td:
+                try:
+                    _eng.unpack_pak(pak, _td, log=lambda *a: None)
+                    got = None
+                    for root, _dirs, files in os.walk(_td):
+                        if Path(tgt).name in files:
+                            got = (Path(root) / Path(tgt).name).read_bytes()
+                            break
+                except Exception as _e:
+                    check("inject byte-exact (unpack)", False, str(_e)[:120])
+                    got = None
+                check("inject byte-exact", got == b"V112-INJECT-PROBE\n",
+                      "got %r" % (got[:40] if got else got,))
 
     # keep a trace for debugging (temp dirs are cleaned by parent on pass)
     (home / "trace.txt").write_text(out_all)

@@ -27,6 +27,13 @@ REPO = "ikram571/ikram-tool"
 API = "https://api.github.com/repos/{}/releases/latest".format(REPO)
 ZIP_NAME = "IkramTool.zip"
 
+# The one true activation key hash. This must always equal the key_hash in
+# ikram_key.json and in release.sh — a typo here silently invalidates the
+# user's key. tests/test_updater_safety.py cross-checks all three.
+CANONICAL_KEY_HASH = (
+    "7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"
+)
+
 # ------------------- ANSI palette (matches Ikram Tool UI) --------------------
 _TTY = 1 if (hasattr(sys.stdout, "isatty") and sys.stdout.isatty()) else 0
 _R = "\033[0m"
@@ -150,40 +157,158 @@ PROTECTED = {
     "repair.zip",
 }
 
+# A payload without the tool's own entry points is not an update, it is a
+# broken or truncated download. The old installer deleted the whole runtime
+# first and copied afterwards, so a partial payload left the tool uninstalled
+# and unrecoverable without a manual reinstall. These must all be present
+# before a single existing file is touched.
+REQUIRED_ENTRIES = (
+    "ikram.pyc",
+    "ikram_patch.py",
+    "lua_pipeline.py",
+    "mega_lua.py",
+    "univ.py",
+    "update.py",
+)
+
+# A real release ships dozens of runtime files. Anything close to this count is
+# a truncated archive, not a small update.
+MIN_PAYLOAD_FILES = 40
+
+BACKUP_DIR = ".ikram_update_backup"
+
+
+class InstallError(Exception):
+    """A payload cannot be installed safely. The live install is unchanged."""
+
+
+def _safe_extract(zip_path, dest):
+    """Extract an archive, refusing any member that would escape dest.
+
+    A zip entry named ../../something writes outside the staging directory, so
+    the paths are resolved and checked rather than trusted.
+    """
+    dest = Path(dest)
+    root = dest.resolve()
+    with zipfile.ZipFile(zip_path) as z:
+        names = z.namelist()
+        if not names:
+            raise InstallError("archive is empty")
+        for name in names:
+            if name.startswith("/") or ".." in Path(name).parts:
+                raise InstallError("unsafe path in archive: %s" % name)
+            target = (root / name).resolve()
+            if target != root and root not in target.parents:
+                raise InstallError("unsafe path in archive: %s" % name)
+        z.extractall(dest)
+
+
+def _payload_root(tmp):
+    """Release zips sometimes ship a single wrapper folder; step into it."""
+    tmp = Path(tmp)
+    nested = [p for p in tmp.iterdir() if p.is_dir()]
+    if len(nested) == 1 and (nested[0] / "ikram.pyc").exists():
+        return nested[0]
+    return tmp
+
+
+def _validate_payload(src):
+    """(ok, reason). The gate that keeps a bad download away from the install."""
+    src = Path(src)
+    if not src.is_dir():
+        return False, "payload directory missing"
+    files = [p for p in src.rglob("*") if p.is_file()]
+    if not files:
+        return False, "payload contains no files"
+    names = {p.name for p in src.iterdir()}
+    missing = [n for n in REQUIRED_ENTRIES if n not in names]
+    if missing:
+        return False, "payload is missing %s" % ", ".join(sorted(missing))
+    if len(files) < MIN_PAYLOAD_FILES:
+        return False, ("payload has only %d file(s); a real release has %d+ "
+                       "so this looks like a truncated download"
+                       % (len(files), MIN_PAYLOAD_FILES))
+    return True, "%d files validated" % len(files)
+
+
+def _drop(path):
+    """Remove a file, symlink or directory without ever raising."""
+    try:
+        p = Path(path)
+        if p.is_symlink() or p.is_file():
+            p.unlink()
+        elif p.is_dir():
+            shutil.rmtree(p, ignore_errors=True)
+    except OSError:
+        pass
+
 
 def _clean_replace(src):
-    """Delete old tool files (EXCEPT DROP/RESULT/VERSION/activation),
-    then fresh-copy the new files from src. => no file is ever missing."""
+    """Replace the runtime with src as a transaction, not a delete-then-copy.
+
+    Every existing non-protected entry is MOVED aside first, the new set is
+    copied in, and the result is verified. If any step fails, the partial copy
+    is removed and the previous runtime is moved straight back, so a bad
+    download can never leave the tool uninstalled.
+
+    DROP/RESULT/VERSION/ikram_key.json are never touched.
+    """
+    src = Path(src)
+    ok, reason = _validate_payload(src)
+    if not ok:
+        raise InstallError(reason)
+
     if not TOOL_DIR.exists():
         TOOL_DIR.mkdir(parents=True, exist_ok=True)
-    new_names = {f.name for f in src.iterdir()}
-    for old in list(TOOL_DIR.iterdir()):
-        if old.name in PROTECTED:
-            continue
-        if old.name not in new_names:
-            # stale file not in the new zip -> remove it (clean slate)
-            if old.is_dir():
-                shutil.rmtree(old, ignore_errors=True)
+    backup = TOOL_DIR / BACKUP_DIR
+    shutil.rmtree(backup, ignore_errors=True)
+    backup.mkdir(parents=True, exist_ok=True)
+
+    moved, installed = [], []
+    try:
+        for old in list(TOOL_DIR.iterdir()):
+            if old.name in PROTECTED or old.name == BACKUP_DIR:
+                continue
+            shutil.move(str(old), str(backup / old.name))
+            moved.append(old.name)
+
+        for f in src.iterdir():
+            if f.name in PROTECTED:
+                continue
+            dst = TOOL_DIR / f.name
+            if f.is_dir():
+                shutil.copytree(f, dst)
             else:
-                old.unlink(missing_ok=True)
-    # now copy the new files (overwrite existing same-name)
-    for f in src.iterdir():
-        if f.name in PROTECTED:
-            continue
-        dst = TOOL_DIR / f.name
-        if f.is_dir():
-            shutil.rmtree(dst, ignore_errors=True)
-            shutil.copytree(f, dst)
-        else:
-            shutil.copy2(f, dst)
-    # keep the execute bit right on all of these
-    for name in ("run.sh", "install.sh", "lua_patched", "luac_patched", "unluac_rs", "repak"):
+                shutil.copy2(f, dst)
+            installed.append(f.name)
+
+        gone = [n for n in REQUIRED_ENTRIES if not (TOOL_DIR / n).exists()]
+        if gone:
+            raise InstallError("install came out incomplete, missing %s"
+                               % ", ".join(sorted(gone)))
+    except Exception as exc:
+        for name in installed:
+            _drop(TOOL_DIR / name)
+        for name in moved:
+            kept = backup / name
+            if kept.exists() or kept.is_symlink():
+                shutil.move(str(kept), str(TOOL_DIR / name))
+        shutil.rmtree(backup, ignore_errors=True)
+        if isinstance(exc, InstallError):
+            raise
+        raise InstallError("copy failed (%s); previous install restored"
+                           % exc)
+
+    for name in ("run.sh", "install.sh", "lua_patched", "luac_patched",
+                 "unluac_rs", "repak"):
         p = TOOL_DIR / name
         if p.exists():
             try:
                 p.chmod(0o755)
             except Exception:
                 pass
+    shutil.rmtree(backup, ignore_errors=True)
+    return True
 
 
 def _show_complete():
@@ -202,10 +327,12 @@ def _show_complete():
 
 
 def do_install():
+    """Download + install the latest release. Returns True only on a real
+    complete install; every failure path leaves the current install intact."""
     info = latest_remote()
     if not info:
         print("NO_RELEASE")
-        return None
+        return False
 
     zip_path = TOOL_DIR / ".ikram_update.zip"
     tmp = TOOL_DIR / ".ikram_update_tmp"
@@ -227,17 +354,12 @@ def do_install():
                     break
                 data += chunk
                 prog.show(len(data), total)
+        if not data:
+            raise InstallError("download produced an empty file")
         zip_path.write_bytes(data)
 
-        with zipfile.ZipFile(zip_path) as z:
-            z.extractall(tmp)
-
-        src = tmp
-        nested = [p for p in tmp.iterdir() if p.is_dir()]
-        if len(nested) == 1 and (nested[0] / "ikram.pyc").exists():
-            src = nested[0]
-
-        _clean_replace(src)
+        _safe_extract(zip_path, tmp)
+        _clean_replace(_payload_root(tmp))
 
         try:
             ver = "V" + str(info["version"]).lstrip("vV")
@@ -250,9 +372,7 @@ def do_install():
             except Exception:
                 kf.write_text(
                     '{\n  "version": "%s",\n'
-                    '  "key_hash": '
-                    '"7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"\n}\n'
-                    % ver
+                    '  "key_hash": "%s"\n}\n' % (ver, CANONICAL_KEY_HASH)
                 )
         except Exception:
             pass
@@ -260,12 +380,18 @@ def do_install():
         _show_complete()
         print("INSTALLED_OK")
         threading.Thread(target=_fix_env, daemon=True).start()
+        return True
+    except InstallError as e:
+        print("UPDATE_ABORTED: {}".format(e))
+        print("Your current install was left untouched.")
+        return False
     except Exception as e:
         print("FAIL: {}".format(e))
+        print("Your current install was left untouched.")
+        return False
     finally:
-        zip_path.unlink(missing_ok=True)
+        _drop(zip_path)
         shutil.rmtree(tmp, ignore_errors=True)
-    return None
 
 
 def _fix_env():
@@ -434,4 +560,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--check":
         check_only()
     else:
-        do_install()
+        # update.sh runs under `set -e`, so a failed install must not look done.
+        sys.exit(0 if do_install() else 1)

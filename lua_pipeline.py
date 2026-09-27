@@ -1,4 +1,4 @@
-"""IkramTool V119 — Lua Intelligence Engine.
+"""IkramTool — Lua Intelligence Engine.
 
 Full multi-tier decompile cascade + game-ready validator + honest reporting.
 
@@ -33,6 +33,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -69,7 +70,7 @@ _LUA_HEADERS = tuple(
 # entries were quietly dead: `_xor_key_recover` rejected them on sight.
 _XOR_LENGTHS = tuple(range(1, len(_LUA_HEADERS[0]) + 1))
 
-VERSION = "v119"
+VERSION = "v120"
 
 # Offsets a wrapper may occupy before the real chunk starts. The offset is
 # never trusted on its own: find_wrapper only accepts one where a real
@@ -88,6 +89,27 @@ _LAYER_SCAN = tuple(list(range(17)) + [24, 32, 48, 64, 96, 128, 192, 256])
 # pathological input from spinning: every pass either peels one real layer
 # or returns, so this is a hard ceiling on work, not a retry budget.
 _MAX_LAYERS = 6
+
+# The key sweep is 3,600 candidates (25 offsets x 12 key lengths x 6 known
+# headers x xor/add). Each candidate only needs a 12-byte header check, so the
+# whole search is bounded by a wall-clock budget instead of running to
+# completion: on a slow phone an unbounded sweep on a 350KB chunk burned
+# minutes of frozen UI before a single decompiler was tried.
+_SWEEP_BUDGET = float(os.environ.get("IKRAM_SWEEP_BUDGET", "45") or 45)
+
+# How many header-passing candidates may be handed to the (subprocess-backed)
+# body verifier. The header gate is only 5 bytes wide, so real chunks do throw
+# false positives; this caps the subprocess cost without ever aborting the
+# search, because a genuine key can sit behind several of them.
+_MAX_LOADS_PROBES = 24
+
+# Bytes handed to the cheap header gate before any full-window transform.
+_HEAD_PROBE = 64
+
+# Wall-clock ceiling for one file's whole tier cascade. Every individual
+# engine already carries its own timeout; this is the outer bound that turns
+# "seven slow tiers in a row" into one honest budget message.
+_CASCADE_BUDGET = float(os.environ.get("IKRAM_DECOMPILE_BUDGET", "300") or 300)
 
 
 # ---------------------------------------------------------------- detection
@@ -447,6 +469,12 @@ def _unluac_jar(data: bytes, timeout=90) -> str | None:
 def _ljd_decompile(data: bytes, timeout=60) -> str | None:
     """LuaJIT decompiler (Andrian Nord ljd) via bundled deps/ljd.
 
+    Runs inside a dedicated worker process (ljd_worker.py) so that `timeout` is
+    a real, enforceable deadline. ljd.tools.decompile walks the bytecode graph
+    in pure Python; on a malformed chunk it can spin forever, and a loop that
+    lives in this process cannot be killed, so the tool froze with no error at
+    all. Handing the work to a child makes the timeout mean something.
+
     The full ljd chain is rawdump parse -> ljd.tools.decompile (the actual
     bytecode-to-AST pass) -> ljd.lua.writer (Lua source out). Skipping
     decompile() and writing pseudoasm instead yields a disassembly listing,
@@ -454,40 +482,31 @@ def _ljd_decompile(data: bytes, timeout=60) -> str | None:
     """
     if not LJD_DIR.is_dir():
         return None
-    import sys
-    tools = None
-    try:
-        old = list(sys.path)
-        sys.path.insert(0, str(LJD_DIR))
-        from ljd.rawdump import parser
-        import ljd.tools as tools
-        import ljd.lua.writer as lua_writer
-    except Exception:
+    worker = _TOOL_DIR / "ljd_worker.py"
+    if not worker.is_file():
         return None
-    finally:
-        sys.path[:] = old
-    import io as _io, tempfile, os, contextlib
-    sink = _io.StringIO()
-    tmp = tempfile.NamedTemporaryFile(prefix="ljd_", suffix=".luac", delete=False)
+    work = tempfile.mkdtemp(prefix="ljd_")
     try:
-        tmp.write(data)
-        tmp.close()
-        with contextlib.redirect_stderr(sink), contextlib.redirect_stdout(sink):
-            header, proto = parser.parse(tmp.name)
-            if header is None:
-                return None
-            ast = tools.decompile(header, proto)
-            buf = _io.StringIO()
-            lua_writer.write(buf, ast)
-        txt = buf.getvalue()
+        src = os.path.join(work, "in.luac")
+        out = os.path.join(work, "out.lua")
+        with open(src, "wb") as fh:
+            fh.write(data)
+        try:
+            p = subprocess.run(
+                [sys.executable, str(worker), src, str(LJD_DIR), out],
+                capture_output=True, timeout=timeout,
+            )
+        except subprocess.TimeoutExpired:
+            return None
+        if p.returncode != 0 or not os.path.exists(out):
+            return None
+        with open(out, "r", encoding="utf-8", errors="replace") as fh:
+            txt = fh.read()
         return txt if txt and txt.strip() else None
     except Exception:
         return None
     finally:
-        try:
-            os.unlink(tmp.name)
-        except OSError:
-            pass
+        shutil.rmtree(work, ignore_errors=True)
 
 
 def _luadec(data: bytes, timeout=90) -> str | None:
@@ -689,10 +708,34 @@ def _peel_layers(data: bytes, ik) -> tuple:
     return None, notes
 
 
-def _xor_sweep(data: bytes) -> list:
+def _apply_key(buf: bytes, key: bytes, key_len: int, mode: str) -> bytes:
+    """Apply a repeating XOR/additive key to buf.
+
+    One C-level ``bytes.translate`` pass per key phase instead of a Python
+    loop per byte. Applying a 12-byte key to a 350KB chunk becomes 12 slice
+    operations rather than 350,000 interpreted iterations, which is the whole
+    difference between a multi-minute freeze and milliseconds.
+    """
+    if key_len <= 0:
+        return bytes(buf)
+    out = bytearray(buf)
+    for i in range(min(key_len, len(key))):
+        k = key[i]
+        if mode == "xor":
+            table = bytes(b ^ k for b in range(256))
+        else:
+            table = bytes((b - k) & 0xFF for b in range(256))
+        out[i::key_len] = out[i::key_len].translate(table)
+    return bytes(out)
+
+
+def _xor_sweep(data: bytes, progress=None,
+               budget: float = _SWEEP_BUDGET) -> tuple:
     """Tier-4 sweep: recover repeating XOR/additive keys against known lua
     headers, at the file start and at a few early offsets. Returns
-    [(label, dec)] where dec is the bare chunk with any prefix dropped.
+    (found, note) where found is [(label, dec)] with any prefix dropped, and
+    note is the honest reason for whatever happened (used, exhausted, or the
+    exact point the budget stopped the search).
 
     The prefix is dropped on purpose. A real protected game file is a wrapper
     followed by an encrypted body, so the bytes from `offset` onward ARE the
@@ -702,14 +745,29 @@ def _xor_sweep(data: bytes) -> list:
     """
     found = []
     if _lua_family_at(data[:12])[0]:
-        return found            # already a bare chunk: nothing to decrypt
-    # Offsets are dense for the first 16 bytes on purpose: loaders put a
-    # 1/2/3/4-byte magic in front of the body, and a power-of-two list simply
-    # skipped a 3-byte "TPF" header. After that the steps widen, since large
-    # prefixes are rare and each offset costs a full key search.
-    for offset in list(range(17)) + [24, 32, 48, 64, 96, 128, 192, 256]:
-        if offset + 4 > len(data):
+        return found, "bare chunk, nothing to decrypt"
+    offsets = [o for o in (list(range(17)) + [24, 32, 48, 64, 96, 128, 192, 256])
+               if o + 4 <= len(data)]
+    total = len(offsets) * len(_XOR_LENGTHS) * len(_LUA_HEADERS) * 2
+    start = time.monotonic()
+    done = 0
+    probes = 0
+    skipped = 0
+    note = "no key matched a known header in %d candidates" % total
+
+    def _out_of_time():
+        return time.monotonic() - start > budget
+
+    for offset in offsets:
+        if _out_of_time():
+            note = ("search stopped after %d/%d candidates (%.0fs budget); "
+                    "no key found in the part that was searched"
+                    % (done, total, budget))
             break
+        # The sweep can run for tens of seconds on a large protected file, so
+        # report movement per offset instead of leaving the UI on one line.
+        _phase(progress, "XOR key sweep — %d/%d offsets, candidate %d/%d"
+               % (offsets.index(offset) + 1, len(offsets), done, total))
         window = data[offset:]
         # key_len is the OUTER loop on purpose. Trying every header at
         # key_len=1 before touching key_len=8 is what stops the sweep from
@@ -725,25 +783,37 @@ def _xor_sweep(data: bytes) -> list:
                     continue
                 for mode, fn in (("xor", _mega._xor_key_recover),
                                  ("add", _mega._add_key_recover)):
+                    done += 1
                     key = fn(window, plain, key_len)
                     if key is None:
                         continue
                     if not any(key):
-                        continue          # all-zero key is a no-op, not a decrypt
-                    dec = bytearray(window)
-                    for i in range(len(dec)):
-                        if mode == "xor":
-                            dec[i] ^= key[i % key_len]
-                        else:
-                            dec[i] = (dec[i] - key[i % key_len]) & 0xFF
-                    if not _lua_family_at(bytes(dec[:12]))[0]:
+                        continue      # all-zero key is a no-op, not a decrypt
+                    # Cheap gate first. The only thing the transform is being
+                    # asked here is "does this start with a lua header", and
+                    # that is answered by 12 bytes. Transforming the whole
+                    # window before asking was the freeze.
+                    head = _apply_key(window[:_HEAD_PROBE], key, key_len, mode)
+                    if not _lua_family_at(head[:12])[0]:
                         continue
-                    if not _mega._loads_ok(bytes(dec)):
-                        continue      # plausible header, but the body is not real
-                    found.append(("%s key (len %d)" % (mode.upper(), key_len),
-                                  bytes(dec)))
-                    return found
-    return found
+                    # Past the probe cap the search keeps going, it just stops
+                    # paying for body verification. A real key hiding behind
+                    # the false positives is still found, and the number of
+                    # candidates that went unverified is reported below.
+                    if probes >= _MAX_LOADS_PROBES or _out_of_time():
+                        skipped += 1
+                        continue
+                    probes += 1
+                    dec = _apply_key(window, key, key_len, mode)
+                    if not _mega._loads_ok(dec):
+                        continue      # plausible header, but body is not real
+                    label = "%s key (len %d)" % (mode.upper(), key_len)
+                    found.append((label, dec))
+                    return found, "decrypted with %s" % label
+    if skipped:
+        note += (" (%d header-matching candidate(s) left unverified after the "
+                 "%d-probe cap)" % (skipped, _MAX_LOADS_PROBES))
+    return found, note
 
 
 # ---------------------------------------------------------------- pipeline
@@ -755,7 +825,52 @@ def run(src, out_dir, progress=None) -> dict:
              "fail_path": Path|None, "meta": dict,
              "attempts": [(label, msg)], "lines": int|None,
              "quality": str|None, "msg": str}
+
+    Never raises. Every individual engine already carries a timeout and its own
+    error handling; this is the outer net so that an unexpected failure still
+    reaches the menu as the normal honest failure report instead of a traceback
+    that leaves the UI stuck on a spinner.
     """
+    try:
+        # One wall-clock ceiling for the whole request, started here so the
+        # detection/sweep work counts against it too, and handed to the engines
+        # so a tier that begins late is clamped to the time actually left.
+        deadline = time.monotonic() + _CASCADE_BUDGET
+        _mega.set_hard_deadline(deadline)
+        return _run_cascade(src, out_dir, progress, deadline)
+    except KeyboardInterrupt:
+        raise
+    except Exception as exc:
+        return _crash_report(src, out_dir, exc)
+    finally:
+        _mega.clear_hard_deadline()
+
+
+def _crash_report(src, out_dir, exc) -> dict:
+    """Last-resort honest failure when the cascade itself blows up."""
+    stem, meta = "output", {
+        "family": None, "kind": "pipeline error", "entropy": 0.0,
+        "band": "unknown", "magic": "", "wrapper": 0, "protection": None,
+    }
+    try:
+        src = Path(src)
+        out_dir = Path(out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        stem = src.stem
+    except Exception:
+        pass
+    attempts = [("Pipeline", "unexpected %s: %s" % (type(exc).__name__, exc))]
+    try:
+        return _finish_failure(src, out_dir, stem, meta, attempts)
+    except Exception:
+        return {"ok": False, "status": "failed", "out": None,
+                "disasm_path": None, "fail_path": None, "meta": meta,
+                "attempts": attempts, "lines": None, "quality": None,
+                "msg": "pipeline error: %s" % exc}
+
+
+def _run_cascade(src, out_dir, progress=None, deadline=None) -> dict:
+    """The tier cascade itself. See run() for the return contract."""
     src = Path(src)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -845,7 +960,7 @@ def run(src, out_dir, progress=None) -> dict:
             or meta["band"] in ("lightly encrypted", "encrypted")
             or meta["kind"] == "unknown"):
         _phase(progress, "Encryption sweep...")
-        sweep = _xor_sweep(data)
+        sweep, sweep_note = _xor_sweep(data, progress=progress)
         if sweep:
             label, dec = sweep[0]
             attempts.append(("XOR/SKIP", "decrypted with %s" % label))
@@ -855,6 +970,7 @@ def run(src, out_dir, progress=None) -> dict:
             dec_tmp.write_bytes(dec)
             dec_src = dec_tmp
         else:
+            attempts.append(("XOR/SKIP", sweep_note))
             strings = _string_extraction(data)
             kw_hits = [s for s in strings if any(k in s.lower()
                                                 for k in ("function", "return", "local", "end"))]
@@ -876,7 +992,23 @@ def run(src, out_dir, progress=None) -> dict:
     else:
         order = ("mega", "unluacrs", "unluac", "ljd", "luadec", "luacdis", "luajit")
 
+    # Wall-clock ceiling for the whole cascade. Each engine carries its own
+    # timeout, but seven tiers in a row still add up to minutes on a phone;
+    # this turns that into one honest budget line and moves straight to the
+    # disassembly fallback instead of looking like a freeze. run() starts the
+    # clock (so detection and the XOR sweep count too) and hands it down; a
+    # direct call to _run_cascade still gets its own full budget.
+    if deadline is None:
+        deadline = time.monotonic() + _CASCADE_BUDGET
+        _mega.set_hard_deadline(deadline)
+
     for step in order:
+        if time.monotonic() > deadline:
+            attempts.append(("Time budget",
+                             "stopped before the '%s' tier — %.0fs total "
+                             "budget exhausted; tiers already tried are "
+                             "listed above" % (step, _CASCADE_BUDGET)))
+            break
         # ----- TIER 1 — mega_lua game engine (the proven core)
         if step == "mega":
             _phase(progress, "MegaLua engine...")

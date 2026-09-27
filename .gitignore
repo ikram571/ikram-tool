@@ -10,3 +10,6 @@ original/
 logs/
 dev_work/
 *.bak_*
+luac.out
+.ikram_release
+.updater_safety_test
