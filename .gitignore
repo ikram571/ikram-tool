@@ -13,3 +13,11 @@ dev_work/
 luac.out
 .ikram_release
 .updater_safety_test
+
+# runtime artefacts: the local action log and the test sandboxes
+telemetry.log
+tests/.sandbox_paks/
+tests/_corpus_synth/
+tests/_corpus_tmp/
+# build products and unrelated archives
+*.zip

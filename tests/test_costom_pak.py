@@ -9,14 +9,19 @@ plus: N at Proceed? cancels, missing PAK errors cleanly, and the tencent
 branch is reported as unsupported rather than crashing.
 """
 import importlib.util
+import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path("/data/data/com.termux/files/home/opencode/ikram_work/ikram-tool")
+# The repo, wherever it is checked out. A hardcoded home path made this
+# suite die on ModuleNotFoundError for anyone but the machine it was written
+# on, which is how a real regression test quietly stops testing anything.
+ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-SB = Path("/data/data/com.termux/files/usr/tmp/opencode/paksb")
+SB = Path(os.environ.get("IKRAM_TEST_SANDBOX")
+          or (ROOT / "tests" / ".sandbox_paks"))
 KEY = "8A75AFDF1C74AB55B79DC1DD4ABE4B01360A059D77F243EF4EFADA41A59D71A0"
 REPAK = str(ROOT / "repak")
 

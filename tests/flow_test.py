@@ -33,10 +33,32 @@ def _f(s):
     """Map hardcoded RESULT/ path substrings onto the layout's real casing."""
     return s.replace("RESULT/", _RES + "/")
 
-FIX_DIR = Path(os.environ.get(
-    "FIX_ROOT",
-    "/data/data/com.termux/files/home/opencode/IkramTool Project/Pakfiles For Testing"))
-FIX_PAK = FIX_DIR / "core_patch_4.6.0.21537.pak" if FIX_DIR.is_dir() else None
+def _find_fixture_pak():
+    """Any real tencent pak on this machine, or None.
+
+    The original path pointed at one directory on one author's laptop; a fresh
+    clone has no fixture, which is why the deep scenarios silently stopped
+    running. Point IKRAM_TEST_FIXTURES at a directory, or drop paks in
+    tests/fx/ or Paks/ next to the tool.
+    """
+    roots = [Path(d) for d in [os.environ.get("IKRAM_TEST_FIXTURES", "")] if d] + [
+        ROOT / "tests" / "fx",
+        ROOT / "Paks",
+        Path.home() / "Paks",
+    ]
+    for r in roots:
+        try:
+            if r.is_dir():
+                paks = [p for p in sorted(r.glob("*.pak")) if p.stat().st_size > 0]
+                if paks:
+                    return paks[0]
+        except OSError:
+            continue
+    return None
+
+
+FIX_PAK = _find_fixture_pak()
+
 
 
 def synth_pak():

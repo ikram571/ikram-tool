@@ -26,10 +26,29 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 SYS_EXE = sys.executable
 
-FIXURE_PAK = os.environ.get(
-    "FIX_ROOT",
-    "/data/data/com.termux/files/home/opencode/"
-    "IkramTool Project/Pakfiles For Testing/core_patch_4.6.0.21537.pak")
+def _find_fixture_pak():
+    """Any real .pak the manual driver can use, or None.
+
+    No default absolute path: a hardcoded one meant the driver could only ever
+    run on the machine it was written on, and failed everywhere else.
+    """
+    roots = [Path(d) for d in [os.environ.get("IKRAM_TEST_FIXTURES", "")] if d] + [
+        ROOT / "tests" / "fx",
+        ROOT / "Paks",
+        Path.home() / "Paks",
+    ]
+    for r in roots:
+        try:
+            if r.is_dir():
+                paks = [p for p in sorted(r.glob("*.pak")) if p.stat().st_size > 0]
+                if paks:
+                    return str(paks[0])
+        except OSError:
+            continue
+    return None
+
+
+FIXURE_PAK = os.environ.get("FIX_PAK") or _find_fixture_pak()
 
 
 def _vis(s: str) -> int:

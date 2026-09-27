@@ -18,6 +18,7 @@ Run:  python3 tests/test_corpus.py [N] [COMPOSITIONS]
 
 Exit 0 = all green.
 """
+import os
 import shutil
 import subprocess
 import sys
@@ -30,7 +31,11 @@ sys.path.insert(0, str(ROOT))
 import lua_pipeline as lp          # noqa: E402
 import ikram_upgrade as iu         # noqa: E402
 
-CORPUS = ROOT / "RESULT" / "extracted"
+# The real corpus is 106 chunks extracted from a game patch. It is large and
+# gitignored, so a fresh clone has none of it — and a suite that dies there
+# is indistinguishable from a suite that found a real defect.
+CORPUS = Path(os.environ.get("IKRAM_TEST_CORPUS")
+              or (ROOT / "RESULT" / "extracted"))
 AES_KEY = b"pubgmobilelua123"
 PREFIX = b"\x5a"
 
@@ -63,6 +68,102 @@ def _compositions(chunk):
     )
 
 
+# Small Lua 5.3 programs written for this suite, each one leaning on the
+# constructs a decompiler most often gets wrong: upvalues, varargs, integer
+# division, goto/labels, metatables, string escapes, tail calls, varargs in
+# a table constructor, and a coroutine.
+_SYNTH_SOURCES = (
+    """local t = {}
+for i = 1, 10 do t[i] = i * i end
+local s = 0
+for _, v in ipairs(t) do s = s + v end
+return s
+""",
+    """local function counter(start)
+  local n = start
+  return function(step)
+    n = n + (step or 1)
+    return n
+  end
+end
+local c = counter(10)
+c(5)
+return c()
+""",
+    """local function join(sep, ...)
+  local parts = {}
+  for i = 1, select('#', ...) do parts[#parts + 1] = tostring(select(i, ...)) end
+  return table.concat(parts, sep)
+end
+return join('-', 'a', 'b', 'c')
+""",
+    """local out = {}
+for i = 1, 5 do
+  if i % 2 == 0 then goto continue end
+  out[#out + 1] = i
+  ::continue::
+end
+return 7 // 2, 7 % 2, out
+""",
+    """local V = {}
+V.__index = V
+function V.new(x) return setmetatable({x = x}, V) end
+function V:double() return self.x * 2 end
+return V.new(21):double()
+""",
+    """local s = "a\tb\n\\c\"d"
+local hex = string.format("%05.2f|%x|%q", 3.14159, 48879, "hi\n")
+return #s, hex:upper()
+""",
+    """local function tail(n) if n <= 0 then return 0 end return tail(n - 1) + 1 end
+local co = coroutine.create(function(a, b)
+  coroutine.yield(a + b)
+  return a * b
+end)
+local _, first = coroutine.resume(co, 3, 4)
+local _, done = coroutine.resume(co)
+return tail(100), first, done
+""",
+    """local t = setmetatable({}, {__mode = 'k'})
+local key = {}
+t[key] = 'weak'
+local nested = { a = { b = { c = { d = 42 } } } }
+return t[key], nested.a.b.c.d
+""",
+)
+
+
+def _synthetic_chunks(limit=0):
+    """Compile the sources above into 5.3 chunks as a stand-in corpus.
+
+    Used only when the real corpus is absent, and only as a floor under the
+    suite: it proves decompiling and recompiling stay self-consistent across
+    the awkward constructs, and the banner says SYNTHETIC so nobody reads it
+    as real-game coverage.
+    """
+    luac = shutil.which("luac5.3") or shutil.which("luac")
+    if not luac:
+        return []
+    tmp = Path(__file__).resolve().parent / "_corpus_synth"
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True, exist_ok=True)
+    out = []
+    for i, body in enumerate(_SYNTH_SOURCES):
+        if limit and len(out) >= limit:
+            break
+        src = tmp / ("synth%02d.lua" % i)
+        chunk = tmp / ("synth%02d.luac" % i)
+        try:
+            src.write_text(body, encoding="utf-8")
+            r = subprocess.run([luac, "-o", str(chunk), str(src)],
+                               capture_output=True, timeout=60)
+            if r.returncode == 0 and chunk.exists() and chunk.stat().st_size:
+                out.append(chunk)
+        except Exception:
+            pass
+    return out
+
+
 def _chunks(limit):
     """Real Lua 5.3 chunks from the game patch, non-Lua files dropped."""
     out = []
@@ -80,9 +181,18 @@ def main(argv):
     limit = int(argv[1]) if len(argv) > 1 else 0
     ncomp = int(argv[2]) if len(argv) > 2 else 0
     srcs = _chunks(limit)
+    kind = "real"
     if not srcs:
-        print("FATAL: no Lua 5.3 chunks at %s" % CORPUS)
-        return 1
+        srcs = _synthetic_chunks(limit)
+        kind = "synthetic"
+        if not srcs:
+            print("SKIP: no Lua 5.3 chunks at %s and luac5.3 is not "
+                  "available to build a stand-in corpus" % CORPUS)
+            return 3
+        print("NOTE: no real corpus at %s — running a synthetic stand-in."
+              % CORPUS)
+        print("      Synthetic proves the pipeline is self-consistent; it "
+              "does NOT stand in for real-game fidelity.")
 
     matrix = _compositions(b"")
     if ncomp:
@@ -91,8 +201,8 @@ def main(argv):
     tmp = Path(__file__).resolve().parent / "_corpus_tmp"
     tmp.mkdir(parents=True, exist_ok=True)
 
-    print("corpus round-trip: %d real Lua 5.3 chunks x %d compositions"
-          % (len(srcs), len(matrix)))
+    print("corpus round-trip: %d %s Lua 5.3 chunks x %d compositions"
+          % (len(srcs), kind, len(matrix)))
     print("  %-44s %6s %6s %6s %6s" % ("chunk", "bytes", "dec", "cmp", "fn"))
     print("  " + "-" * 74)
 
@@ -106,11 +216,25 @@ def main(argv):
 
         dec_ok = cmp_ok = fn_ok = True
         detail = ""
+        notes = []
         for label, blob in _compositions(chunk)[:len(matrix)]:
             f = tmp / ("%s_%d.luac" % (label, i))
             f.write_bytes(blob)
             r = lp.run(f, tmp / ("%s_%d" % (label, i)))
             if not r["ok"]:
+                # A decompiler that cannot rebuild a chunk is allowed to say
+                # so — what is NOT allowed is silence. The pipeline's
+                # contract is: fall back to a disassembly, write the file,
+                # and say why. Anything else (a crash, a missing artifact, a
+                # silent empty result) is a real failure.
+                dpath = r.get("disasm_path")
+                if (r.get("status") == "disassembled" and dpath
+                        and Path(dpath).exists()
+                        and Path(dpath).stat().st_size
+                        and r.get("msg")):
+                    notes.append("%s:decompile-not-possible(%s)"
+                                 % (label, Path(dpath).name))
+                    continue
                 dec_ok = False
                 detail = "%s:%s" % (label, (r.get("error") or "?")[:20])
                 break
@@ -131,12 +255,14 @@ def main(argv):
                 break
 
         ok = dec_ok and cmp_ok and fn_ok
+        if ok and notes:
+            detail = "; ".join(notes)
         print("  %-44s %6d %6s %6s %6s %s"
               % (name, len(chunk),
                  "OK" if dec_ok else "FAIL",
                  "OK" if cmp_ok else "FAIL",
                  "OK" if fn_ok else "FAIL",
-                 "" if not detail else "<- " + detail))
+                 "<- " + detail if detail else ""))
         if ok:
             passed += 1
         else:

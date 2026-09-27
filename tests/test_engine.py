@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 FAILS = []
+SKIPS = []
 
 
 def check(name, cond, extra=""):
@@ -18,6 +19,11 @@ def check(name, cond, extra=""):
     else:
         FAILS.append(name)
         print("FAIL  %s  %s" % (name, extra))
+
+
+def skip(name, why):
+    SKIPS.append((name, why))
+    print("SKIP  %s  (%s)" % (name, why))
 
 
 # ------------------------------------------------------------- D1 BOX
@@ -96,9 +102,15 @@ with tempfile.TemporaryDirectory() as td:
 
 # ------------------------------------------------------------- D3 DETECT
 import pathlib
-FIX = pathlib.Path(os.environ.get(
-    "FIX_ROOT",
-    "/data/data/com.termux/files/home/opencode/IkramTool_Analysis/tests/fx"))
+_ROOT = pathlib.Path(__file__).resolve().parent.parent
+_FIX_DIRS = [
+    pathlib.Path(d) for d in [os.environ.get("IKRAM_TEST_FIXTURES", "")] if d
+] + [
+    _ROOT / "tests" / "fx",
+    _ROOT / "tests" / ".sandbox_paks",
+    _ROOT / "Paks",
+    pathlib.Path.home() / "Paks",
+]
 try:
     from lua_bgmi import detect_format, is_bgmi
     import univ
@@ -233,20 +245,38 @@ except Exception as e:
     check("D6 menus", False, str(e))
 
 # ------------------------------------------------------------- D5 PAK
-# Real .pak fixtures. The original suite hardcoded one PUBG core_patch file and
-# its exact 696-entry index, so it could only ever pass on the machine that file
-# was authored on and failed everywhere else. Fixtures are now discovered and
-# the entry count is read from the file itself, so the suite exercises the real
-# PAK engine against whatever real archives are actually present.
-def _pak_fixtures(root):
-    return sorted(p for p in root.glob("*.pak") if p.stat().st_size > 0)
+# Two halves, because the two PAK engines are different formats:
+#
+#   D5a  tencent  — index parse / inject / byte-exact read-back. Needs a real
+#                   tencent archive, which is licensed game data and cannot be
+#                   synthesised (the writer only bootstraps from a reader). When
+#                   none is present this is an absent fixture, reported as a skip.
+#   D5b  ue4      — pack / extract / repack / re-extract, byte-for-byte. Built
+#                   here with the bundled repak, so it runs on every machine and
+#                   the round-trip is never silently untested.
+def _pak_fixtures(dirs):
+    out = []
+    for d in dirs:
+        try:
+            if d.is_dir():
+                out += [p for p in sorted(d.glob("*.pak"))
+                        if p.stat().st_size > 0]
+        except OSError:
+            continue
+    seen, uniq = set(), []
+    for p in out:
+        k = str(p.resolve())
+        if k not in seen:
+            seen.add(k)
+            uniq.append(p)
+    return uniq
 
 
-PAKS = _pak_fixtures(FIX) if FIX.is_dir() else []
+PAKS = _pak_fixtures(_FIX_DIRS)
 
 
-def _first_readable_pak(cands):
-    """First archive that has at least one non-empty entry.
+def _first_tencent_pak(cands):
+    """First archive the tencent reader can open with a non-empty entry.
 
     Real PAKs legitimately contain zero-byte entries, and the engine's writer
     unpacks a struct per entry, so a zero-length payload is not a usable
@@ -256,8 +286,7 @@ def _first_readable_pak(cands):
     for c in cands:
         try:
             with pak.PakReader(c) as r:
-                vals = list(r.full_paths().values())
-                for v in vals:
+                for v in list(r.full_paths().values()):
                     if v and r.read_entry(v):
                         return c
         except Exception:
@@ -265,7 +294,7 @@ def _first_readable_pak(cands):
     return None
 
 
-PAKF = _first_readable_pak(PAKS) if PAKS else None
+PAKF = _first_tencent_pak(PAKS)
 if PAKF:
     import pak
     pakf = PAKF
@@ -292,13 +321,74 @@ if PAKF:
     except Exception as e:
         import traceback
         traceback.print_exc()
-        check("D5 pak suite", False, str(e))
+        check("D5a tencent suite", False, str(e))
 else:
-    # No external archive on this machine is an absent fixture, not a defect.
-    print("SKIP  D5 pak suite (no readable .pak fixture under %s)" % FIX)
+    skip("D5a tencent round-trip",
+         "no tencent .pak in %s" % ", ".join(str(d) for d in _FIX_DIRS))
+
+# ---- D5b ue4 round-trip, self-contained
+def _tree(root):
+    root = Path(root)
+    return {str(f.relative_to(root)): f.read_bytes()
+            for f in sorted(root.rglob("*")) if f.is_file()}
+
+
+try:
+    import engines as _eng
+    _repak = _eng.find_repak()
+    if not _repak:
+        skip("D5b ue4 round-trip", "repak binary not found")
+    else:
+        import subprocess as _sp
+        _td = Path(tempfile.mkdtemp(prefix="ikram_d5b_"))
+        _src = _td / "tree"
+        (_src / "ShadowTrackerExtra" / "Config").mkdir(parents=True)
+        (_src / "ShadowTrackerExtra" / "Content" / "Lua").mkdir(parents=True)
+        (_src / "ShadowTrackerExtra" / "Config" / "GameUserSettings.ini").write_bytes(
+            b"res=1080p\nmobile=True\n")
+        (_src / "ShadowTrackerExtra" / "Content" / "Lua" / "data.lua").write_bytes(
+            bytes(range(256)) * 8)          # binary-ish, not text-only
+        (_src / "ShadowTrackerExtra" / "Content" / "Lua" / "gameplay.lua").write_bytes(
+            b"return {a=1,b='x'}\n")
+        _pak1 = _td / "base.pak"
+        _r = _sp.run([_repak, "pack", str(_src), "--mount-point", "../../../",
+                      "--version", "V8B", "--compression", "Zlib", str(_pak1)],
+                     capture_output=True, text=True)
+        check("ue4 repak pack", _r.returncode == 0 and _pak1.exists(),
+              (_r.stderr or _r.stdout)[:200])
+
+        _un1 = _td / "un1"
+        _n = _eng.unpack_pak(_pak1, _un1, kind="ue4", log=lambda *a, **k: None)
+        check("ue4 unpack returns files", _n == 3, str(_n))
+        _a = _tree(_src)
+        _b = _tree(_un1)
+        check("ue4 extract byte-exact", _a == _b,
+              "%d vs %d files" % (len(_a), len(_b)))
+
+        # edit one file, repack, extract again: the whole write path
+        (_un1 / "ShadowTrackerExtra" / "Content" / "Lua" / "data.lua").write_bytes(
+            b"-- vip edit\n" + b"z" * 4096)
+        _pak2 = _td / "rt.pak"
+        _n2 = _eng.repack_folder(_pak1, _un1, _pak2, kind="ue4",
+                                 log=lambda *a, **k: None)
+        check("ue4 repack returns files", _n2 == 3, str(_n2))
+        _un2 = _td / "un2"
+        _n3 = _eng.unpack_pak(_pak2, _un2, kind="ue4", log=lambda *a, **k: None)
+        _c = _tree(_un2)
+        _expect = dict(_a)
+        _expect["ShadowTrackerExtra/Content/Lua/data.lua"] = \
+            b"-- vip edit\n" + b"z" * 4096
+        check("ue4 repack round-trip byte-exact", _n3 == 3 and _c == _expect,
+              "%d files, %d match" % (len(_c), sum(1 for k in _c if _c.get(k) == _expect.get(k))))
+except Exception as e:
+    import traceback
+    traceback.print_exc()
+    check("D5b ue4 round-trip", False, str(e))
 
 # ------------------------------------------------------------- finish
 print()
+if SKIPS:
+    print("%d skipped: %s" % (len(SKIPS), "; ".join(n for n, _ in SKIPS)))
 if FAILS:
     print("%d FAILED: %s" % (len(FAILS), ", ".join(FAILS)))
     sys.exit(1)

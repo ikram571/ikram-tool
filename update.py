@@ -17,12 +17,16 @@ import os
 import shutil
 import subprocess
 import sys
-import threading
 import urllib.request
 import zipfile
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
+
+# A version check is a courtesy, not a gate. Five seconds is long enough for
+# the GitHub API on a good connection and short enough that a dead network
+# does not leave the user staring at a spinner before the tool opens.
+VERSION_CHECK_TIMEOUT = 5
 REPO = "ikram571/ikram-tool"
 API = "https://api.github.com/repos/{}/releases/latest".format(REPO)
 ZIP_NAME = "IkramTool.zip"
@@ -92,7 +96,7 @@ def latest_remote():
     """Latest release ka zip download URL + version. Return dict or None."""
     try:
         req = urllib.request.Request(API, headers={"User-Agent": "ikram-tool"})
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(req, timeout=VERSION_CHECK_TIMEOUT) as r:
             d = json.load(r)
         tag = str(d.get("tag_name", "")).lstrip("vV")
         for a in d.get("assets", []):
@@ -379,7 +383,12 @@ def do_install():
 
         _show_complete()
         print("INSTALLED_OK")
-        threading.Thread(target=_fix_env, daemon=True).start()
+        # Synchronous on purpose. This runs pkg/pip, and a dpkg that is
+        # killed halfway leaves the package database locked and the next
+        # install failing; a daemon thread dies with this process, which is
+        # exactly the moment the tool exits. The files are already in place,
+        # so all that blocking costs is the wait on the repair itself.
+        _fix_env()
         return True
     except InstallError as e:
         print("UPDATE_ABORTED: {}".format(e))
@@ -394,7 +403,21 @@ def do_install():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def _has_lib(name):
+    """True when the module is importable, without importing it twice."""
+    import importlib.util
+    try:
+        return importlib.util.find_spec(name) is not None
+    except Exception:
+        return False
+
+
 def _fix_env():
+    """Install what the tool needs and put the `ikram` command back.
+
+    Blocking by design — see the call site. Every step announces itself, so
+    a ten minute wait reads as progress instead of a frozen screen.
+    """
     try:
         home = Path.home()
     except Exception:
@@ -411,6 +434,8 @@ def _fix_env():
             if not shutil.which(tool):
                 need.append(pkg)
         if not shutil.which("javac"):
+            print("ENV_REPAIR: installing a Java compiler (needed for "
+                  "some PAK work)...")
             # openjdk package name varies by repo/mirror — try 17/21/25
             for jp in ("openjdk-17", "openjdk-21", "openjdk-25"):
                 for _ in range(3):
@@ -427,6 +452,7 @@ def _fix_env():
                 if shutil.which("javac"):
                     break
         if need:
+            print("ENV_REPAIR: installing %s..." % ", ".join(need))
             for pkg in need:
                 for _ in range(3):
                     try:
@@ -446,6 +472,11 @@ def _fix_env():
             )
         except Exception:
             pass
+        missing_lib = [lib for lib in ("rich", "pycryptodome", "zstandard",
+                                       "gmalg")
+                       if not _has_lib(lib)]
+        if missing_lib:
+            print("ENV_REPAIR: installing %s..." % ", ".join(missing_lib))
         for lib in ("rich", "pycryptodome", "zstandard", "gmalg"):
             for _ in range(3):
                 try:
@@ -458,37 +489,43 @@ def _fix_env():
                 except Exception:
                     pass
         # ---- 'ikram' launcher -> ikram_patch.py (poora tool A-to-Z load) ----
+        # Built from TOOL_DIR, not typed in: the tool has been installed
+        # both as ~/Ikram_Tool and as a plain .engine tree, and a launcher
+        # pointing at the wrong one fails with a bare "command not found".
+        tdir = str(TOOL_DIR)
         launcher = (
             "ikram() { PYTHONDONTWRITEBYTECODE=1 MAGIC_NEEDED=$(python3 -c "
             "'import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())' "
             "2>/dev/null); if ! python3 -c \"import sys; "
             "from pathlib import Path; "
-            "p=Path('$HOME/Ikram_Tool/.engine/ikram_patch.py'); print(p.exists())\" "
+            "p=Path('@@PATCH@@'); print(p.exists())\" "
             "2>/dev/null | grep -q True; then echo '  Tool files missing - reinstall with: install.sh'; return 1; fi; "
             "MAGIC_HAVE=$(python3 -c \"import struct; "
-            "p=open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4); print(p.hex())\" "
+            "p=open('@@CORE@@','rb').read(4); print(p.hex())\" "
             "2>/dev/null); if [ -n \"$MAGIC_HAVE\" ] && [ \"$MAGIC_HAVE\" != \"$MAGIC_NEEDED\" ]; then "
-            "echo ''; echo '  ⬆ Python is outdated — upgrading...'; "
-            "pkg upgrade -y python 2>&1 | tail -3; echo '  ✓ Now try again: ikram'; "
-            "echo ''; return 1; fi; python3 \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" \"$@\"; }"
-        )
+            "echo ''; echo '  \u2b06 Python is outdated \u2014 upgrading...'; "
+            "pkg upgrade -y python 2>&1 | tail -3; echo '  \u2713 Now try again: ikram'; "
+            "echo ''; return 1; fi; python3 \"@@PATCH@@\" \"$@\"; }"
+        ).replace("@@PATCH@@", str(Path(tdir) / "ikram_patch.py")) \
+         .replace("@@CORE@@", str(Path(tdir) / "ikram.pyc"))
         suffix = "\n\n# Ikram Tool launcher\n{}\n".format(launcher)
         rc = home / ".bashrc"
-        if rc.exists():
-            try:
-                text = rc.read_text(errors="ignore")
-                if "ikram()" in text:
-                    lines = []
-                    for l in text.splitlines():
-                        s = l.strip()
-                        if s.startswith("ikram()") or s == "# Ikram Tool launcher":
-                            continue
-                        lines.append(l)
-                    text = "\n".join(lines)
-                text = text.rstrip() + suffix
-                rc.write_text(text)
-            except Exception:
-                pass
+        try:
+            # A missing .bashrc must not skip the launcher: read "" when it
+            # is not there, and write the file either way.
+            text = rc.read_text(errors="ignore") if rc.exists() else ""
+            lines = []
+            for l in text.splitlines():
+                t = l.strip()
+                # the whole launcher is one line; strip it and its header so
+                # repeated installs cannot stack up copies of it
+                if t.startswith("ikram()") or t == "# Ikram Tool launcher":
+                    continue
+                lines.append(l)
+            text = "\n".join(lines).rstrip() + suffix
+            rc.write_text(text)
+        except Exception:
+            pass
         # ---- real executable: $PREFIX/bin/ikram -> ikram_patch.py ----
         try:
             prefix = os.environ.get(
@@ -499,45 +536,52 @@ def _fix_env():
         bindir = Path(prefix) / "bin"
         bindir.mkdir(parents=True, exist_ok=True)
         binpath = bindir / "ikram"
+        # Same rule as the .bashrc launcher: the install directory is
+        # substituted in, never assumed, so the self-repair path repairs the
+        # copy the user actually has.
+        bdir = str(TOOL_DIR)
+        bpatch = str(Path(bdir) / "ikram_patch.py")
+        bcore = str(Path(bdir) / "ikram.pyc")
         binlauncher = (
             "#!/data/data/com.termux/files/usr/bin/bash\n"
             "export PYTHONDONTWRITEBYTECODE=1\n"
+            "TOOL_DIR=@@DIR@@\n"
             "if ! command -v python3 >/dev/null 2>&1; then\n"
             '  echo ""\n  echo "  python3 not found! Install it:"\n'
             '  echo "    pkg update -y && pkg install -y python"\n'
             '  echo ""\n  exit 1\nfi\n'
-            "if [ ! -f \"$HOME/Ikram_Tool/.engine/ikram_patch.py\" ]; then\n"
+            "if [ ! -f \"$TOOL_DIR/ikram_patch.py\" ]; then\n"
             '  echo ""\n'
-            '  echo "  ⚠ Tool files missing — self-repairing..."\n'
-            '  mkdir -p "$HOME/Ikram_Tool/.engine"\n'
-            '  cd "$HOME/Ikram_Tool/.engine"\n'
+            '  echo "  \u26a0 Tool files missing \u2014 self-repairing..."\n'
+            '  mkdir -p "$TOOL_DIR"\n'
+            '  cd "$TOOL_DIR"\n'
             '  curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"\n'
-            '  TMPX="$HOME/Ikram_Tool/.engine/.repair"\n'
+            '  TMPX="$TOOL_DIR/.repair"\n'
             '  rm -rf "$TMPX" && mkdir -p "$TMPX"\n'
-            '  if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n'
-            '    cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null\n'
-            '    chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/.engine/ikram_patch.py" 2>/dev/null\n'
-            '    echo "  ✓ Repair done! Tool is starting..."\n'
-            '    exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
-            '  fi\n'
-            '  rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"\n'
-            '  echo "  ✗ Repair failed. Reinstall with:"\n'
+            '  if (cd "$TMPX" && unzip -q -o "$TOOL_DIR/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then\n'
+            '    cp -r "$TMPX"/. "$TOOL_DIR"/ 2>/dev/null\n'
+            '    chmod +x "$TOOL_DIR/run.sh" "$TOOL_DIR/ikram_patch.py" 2>/dev/null\n'
+            '    echo "  \u2713 Repair done! Tool is starting..."\n'
+            '    exec python3 "$TOOL_DIR/ikram_patch.py" "$@"\n'
+            "  fi\n"
+            '  rm -rf "$TMPX" "$TOOL_DIR/repair.zip"\n'
+            '  echo "  \u2717 Repair failed. Reinstall with:"\n'
             '  echo "    curl -sL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash"\n'
             '  echo ""\n  exit 1\nfi\n'
             "MAGIC_NEEDED=$(python3 -c "
             '"import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)\n'
             'MAGIC_HAVE=$(python3 -c "\nimport struct\n'
-            "p = open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4)\nprint(p.hex())\n"
+            "p = open('@@CORE@@','rb').read(4)\nprint(p.hex())\n"
             '" 2>/dev/null)\n'
             'if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then\n'
             '  echo ""\n'
-            '  echo "  ⬆ Python is outdated — upgrading..."\n'
+            '  echo "  \u2b06 Python is outdated \u2014 upgrading..."\n'
             '  pkg update -y >/dev/null 2>&1\n'
             '  pkg upgrade -y python 2>&1 | tail -3\n'
-            '  exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
-            'fi\n'
-            'exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"\n'
-        )
+            '  exec python3 "$TOOL_DIR/ikram_patch.py" "$@"\n'
+            "fi\n"
+            'exec python3 "$TOOL_DIR/ikram_patch.py" "$@"\n'
+        ).replace("@@DIR@@", bdir).replace("@@CORE@@", bcore)
         binpath.write_text(binlauncher)
         binpath.chmod(0o755)
     except Exception:

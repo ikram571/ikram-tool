@@ -384,8 +384,47 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
     raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
 
 
+def _staged_files(edit_dir):
+    """The exact file set a repack stages — dotfiles are never packed."""
+    return [p for p in sorted(Path(edit_dir).rglob("*"))
+            if p.is_file() and not p.name.startswith(".")]
+
+
+def _count_packed(out, kind, aes_key, log):
+    """How many entries the pak that was just written actually holds.
+
+    The number reported to the user has to describe the OUTPUT, not the
+    folder that was handed in: the python-ue4 writer reports only the files
+    it changed, so an edit that rewrote identical bytes came back as 0 even
+    though the pak was rebuilt fine. Reading the finished pak back is the
+    only count that cannot lie. If it cannot be read, the staged count is
+    the honest fallback.
+    """
+    out = Path(out)
+    try:
+        if kind == "tencent":
+            with pakmod().PakReader(out) as pak:
+                return len(pak.full_paths())
+        p = ue4mod().Ue4Pak(out, aes_key=aes_key)
+        return len(p.files())
+    except Exception as exc:
+        log("  (entry count fell back to the staged list: %s)" % exc)
+        return None
+
+
+def _packed_count(out, kind, aes_key, log, fallback):
+    """Entries in the pak that was written, or `fallback` if unreadable."""
+    n = _count_packed(out, kind, aes_key, log)
+    return fallback if n is None else n
+
+
 def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
-    """Repack a whole edited folder tree into a pak. Returns file count."""
+    """Repack a whole edited folder tree into a pak. Returns file count.
+
+    Every engine path returns the same thing: the number of entries in the
+    pak that was written, so "N files repacked" means the same thing no
+    matter which engine did the work.
+    """
     log = log or (lambda *a, **k: None)
     pakf = Path(pakf)
     edit_dir = Path(edit_dir)
@@ -427,7 +466,8 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
                 if target is None:
                     target = rel
                 edits.append((target, (p.read_bytes(), None, p.stem)))
-            return pakmod().PakWriter(pak).inject_files(edits, str(out), force_add=True)
+            pakmod().PakWriter(pak).inject_files(edits, str(out), force_add=True)
+            return _packed_count(out, kind, aes_key, log, len(edits))
 
     if kind == "ue4":
         aes_key = _resolve_ue4_key(pakf, aes_key or None, log)
@@ -459,7 +499,8 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
                 _run([repak, "pack", stage, "--mount-point", mount_point,
                       "--version", _repak_version_str(version, compression_u8),
                       "--compression", "Zlib", out], log)
-            return sum(1 for p in edit_dir.rglob("*") if p.is_file())
+            return _packed_count(out, kind, aes_key, log,
+                                 len(_staged_files(edit_dir)))
 
         log("  engine: python-ue4 (standard UE4)")
         p = ue4mod().Ue4Pak(pakf, aes_key=aes_key)
@@ -474,7 +515,8 @@ def repack_folder(pakf, edit_dir, out, kind=None, aes_key=None, log=None):
                 repl[rel] = data
             else:
                 adds[rel] = data
-        return p.repack(str(out), replacements=repl, add_files=adds)
+        p.repack(str(out), replacements=repl, add_files=adds)
+        return _packed_count(out, kind, aes_key, log, len(repl) + len(adds))
 
     raise ValueError(f"Unknown pak format (no UE4/Tencent magic): {pakf.name}")
 

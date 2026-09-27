@@ -10,11 +10,13 @@ un-boxed; the only non-boxed line allowed anywhere is the Press-ENTER
 All user input funnels through `_ask()`, so tests can script whole flows
 without a terminal.
 """
+import re
 import sys
 import time
+import unicodedata
 
 from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
-from box_engine import BoxEngine, SEP
+from box_engine import BoxEngine, SEP, vip_num_cycle
 import paths
 
 
@@ -82,15 +84,14 @@ _ATTR_ROLE = {
 
 
 def _vip_num_cycle(pal, theme_name="Original Color"):
-    """V111 number colour cycle: 0→183, 1→45, 2→51, 3→39, 4→118, 5→119.
-    Other themes map the same six slots through their own palette so the
-    UI shape stays byte-identical everywhere."""
-    if theme_name == "Original Color":
-        return {"0": 183, "1": 45, "2": 51, "3": 39, "4": 118, "5": 119}
-    base = pal.get("number", 45)
-    return {"0": base, "1": base, "2": pal.get("secondary", 51),
-            "3": pal.get("accent", 141), "4": pal.get("warn", 214),
-            "5": pal.get("primary", 228)}
+    """V111 number colour cycle, from the one definition in box_engine.
+
+    Default theme: 0→183, 1→45, 2→51, 3→39, 4→118, 5→119, unchanged. Any
+    other theme maps the same six slots through its own palette, so the
+    numbers follow the theme everywhere they are painted — renderer and
+    compiled core alike — instead of only in half the tool.
+    """
+    return vip_num_cycle(pal, theme_name)
 
 
 def _sync_compiled_theme(vip):
@@ -132,6 +133,148 @@ class ProgressFrame:
 
     def phase(self, text):
         self.show(cur=text)
+
+
+# --------------------------------------------------------------- key screen
+# The key screen is drawn by the compiled core, so what is fixed here is
+# patched onto the strings on their way to the terminal. Nothing on the
+# screen is redrawn — the prompt, the banner and the colours are untouched.
+_BAD_KEY_MARK = "Invalid key!"
+_KEY_PROMPT_MARK = "\U0001f511 Enter key:"
+
+_TAG = re.compile(r"\[[^\[\]]*\]")
+_BORDER = re.compile(r"[╭╰](?P<run>─+)[╮╯]")
+_ROW_END = re.compile(r"^(?P<head>.*\])(?P<fill>[ \t]+)\u2502\[/\]$")
+
+
+def _width(text):
+    """Columns the terminal will actually spend on `text`.
+
+    Markup is dropped first, and anything double-width (the key glyph, any
+    CJK or emoji) is charged two columns, which is what a terminal does.
+    """
+    total = 0
+    for ch in _TAG.sub("", text):
+        if unicodedata.combining(ch):
+            continue
+        total += 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+    return total
+
+
+def _fix_bottom_corner(text):
+    """The compiled bottom border closes with a top-right corner.
+
+    It is built as '╰' + '─'*n + '╮', so the box shows '╮' exactly where a
+    '╯' belongs. Only a line that already opens with '╰' is touched, which
+    is the bottom border and nothing else on the screen.
+    """
+    if "╰" not in text:
+        return text
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if "╰" in line and line.rstrip().endswith("╮[/]"):
+            lines[i] = line.rstrip()[:-len("╮[/]")] + "╯[/]"
+    return "\n".join(lines)
+
+
+class _KeyScreen:
+    """Runs the compiled key screen under the rules it is missing.
+
+    The compiled loop has no attempt counter and no end-of-input check, so
+    a wrong key spins forever and a closed stdin hangs on the prompt with
+    nothing on screen. Both are fixed here, from the outside, without
+    redrawing a single line of the key screen itself.
+    """
+
+    MAX_ATTEMPTS = 3
+
+    def __init__(self, vip):
+        self.vip = vip
+        self.ik = vip.ikram
+        self.bad = 0
+        self.inner = None        # dashes in the key box's top border
+        self.prompt_w = None     # columns the prompt already spent
+        self._console = None
+        self._input = None
+
+    # -- the two things the compiled screen gets wrong -------------------
+    def _fit_row(self, text):
+        """Size the key row's fill so the row lands on the border.
+
+        The compiled core pads the row by arithmetic on len() of the label,
+        which does not know that the key glyph renders two columns wide, so
+        the row overshot the right border and wrapped. Rather than guess an
+        offset, the fill is solved for: whatever makes the whole line exactly
+        as wide as the border it sits between.
+        """
+        m = _ROW_END.match(text)
+        if not m or self.inner is None or self.prompt_w is None:
+            return text
+        want = self.inner + 2 - self.prompt_w     # the two bars are counted
+        have = _width(m.group("head") + m.group("fill") + "│")
+        fill = m.group("fill")
+        if have == want:
+            return text
+        pad = max(1, len(fill) + (want - have))
+        return m.group("head") + " " * pad + "│[/]"
+
+    def _print(self, *args, **kwargs):
+        if args and isinstance(args[0], str):
+            text = args[0]
+            text = self._fit_row(text)
+            text = _fix_bottom_corner(text)
+            if _KEY_PROMPT_MARK in text:
+                self.prompt_w = _width(text)
+            else:
+                b = _BORDER.search(_TAG.sub("", text))
+                if b is not None:
+                    self.inner = len(b.group("run"))
+            if _BAD_KEY_MARK in text:
+                self.bad += 1
+            args = (text,) + args[1:]
+        self._console.print(*args, **kwargs)
+        if self.bad >= self.MAX_ATTEMPTS:
+            # SystemExit is a BaseException: the compiled `except Exception`
+            # around the prompt cannot swallow it, so this unwinds the loop
+            # for good instead of re-asking a fourth time.
+            raise SystemExit(1)
+
+    def _ask(self, prompt=""):
+        try:
+            return self._input(prompt)
+        except (EOFError, KeyboardInterrupt):
+            raise SystemExit(1)
+
+    # -- lifecycle --------------------------------------------------------
+    def __enter__(self):
+        import builtins
+        self._console = self.ik.console
+        self._input = builtins.input
+        self.ik.console = _KeyConsole(self)
+        builtins.input = self._ask
+        return self
+
+    def __exit__(self, *exc):
+        import builtins
+        if self._console is not None:
+            self.ik.console = self._console
+        builtins.input = self._input
+        return False
+
+
+class _KeyConsole:
+    """Thin stand-in for the compiled core's rich Console during the key."""
+
+    def __init__(self, screen):
+        self._screen = screen
+        self._real = screen._console
+
+    def print(self, *args, **kwargs):
+        self._screen._print(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
 
 
 class Vip:
@@ -429,11 +572,33 @@ class Vip:
         self.pause(1.0)
         self.reset_term()
 
+    def _key_gate(self):
+        """True = key accepted, carry on. False = leave, tool is done.
+
+        The screen is the compiled core's own; this only supplies the two
+        rules it lacks — three strikes and a real answer to a closed stdin.
+        """
+        screen = _KeyScreen(self)
+        try:
+            with screen:
+                ok = self.ikram.key_lock()
+        except SystemExit:
+            if screen.bad >= screen.MAX_ATTEMPTS:
+                self.cls()
+                err = getattr(self.ikram, "ERROR", "color(196)")
+                # rich markup, printed by rich — the key screen's own
+                # messages go through the console and this one matches them.
+                self.ikram.console.print(
+                    "\n[bold %s]✘ Too many attempts. Exiting.[/]" % err)
+                self.reset_term()
+            return False
+        return bool(ok)
+
     # ------------------------------------------------------------- run
     def run(self):
         paths.ensure_dirs()
         if self.ikram is not None:
-            if not self.ikram.key_lock():
+            if not self._key_gate():
                 return
             self.ikram.welcome_splash()
         got = None
@@ -463,6 +628,32 @@ class Vip:
                            next_step="Restart and try again.")
             return
 
+    # ------------------------------------------------------------- actions
+    def logged(self, name, **extra):
+        """Record an action that needs no call of its own (a setting, say)."""
+        import telemetry
+        return telemetry.send_event(name, status="OK", **extra)
+
+    def act(self, name, fn, *args, **kwargs):
+        """Run one menu action, and write it to the local action log.
+
+        Every choice in every menu goes through here, which is the only way
+        to guarantee an action is never run unlogged: the log line is
+        written after the action returns, and a failure is recorded before
+        the exception is allowed to keep travelling. The log is local
+        (telemetry.log beside the tool) and a failed write is ignored, so
+        this can never turn a working action into a broken one.
+        """
+        import telemetry
+        started = time.time()
+        try:
+            out = fn(*args, **kwargs)
+        except BaseException as exc:                   # noqa: BLE001
+            telemetry.send_error(exc, extra=name)
+            raise
+        self.logged(name, ms=int((time.time() - started) * 1000))
+        return out
+
     def run_pak(self):
         import menus
         while True:
@@ -473,17 +664,17 @@ class Vip:
                 return
             self.cls()
             if got == "1":
-                menus.pak_unpack(self)
+                self.act("pak.unpack", menus.pak_unpack, self)
             elif got == "2":
-                menus.pak_inject(self)
+                self.act("pak.inject", menus.pak_inject, self)
             elif got == "3":
-                menus.pak_repack(self)
+                self.act("pak.repack", menus.pak_repack, self)
             elif got == "4":
-                menus.pak_custom(self)
+                self.act("pak.custom", menus.pak_custom, self)
             elif got == "c":
-                menus.clear_drop_pak(self)
+                self.act("pak.clear_drop", menus.clear_drop_pak, self)
             elif got == "r":
-                menus.clear_result(self)
+                self.act("pak.clear_result", menus.clear_result, self)
 
     def run_lua(self):
         import menus
@@ -517,13 +708,13 @@ class Vip:
                 return
             self.cls()
             if got == "1":
-                menus.lua_compile(self)
+                self.act("lua.compile", menus.lua_compile, self)
             elif got == "2":
-                menus.lua_decompile(self)
+                self.act("lua.decompile", menus.lua_decompile, self)
             elif got == "c":
-                menus.clear_drop_lua(self)
+                self.act("lua.clear_drop", menus.clear_drop_lua, self)
             elif got == "r":
-                menus.clear_result_lua(self)
+                self.act("lua.clear_result", menus.clear_result_lua, self)
 
     def run_themes(self):
         while True:
@@ -535,11 +726,13 @@ class Vip:
             if got == "0":
                 return
             name = THEMES[int(got) - 1]
-            if name != self.theme.name:
+            changed = name != self.theme.name
+            if changed:
                 save_theme(name)
                 self.theme = Theme(name)
                 self.box = BoxEngine(self.theme)
                 _sync_compiled_theme(self)
+            self.logged("theme.set", file=name, changed=changed)
             self.cls()
             self.write(self.box.draw_box([
                 self.theme.apply(name, "primary"),

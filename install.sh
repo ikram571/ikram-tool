@@ -665,7 +665,7 @@ sed -i "/Ikram_Tool\/ikram\.py/d" "$RC" 2>/dev/null
 cat >> "$RC" <<'EOF'
 
 # Ikram Tool launcher (ikram_patch.py = full A-to-Z file load)
-ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"; }
+ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "@@ENG@@/ikram_patch.py" "$@"; }
 EOF
 # real executable - won't reload from bashrc function, always ready in PATH
 cat > "$PREFIX/bin/ikram" <<'EOF'
@@ -679,21 +679,21 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 1
 fi
 # if the patch is missing, self-repair (fresh full zip download)
-if [ ! -f "$HOME/Ikram_Tool/.engine/ikram_patch.py" ]; then
+if [ ! -f "@@ENG@@/ikram_patch.py" ]; then
     echo ""
     echo "  ⚠ Tool files missing — self-repairing..."
-    mkdir -p "$HOME/Ikram_Tool/.engine"
-    cd "$HOME/Ikram_Tool"
+    mkdir -p "@@ENG@@"
+    cd "$TARGET"
     curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
-    TMPX="$HOME/Ikram_Tool/.engine/.repair"
+    TMPX="@@ENG@@/.repair"
     rm -rf "$TMPX" && mkdir -p "$TMPX"
-    if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
-        cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null
-        chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/run.sh" 2>/dev/null
+    if (cd "$TMPX" && unzip -q -o "@@ENG@@/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
+        cp -r "$TMPX"/. "@@ENG@@"/ 2>/dev/null
+        chmod +x "@@ENG@@/run.sh" "@@ROOT@/run.sh" 2>/dev/null
         echo "  ✓ Repair done! Tool khul raha hai..."
-        exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+        exec python3 "@@ENG@@/ikram_patch.py" "$@"
     fi
-    rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"
+    rm -rf "$TMPX" "@@ENG@@/repair.zip"
     echo "  ✗ Repair failed. Reinstall with:"
     echo "    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash"
     echo ""
@@ -703,7 +703,7 @@ fi
 MAGIC_NEEDED=$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)
 MAGIC_HAVE=$(python3 -c "
 import struct
-p = open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4)
+p = open('@@ENG@@/ikram.pyc','rb').read(4)
 print(p.hex())
 " 2>/dev/null)
 if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
@@ -713,7 +713,7 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     DEBIAN_FRONTEND=noninteractive pkg upgrade -y python 2>&1 </dev/null | tail -3
     if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
         echo "  ✓ Python upgraded! The tool is starting..."
-        exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+        exec python3 "@@ENG@@/ikram_patch.py" "$@"
     fi
     echo "  ✗ Python upgrade failed. Run these:"
     echo "    pkg update -y && pkg upgrade -y"
@@ -721,8 +721,13 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     echo ""
     exit 1
 fi
-    exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+    exec python3 "@@ENG@@/ikram_patch.py" "$@"
 EOF
+# A quoted heredoc expands nothing, so the install path is baked
+# in after the write. The installer knows where it put the engine;
+# the generated launchers must not have to guess at it.
+sed -i "s#@@ENG@@#$TARGET/.engine#g; s#@@ROOT@#$TARGET#g" \
+    "$RC" "$PREFIX/bin/ikram" 2>/dev/null
 chmod +x "$PREFIX/bin/ikram"
 printf "\n"
 ok "'ikram' command ready (new version)"

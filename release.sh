@@ -6,7 +6,18 @@
 #  Use: bash release.sh V86
 # =============================================
 set -e
-VERSION="${1:?Usage: bash release.sh VERSION (e.g. V86)}"
+VERSION="${1:?Usage: bash release.sh VERSION, e.g. V86  (add --build-only to skip publishing)}"
+
+# --build-only stops after the archive is built and proven, so the ZIP can be
+# inspected before anything is pushed or published. Publishing is a separate,
+# deliberate act.
+BUILD_ONLY=0
+for _arg in "${@:2}"; do
+  case "$_arg" in
+    --build-only) BUILD_ONLY=1 ;;
+    *) echo "[!] Unknown option: $_arg"; exit 1 ;;
+  esac
+done
 
 SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Release work only happens in the opencode folder (no ikram junk at root).
@@ -37,13 +48,26 @@ rm -rf "$STAGE"/original "$STAGE"/logs
 rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
 rm -rf "$STAGE"/.git "$STAGE"/.github
 rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools "$STAGE"/dev_work
+# The local action log is a RUNTIME artefact: it is written next to the module
+# the first time the tool records anything, so on the machine that builds the
+# release it is always present and always full of the builder's own runs.
+# Shipping it would leak the maintainer's file paths into every download.
+rm -f "$STAGE"/telemetry.log "$STAGE"/*.log
+# Any .zip in the tree is a build product or an unrelated archive someone
+# committed by accident. Neither belongs in the release.
+rm -f "$STAGE"/*.zip
 # Timestamped pre-edit backups live beside their sources in the working tree.
 # They must never ship to users.
 find "$STAGE" -name '*.bak_*' -delete
 rm -f "$STAGE"/luac.out
 # Docs are for the repo, not for the runtime zip — the zip ships ONLY files
 # the tool needs to run and do its work.
-rm -f "$STAGE"/README.md "$STAGE"/INSTRUCTIONS.txt "$STAGE"/CHANGELOG.md "$STAGE"/.gitignore
+# Every .md is repo documentation. The tool prints its own help; none of this
+# belongs in a download. .gitignore goes with them.
+rm -f "$STAGE"/*.md "$STAGE"/.gitignore
+# release.sh is how the maintainer cuts a release. A user never runs it, and it
+# is the one file in the tree that can push to github, so it stays in the repo.
+rm -f "$STAGE"/release.sh
 
 # Stamp the new version into VERSION + ikram_key.json (key_hash unchanged).
 # The hash is read from the existing ikram_key.json, never retyped here, so
@@ -63,7 +87,22 @@ if ! unzip -tq "$ZIP" >/dev/null 2>&1; then
   echo "[x] The built archive is corrupt — refusing to upload."
   exit 1
 fi
+# Prove the contents too. An archive that is internally valid but carries the
+# maintainer's log, the test tree, or the analysis dump is still a bad release,
+# and every one of those has been committed by accident at some point.
+LEAKED=$(unzip -Z1 "$ZIP" | grep -E '(^|/)(__pycache__|analysis|tests|\.git)(/|$)|telemetry\.(log|pyc)|\.bak_|\.zip$|^\./' || true)
+if [ -n "$LEAKED" ]; then
+  echo "[x] The archive carries files that must never ship:"
+  printf '%s\n' "$LEAKED" | head -20
+  exit 1
+fi
 echo "[*] Archive OK: $(du -h "$ZIP" | cut -f1), $(unzip -l "$ZIP" | tail -1 | awk '{print $2}') entries"
+
+if [ "$BUILD_ONLY" = "1" ]; then
+  echo "[*] --build-only: archive built and proven, nothing pushed or published."
+  echo "[*] ZIP: $ZIP"
+  exit 0
+fi
 
 echo "[*] Pushing $VERSION source to origin/main..."
 git -C "$SOURCE_DIR" push origin main
