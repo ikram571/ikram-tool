@@ -489,6 +489,68 @@ def run_all(real_tool_dir):
               rebuilt.get("version") == "V120")
 
     run_case("keyhash", case_key_hash)
+    run_case("userdata_backup", case_userdata_backup)
+    run_case("userdata_prune", case_userdata_prune)
+
+
+def _backups_under(root):
+    parent = Path(root).parent
+    return sorted(q for q in parent.iterdir()
+                  if q.is_dir() and q.name.startswith(u.USERDATA_BACKUP_PREFIX)) \
+        if parent.exists() else []
+
+
+def case_userdata_backup(live):
+    """A copy of the user's PAK/result folders must exist on disk BEFORE the
+    transaction, outside the tree being replaced.
+
+    The case-sensitive PROTECTED bug deleted these for real. This pins the
+    belt-and-braces so any future regression still finds the bytes somewhere.
+    """
+    u.TOOL_DIR = live
+    before = _backups_under(live)
+    dest = u._backup_user_data()
+    check("backup: a copy was made", dest is not None)
+    if dest is None:
+        return
+    check("backup: lives outside TOOL_DIR", Path(dest).parent == live.parent)
+    check("backup: user.pak is inside it",
+          (Path(dest) / "DROP" / "user.pak").read_text() == "MY PRECIOUS PAK")
+    check("backup: out.lua is inside it",
+          (Path(dest) / "RESULT" / "out.lua").read_text()
+          == "-- my decompiled output\n")
+    check("backup: the live install is untouched",
+          (live / "DROP" / "user.pak").exists()
+          and (live / "RESULT" / "out.lua").exists())
+    after = _backups_under(live)
+    # Not "+1": _backup_user_data prunes as it goes, so adding one can remove
+    # an older one and leave the count flat. What must hold is that the cap
+    # still holds and the newest copy is the good one.
+    check("backup: count stays capped", len(after) <= u.USERDATA_BACKUP_KEEP + 1)
+    check("backup: newest holds the data",
+          after and (after[-1] / "DROP" / "user.pak").read_text()
+          == "MY PRECIOUS PAK")
+
+
+def case_userdata_prune(live):
+    """Old copies must be pruned so this cannot fill the device, and the
+    newest must always be kept."""
+    u.TOOL_DIR = live
+    parent = live.parent
+    for i in range(u.USERDATA_BACKUP_KEEP + 3):
+        d = parent / ("%sseed%d" % (u.USERDATA_BACKUP_PREFIX, i))
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "marker").write_text(str(i))
+    u._prune_user_data_backups()
+    left = _backups_under(live)
+    check("prune: capped at USERDATA_BACKUP_KEEP",
+          len(left) <= u.USERDATA_BACKUP_KEEP + 1)
+    fresh = u._backup_user_data()
+    check("prune: a new backup is still taken afterwards", fresh is not None)
+    check("prune: the newest backup holds the user's pak",
+          fresh is not None
+          and (Path(fresh) / "DROP" / "user.pak").read_text()
+          == "MY PRECIOUS PAK")
 
 
 if __name__ == "__main__":

@@ -1038,8 +1038,20 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
 
 def pak_costom_pak():
     """COSTOM PAK — pak pick → folder pick (number / 0 cancel / custom path) →
-    a pak with that folder's files at FULL content -> RESULT/CostomPak/<same
-    name>.pak. ENTER (all paths) keeps every file's real bytes too."""
+    RESULT/CostomPak/<same name>.pak.
+
+    What the output actually contains depends on the branch, and the docstring
+    used to promise more than any of them deliver:
+
+      ENTER (all paths)  every file, at its ORIGINAL bytes — the full-content
+                         build, the same one the VIP menu uses.
+      a folder, tencent  the subtree copy / single-file inject, real content.
+      a folder, ue4      an EMPTY shell. That branch packs an empty tempdir
+                         and returns (0, 0); it preserves the mount point and
+                         version and adds no files. It never copied the folder.
+
+    Pinned by tests/test_baki_costom_pak.py, which asserts the real behaviour
+    of each branch rather than the old claim."""
     paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
     if not paks:
         ikram.show_error(

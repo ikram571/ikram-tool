@@ -17,6 +17,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -197,6 +198,76 @@ REQUIRED_ENTRIES = (
 MIN_PAYLOAD_FILES = 40
 
 BACKUP_DIR = ".ikram_update_backup"
+
+# Belt to the transaction's braces. The case-sensitive PROTECTED match above
+# really did delete a flat install's lowercase drop/ and result/ — reproduced
+# end to end, not theorised. If any future transaction, or any new bug in this
+# one, ever removes those folders again, a copy already exists on disk OUTSIDE
+# the directory being replaced.
+USERDATA_NAMES = ("drop", "result")
+USERDATA_BACKUP_PREFIX = ".ikram_userdata_backup_"
+USERDATA_BACKUP_KEEP = 2
+
+
+def _backup_user_data(log=None):
+    """Copy the user's PAK/result folders aside before the transaction runs.
+
+    Writes only. Never moves, never deletes the source, and skips an empty
+    folder so the "nothing to save" case costs nothing. Lives in TOOL_DIR's
+    parent, which is outside the replaced tree in the .engine layout and is the
+    only place that survives a flat TOOL_DIR wipe.
+
+    Returns the backup path, or None when there was nothing to save.
+    """
+    log = log or (lambda *a, **k: None)
+    if not TOOL_DIR.exists():
+        return None
+
+    live = {}
+    for entry in TOOL_DIR.iterdir():
+        if entry.is_dir() and entry.name.lower() in USERDATA_NAMES:
+            live[entry.name] = entry
+    if not any(any(p.is_file() for p in d.rglob("*")) for d in live.values()):
+        return None
+
+    stamp = time.strftime("%Y%m%d_%H%M%S")
+    dest = Path(TOOL_DIR).parent / (USERDATA_BACKUP_PREFIX + stamp)
+    suffix = 1
+    while dest.exists():
+        dest = Path(TOOL_DIR).parent / (
+            USERDATA_BACKUP_PREFIX + stamp + "_%d" % suffix)
+        suffix += 1
+    try:
+        dest.mkdir(parents=True)
+        for name, src in live.items():
+            shutil.copytree(str(src), str(dest / name))
+    except Exception as exc:
+        log("  user-data backup skipped: %s" % exc)
+        return None
+
+    _prune_user_data_backups(log=log)
+    log("  user data saved to %s" % dest)
+    return dest
+
+
+def _prune_user_data_backups(log=None):
+    """Keep only the newest USERDATA_BACKUP_KEEP copies, so this cannot grow
+    without bound on a device that updates often."""
+    log = log or (lambda *a, **k: None)
+    root = Path(TOOL_DIR).parent
+    if not root.exists():
+        return
+    found = [q for q in root.iterdir()
+             if q.is_dir() and q.name.startswith(USERDATA_BACKUP_PREFIX)]
+    if len(found) <= USERDATA_BACKUP_KEEP:
+        return
+    found.sort(key=lambda q: q.stat().st_mtime, reverse=True)
+    for old in found[USERDATA_BACKUP_KEEP:]:
+        try:
+            shutil.rmtree(str(old), ignore_errors=True)
+            log("  pruned old user-data backup %s" % old.name)
+        except Exception:
+            pass
 
 
 class InstallError(Exception):
@@ -380,6 +451,7 @@ def do_install():
         zip_path.write_bytes(data)
 
         _safe_extract(zip_path, tmp)
+        _backup_user_data(log=lambda m: print(m))
         _clean_replace(_payload_root(tmp))
 
         try:
