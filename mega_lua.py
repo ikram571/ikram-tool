@@ -959,13 +959,15 @@ def _nadeem_salvage(out_root, stem, data, shell_text, progress=None):
 
     report = out_root / (stem + "_NADEEM_REPORT.txt")
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    # mega_lua is imported BY lua_pipeline, so a module-level import back into
-    # it would be circular. Resolve the version lazily instead of adding a
-    # fourth hardcoded "v120" literal to a file that already has two others.
+    # Imported lazily: mega_lua is imported BY lua_pipeline, so a top-level
+    # import back into it would be circular. paths has no such dependency and
+    # already owns every folder constant, so the version comes from the same
+    # reader instead of a second hardcoded string.
     try:
-        from lua_pipeline import VERSION as _VER
+        import paths
+        _VER = paths.read_version()
     except Exception:
-        _VER = "v120"
+        _VER = "V120"
     lines = [
         "IkramTool %s - NADEEM protection, partial recovery" % _VER,
         "Timestamp : %s" % now,

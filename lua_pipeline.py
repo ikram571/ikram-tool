@@ -77,7 +77,13 @@ _XOR_LENGTHS = tuple(range(1, len(_LUA_HEADERS[0]) + 1))
 # and with a single candidate there was never a choice to make.
 _MAX_SWEEP_CANDIDATES = 6
 
-VERSION = "v120"
+# Stamped into the NADEEM shell and the decompile-FAILED report. Read from the
+# VERSION file at call time, not hardcoded: this shipped as "v120" while the
+# tool actually ran V121, so every failure report named a version the user was
+# not running. Same reader the menu header uses, one source of truth.
+def _version():
+    import paths
+    return paths.read_version()
 
 # Offsets a wrapper may occupy before the real chunk starts. The offset is
 # never trusted on its own: find_wrapper only accepts one where a real
@@ -913,7 +919,7 @@ def _run_impl(src, out_dir, progress, _tmps) -> dict:
             "  payload blob   -> %s\n  report         -> %s\n\n"
             "The shell is loader plumbing, not game code. Recompiling it will\n"
             "NOT produce a working script.\n"
-            % (VERSION, (stem + "_NADEEM_shell.lua"), (stem + "_NADEEM_payload.bin"),
+            % (_version(), (stem + "_NADEEM_shell.lua"), (stem + "_NADEEM_payload.bin"),
                (stem + "_NADEEM_REPORT.txt")),
             encoding="utf-8")
         attempts.append(("Salvage", _msg))
@@ -1261,7 +1267,7 @@ def _write_failed(src, out_dir, stem, meta, attempts, validator=None,
     fail = out_dir / (stem + "_FAILED.txt")
     now = time.strftime("%Y-%m-%d %H:%M:%S")
     lines = [
-        "IkramTool %s — decompile FAILED" % VERSION,
+          "IkramTool %s — decompile FAILED" % _version(),
         "Timestamp : %s" % now,
         "File      : %s" % src.name,
         "Size      : %s bytes" % _safe_size(src, src_size),

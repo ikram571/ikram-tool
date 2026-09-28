@@ -17,7 +17,10 @@ from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
 from box_engine import BoxEngine, SEP
 import paths
 
-VERSION = "v120"
+# No module-level version constant. It shipped as "v120" for two releases while
+# the VERSION file said V121, so the menu header lied on every launch.
+# paths.read_version() reads the file install.sh writes and update.py stamps; it
+# cannot drift from what is installed.
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
@@ -174,8 +177,9 @@ class Vip:
 
     # ------------------------------------------------------------- screens
     def header(self):
-        return self.box.draw_box([], "thick", title="%s  %s" % (BRAND, VERSION),
-                                 padding=0)
+          return self.box.draw_box(
+              [], "thick",
+              title="%s  %s" % (BRAND, paths.read_version()), padding=0)
 
     def folder_rows(self):
         lines = []
@@ -207,7 +211,8 @@ class Vip:
                  ["switch the color theme of the whole tool"]),
             ] + self.folder_rows() + [
                 ("0", "EXIT", ["close the tool"]),
-            ], title="MAIN MENU (%s)" % VERSION.upper(), subtitle="choose a number"),
+              ], title="MAIN MENU (%s)" % paths.read_version().upper(),
+                 subtitle="choose a number"),
         ]
         return blocks
 
@@ -371,7 +376,7 @@ class Vip:
         self.cls()
         self.write(self.box.draw_box([
             self.theme.apply("Thanks for using %s" % BRAND, "primary"),
-        ], "rounded", title="%s  %s" % (BRAND, VERSION)) + "\n")
+          ], "rounded", title="%s  %s" % (BRAND, paths.read_version())) + "\n")
         self.pause(1.0)
         self.reset_term()
 

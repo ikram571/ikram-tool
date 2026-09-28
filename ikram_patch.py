@@ -840,6 +840,35 @@ def _verify_written_subtree(out_pak, payloads, log=None):
     return bad
 
 
+def _discard_unverified(out_pak, bad, log=None):
+    """Make an output pak that failed verification un-shippable, in place.
+
+    The compiled writer cannot rebuild a multi-block entry byte-exactly, so the
+    honest outcomes are (a) ship it knowing it is altered, or (b) remove it. (b)
+    is correct: an altered injected entry is a silently broken game file, and the
+    user asked for their own bytes back. Renames to .pak.UNVERIFIED rather than
+    unlinking, so a mistaken click is recoverable and the directory listing is
+    self-explanatory.
+
+    A read-only or otherwise stubborn file is reported by name, because
+    "silently still there" is exactly the failure this whole check exists to
+    prevent.
+    """
+    log = log or (lambda *a, **k: None)
+    p = Path(out_pak)
+    dest = p.with_name(p.name + ".UNVERIFIED")
+    try:
+        if dest.exists():
+            dest.unlink()
+        p.replace(dest)
+        log("  → output pak withheld as {} — it contains {} entry/entries that "
+            "could not be verified byte-for-byte. Rename it back only if you "
+            "accept altered content.".format(dest.name, len(bad)))
+    except OSError as e:
+        log("  ⚠ could not withhold {}: {}. IT STILL CONTAINS ALTERED CONTENT "
+            "({} entries) — do not ship it.".format(p.name, e, len(bad)))
+
+
 def _align_block_windows(r, sel, log):
     """Reuse-path safety (single-block entries only). pak.pyc inject_files
     splices only the block span of a compressed/encrypted single-block entry,
@@ -1046,6 +1075,7 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                         "splice cannot reproduce these (multi-block encrypted "
                         "entries). They are NOT safe to ship.".format(
                             len(bad), n))
+                    _discard_unverified(out, bad, log)
                 return chain, n - len(bad)
             r.files = []
             r.dirs = {d: {} for d in chain}

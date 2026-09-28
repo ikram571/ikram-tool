@@ -70,6 +70,25 @@ _FOLDERS = {
 }
 
 
+def read_version(default="V120"):
+    """Return the running build's version string, e.g. "V121".
+
+    The VERSION file next to the runtime is the single source of truth. It is
+    the same file install.sh writes and update.py stamps after a successful
+    install, so the menu, the LUA reports and the version guard can never
+    drift from what is actually on disk.
+
+    Never a module-level constant: the tool has shipped three files each
+    carrying its own hardcoded "v120" that only changed when someone
+    remembered. Reading at call time costs one stat() and cannot go stale.
+    """
+    try:
+        text = (_F / "VERSION").read_text().strip()
+    except OSError:
+        return default
+    return text or default
+
+
 def ensure_dirs():
     """Create all folders if missing. Raises OSError on permission."""
     for d in ALL_DIRS:

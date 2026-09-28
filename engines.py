@@ -385,6 +385,12 @@ def verify_tencent_unpack(pakf, out_dir, log=None):
                 extract dropped an entry.
 
     Returns (good, bad) as lists of pak-relative paths.
+
+    When quarantine=True (the default) every path named in `bad` is MOVED out
+    of out_dir into out_dir/_quarantine/, mirroring its relative position. A
+    user who ignores the warning is otherwise left holding garbage that looks
+    exactly like a good extract, and the whole point of this check is that they
+    should not be able to.
     """
     log = log or (lambda *a, **k: None)
     out_dir = Path(out_dir)
@@ -411,7 +417,42 @@ def verify_tencent_unpack(pakf, out_dir, log=None):
                     "extracted".format(rel))
                 continue
             good.append(rel)
+    if bad:
+        _quarantine_bad(out_dir, root, bad, log)
     return good, bad
+
+
+def _quarantine_bad(out_dir, root, bad, log=None):
+    """Move verified-bad entries into out_dir/_quarantine/ and report where.
+
+    Never deletes: the user may want to inspect a damaged pak, and a wrong
+    quarantine that destroys data is worse than the bug it fixes. The move is
+    best-effort per file so one locked path cannot abort the rest.
+    """
+    log = log or (lambda *a, **k: None)
+    out_dir = Path(out_dir)
+    moved, stuck = 0, 0
+    for rel in bad:
+        src = out_dir / root / rel
+        if not src.is_file():
+            continue  # MISSING: nothing on disk to move
+        dest = out_dir / "_quarantine" / rel
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                dest.unlink()
+            src.replace(dest)
+            moved += 1
+        except OSError as e:
+            stuck += 1
+            log("  ⚠ could not quarantine {} — still in place: {}".format(rel, e))
+    if moved:
+        log("  → {} damaged file(s) moved to {}/_quarantine/ (not deleted, "
+            "nothing trustworthy left in the extract tree)".format(
+                moved, out_dir.name))
+    if stuck:
+        log("  ⚠ {} damaged file(s) could NOT be moved and remain in the "
+            "extract tree. Do not use them.".format(stuck))
 
 
 def _extracted_root(out_dir, reader, log=None):
@@ -465,8 +506,8 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
         # The compiled unpacker is happy to write out bytes that no longer match
         # the archive's own index, and it still reports the full file count. Left
         # unchecked, a damaged pak comes back looking like a clean success and the
-        # user edits garbage. Verify, name the bad entries, and hand back only the
-        # count we can actually vouch for.
+        # user edits garbage. Verify, name the bad entries, quarantine them, and
+        # hand back only the count we can actually vouch for.
         good, bad = verify_tencent_unpack(pakf, out_dir, log)
         if bad:
             log("  ⚠ {}/{} entries FAILED verification — the pak itself is "
