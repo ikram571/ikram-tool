@@ -400,7 +400,28 @@ def _clean_replace(src):
             except Exception:
                 pass
     shutil.rmtree(backup, ignore_errors=True)
+    _ensure_user_folders()
     return True
+
+
+# DROP/ and RESULT/ live beside .engine, not inside it, so the replace above
+# cannot touch them. Rebuild the folder skeleton anyway: a user who deleted one
+# by hand, or an install made before a subfolder existed, would otherwise be
+# left with a tool that cannot write its output.
+USER_FOLDERS = (
+    ("DROP", "pak"), ("DROP", "lua"), ("DROP", "inject"),
+    ("RESULT", "extracted"), ("RESULT", "injected"), ("RESULT", "lua"),
+    ("RESULT", "processed"), ("RESULT", "CostomPak"), ("RESULT", "Repacked"),
+)
+
+
+def _ensure_user_folders():
+    root = TOOL_DIR.parent
+    for parent, child in USER_FOLDERS:
+        try:
+            (root / parent / child).mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
 
 
 def _show_complete():

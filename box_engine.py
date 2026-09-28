@@ -18,30 +18,6 @@ SEP = "__SEP__"
 # V111 number colour cycle per digit (compiled `_vip_num`).
 _VIP_NUM = {"0": 183, "1": 45, "2": 51, "3": 39, "4": 118, "5": 119}
 
-# The cycle the DEFAULT theme ships with, kept as a literal so the default
-# look can never drift when the mapping below changes.
-_DEFAULT_NUM_CYCLE = dict(_VIP_NUM)
-
-
-def vip_num_cycle(pal, theme_name="Original Color"):
-    """Digit -> colour for a menu number, for one theme's palette.
-
-    "Original Color" gets the exact cycle it has always had. Every other
-    theme maps the same six slots through its own palette, so the numbers
-    belong to the theme instead of being the one hardcoded thing left in the
-    renderer. Slot 5 stays the fallback for any digit outside 0-5.
-    """
-    if theme_name == "Original Color":
-        return dict(_DEFAULT_NUM_CYCLE)
-    pal = pal or {}
-    base = pal.get("number", 45)
-    return {"0": base,
-            "1": base,
-            "2": pal.get("secondary", 51),
-            "3": pal.get("accent", 141),
-            "4": pal.get("warn", 214),
-            "5": pal.get("primary", 228)}
-
 _BOXES = {
     "heavy":   {"tl": "╔", "tr": "╗", "bl": "╚", "br": "╝",
                 "h": "═", "v": "║", "jt": "╠", "je": "╣"},
@@ -94,11 +70,6 @@ class BoxEngine:
     def __init__(self, theme: Theme | None = None):
         self.theme = theme or Theme("Cyber Blue")
         self._bar = ProgressBar(self.theme)
-
-    @property
-    def num_cycle(self):
-        """Read per draw, so swapping self.theme re-colours the numbers."""
-        return vip_num_cycle(self.theme._pal, self.theme.name)
 
     # ------------------------------------------------------------- public
     def draw_box(self, content, style="heavy", title=None, subtitle=None,
@@ -180,10 +151,9 @@ class BoxEngine:
                         body.append(self._row(b, _truncate(sl, inner_w),
                                               inner_w, "left"))
                 else:
-                    cycle = self.num_cycle
                     name_row = "   " + self.theme.paint_code(
                         str(digit).rjust(3),
-                        cycle.get(str(digit), cycle["5"]),
+                        _VIP_NUM.get(str(digit), _VIP_NUM["5"]),
                         bold=True) + "  " \
                         + self.theme.apply(str(name), "text", bold=True)
                     body.append(self._row(b, _truncate(name_row, inner_w),

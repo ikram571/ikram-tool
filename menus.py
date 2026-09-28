@@ -1,29 +1,26 @@
-"""Ikram Tool — menu handlers.
+"""IkramTool V112 — menu handlers.
 
-Five of the six real operations are the ORIGINAL flow, run exactly as
-shipped, by delegating to the compiled core:
+Every real operation is the ORIGINAL V111 flow, run exactly as shipped:
 
     PAK  1 Unpack    -> ikram.pak_extract
          2 Inject    -> ikram.pak_inject        (compiled 7-step wizard)
          3 Repack    -> ikram.pak_repack_folder
+         4 Costom    -> ikram.pak_costom_pak
     LUA  1 Compile   -> ikram.lua_compile_one
          2 Decompile -> ikram.lua_decompile_one
 
-Delegating (instead of re-implementing) is what guarantees Section G: paths,
-prompt order, numbered displays, auto-replace, never-modify-original, new
-folder creation and output path behaviour stay identical to the original.
-The only option NOT delegated is PAK 4 (Costom): ikram.pyc has no
-pak_costom_pak, so it used to raise AttributeError and drop the user into
-the "Unexpected error" box. That one is implemented in pak_custom() against
-the same engine layer, driven entirely by the menu text it already shipped
-with. See its docstring for what the option actually promises.
+Delegating (instead of re-implementing) is what guarantees Section G:
+paths, prompt order, numbered displays, auto-replace, never-modify-original,
+new-folder creation, example/help text, repack + costom logic and output
+path behaviour are byte-identical to V111. The V112 layer only adds the
+shell around them: themed main menu, Themes switcher, dependency check at
+launch, and the C/R clear utilities below.
 
 `ikram` is the module loaded by ikram_patch.py (compiled core + patched
 overlay). Vip passes it in at construction time.
 """
 from pathlib import Path
 
-import box_engine
 import paths
 
 
@@ -58,254 +55,11 @@ def pak_repack(vip):
     ik.pak_repack_folder()
 
 
-def _numbered(vip, rows, title, subtitle=None, per_page=14):
-    """Numbered list inside the tool's own box, paged so a 4000-entry pak
-    does not scroll the prompt off the screen. Returns the rendered text."""
-    pages = [rows[i:i + per_page] for i in range(0, len(rows), per_page)] or [[]]
-    out = []
-    for i, page in enumerate(pages, 1):
-        body = []
-        if len(pages) > 1:
-            body.append(vip.theme.apply("page %d / %d" % (i, len(pages)), "dim"))
-            body.append(box_engine.SEP)
-        body.extend(page)
-        out.append(vip.box.draw_box(
-            body, "light", title=title if i == 1 else None,
-            subtitle=subtitle if i == 1 else None))
-        title = subtitle = None
-    return "\n".join(out)
-
-
-def _ask_pak(vip, paks):
-    """STEP 1 — pick which pak out of DROP/pak. Re-prompts, never crashes."""
-    while True:
-        vip.write(_numbered(
-            vip,
-            [vip.theme.apply("%3d" % i, "number")
-             + "  " + vip.theme.apply(p.name, "primary")
-             + vip.theme.apply("  " + paths.human(p.stat().st_size), "dim")
-             for i, p in enumerate(paks, 1)],
-            "CUSTOM PAK — select base pak",
-            "%d pak file(s) in %s" % (len(paks), paths.folder_label(paths.DROP_PAK)),
-        ) + "\n")
-        vip.write("  " + vip.theme.apply("Select file number", "prompt") + " ")
-        ans, eof = vip._eof_answered("")
-        ans = ans.strip()
-        if eof and not ans:
-            return None
-        if ans.isdigit():
-            n = int(ans)
-            if n == 0:
-                return None
-            if 1 <= n <= len(paks):
-                return paks[n - 1]
-        vip.error_box(["✗ Invalid number",
-                       "  Enter 1-%d, or 0 to cancel" % len(paks)])
-        vip.pause(0.5)
-
-
-def _ask_paths(vip, inventory, pak_name):
-    """STEP 2 + 3 — show every internal path, then resolve the selection.
-
-    ENTER = every path. A number = that numbered path. A typed path = that
-    path (or everything under it). Anything else re-prompts. Returns
-    (selected, how) or (None, None) when the user backs out.
-    """
-    names = sorted(inventory)
-    rows = []
-    for i, fp in enumerate(names, 1):
-        rows.append(vip.theme.apply("%3d" % i, "number")
-                    + "  " + vip.theme.apply(fp, "primary")
-                    + vip.theme.apply("  " + paths.human(inventory[fp]), "dim"))
-    vip.write(_numbered(
-        vip, rows, "PATHS INSIDE %s" % pak_name.upper(),
-        "%d file(s) — ENTER selects ALL with full content" % len(names),
-    ) + "\n")
-    vip.write("  " + vip.theme.apply(
-        "Enter number, path, or ENTER for ALL (0 = cancel)", "prompt") + " ")
-    while True:
-        ans, eof = vip._eof_answered("")
-        ans = ans.strip()
-        if eof and not ans:
-            return None, None
-        if not ans:
-            return list(names), "all %d paths selected with full content" % len(names)
-        if ans.isdigit():
-            n = int(ans)
-            if n == 0:
-                return None, None
-            if 1 <= n <= len(names):
-                return [names[n - 1]], "1 path selected with full content"
-            vip.error_box(["✗ Invalid number",
-                           "  Enter 1-%d, or press ENTER for ALL" % len(names)])
-            vip.pause(0.5)
-            continue
-        low = ans.replace("\\", "/").lstrip("./")
-        if low in inventory:
-            return [low], "1 path selected with full content"
-        under = [fp for fp in names
-                 if fp.startswith(low.rstrip("/") + "/")]
-        if under:
-            return under, ("%d paths under %s selected with full content"
-                           % (len(under), low[:48]))
-        tail = [fp for fp in names if fp.endswith("/" + low)]
-        if tail:
-            return tail, ("%d path(s) matched %s with full content"
-                          % (len(tail), low[:48]))
-        vip.error_box(["✗ Path not found in pak",
-                       "  " + ans[:60]])
-        vip.pause(0.5)
-
-
-_BAD_NAME = set('/\\:*?"<>|')
-
-
-def _ask_out_name(vip, pakf):
-    """STEP 4 — output pak name. Defaults to the source pak's own name."""
-    default = pakf.stem
-    vip.write("  " + vip.theme.apply("Output pak name (without .pak)", "prompt")
-              + vip.theme.apply("  [%s]" % default, "dim") + " ")
-    while True:
-        ans, eof = vip._eof_answered("")
-        ans = ans.strip()
-        if eof and not ans:
-            return None
-        if not ans:
-            return default
-        if ans.lower().endswith(".pak"):
-            ans = ans[:-4]
-        if not ans.strip():
-            vip.error_box(["✗ Name cannot be empty",
-                           "  Press ENTER to use %s" % default])
-            vip.pause(0.5)
-            continue
-        if _BAD_NAME & set(ans):
-            vip.error_box(["✗ Illegal character in name",
-                           "  Not allowed: " + " ".join(sorted(_BAD_NAME & set(ans))),
-                           "  Use letters, numbers, dot, dash, underscore."])
-            vip.pause(0.5)
-            continue
-        return ans
-
-
 def pak_custom(vip):
-    """COSTOM PAK — build a pak from a base pak, with REAL file content.
-
-    ikram.pyc has no pak_costom_pak (its pak menu only ever had unpack /
-    inject / repack), so this option used to raise AttributeError and drop the
-    tool into the "Unexpected error" box.
-
-    What it does now, in the order the user sees it:
-
-      1. every .pak in DROP/pak is listed and numbered; the user picks one
-      2. that pak is extracted WITH its content and every internal path is
-         listed and numbered, with the real size of each file
-      3. the selection is resolved: ENTER = all paths, a number = that path,
-         a typed path = that path or everything under it. Anything invalid
-         re-prompts; nothing crashes and nothing is written empty
-      4. an output name is asked for, defaulting to the base pak's name
-      5. the pak is built into RESULT/CostomPak with every selected file
-         carrying its ORIGINAL bytes, then read back and compared
-      6. the temp session is removed whether the build succeeded or not
-
-    The old version of this wrote 0-byte entries for the ENTER and folder
-    modes, which produced a pak the game could not read, and it silently used
-    whichever pak happened to be first in the folder.
-    """
-    import engines
-
-    paks = paths.list_drop(paths.DROP_PAK, (".pak",))
-    if not paks:
-        vip.error_box(["✗ No PAK found",
-                       "PUT FILE IN: " + paths.folder_label(paths.DROP_PAK)])
-        vip.wait_enter()
+    ik = _ikram(vip)
+    if ik is None:
         return
-    pakf = _ask_pak(vip, paks)
-    if pakf is None:
-        vip.write("  " + vip.theme.apply("Cancelled", "warn") + "\n")
-        vip.wait_enter()
-        return
-
-    workdir = engines.custom_session_dir(paths.timestamp())
-    try:
-        try:
-            inventory = engines.custom_pak_inventory(
-                pakf, workdir, log=lambda *a: vip.write(str(a[0]) + "\n")
-                if a else None)
-        except Exception as e:
-            vip.error_box(["✗ Cannot read this PAK",
-                           "  %s" % str(e)[:70],
-                           "PUT A PAK IN: " + paths.folder_label(paths.DROP_PAK)])
-            vip.wait_enter()
-            return
-        if not inventory:
-            vip.error_box(["✗ This PAK has no readable files",
-                           "  " + pakf.name])
-            vip.wait_enter()
-            return
-
-        wanted, how = _ask_paths(vip, inventory, pakf.name)
-        if wanted is None:
-            vip.write("  " + vip.theme.apply("Cancelled", "warn") + "\n")
-            vip.wait_enter()
-            return
-
-        name = _ask_out_name(vip, pakf)
-        if name is None:
-            vip.write("  " + vip.theme.apply("Cancelled", "warn") + "\n")
-            vip.wait_enter()
-            return
-
-        out = paths.unique_path(paths.RESULT_CUSTOMPAK / (name + ".pak"))
-        if not vip.proceed_box(
-                "COSTOM PAK (full content)",
-                paths.folder_label(paths.DROP_PAK) + " -> " + pakf.name,
-                wanted[:3],
-                paths.folder_label(paths.RESULT_CUSTOMPAK) + "/" + out.name,
-                extra=["%d path(s): %s" % (len(wanted), how),
-                       "every file keeps its ORIGINAL content (no 0-byte files)"]):
-            vip.write("  " + vip.theme.apply("Cancelled", "warn") + "\n")
-            vip.wait_enter()
-            return
-
-        frame = None
-        try:
-            from vip_ui import ProgressFrame
-            frame = ProgressFrame(vip, title="Building costom PAK",
-                                  total=len(wanted))
-        except Exception:
-            frame = None
-
-        def _tick(done, total, label):
-            if frame is not None:
-                frame.show(done=done, total=total, cur=label)
-
-        try:
-            n, nbytes = engines.build_custom_pak(
-                pakf, out, wanted, workdir,
-                log=lambda *a: vip.write(str(a[0]) + "\n") if a else None,
-                progress=_tick)
-        except Exception as e:
-            if frame is not None:
-                frame.show(pct=100, done=0, total=len(wanted), cur="Failed")
-            vip.error_box(["✗ Build failed: " + str(e)[:64],
-                           "  The base pak was not modified."],
-                          next_step="Nothing was written to RESULT/CostomPak.")
-            vip.wait_enter()
-            return
-        if frame is not None:
-            frame.show(pct=100, done=len(wanted), total=len(wanted),
-                       cur="Finished")
-        vip.success_box([
-            "✓ Custom PAK built: %s" % paths.folder_label(
-                paths.RESULT_CUSTOMPAK) + "/" + out.name,
-            "  Files : %d (full original content)" % n,
-            "  Size  : %s" % paths.human(nbytes),
-            "  File  : %s" % paths.human(out.stat().st_size),
-        ])
-        vip.logged("pak.custom", files=n, out=out.name)
-    finally:
-        engines.cleanup_custom_session(workdir)
+    ik.pak_costom_pak()
 
 
 # ================================================================== LUA

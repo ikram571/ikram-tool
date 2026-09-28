@@ -25,19 +25,16 @@ from pathlib import Path
 _F = Path(__file__).resolve().parent
 
 # Engine kaha se chal raha hai:
-#   - .engine/  -> installed layout: DROP/RESULT parent me (drop/result lowercase)
-#   - repo root -> dev layout: DROP/RESULT yahin (uppercase, release layout)
+#   - .engine/  -> installed layout: DROP/RESULT uske PARENT me (uppercase)
+#   - repo root -> dev layout: DROP/RESULT yahin (uppercase)
+# Dono branches ab same folders resolve karte hain; .engine ke andar kabhi
+# user data nahi hota, isliye koi symlink banana zaroori nahi.
 if _F.name == ".engine":
     BASE_DIR = _F.parent
-    _DROP = BASE_DIR / "drop"
-    _RESULT = BASE_DIR / "result"
 else:
     BASE_DIR = _F
-    _DROP = BASE_DIR / "DROP"
-    _RESULT = BASE_DIR / "RESULT"
-
-# Public alias: the directory the tool's own files live in (VERSION, assets).
-ROOT = _F
+_DROP = BASE_DIR / "DROP"
+_RESULT = BASE_DIR / "RESULT"
 
 DROP_PAK = _DROP / "pak"
 DROP_LUA = _DROP / "lua"

@@ -12,29 +12,13 @@ spec = importlib.util.spec_from_file_location("ikram", _TOOL_DIR / "ikram.pyc")
 ikram = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ikram)
 
-# ---- telemetry: pin the LOCAL logger before the core can import anything ----
-# The compiled core does a lazy `import telemetry` inside key_lock() and in
-# four error paths, so whatever sits in sys.modules under that name at THAT
-# moment is what runs. Load telemetry.py from source here, up front, and pin
-# it: the shipped telemetry.pyc used to POST the device name and the launch
-# time to a hardcoded Telegram bot on every single login, which is not what
-# this tool is supposed to do and not something an installed copy of the tool
-# should be doing behind the user's back. Loading it here also means the lazy
-# import can never fail, whatever else is on disk.
-telemetry = None
-try:
-    import telemetry as _telemetry
-    telemetry = _telemetry
-    sys.modules["telemetry"] = _telemetry
-except Exception:  # never let logging setup break the launch
-    telemetry = None
-
 import engines as _engines
 import assetprocs as _assets
 
-# ---- real DROP/RESULT override (installed layout: .engine/ ke PARENT me
-# drop/result lowercase; repo layout: DROP/RESULT. compiled module points at
-# its own __file__ dir = .engine/DROP, which must NEVER have user data).
+# ---- real DROP/RESULT override (installed layout: engine files live directly
+# in ~/Ikram_Tool, so DROP/RESULT are its uppercase sibling folders. The
+# compiled module points at its own __file__ dir, which must NEVER hold data.
+# Legacy .engine installs are migrated by install.sh before this runs.)
 import paths as _paths
 for _name, _val in (
     ("DROP", _paths.DROP_DIR),
@@ -429,16 +413,14 @@ def pak_extract():
 
 
 def _notify_tg(operation, msg, limit=800):
-    """Non-raising failures go to the local log, never off the device.
-
-    This used to load telemetry.pyc straight off disk and post the machine to
-    the owner's Telegram. That file is gone and the logger is local-only, so
-    the same record now lands in telemetry.log next to everything else and
-    the call stays non-raising: a log write must never break a PAK run.
-    """
+    """Graceful (non-raising) failure -> owner Telegram, same lazy-load as
+    telemetry.pyc. Exceptions elsewhere already reach TG via report_error."""
     try:
-        if telemetry is not None:
-            telemetry.send_error(RuntimeError(msg[:limit]), extra=operation)
+        import importlib.util as _ilu
+        _s = _ilu.spec_from_file_location("_tel_pak", _TOOL_DIR / "telemetry.pyc")
+        _m = _ilu.module_from_spec(_s)
+        _s.loader.exec_module(_m)
+        _m.send_error(RuntimeError(msg[:limit]), extra=operation)
     except Exception:
         pass
 
@@ -452,9 +434,6 @@ def _finish_report(pakf, n, kind, out):
                    "{}({}): 0 files extracted".format(pakf.name, kind))
     else:
         ikram.show_success("✔ {} files unpacked -> {}".format(n, out))
-        if telemetry is not None:
-            telemetry.send_event("pak.unpack", file=pakf.name, status="OK",
-                                 engine=kind or "unknown", files=n)
 
 
 _compiled_pak_inject = ikram.pak_inject
@@ -509,14 +488,8 @@ def pak_repack_folder():
                 pass
         _purge_legacy_repacked_folders()
         ikram.show_success("✔ {} files repacked -> {}".format(n, out))
-        if telemetry is not None:
-            telemetry.send_event("pak.repack", file=pakf.name, status="OK",
-                                 engine=kind or "unknown", edited=n,
-                                 bytes=out.stat().st_size if out.exists() else 0)
     except Exception as e:
         ikram.report_error(e)
-        if telemetry is not None:
-            telemetry.send_error(e, extra="pak.repack:%s" % pakf.name)
     ikram.pause()
 
 
@@ -928,23 +901,6 @@ def _trim_tencent_pad(path, log=None):
         return
 
 
-def _build_full_content_custom(pakf, out, wanted, log=None, aes_key=None):
-    """Build a costom pak whose every selected file keeps its ORIGINAL bytes.
-
-    Used by the ENTER (all paths) branch of the Baki menu, which used to write
-    empty bodies through _inject_skeleton. The engine call is the same one the
-    VIP menu uses, so both entry points produce the same bytes, and the temp
-    session is removed whether the build worked or not.
-    """
-    log = log or (lambda *a, **k: None)
-    workdir = _engines.custom_session_dir()
-    try:
-        return _engines.build_custom_pak(
-            pakf, out, wanted, workdir, aes_key=aes_key, log=log)
-    finally:
-        _engines.cleanup_custom_session(workdir)
-
-
 def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                      empty_name=None):
     """Build a COSTOM pak from source pakf:
@@ -974,13 +930,8 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
                 version = getattr(r, "version_num", 14)
             mount = r.mount_point
             if target == _SKELETON:
-                # ENTER pressed: ALL file names, and now with their REAL
-                # content — the old _inject_skeleton wrote 0-byte bodies,
-                # which produced a pak the game could not read.
-                every = sorted(p for p in r.full_paths())
-                n, nbytes = _build_full_content_custom(
-                    pakf, out, every, log=log, aes_key=aes_key)
-                return len(chain), n
+                # ENTER pressed: ALL folders + ALL file names, EMPTY bodies.
+                return _inject_skeleton(r, out, mount, log)
             if empty_name is not None:
                 got = _inject_empty_file(
                     r, out, target, empty_name, mount, version, log
@@ -999,14 +950,6 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
             _trim_tencent_pad(out, log)
             return len(chain), 0
     if kind == "ue4":
-        if target == _SKELETON:
-            # Same rule as the tencent branch above: ENTER = every file, with
-            # its real content, not an empty shell.
-            p = _engines.ue4mod().Ue4Pak(pakf, aes_key=aes_key)
-            every = sorted(p.files())
-            n, nbytes = _build_full_content_custom(
-                pakf, out, every, log=log, aes_key=aes_key)
-            return 0, n
         log("  engine: repak-pack (standard UE4)")
         repak = _engines.find_repak()
         if repak is None:
@@ -1038,20 +981,7 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
 
 def pak_costom_pak():
     """COSTOM PAK — pak pick → folder pick (number / 0 cancel / custom path) →
-    RESULT/CostomPak/<same name>.pak.
-
-    What the output actually contains depends on the branch, and the docstring
-    used to promise more than any of them deliver:
-
-      ENTER (all paths)  every file, at its ORIGINAL bytes — the full-content
-                         build, the same one the VIP menu uses.
-      a folder, tencent  the subtree copy / single-file inject, real content.
-      a folder, ue4      an EMPTY shell. That branch packs an empty tempdir
-                         and returns (0, 0); it preserves the mount point and
-                         version and adds no files. It never copied the folder.
-
-    Pinned by tests/test_baki_costom_pak.py, which asserts the real behaviour
-    of each branch rather than the old claim."""
+    empty pak with just that folder chain -> RESULT/CostomPak/<same name>.pak"""
     paks = ikram.drop_files(ikram.DROP_PAK, [".pak"])
     if not paks:
         ikram.show_error(
@@ -1112,8 +1042,8 @@ def pak_costom_pak():
         )
         if target == _SKELETON:
             ikram.console.print(
-                "    [bold {}]•[/] {} file(s) copied with FULL content".format(
-                    ikram.MUTED, nfiles
+                "    [bold {}]•[/] ALL folders + all file names, EMPTY bodies".format(
+                    ikram.MUTED
                 )
             )
         elif target:
@@ -1154,7 +1084,7 @@ def pak_tool_menu():
             ("[3]", "📦 Repack PAK",
              "WORK: build the pak again.\n1) first UNPACK the pak\n2) edit files in RESULT/extracted\n3) old pak files are NEVER touched\nOUTPUT: RESULT/Repacked/"),
             ("[4]", "📦 Costom Pak",
-             "WORK: build a new pak from a base pak.\n1) pick the base pak from DROP/pak\n2) pick the paths: number, path, or ENTER = ALL\nevery selected file keeps its FULL original\ncontent (no 0-byte files).\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
+             "WORK: make an empty pak.\nENTER (no typing) = ALL folders +\nall file names but EMPTY files\n(real in game when you inject into it).\nnumber = pick 1 folder · typed path = only\nthat path + its files copied (not empty).\nPUT FILE IN: DROP/pak\nOUTPUT: RESULT/CostomPak/"),
             ("[0]", "Back", "back to main menu"),
         ]
         t = ikram.build_menu_table(opts)

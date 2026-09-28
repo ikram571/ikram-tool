@@ -1,4 +1,4 @@
-"""IkramTool — VIP shell.
+"""IkramTool V120 — VIP shell.
 
 Owns the screen: header, menu loops, submenus, folder status, prompts,
 PROCEED box, progress frames, status boxes, invalid-input box, theme
@@ -10,49 +10,14 @@ un-boxed; the only non-boxed line allowed anywhere is the Press-ENTER
 All user input funnels through `_ask()`, so tests can script whole flows
 without a terminal.
 """
-import re
 import sys
 import time
-import unicodedata
 
 from theme_engine import Theme, load_theme, save_theme, THEMES, is_tty
-from box_engine import BoxEngine, SEP, vip_num_cycle
+from box_engine import BoxEngine, SEP
 import paths
 
-
-def _read_version():
-    """Single source of truth is the VERSION file next to this module.
-
-    There is deliberately no hardcoded version literal in this function. The
-    literal that used to sit here was worse than no fallback at all: every
-    sandbox that remaps paths away from the repo has no VERSION file, so the
-    banner silently showed that frozen literal instead of the real version —
-    which is how a version bump can pass the unit suites and still ship a
-    wrong banner.
-
-    Fallback chain, in order of authority:
-      1. the VERSION file
-      2. ikram_key.json, which the updater rewrites on every install
-      3. "unknown" — loud and obviously wrong, never a plausible number
-    """
-    try:
-        v = (paths.ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        if v:
-            return v.lower()
-    except Exception:
-        pass
-    try:
-        import json
-        v = json.loads((paths.ROOT / "ikram_key.json").read_text(
-            encoding="utf-8")).get("version", "")
-        if v:
-            return str(v).strip().lower()
-    except Exception:
-        pass
-    return "unknown"
-
-
-VERSION = _read_version()
+VERSION = "v120"
 BRAND = "IkramTool"
 C = "\x1b["
 RESET = C + "0m"
@@ -84,14 +49,15 @@ _ATTR_ROLE = {
 
 
 def _vip_num_cycle(pal, theme_name="Original Color"):
-    """V111 number colour cycle, from the one definition in box_engine.
-
-    Default theme: 0→183, 1→45, 2→51, 3→39, 4→118, 5→119, unchanged. Any
-    other theme maps the same six slots through its own palette, so the
-    numbers follow the theme everywhere they are painted — renderer and
-    compiled core alike — instead of only in half the tool.
-    """
-    return vip_num_cycle(pal, theme_name)
+    """V111 number colour cycle: 0→183, 1→45, 2→51, 3→39, 4→118, 5→119.
+    Other themes map the same six slots through their own palette so the
+    UI shape stays byte-identical everywhere."""
+    if theme_name == "Original Color":
+        return {"0": 183, "1": 45, "2": 51, "3": 39, "4": 118, "5": 119}
+    base = pal.get("number", 45)
+    return {"0": base, "1": base, "2": pal.get("secondary", 51),
+            "3": pal.get("accent", 141), "4": pal.get("warn", 214),
+            "5": pal.get("primary", 228)}
 
 
 def _sync_compiled_theme(vip):
@@ -134,147 +100,10 @@ class ProgressFrame:
     def phase(self, text):
         self.show(cur=text)
 
-
-# --------------------------------------------------------------- key screen
-# The key screen is drawn by the compiled core, so what is fixed here is
-# patched onto the strings on their way to the terminal. Nothing on the
-# screen is redrawn — the prompt, the banner and the colours are untouched.
-_BAD_KEY_MARK = "Invalid key!"
-_KEY_PROMPT_MARK = "\U0001f511 Enter key:"
-
-_TAG = re.compile(r"\[[^\[\]]*\]")
-_BORDER = re.compile(r"[╭╰](?P<run>─+)[╮╯]")
-_ROW_END = re.compile(r"^(?P<head>.*\])(?P<fill>[ \t]+)\u2502\[/\]$")
-
-
-def _width(text):
-    """Columns the terminal will actually spend on `text`.
-
-    Markup is dropped first, and anything double-width (the key glyph, any
-    CJK or emoji) is charged two columns, which is what a terminal does.
-    """
-    total = 0
-    for ch in _TAG.sub("", text):
-        if unicodedata.combining(ch):
-            continue
-        total += 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
-    return total
-
-
-def _fix_bottom_corner(text):
-    """The compiled bottom border closes with a top-right corner.
-
-    It is built as '╰' + '─'*n + '╮', so the box shows '╮' exactly where a
-    '╯' belongs. Only a line that already opens with '╰' is touched, which
-    is the bottom border and nothing else on the screen.
-    """
-    if "╰" not in text:
-        return text
-    lines = text.split("\n")
-    for i, line in enumerate(lines):
-        if "╰" in line and line.rstrip().endswith("╮[/]"):
-            lines[i] = line.rstrip()[:-len("╮[/]")] + "╯[/]"
-    return "\n".join(lines)
-
-
-class _KeyScreen:
-    """Runs the compiled key screen under the rules it is missing.
-
-    The compiled loop has no attempt counter and no end-of-input check, so
-    a wrong key spins forever and a closed stdin hangs on the prompt with
-    nothing on screen. Both are fixed here, from the outside, without
-    redrawing a single line of the key screen itself.
-    """
-
-    MAX_ATTEMPTS = 3
-
-    def __init__(self, vip):
-        self.vip = vip
-        self.ik = vip.ikram
-        self.bad = 0
-        self.inner = None        # dashes in the key box's top border
-        self.prompt_w = None     # columns the prompt already spent
-        self._console = None
-        self._input = None
-
-    # -- the two things the compiled screen gets wrong -------------------
-    def _fit_row(self, text):
-        """Size the key row's fill so the row lands on the border.
-
-        The compiled core pads the row by arithmetic on len() of the label,
-        which does not know that the key glyph renders two columns wide, so
-        the row overshot the right border and wrapped. Rather than guess an
-        offset, the fill is solved for: whatever makes the whole line exactly
-        as wide as the border it sits between.
-        """
-        m = _ROW_END.match(text)
-        if not m or self.inner is None or self.prompt_w is None:
-            return text
-        want = self.inner + 2 - self.prompt_w     # the two bars are counted
-        have = _width(m.group("head") + m.group("fill") + "│")
-        fill = m.group("fill")
-        if have == want:
-            return text
-        pad = max(1, len(fill) + (want - have))
-        return m.group("head") + " " * pad + "│[/]"
-
-    def _print(self, *args, **kwargs):
-        if args and isinstance(args[0], str):
-            text = args[0]
-            text = self._fit_row(text)
-            text = _fix_bottom_corner(text)
-            if _KEY_PROMPT_MARK in text:
-                self.prompt_w = _width(text)
-            else:
-                b = _BORDER.search(_TAG.sub("", text))
-                if b is not None:
-                    self.inner = len(b.group("run"))
-            if _BAD_KEY_MARK in text:
-                self.bad += 1
-            args = (text,) + args[1:]
-        self._console.print(*args, **kwargs)
-        if self.bad >= self.MAX_ATTEMPTS:
-            # SystemExit is a BaseException: the compiled `except Exception`
-            # around the prompt cannot swallow it, so this unwinds the loop
-            # for good instead of re-asking a fourth time.
-            raise SystemExit(1)
-
-    def _ask(self, prompt=""):
-        try:
-            return self._input(prompt)
-        except (EOFError, KeyboardInterrupt):
-            raise SystemExit(1)
-
-    # -- lifecycle --------------------------------------------------------
-    def __enter__(self):
-        import builtins
-        self._console = self.ik.console
-        self._input = builtins.input
-        self.ik.console = _KeyConsole(self)
-        builtins.input = self._ask
-        return self
-
-    def __exit__(self, *exc):
-        import builtins
-        if self._console is not None:
-            self.ik.console = self._console
-        builtins.input = self._input
-        return False
-
-
-class _KeyConsole:
-    """Thin stand-in for the compiled core's rich Console during the key."""
-
-    def __init__(self, screen):
-        self._screen = screen
-        self._real = screen._console
-
-    def print(self, *args, **kwargs):
-        self._screen._print(*args, **kwargs)
-
-    def __getattr__(self, name):
-        return getattr(self._real, name)
-
+    def close(self, cur=None):
+        """Final frame. ProgressFrame has no teardown state in TTY mode,
+        but callers unconditionally invoke it, so it must exist."""
+        self.show(pct=100, done=100, total=100, cur=cur)
 
 
 class Vip:
@@ -297,21 +126,12 @@ class Vip:
             _w(text)
 
     def _ask(self, prompt):
-        """Read one line. Overridable in tests.
-
-        Sets `_eof` when the input stream is gone. Every re-prompt loop must
-        check it: input() keeps raising EOFError forever on a closed stdin, so
-        a naive "not valid -> ask again" loop spins at 100% CPU instead of
-        letting the tool exit.
-        """
-        self._eof = False
+        """Read one line. Overridable in tests."""
         try:
             ans = input(prompt)
         except EOFError:
-            self._eof = True
             return ""
         except KeyboardInterrupt:
-            self._eof = True
             return ""
         if is_tty():
             # Termux doesn't echo the Enter newline — advance the cursor so
@@ -319,10 +139,6 @@ class Vip:
             # the "Choose ..." prompt.
             self.write("\n")
         return ans
-
-    def _eof_answered(self, prompt=""):
-        """_ask() plus a flag telling the caller the stream just closed."""
-        return self._ask(prompt), bool(getattr(self, "_eof", False))
 
     def cls(self):
         if is_tty():
@@ -384,7 +200,7 @@ class Vip:
             self.box.draw_menu([
                 ("1", "📦 PAK TOOL (UNPACK, INJECT, REPACK)",
                  ["unpack, inject, repack pak files",
-                  "COSTOM PAK: build a pak with full file content (option 4)"]),
+                  "COSTOM PAK: make empty pak all-in-one (option 4)"]),
                 ("2", "📜 LUA TOOL (COMPILING, DECOMPILING)",
                  ["compile / decompile lua (auto-detect)"]),
                 ("3", "🎨 THEMES",
@@ -414,10 +230,11 @@ class Vip:
               "3) old pak files are NEVER touched",
               "OUTPUT: RESULT/Repacked/"]),
             ("4", "📦 Costom Pak",
-             ["WORK: build a new pak from a base pak.",
-              "1) pick the base pak from DROP/pak",
-              "2) pick the paths: number, path, or ENTER = ALL",
-              "every selected file keeps its FULL original content.",
+             ["WORK: make an empty pak.",
+              "ENTER (no typing) = ALL folders + all file names",
+              "but EMPTY files (real in game when injected).",
+              "number = pick 1 folder · typed path = only that",
+              "path + its files copied (not empty).",
               "PUT FILE IN: DROP/pak",
               "OUTPUT: RESULT/CostomPak/"]),
         ]
@@ -478,14 +295,9 @@ class Vip:
     def prompt_in(self, choices, label):
         while True:
             self.write("  " + self.theme.apply(label, "prompt") + " ")
-            ans, eof = self._eof_answered("")
-            ans = ans.strip().lower()
+            ans = self._ask("").strip().lower()
             if ans in choices:
                 return ans
-            if eof:
-                # stdin is gone: treat as back so the menu unwinds instead of
-                # re-asking forever.
-                return choices[-1] if choices else "0"
             self.invalid_box()
 
     def invalid_box(self):
@@ -532,15 +344,11 @@ class Vip:
                     + "      " + self.theme.apply("[ N ] Cancel", "warn"))
         self.write(self.box.draw_box(rows, "thick", title="Proceed?") + "\n")
         self.write("  " + self.theme.apply("Proceed? (Y/N) ", "prompt") + " ")
-        ans, eof = self._eof_answered("")
-        ans = ans.strip().lower()
+        ans = self._ask("").strip().lower()
         while ans not in ("y", "n"):
-            if eof:
-                return False
             self.invalid_box()
             self.write("  " + self.theme.apply("Proceed? (Y/N) ", "prompt") + " ")
-            ans, eof = self._eof_answered("")
-            ans = ans.strip().lower()
+            ans = self._ask("").strip().lower()
         return ans == "y"
 
     def confirm_box(self, title, label, yes_label="Delete"):
@@ -551,15 +359,11 @@ class Vip:
             + "      " + self.theme.apply("[ N ] Cancel", "warn"),
         ], "heavy", title=title) + "\n")
         self.write("  " + self.theme.apply("Confirm? (Y/N) ", "prompt") + " ")
-        ans, eof = self._eof_answered("")
-        ans = ans.strip().lower()
+        ans = self._ask("").strip().lower()
         while ans not in ("y", "n"):
-            if eof:
-                return False
             self.invalid_box()
             self.write("  " + self.theme.apply("Confirm? (Y/N) ", "prompt") + " ")
-            ans, eof = self._eof_answered("")
-            ans = ans.strip().lower()
+            ans = self._ask("").strip().lower()
         return ans == "y"
 
     # ------------------------------------------------------------- returns
@@ -571,127 +375,11 @@ class Vip:
         self.pause(1.0)
         self.reset_term()
 
-    # ------------------------------------------------------- auto update
-    def _update_gate(self):
-        """Check GitHub for a newer release BEFORE the key screen, and
-        re-exec into it when there is one.
-
-        The compiled core's main() has always done this (check_updates_auto ->
-        os.execv -> key_lock) but nothing calls main() any more: this file
-        drives the menus now, so the update chain was severed and an old
-        install stayed on its old version forever while the key screen opened
-        exactly as it always had.
-
-        Rules this keeps:
-          - the check is bounded (update.VERSION_CHECK_TIMEOUT) and any
-            failure is silent: no network, no problem, straight to the key
-          - comparison is integer-based via update.version_tuple, so
-            V100 < V119 < V120 < V122 and equal versions are skipped
-          - DROP/ and RESULT/ are never touched (update.PROTECTED, plus the
-            case-insensitive guard inside it)
-          - the re-exec happens only after update.do_install() reported a
-            complete, verified install, so a failed update leaves the running
-            version working
-        """
-        try:
-            import update
-        except Exception:
-            return
-        try:
-            info = update.latest_remote()
-        except Exception:
-            info = None
-        if not info:
-            return
-        local = _read_version()
-        try:
-            newer = (update.version_tuple(info.get("version", "0"))
-                     > update.version_tuple(local))
-        except Exception:
-            newer = False
-        if not newer:
-            return
-        self.cls()
-        self.write(self.box.draw_box([
-            self.box.draw_labeled_row("Installed", local.upper(), "dim", "text"),
-            self.box.draw_labeled_row("Latest", ("V" + str(
-                info.get("version", "")).lstrip("vV")), "dim", "success"),
-            "",
-            "  Updating now, please wait...",
-        ], "thick", title="UPDATE AVAILABLE") + "\n")
-        self.pause(1.0)
-        try:
-            ok = bool(update.do_install())
-        except Exception:
-            ok = False
-        if not ok:
-            self.write(self.box.draw_box([
-                "  Update could not be applied.",
-                "  Continuing with the current version.",
-            ], "light", color_role="warn") + "\n")
-            self.pause(1.5)
-            return
-        self.write(self.box.draw_box([
-            "  Updated to %s successfully!"
-            % ("V" + str(info.get("version", "")).lstrip("vV")),
-            "  Restarting...",
-        ], "rounded", color_role="success") + "\n")
-        self.pause(1.0)
-        self.reset_term()
-        # Re-exec rather than continue: this process is already running the
-        # old code, so without the re-exec the user would keep using the
-        # version they just replaced until they launched a second time.
-        self.flush()
-        try:
-            import os
-            # absolutise argv[0]: a relative script path would be re-resolved
-            # against whatever CWD the re-exec ends up with.
-            argv = list(sys.argv)
-            try:
-                argv[0] = str(paths.ROOT / os.path.basename(argv[0]))
-            except Exception:
-                pass
-            os.execv(sys.executable, [sys.executable] + argv)
-        except Exception:
-            pass
-
-    def flush(self):
-        for stream in (self.stream, sys.stdout, sys.stderr):
-            try:
-                stream.flush()
-            except Exception:
-                pass
-
-    # ------------------------------------------------------------- key screen
-    def _key_gate(self):
-        """True = key accepted, carry on. False = leave, tool is done.
-
-        The screen is the compiled core's own; this only supplies the two
-        rules it lacks — three strikes and a real answer to a closed stdin.
-        """
-        screen = _KeyScreen(self)
-        try:
-            with screen:
-                ok = self.ikram.key_lock()
-        except SystemExit:
-            if screen.bad >= screen.MAX_ATTEMPTS:
-                self.cls()
-                err = getattr(self.ikram, "ERROR", "color(196)")
-                # rich markup, printed by rich — the key screen's own
-                # messages go through the console and this one matches them.
-                self.ikram.console.print(
-                    "\n[bold %s]✘ Too many attempts. Exiting.[/]" % err)
-                self.reset_term()
-            return False
-        return bool(ok)
-
     # ------------------------------------------------------------- run
     def run(self):
         paths.ensure_dirs()
-        # Update first, then the key — the same order the compiled core used.
-        self._update_gate()
         if self.ikram is not None:
-            if not self._key_gate():
+            if not self.ikram.key_lock():
                 return
             self.ikram.welcome_splash()
         got = None
@@ -721,32 +409,6 @@ class Vip:
                            next_step="Restart and try again.")
             return
 
-    # ------------------------------------------------------------- actions
-    def logged(self, name, **extra):
-        """Record an action that needs no call of its own (a setting, say)."""
-        import telemetry
-        return telemetry.send_event(name, status="OK", **extra)
-
-    def act(self, name, fn, *args, **kwargs):
-        """Run one menu action, and write it to the local action log.
-
-        Every choice in every menu goes through here, which is the only way
-        to guarantee an action is never run unlogged: the log line is
-        written after the action returns, and a failure is recorded before
-        the exception is allowed to keep travelling. The log is local
-        (telemetry.log beside the tool) and a failed write is ignored, so
-        this can never turn a working action into a broken one.
-        """
-        import telemetry
-        started = time.time()
-        try:
-            out = fn(*args, **kwargs)
-        except BaseException as exc:                   # noqa: BLE001
-            telemetry.send_error(exc, extra=name)
-            raise
-        self.logged(name, ms=int((time.time() - started) * 1000))
-        return out
-
     def run_pak(self):
         import menus
         while True:
@@ -757,17 +419,17 @@ class Vip:
                 return
             self.cls()
             if got == "1":
-                self.act("pak.unpack", menus.pak_unpack, self)
+                menus.pak_unpack(self)
             elif got == "2":
-                self.act("pak.inject", menus.pak_inject, self)
+                menus.pak_inject(self)
             elif got == "3":
-                self.act("pak.repack", menus.pak_repack, self)
+                menus.pak_repack(self)
             elif got == "4":
-                self.act("pak.custom", menus.pak_custom, self)
+                menus.pak_custom(self)
             elif got == "c":
-                self.act("pak.clear_drop", menus.clear_drop_pak, self)
+                menus.clear_drop_pak(self)
             elif got == "r":
-                self.act("pak.clear_result", menus.clear_result, self)
+                menus.clear_result(self)
 
     def run_lua(self):
         import menus
@@ -785,7 +447,7 @@ class Vip:
                 if want:
                     frame = ProgressFrame(self, title="Installing missing tools")
                     results = lua_pipeline.install_missing(progress=frame)
-                    frame.show(pct=100, cur="Finished")
+                    frame.close(cur="Finished")
                     ok_n = sum(1 for _c, ok, _t in results if ok)
                     self.cls()
                     self.write(self.box.draw_box([
@@ -801,13 +463,13 @@ class Vip:
                 return
             self.cls()
             if got == "1":
-                self.act("lua.compile", menus.lua_compile, self)
+                menus.lua_compile(self)
             elif got == "2":
-                self.act("lua.decompile", menus.lua_decompile, self)
+                menus.lua_decompile(self)
             elif got == "c":
-                self.act("lua.clear_drop", menus.clear_drop_lua, self)
+                menus.clear_drop_lua(self)
             elif got == "r":
-                self.act("lua.clear_result", menus.clear_result_lua, self)
+                menus.clear_result_lua(self)
 
     def run_themes(self):
         while True:
@@ -819,13 +481,11 @@ class Vip:
             if got == "0":
                 return
             name = THEMES[int(got) - 1]
-            changed = name != self.theme.name
-            if changed:
+            if name != self.theme.name:
                 save_theme(name)
                 self.theme = Theme(name)
                 self.box = BoxEngine(self.theme)
                 _sync_compiled_theme(self)
-            self.logged("theme.set", file=name, changed=changed)
             self.cls()
             self.write(self.box.draw_box([
                 self.theme.apply(name, "primary"),

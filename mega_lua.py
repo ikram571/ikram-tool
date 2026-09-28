@@ -29,7 +29,6 @@ import re
 import subprocess
 import sys
 import tempfile
-import time
 import zlib
 from pathlib import Path
 
@@ -59,41 +58,13 @@ UNLUAC_JAR_TIMEOUT = 180  # base seconds; jar is slower to warm up
 PROBE_TIMEOUT = 30        # seconds; validation probes must never block detection
 MAX_SCALED_TIMEOUT = 3600 # absolute ceiling so nothing pins the UI forever
 
-# Wall-clock ceiling for one decompile request, set by the pipeline before the
-# cascade starts. Without it every tier uses its own generous timeout and seven
-# tiers in a row can run for many minutes; with it a tier that starts late is
-# clamped to whatever budget is actually left, so the whole request honours the
-# user-visible limit instead of overshooting it by one long engine run.
-_HARD_DEADLINE = [0.0]  # 0.0 means "no deadline set"
-
-
-def set_hard_deadline(when: float) -> None:
-    _HARD_DEADLINE[0] = float(when or 0.0)
-
-
-def clear_hard_deadline() -> None:
-    _HARD_DEADLINE[0] = 0.0
-
-
-def _budget_left() -> float:
-    if _HARD_DEADLINE[0] <= 0.0:
-        return float("inf")
-    return _HARD_DEADLINE[0] - time.monotonic()
-
 
 def _scaled_timeout(base: int, size: int) -> int:
     """Timeout that grows with the input so no line-count / byte-count wall
-    exists: base + ~5s per extra MB, capped at MAX_SCALED_TIMEOUT, then
-    clamped to the remaining request budget so a cascade cannot overshoot."""
+    exists: base + ~5s per extra MB, capped at MAX_SCALED_TIMEOUT."""
     if size <= 0:
-        secs = base
-    else:
-        secs = min(MAX_SCALED_TIMEOUT,
-                   int(base + max(0.0, (size - (2 << 20)) / (1 << 20)) * 5.0))
-    left = _budget_left()
-    if left != float("inf"):
-        secs = max(1, min(secs, int(left)))
-    return secs
+        return base
+    return min(MAX_SCALED_TIMEOUT, int(base + max(0.0, (size - (2 << 20)) / (1 << 20)) * 5.0))
 
 
 def _phase(progress, text: str) -> None:
@@ -3058,33 +3029,654 @@ def _patched_luac() -> Path:
     return LUAC_PATCHED
 
 
+_GOTO_RE = re.compile(r"\bgoto\s+([A-Za-z_][A-Za-z0-9_]*)")
+_LABEL_RE = re.compile(r"::([A-Za-z_][A-Za-z0-9_]*)::")
+
+# Populated by _compile_std when a retry neutralised unresolvable `goto`s.
+# compile_bgmi reads it to report the repair instead of hiding it.
+_LAST_GOTO_REPAIR: list = []
+
+
+def _mask_lua(src: str) -> str:
+    """Return `src` with comment and string *bodies* blanked to spaces.
+
+    Offsets and newlines are preserved, so regex hits found on the mask map
+    1:1 back onto the original text. This is what lets the goto scan avoid
+    false positives from a label named in a string or a `--` comment.
+    """
+    buf = list(src)
+    n = len(src)
+
+    def blank(a, b):
+        for k in range(a, min(b, n)):
+            if buf[k] != "\n":
+                buf[k] = " "
+
+    i = 0
+    while i < n:
+        c = src[i]
+        if c == "[":
+            m = re.match(r"\[(=*)\[", src[i:])
+            if m:
+                close = "]" + m.group(1) + "]"
+                j = src.find(close, i + m.end())
+                if j == -1:
+                    blank(i, n)
+                    break
+                blank(i, j + len(close))
+                i = j + len(close)
+                continue
+        if src.startswith("--", i):
+            m = re.match(r"--\[(=*)\[", src[i:])
+            if m:
+                close = "]" + m.group(1) + "]"
+                j = src.find(close, i + m.end())
+                if j == -1:
+                    blank(i, n)
+                    break
+                blank(i, j + len(close))
+                i = j + len(close)
+                continue
+            j = src.find("\n", i)
+            j = n if j == -1 else j
+            blank(i, j)
+            i = j
+            continue
+        if c in "\"'":
+            j = i + 1
+            while j < n:
+                if src[j] == "\\":
+                    j += 2
+                    continue
+                if src[j] == c:
+                    j += 1
+                    break
+                j += 1
+            blank(i + 1, j)
+            i = j
+            continue
+        i += 1
+    return "".join(buf)
+
+
+def _neutralise_gotos(text: str, only_missing: bool = True) -> tuple:
+    """Rewrite `goto Lx` into a no-op `do end` when no such label exists.
+
+    unluac-rs drops a `::label::` from its output and leaves the matching
+    `goto` behind (BRPlayerCharacterBase.lua: 28 gotos, 16 labels, and
+    `goto L12` at line 7795 with no `::L12::` anywhere). luac rejects that
+    with "no visible label", so the tool's own decompile output could not be
+    fed back into its own compiler.
+
+    Only labels absent from the WHOLE file are touched, which is the one
+    case that cannot be legal. A goto whose label exists may still be dead
+    because it sits in another function, but detecting that by static scope
+    analysis is unreliable on decompiler output -- one desynced `end`
+    mislabels every later goto, and the cost is live control flow. That case
+    is handled by _repair_from_error(), which asks luac for the exact line
+    instead of guessing.
+    """
+    masked = _mask_lua(text)
+    labels = set(_LABEL_RE.findall(masked))
+    edits = []
+    for m in _GOTO_RE.finditer(masked):
+        name = m.group(1)
+        if only_missing and name in labels:
+            continue
+        edits.append((m.start(), m.end(), name))
+    if not edits:
+        return text, []
+    parts = []
+    last = 0
+    removed = []
+    for a, b, name in edits:
+        parts.append(text[last:a])
+        parts.append("do end")
+        removed.append(name)
+        last = b
+    parts.append(text[last:])
+    return "".join(parts), ["goto:" + n for n in removed]
+
+
+# luac names the exact line and reason, which is far more reliable here than
+# any static guess at scope.
+_ERR_GOTO_RE = re.compile(
+    r"no visible label '([^']+)' for <goto> at line (\d+)")
+_ERR_LABEL_DUP_RE = re.compile(r"label '([^']+)' already defined on line (\d+)")
+
+
+def _neutralise_goto_at(text: str, name: str, line: int) -> tuple:
+    """Rewrite one specific `goto NAME` on one specific line."""
+    lines = text.split("\n")
+    idx = line - 1
+    if not (0 <= idx < len(lines)):
+        return text, []
+    pat = re.compile(r"\bgoto\s+%s\b" % re.escape(name))
+    new, hits = pat.subn("do end", lines[idx], count=1)
+    if not hits:
+        return text, []
+    lines[idx] = new
+    return "\n".join(lines), ["goto:%s@line%d" % (name, line)]
+
+
+def _repair_from_error(text: str, err: str) -> tuple:
+    """Fix exactly the line luac just complained about.
+
+    Compiler-driven rather than lint-driven: a file can hold many bad gotos
+    and the compiler reveals them one per round, so the caller loops until
+    it stops reporting. Each round touches a single line.
+    """
+    m = _ERR_GOTO_RE.search(err)
+    if m:
+        return _neutralise_goto_at(text, m.group(1), int(m.group(2)))
+    m = _ERR_LABEL_DUP_RE.search(err)
+    if m:
+        return _dedupe_labels(text)
+    return text, []
+
+
+_SPLIT_GLOBAL_RE = re.compile(
+    r"(_G)\.([A-Za-z_][A-Za-z0-9_]*)(\s+)([A-Za-z_][A-Za-z0-9_]*)")
+
+
+_LUA_RESERVED = frozenset((
+    "and", "break", "do", "else", "elseif", "end", "false", "for", "function",
+    "goto", "if", "in", "local", "nil", "not", "or", "repeat", "return",
+    "then", "true", "until", "while",
+))
+
+
+def _repair_split_globals(text: str) -> tuple:
+    """Fold `_G.A B` back into the bracketed key `_G["A B"]`.
+
+    unluac-rs can split a global name that contains a space across a dot
+    access, which is not valid Lua:
+
+        _G.__RAJPUT Session = nil
+        _G.__RAJPUT LagFix.version
+
+    becomes a syntax error at compile time. Both are really one key,
+    `_G["__RAJPUT Session"]` / `_G["__RAJPUT LagFix"].version`. Verified
+    against 19 such lines in drop/lua/BRPlayerCharacterBase.lua.
+
+    Only invoked from the post-failure retry ladder, so well-formed source is
+    never rewritten.
+    """
+    masked = _mask_lua(text)
+    edits = []
+    for m in _SPLIT_GLOBAL_RE.finditer(masked):
+        first, second = m.group(2), m.group(4)
+        # `_G.Client if x then` — the "second word" is the keyword `if`, not
+        # part of a global name. Folding that would eat the keyword and turn
+        # valid code into `_G["Client if"] x then`. Reserved words are never
+        # a continuation of a name.
+        if second in _LUA_RESERVED or first in _LUA_RESERVED:
+            continue
+        edits.append((m.start(), m.end(), m.group(1), first, second))
+    if not edits:
+        return text, []
+    parts = []
+    last = 0
+    fixed = []
+    for a, b, prefix, first, second in edits:
+        parts.append(text[last:a])
+        parts.append('%s["%s %s"]' % (prefix, first, second))
+        fixed.append("key:%s %s" % (first, second))
+        last = b
+    parts.append(text[last:])
+    return "".join(parts), fixed
+
+
+_BLOCK_TOKEN_RE = re.compile(
+    r"\b(function|then|do|repeat|end|until|else|elseif|return|break)\b")
+
+
+def _seal_dead_code(text: str) -> tuple:
+    """Drop the unreachable tail of a block that a `return`/`break` sealed.
+
+    Lua requires `return`/`break` to be the LAST statement of its block, so any
+    statement after it is dead. A decompiler that loses a jump target can emit
+    such a tail, and luac rejects it with "unexpected symbol near ...".
+
+    Two traps this must not fall into:
+
+    1. `return {` and `return (s:gsub(".", function(x)` continue onto the next
+       lines. A return only seals when the line is bracket-balanced, i.e. the
+       statement finished on that line.
+    2. `return function(a) ... end` returns a CLOSURE whose body is the
+       following code and is fully reachable. A block-opener after `return`
+       therefore cancels the seal.
+
+    The dead region is buffered and dropped as a RANGE with its terminator
+    (`end`/`until`) kept, because dropping a line that carries an `end` would
+    unbalance the block structure. If a branch reset (`else`/`elseif`) is met
+    at the sealed block's own level, the seal was wrong: the buffer is
+    restored untouched.
+
+    Returns (text, ["dead:<line>"]).
+    """
+    masked = _mask_lua(text)
+    lines = text.split("\n")
+    masks = masked.split("\n")
+    openers = ("function", "then", "do", "repeat")
+    out = []
+    dropped = []
+    frames = [False]          # sealed flag per open block
+    dead = None               # {"buf": [...], "sub": int}
+
+    for idx in range(len(lines)):
+        raw = lines[idx]
+        content = masks[idx].strip()
+
+        if dead is not None:
+            if not content:
+                continue
+            toks = _BLOCK_TOKEN_RE.findall(content)
+            closed = broke = False
+            for t in toks:
+                if t in openers:
+                    dead["sub"] += 1
+                elif t in ("end", "until"):
+                    if dead["sub"] > 0:
+                        dead["sub"] -= 1
+                    else:
+                        closed = True
+                        break
+                elif t in ("else", "elseif") and dead["sub"] == 0:
+                    broke = True
+                    break
+            if closed:
+                out.append(raw)                 # keep the terminator
+                if len(frames) > 1:
+                    frames.pop()
+                for ln in dead["buf"]:
+                    dropped.append("dead:%d" % dead["lines"].get(ln, 0))
+                dead = None
+                continue
+            if broke:
+                out.extend(dead["buf"])         # seal was wrong: restore
+                out.append(raw)
+                if len(frames) > 1:
+                    frames.pop()
+                dead = None
+                continue
+            dead["lines"][raw] = idx + 1
+            dead["buf"].append(raw)
+            continue
+
+        if not content:
+            out.append(raw)
+            continue
+
+        toks = _BLOCK_TOKEN_RE.findall(content)
+        saw_return = False
+        opener_after_return = False
+        for t in toks:
+            if t in openers:
+                if saw_return:
+                    opener_after_return = True
+                frames.append(False)
+            elif t in ("end", "until"):
+                if len(frames) > 1:
+                    frames.pop()
+            elif t in ("else", "elseif"):
+                if len(frames) > 1:
+                    frames[-1] = False
+            elif t in ("return", "break"):
+                saw_return = True
+        out.append(raw)
+        delta = 0
+        for ch in content:
+            if ch in "{([": delta += 1
+            elif ch in "})]": delta -= 1
+        if delta == 0 and saw_return and not opener_after_return:
+            frames[-1] = True
+            dead = {"buf": [], "lines": {}, "sub": 0}
+
+    if dead is not None:
+        # Unterminated seal: restore, we cannot know where the block ended.
+        out.extend(dead["buf"])
+    if not dropped:
+        return text, []
+    return "\n".join(out), dropped
+
+
+def _open_block_stack(masked: str) -> list:
+    """Block keywords still open at the end of `masked`, innermost last.
+
+    `for`/`while` open a block that their own `do` completes, so they are
+    tagged ":do" and a following `do` clears the tag instead of pushing a
+    second frame. `repeat` never closes with `end` — only `until`.
+    """
+    stack = []
+    for m in re.finditer(r"[A-Za-z_][A-Za-z_0-9]*", masked):
+        w = m.group(0)
+        if w in ("function", "if"):
+            stack.append(w)
+        elif w in ("for", "while"):
+            stack.append(w + ":do")
+        elif w == "do":
+            if stack and stack[-1].endswith(":do"):
+                stack[-1] = stack[-1][:-3]
+            else:
+                stack.append("do")
+        elif w == "repeat":
+            stack.append("repeat")
+        elif w == "end":
+            if stack and not stack[-1].endswith(":do") and stack[-1] != "repeat":
+                stack.pop()
+        elif w == "until":
+            if stack and stack[-1] == "repeat":
+                stack.pop()
+    return stack
+
+
+def _close_open_blocks(text: str) -> tuple:
+    """Append the `end` / `until` terminators a truncated file never got.
+
+    The single most common decompiler defect: a function or `if` is cut off
+    before its `end`. luac reports "'end' expected (to close 'if' at line 2)
+    near <eof>" and nothing compiles. The stack tells us exactly which
+    closers are owed, in which order.
+    """
+    stack = _open_block_stack(_mask_lua(text))
+    if not stack:
+        return text, []
+    closers = []
+    for kind in reversed(stack):
+        if kind == "repeat":
+            closers.append("until false")
+        elif kind.endswith(":do"):
+            closers.append("do")
+            closers.append("end")
+        else:
+            closers.append("end")
+    fixed = text.rstrip("\n") + "\n" + "\n".join(closers) + "\n"
+    return fixed, ["end:%d block(s) closed at EOF" % len(closers)]
+
+
+def _close_long_strings(text: str) -> tuple:
+    """Close a long bracket the decompiler left open (`local s = [[oops`)."""
+    n = len(text)
+    i = 0
+    unclosed = []
+    while i < n:
+        c = text[i]
+        if text.startswith("--", i):
+            m = re.match(r"--\[(=*)\[", text[i:])
+            if m:
+                close = "]" + m.group(1) + "]"
+                j = text.find(close, i + m.end())
+                if j == -1:
+                    return text, []      # unterminated long comment: not ours
+                i = j + len(close)
+                continue
+            j = text.find("\n", i)
+            i = n if j == -1 else j
+            continue
+        if c in "\"'":
+            j = i + 1
+            while j < n:
+                if text[j] == "\\":
+                    j += 2
+                    continue
+                if text[j] == c:
+                    j += 1
+                    break
+                j += 1
+            i = j
+            continue
+        if c == "[":
+            m = re.match(r"\[(=*)\[", text[i:])
+            if m:
+                close = "]" + m.group(1) + "]"
+                j = text.find(close, i + m.end())
+                if j == -1:
+                    unclosed.append(m.group(1))
+                    break
+                i = j + len(close)
+                continue
+        i += 1
+    if not unclosed:
+        return text, []
+    add = "".join("]" + lvl + "]" for lvl in reversed(unclosed))
+    fixed = text.rstrip("\n") + "\n" + add + "\n"
+    return fixed, ["long:%d long string(s) closed" % len(unclosed)]
+
+
+_BRACKET_CLOSE = {"(": ")", "[": "]", "{": "}"}
+
+
+def _close_truncated_tail(text: str) -> tuple:
+    """Balance a table or call the decompiler cut off mid-expression."""
+    stack = []
+    for ch in _mask_lua(text):
+        if ch in _BRACKET_CLOSE:
+            stack.append(ch)
+        elif ch in ")]}" and stack:
+            stack.pop()
+    if not stack:
+        return text, []
+    add = "".join(_BRACKET_CLOSE[c] for c in reversed(stack))
+    fixed = text.rstrip("\n") + "\n" + add + "\n"
+    return fixed, ["tail:%d bracket(s) closed" % len(stack)]
+
+
+def _drop_orphaned_else(text: str) -> tuple:
+    """Remove an `else` / `elseif` with no `if` above it on the stack."""
+    masked = _mask_lua(text)
+    stack = []
+    cuts = []
+    for m in re.finditer(r"[A-Za-z_][A-Za-z_0-9]*", masked):
+        w = m.group(0)
+        if w in ("function", "if"):
+            stack.append(w)
+        elif w in ("for", "while"):
+            stack.append(w + ":do")
+        elif w == "do":
+            if stack and stack[-1].endswith(":do"):
+                stack[-1] = stack[-1][:-3]
+            else:
+                stack.append("do")
+        elif w == "repeat":
+            stack.append("repeat")
+        elif w == "end":
+            if stack and not stack[-1].endswith(":do") and stack[-1] != "repeat":
+                stack.pop()
+        elif w == "until":
+            if stack and stack[-1] == "repeat":
+                stack.pop()
+        elif w in ("else", "elseif") and (not stack or not stack[-1].startswith("if")):
+            ls = text.rfind("\n", 0, m.start()) + 1
+            le = text.find("\n", m.end())
+            le = len(text) if le == -1 else le
+            cuts.append((ls, le + 1))
+    if not cuts:
+        return text, []
+    fixed = text
+    for ls, le in reversed(cuts):
+        fixed = fixed[:ls] + fixed[le:]
+    return fixed, ["else:%d orphaned else/elseif removed" % len(cuts)]
+
+
+def _dedupe_labels(text: str) -> tuple:
+    """Rename a label the decompiler emitted twice in one function.
+
+    Scope-aware: the same label name in two different functions is legal Lua
+    and must stay. Only a repeat inside a single function is a defect, so
+    the seen-set is pushed and popped with the function depth.
+    """
+    masked = _mask_lua(text)
+    edits = []
+    scopes = [set()]
+    depth = 0
+    pos = 0
+    for m in re.finditer(r"[A-Za-z_][A-Za-z_0-9]*|::[A-Za-z_][A-Za-z_0-9_]*::", masked):
+        tok = m.group(0)
+        if tok.startswith("::"):
+            name = tok[2:-2]
+            if name in scopes[-1]:
+                new = name
+                k = 2
+                while new in scopes[-1]:
+                    new = "%s_%d" % (name, k)
+                    k += 1
+                edits.append((m.start(), m.end(), new))
+                scopes[-1].add(new)
+            else:
+                scopes[-1].add(name)
+        elif tok == "function":
+            depth += 1
+            scopes.append(set())
+        elif tok == "end" and depth:
+            depth -= 1
+            if len(scopes) > 1:
+                scopes.pop()
+    if not edits:
+        return text, []
+    out = []
+    last = 0
+    for a, b, new in edits:
+        out.append(text[last:a])
+        out.append("::%s::" % new)
+        last = b
+    out.append(text[last:])
+    return "".join(out), ["label:%d duplicate label(s) renamed" % len(edits)]
+
+
+def _rename_keyword_labels(text: str) -> tuple:
+    """Rename labels that collide with a Lua keyword (`::in::` + `goto in`).
+
+    A label may not be a reserved word, and the decompiler happily emits
+    `goto in`. Renaming the label and its gotos together keeps them bound.
+    """
+    masked = _mask_lua(text)
+    renames = {}
+    for m in _LABEL_RE.finditer(masked):
+        name = m.group(1)
+        if name in _LUA_RESERVED:
+            renames[name] = "_ikram_lbl_" + name
+    if not renames:
+        return text, []
+    out = []
+    last = 0
+    n_lbl = 0
+    for m in _LABEL_RE.finditer(masked):
+        name = m.group(1)
+        if name in renames:
+            out.append(text[last:m.start()])
+            out.append("::%s::" % renames[name])
+            last = m.end()
+            n_lbl += 1
+    out.append(text[last:])
+    fixed = "".join(out)
+    n_go = 0
+    for old, new in renames.items():
+        fixed, k = re.subn(r"\bgoto\s+%s\b" % re.escape(old), "goto " + new, fixed)
+        n_go += k
+    return fixed, ["kwlabel:%d keyword label(s) renamed" % n_lbl]
+
+
+def _apply_repairs(text: str) -> tuple:
+    """Run every targeted repair to a fixpoint. Returns (text, notes)."""
+    notes = []
+    seen = {text}
+    for _ in range(8):
+        changed = False
+        passes = (
+            _neutralise_gotos,
+            _repair_split_globals,
+            _close_long_strings,
+            _drop_orphaned_else,
+            _rename_keyword_labels,
+            _dedupe_labels,
+            _seal_dead_code,
+            _close_truncated_tail,
+            _close_open_blocks,
+        )
+        for fn in passes:
+            cand, found = fn(text)
+            if found and cand not in seen:
+                text = cand
+                notes.extend(found)
+                seen.add(text)
+                changed = True
+        if not changed:
+            break
+    return text, notes
+
+
+def _syntax_repair_variants(text: str) -> list:
+    """Candidate rewrites tried in order after a plain luac compile fails.
+
+    Repairs are mutually reinforcing (sealing dead code can strand a `goto`,
+    and a repaired `_G` key can reveal a sealed region), so they run to a
+    fixpoint rather than one at a time.
+    """
+    fixed, notes = _apply_repairs(text)
+    if not notes or fixed == text:
+        return [(text, [])]
+    return [(text, []), (fixed, notes)]
+
+
 def _compile_std(text: str, strip: bool = False) -> bytes:
     # strip defaults to FALSE so local-variable names + debug line info are kept
     # in the bytecode. This makes a later Compile -> Decompile round-trip come
     # back READABLE (real variable names, full structure) instead of degraded
     # register output (L1/L2) with missing lines. Keeping debug info is also
     # fine for the game to load; the bytecode still works normally.
-    with tempfile.TemporaryDirectory() as td:
-        src_f = Path(td) / "src.lua"
-        src_f.write_text(text, encoding="utf-8")
-        out_f = Path(td) / "out.luac"
-        cmd = [str(_patched_luac())]
-        if strip:
-            cmd.append("-s")
-        cmd += ["-o", str(out_f), str(src_f)]
-        p = _run(cmd, timeout=_scaled_timeout(UNLUAC_JAR_TIMEOUT, len(text)))
-        if p.returncode != 0:
-            err = (p.stderr or b"").decode("utf-8", errors="replace").strip()
-            if not err:
-                err = "luac compile failed (unknown error)"
-            # luac_patched prints "<tooldir>/luac_patched: /tmp/<rand>/src.lua:LINE: msg"
-            # — both paths are noise to the user on device. Strip the binary
-            # prefix and keep line:msessage as-is.
-            err = err.split("\n", 1)[0]
-            err = err.replace(str(_patched_luac()) + ":", "").strip()
-            err = err.replace(str(src_f), "src.lua")
-            raise RuntimeError(err or "luac compile failed")
-        return out_f.read_bytes()
+    global _LAST_GOTO_REPAIR
+    _LAST_GOTO_REPAIR = []
+    # Round 1 tries the file as written, then one variant per targeted repair.
+    # After those are exhausted, keep asking luac what is still wrong and fix
+    # exactly the line it names -- a file can hold many dead gotos and the
+    # compiler reveals them one per round.
+    variants = _syntax_repair_variants(text)
+    last_err = ""
+    last_raw = ""
+    for _round in range(24):
+        for vtext, removed in variants:
+            with tempfile.TemporaryDirectory() as td:
+                src_f = Path(td) / "src.lua"
+                src_f.write_text(vtext, encoding="utf-8")
+                out_f = Path(td) / "out.luac"
+                cmd = [str(_patched_luac())]
+                if strip:
+                    cmd.append("-s")
+                cmd += ["-o", str(out_f), str(src_f)]
+                p = _run(cmd, timeout=_scaled_timeout(UNLUAC_JAR_TIMEOUT, len(vtext)))
+                if p.returncode == 0 and out_f.exists():
+                    _LAST_GOTO_REPAIR = list(removed)
+                    return out_f.read_bytes()
+                err = (p.stderr or b"").decode("utf-8", errors="replace").strip()
+                if not err:
+                    err = "luac compile failed (unknown error)"
+                raw = err
+                # luac_patched prints "<tooldir>/luac_patched: /tmp/.../src.lua:LINE: msg"
+                # -- both paths are noise to the user on device. Strip the
+                # binary prefix and keep line:message as-is.
+                err = err.split("\n", 1)[0]
+                err = err.replace(str(_patched_luac()) + ":", "").strip()
+                err = err.replace(str(src_f), "src.lua")
+                err = err or "luac compile failed"
+                last_raw = raw
+                last_err = _repair_note(err, removed, len(variants))
+        # Every static variant failed. Let the compiler point at one line.
+        base, notes = variants[-1]
+        nxt, new_notes = _repair_from_error(base, last_raw)
+        if not new_notes or nxt == base:
+            break
+        variants = [(nxt, notes + new_notes)]
+    raise RuntimeError(last_err)
+
+
+def _repair_note(err: str, removed: list, tried: int) -> str:
+    """Describe how far the repair ladder got, for the user-facing message."""
+    if tried <= 1:
+        return err
+    kinds = sorted({it.split(":", 1)[0] for it in removed}) or ["targeted"]
+    return "%s (after %d repair pass(es): %s)" % (err, tried - 1,
+                                                 ", ".join(kinds))
 
 
 def compile_bgmi(src, out, progress=None, strip=False) -> tuple:
@@ -3113,39 +3705,43 @@ def compile_bgmi(src, out, progress=None, strip=False) -> tuple:
         text = data.decode("utf-8", errors="replace")
         _phase(progress, "Compiling with patched luac...")
         std = _compile_std(text, strip=strip)
-        try:
-            import ikram_upgrade
-            protected = ikram_upgrade.enabled()
-        except Exception:
-            protected = False
-        if protected:
-            _phase(progress, "Checking proto registers (pre-inflation)...")
-            stats = ikram_upgrade.register_stats(std)
-            reg_msg = ""
-            if stats is not None and stats.get("max"):
-                flag = "WARNING: max proto register %d > 255 (game cap)" % stats["max"] \
-                    if stats["max"] > 255 else \
-                    "max proto register %d (game cap 255)" % stats["max"]
-                reg_msg = " | " + flag
-            _phase(progress, "Inflating with dead protos (IKRM)...")
-            inflated = ikram_upgrade.stage1_inflate(std)
-            _phase(progress, "Converting to BGMI bytecode...")
-            bgmi = _std_to_bgmi(inflated)
-            _phase(progress, "Encrypting (IKRM stage-3 wrapper)...")
-            final = ikram_upgrade.stage3_wrap(bgmi)
-            out.parent.mkdir(parents=True, exist_ok=True)
-            out.write_bytes(final)
-            msg = "OK -> BGMI bytecode (%d B, IKRM-protected, final %d B%s)" % (
-                len(bgmi), len(final), reg_msg)
-            return True, msg
+        goto_note = ""
+        if _LAST_GOTO_REPAIR:
+            groups = {}
+            for item in _LAST_GOTO_REPAIR:
+                kind, _, name = item.partition(":")
+                groups.setdefault(kind, []).append(name)
+            bits = []
+            for kind, label in (("goto", "dangling goto(s)"),
+                                ("key", "split _G key(s)"),
+                                ("end", "unclosed block(s)"),
+                                ("long", "unterminated long string(s)"),
+                                ("tail", "truncated bracket(s)"),
+                                ("else", "orphaned else/elseif"),
+                                ("label", "duplicate label(s)"),
+                                ("kwlabel", "keyword label(s)"),
+                                ("dead", "dead statement(s)")):
+                names = groups.get(kind)
+                if not names:
+                    continue
+                uniq = sorted(set(names))
+                shown = ", ".join(uniq[:6])
+                if len(uniq) > 6:
+                    shown += ", +%d more" % (len(uniq) - 6)
+                bits.append("repaired %d %s: %s" % (len(names), label, shown))
+            goto_note = "| " + "; ".join(bits)
+        # Protection lives in the separate Protect option (protect_compile.py,
+        # which drives ikram_upgrade directly). Compile emits the bare game
+        # format: \x1bLua + BGMI header, exactly what the game loader accepts.
         _phase(progress, "Converting to BGMI bytecode...")
         bgmi = _std_to_bgmi(std)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(bgmi)
-        msg = "OK -> BGMI bytecode (%d B" % len(bgmi)
+        msg = "OK -> game-ready BGMI bytecode (%d B, magic %s" % (
+            len(bgmi), (b"\x1bLua" + bytes([bgmi[4]]) + LUA_MAGIC_TAIL).hex())
         if strip:
             msg += ", debug-info stripped"
-        msg += ")"
+        msg += goto_note + ")"
         try:
             stats = _proto_stats(bgmi)
             if stats is not None and stats.get("max") and stats["max"] > 255:

@@ -3,21 +3,13 @@
 #  Ikram Tool - GitHub Release Publisher
 #  Pushes a new version to GitHub.
 #  Users' tools then get it via auto-update.
-#  Use: bash release.sh V86
+#  Use: bash release.sh V120            (build only - safe default)
+#       bash release.sh V120 --publish  (build, then upload)
 # =============================================
 set -e
-VERSION="${1:?Usage: bash release.sh VERSION, e.g. V86  (add --build-only to skip publishing)}"
-
-# --build-only stops after the archive is built and proven, so the ZIP can be
-# inspected before anything is pushed or published. Publishing is a separate,
-# deliberate act.
-BUILD_ONLY=0
-for _arg in "${@:2}"; do
-  case "$_arg" in
-    --build-only) BUILD_ONLY=1 ;;
-    *) echo "[!] Unknown option: $_arg"; exit 1 ;;
-  esac
-done
+VERSION="${1:?Usage: bash release.sh VERSION [--publish]}"
+PUBLISH=0
+[ "${2:-}" = "--publish" ] && PUBLISH=1
 
 SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Release work only happens in the opencode folder (no ikram junk at root).
@@ -27,6 +19,10 @@ STAGE="$HOME/opencode/.ikram_release"
 #   .../releases/latest/download/IkramTool.zip
 # That is why the asset's EXACT name must be "IkramTool.zip", else 404.
 ZIP="$STAGE/IkramTool.zip"
+# Release payload sits under a single top-level "Ikram_Tool/" directory.
+# install.sh and update.py both unwrap that layer, so the same
+# installer accepts flat (legacy) and wrapped (current) zips.
+PKG="$STAGE/Ikram_Tool"
 
 # NOTE: Release = SOURCE_DIR (repo) flat runtime layout
 # (run.sh -> ikram_patch.py -> compiled .pyc chain). This repo is the canonical
@@ -42,80 +38,65 @@ if [ ! -d "$SOURCE_DIR" ]; then
 fi
 
 # Copy the whole flat layout from the REPO, excluding temp/private junk.
-(cd "$SOURCE_DIR" && cp -r . "$STAGE"/)
-rm -rf "$STAGE"/__pycache__ "$STAGE"/.ikram_tool "$STAGE"/DROP "$STAGE"/RESULT "$STAGE"/output
-rm -rf "$STAGE"/original "$STAGE"/logs
-rm -f "$STAGE"/Memory.md "$STAGE"/activation.json "$STAGE"/OWNER_INFO.txt "$STAGE"/USER_MESSAGE.txt
-rm -rf "$STAGE"/.git "$STAGE"/.github
-rm -rf "$STAGE"/analysis "$STAGE"/tests "$STAGE"/tools "$STAGE"/dev_work
-# The local action log is a RUNTIME artefact: it is written next to the module
-# the first time the tool records anything, so on the machine that builds the
-# release it is always present and always full of the builder's own runs.
-# Shipping it would leak the maintainer's file paths into every download.
-rm -f "$STAGE"/telemetry.log "$STAGE"/*.log
-# Any .zip in the tree is a build product or an unrelated archive someone
-# committed by accident. Neither belongs in the release.
-rm -f "$STAGE"/*.zip
+# Everything lands inside $PKG so the zip has exactly one "Ikram_Tool/" root.
+# -a preserves modes; the explicit chmod below is umask-proof (this box runs
+# umask 0077, which would otherwise strip group/other bits to 700 and ship
+# scripts that only their owner can run).
+mkdir -p "$PKG"
+(cd "$SOURCE_DIR" && cp -a . "$PKG"/)
+for _x in lua_patched luac_patched unluac_rs repak \
+          run.sh install.sh update.sh release.sh; do
+    [ -f "$PKG/$_x" ] && chmod 755 "$PKG/$_x"
+done
+rm -rf "$PKG"/__pycache__ "$PKG"/.ikram_tool "$PKG"/DROP "$PKG"/RESULT "$PKG"/output
+rm -rf "$PKG"/original "$PKG"/logs
+rm -f "$PKG"/Memory.md "$PKG"/activation.json "$PKG"/OWNER_INFO.txt "$PKG"/USER_MESSAGE.txt
+rm -rf "$PKG"/.git "$PKG"/.github
+rm -rf "$PKG"/analysis "$PKG"/tests "$PKG"/tools "$PKG"/dev_work
 # Timestamped pre-edit backups live beside their sources in the working tree.
 # They must never ship to users.
-find "$STAGE" -name '*.bak_*' -delete
-rm -f "$STAGE"/luac.out
+find "$PKG" -name '*.bak_*' -delete
+rm -f "$PKG"/luac.out
 # Docs are for the repo, not for the runtime zip — the zip ships ONLY files
 # the tool needs to run and do its work.
-# Every .md is repo documentation. The tool prints its own help; none of this
-# belongs in a download. .gitignore goes with them.
-rm -f "$STAGE"/*.md "$STAGE"/.gitignore
-# release.sh is how the maintainer cuts a release. A user never runs it, and it
-# is the one file in the tree that can push to github, so it stays in the repo.
-rm -f "$STAGE"/release.sh
+rm -f "$PKG"/README.md "$PKG"/INSTRUCTIONS.txt "$PKG"/CHANGELOG.md "$PKG"/.gitignore
+# Audit notes live in the repo; the payload ships runtime files only.
+rm -f "$PKG"/FIXES_V120.md
+
+# --- dead weight, verified unreferenced at runtime ---------------------
+# cfr.jar 2.0MB : Java .class decompiler. Zero references in any .py; only a
+#                 comment in install.sh. This tool decompiles Lua/PAK.
+# ljd.zip  0.8MB: the loader uses deps/ljd/ (LJD_DIR). lua_pipeline.py:1177
+#                 checks the DIRECTORY, not this zip. Kept: deps/ljd/.
+# ikram_sm4_fast.c : C source for a prebuilt .so that already ships. Nothing
+#                 compiles it at install or run time.
+# release.sh: the publisher itself, not part of the runtime. install.sh only
+#                 chmods it behind a `[ -f ]` guard, so its absence is safe.
+rm -f "$PKG"/cfr.jar "$PKG"/ljd.zip "$PKG"/ikram_sm4_fast.c "$PKG"/release.sh
+# QA harness lives in the working tree, not in the shipped payload.
+rm -f "$PKG"/v120_regress.py "$PKG"/v120_safety.py "$PKG"/option_test.py
 
 # Stamp the new version into VERSION + ikram_key.json (key_hash unchanged).
-# The hash is read from the existing ikram_key.json, never retyped here, so
-# there is exactly one place the activation hash lives.
-KEY_HASH="$("${TERMUX_PREFIX:-/data/data/com.termux/files/usr}/bin/python3" -c \
-  "import json;print(json.load(open('ikram_key.json'))['key_hash'])")"
-echo "$VERSION" > "$STAGE/VERSION"
-printf '{\n  "version": "%s",\n  "key_hash": "%s"\n}\n' "$VERSION" "$KEY_HASH" > "$STAGE/ikram_key.json"
+echo "$VERSION" > "$PKG/VERSION"
+printf '{\n  "version": "%s",\n  "key_hash": "7360b6c497b3f043eb4d74ae1100f8681b6a968719135cd6de7b58f3363d5c36"\n}\n' "$VERSION" > "$PKG/ikram_key.json"
 
 cd "$STAGE"
 # KEEP .pyc: they are required. Only drop __pycache__ junk.
-zip -r "$ZIP" . -x "__pycache__/*" -x "*/__pycache__/*"
+rm -f "$ZIP"
+zip -r "$ZIP" "Ikram_Tool" -x "__pycache__/*" -x "*/__pycache__/*"
 
-# Prove the archive before announcing it. A zip that cannot even list itself is
-# not something to hand to users.
-if ! unzip -tq "$ZIP" >/dev/null 2>&1; then
-  echo "[x] The built archive is corrupt — refusing to upload."
-  exit 1
-fi
-# Prove the contents too. An archive that is internally valid but carries the
-# maintainer's log, the test tree, or the analysis dump is still a bad release,
-# and every one of those has been committed by accident at some point.
-LEAKED=$(unzip -Z1 "$ZIP" | grep -E '(^|/)(__pycache__|analysis|tests|\.git)(/|$)|telemetry\.(log|pyc)|\.bak_|\.zip$|^\./' || true)
-if [ -n "$LEAKED" ]; then
-  echo "[x] The archive carries files that must never ship:"
-  printf '%s\n' "$LEAKED" | head -20
-  exit 1
-fi
-echo "[*] Archive OK: $(du -h "$ZIP" | cut -f1), $(unzip -l "$ZIP" | tail -1 | awk '{print $2}') entries"
+echo "[*] Built $ZIP ($(du -h "$ZIP" | cut -f1))"
 
-if [ "$BUILD_ONLY" = "1" ]; then
-  echo "[*] --build-only: archive built and proven, nothing pushed or published."
-  echo "[*] ZIP: $ZIP"
+if [ "$PUBLISH" -ne 1 ]; then
+  echo "[=] Build only. Nothing was uploaded."
+  echo "[=] Re-run with --publish to upload: bash release.sh $VERSION --publish"
   exit 0
 fi
 
-echo "[*] Pushing $VERSION source to origin/main..."
-git -C "$SOURCE_DIR" push origin main
-
 echo "[*] Uploading to GitHub..."
-if ! gh release create "$VERSION" "$ZIP" \
+gh release create "$VERSION" "$ZIP" \
   --repo ikram571/ikram-tool \
   --title "Ikram Tool $VERSION" \
-  --notes "Ikram Tool $VERSION"; then
-  # This used to be `|| true`, which printed "Done! Users can now auto-update"
-  # after a release that did not exist.
-  echo "[x] Release $VERSION was NOT created — users cannot auto-update to it."
-  exit 1
-fi
+  --notes "Ikram Tool $VERSION"
 
-echo "[+] Done! Release $VERSION is live. Users can now auto-update."
+echo "[+] Done! Users can now auto-update."

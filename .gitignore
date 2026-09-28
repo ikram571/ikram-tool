@@ -21,3 +21,7 @@ tests/_corpus_synth/
 tests/_corpus_tmp/
 # build products and unrelated archives
 *.zip
+
+# decompile test scratch dirs
+tests/.sandbox_baki/
+tests/.sandbox*/

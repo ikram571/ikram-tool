@@ -384,14 +384,13 @@ SELF_TEST="${1:-}"
 if [ "$SELF_TEST" = "--test" ] || [ "$SELF_TEST" = "-t" ]; then
     tool_splash
     sys_info
-    TARGET="$HOME/Ikram_Tool"
-    # Flat layout. Accept the legacy .engine/ tree too so --test still works
-    # on an install made before the engine moved out of the hidden folder.
-    if [ -f "$TARGET/ikram_patch.py" ]; then
-        IKRAM_SRC="$TARGET/ikram_patch.py"
-    elif [ -f "$TARGET/.engine/ikram_patch.py" ]; then
-        IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
-    fi
+      TARGET="$HOME/Ikram_Tool"
+      ENG="$TARGET/.engine"
+      if [ -f "$ENG/ikram_patch.py" ]; then
+          IKRAM_SRC="$ENG/ikram_patch.py"
+      elif [ -f "$TARGET/ikram_patch.py" ]; then
+          IKRAM_SRC="$TARGET/ikram_patch.py"
+      fi
     if [ -n "$IKRAM_SRC" ]; then
         boot_test "$IKRAM_SRC"
         ok "SELF-TEST DONE"
@@ -517,9 +516,22 @@ human() {
     fi
 }
 
-TARGET="$HOME/Ikram_Tool"
-box "$C_CYAN" "⬇ Downloading tool"
-mkdir -p "$TARGET"
+  TARGET="$HOME/Ikram_Tool"
+  # Installed layout is exactly three folders:
+  #   Ikram_Tool/.engine/  the runtime, and nothing else
+  #   Ikram_Tool/DROP/     the user's input files
+  #   Ikram_Tool/RESULT/   the tool's output files
+  # The engine stays in a hidden folder so the tool's own files never sit
+  # among the user's data, but DROP/RESULT are siblings of it, not children.
+    ENG="$TARGET/.engine"
+    # Staging lives OUTSIDE Ikram_Tool so a half-finished download can never be
+    # mistaken for part of the install, and so a successful install leaves
+    # exactly three folders behind: .engine, DROP and RESULT.
+    STAGE="$HOME/.ikram_stage"
+    DLZIP="$STAGE/IkramTool.zip"
+    rm -rf "$STAGE"; mkdir -p "$STAGE"
+    box "$C_CYAN" "⬇ Downloading tool"
+    mkdir -p "$TARGET"
 # TOOL_URL env override = local/testing builds. Default = GitHub latest.
 : "${TOOL_URL:=https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip}"
 TOOL_URL="$TOOL_URL"
@@ -531,11 +543,11 @@ DONE=0
 ATT=0
 while [ "$ATT" -lt 3 ] && [ "$DONE" -eq 0 ]; do
     ATT=$((ATT + 1))
-    rm -f "$TARGET/IkramTool.zip"
-    curl -fL -s -o "$TARGET/IkramTool.zip" "$TOOL_URL" &
+    rm -f "$DLZIP"
+    curl -fL -s -o "$DLZIP" "$TOOL_URL" &
     CPID=$!
     while kill -0 "$CPID" 2>/dev/null; do
-        CUR=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
+        CUR=$(stat -c%s "$DLZIP" 2>/dev/null || echo 0)
         FRAC=$(( TOTAL > 0 ? CUR * 100 / TOTAL : 0 ))
         [ "$FRAC" -gt 100 ] && FRAC=100
         PCT=$(( DL_BASE + FRAC * PW_DL / 100 ))
@@ -554,8 +566,8 @@ while [ "$ATT" -lt 3 ] && [ "$DONE" -eq 0 ]; do
         sleep 0.2
     done
     wait "$CPID"
-    DONE=$(stat -c%s "$TARGET/IkramTool.zip" 2>/dev/null || echo 0)
-    MAGIC=$(head -c2 "$TARGET/IkramTool.zip" 2>/dev/null | tr -d '\0')
+    DONE=$(stat -c%s "$DLZIP" 2>/dev/null || echo 0)
+    MAGIC=$(head -c2 "$DLZIP" 2>/dev/null | tr -d '\0')
     if [ "$MAGIC" != "PK" ] || { [ "$TOTAL" -gt 0 ] && [ "$DONE" -lt "$TOTAL" ]; }; then
         DONE=0
         if [ "$ATT" -lt 3 ]; then
@@ -574,15 +586,17 @@ fi
 
 # 6) extract + install
 box "$C_GOLD" "🧹 Installing tool"
-TMPX="$TARGET/.ikram_tmp"
+# extract into a subdir: TMPX is wiped before extraction, and the downloaded
+# zip lives in $STAGE itself
+TMPX="$STAGE/payload"
 rm -rf "$TMPX" && mkdir -p "$TMPX"
 _pbar "$((DL_BASE + PW_DL))" "Extracting tool"
-if (cd "$TMPX" && unzip -q -o "$TARGET/IkramTool.zip"); then
+if (cd "$TMPX" && unzip -q -o "$DLZIP"); then
     printf "\n"
 else
     printf "\n"
     fail "Extract failed — try again."
-    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    rm -rf "$TMPX" "$DLZIP"
     exit 1
 fi
 # Release zips may ship either FLAT (payload at the zip root, V119 and older)
@@ -597,7 +611,7 @@ if [ ! -f "$TMPX/ikram.pyc" ]; then
 fi
 if [ ! -f "$TMPX/ikram.pyc" ]; then
     fail "ikram.pyc not found in zip — release is broken."
-    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    rm -rf "$TMPX" "$DLZIP"
     exit 1
 fi
 # Validate the WHOLE payload before a single existing file is touched. A
@@ -611,15 +625,13 @@ done
 if [ -n "$_missing" ]; then
     fail "Downloaded package is incomplete — missing:$_missing"
     printf "${C_RED}${C_BOLD}    Nothing was changed. Try again with a better connection.${C_RESET}\n"
-    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    rm -rf "$TMPX" "$DLZIP"
     exit 1
 fi
-# One-time layout migration. Earlier installs kept the engine in a hidden
-# .engine/ folder and the user's files in lowercase drop/ and result/
-# beside it. The engine now lives FLAT in Ikram_Tool/ and paths.py resolves
-# DROP/RESULT from that directory, so the old folders are moved up instead of
-# being left orphaned. Files already present in the new location win, so a
-# re-run can never overwrite anything.
+# One-time layout migration. Early installs kept the user's folders in
+# lowercase drop/ and result/ next to a hidden .engine/. Move their contents
+# into the uppercase DROP/ and RESULT/ the tool uses now. Files already present
+# in the destination win, so a re-run can never overwrite anything.
 for _pair in "drop:DROP" "result:RESULT"; do
     _old="${_pair%%:*}"; _new="${_pair##*:}"
     if [ -d "$TARGET/$_old" ]; then
@@ -634,18 +646,19 @@ for _pair in "drop:DROP" "result:RESULT"; do
 done
 
 # Install as a transaction, not a delete-then-copy. Every existing top-level
-# entry is MOVED aside first, the new payload is copied in, and the result is
-# verified. If any step fails the partial copy is dropped and the previous
-# runtime is moved straight back, so a failed reinstall can never leave the
-# user with no tool at all. DROP/RESULT hold the user's files and are never
-# touched.
+# entry is MOVED aside first, the new runtime is copied into .engine/, and the
+# result is verified. If any step fails the partial copy is dropped and the
+# previous runtime is moved straight back, so a failed reinstall can never
+# leave the user with no tool at all. DROP/RESULT hold the user's files and are
+# never touched -- the old .engine/ tree, including the DROP/RESULT symlinks it
+# used to carry, goes into $OLDRT and is discarded once the new copy verifies.
 OLDRT="$TARGET/.old_runtime"
 rm -rf "$OLDRT"; mkdir -p "$OLDRT"
 _take_aside() {
     for _e in "$TARGET"/* "$TARGET"/.[!.]*; do
         [ -e "$_e" ] || continue
         case "${_e##*/}" in
-            DROP|RESULT|drop|result|.old_runtime|.ikram_tmp) continue ;;
+            DROP|RESULT|.old_runtime|.ikram_tmp) continue ;;
         esac
         mv "$_e" "$OLDRT/" 2>/dev/null || true
     done
@@ -654,7 +667,7 @@ _restore() {
     for _e in "$TARGET"/* "$TARGET"/.[!.]*; do
         [ -e "$_e" ] || continue
         case "${_e##*/}" in
-            DROP|RESULT|drop|result|.old_runtime|.ikram_tmp) continue ;;
+            DROP|RESULT|.old_runtime|.ikram_tmp) continue ;;
         esac
         rm -rf "$_e"
     done
@@ -662,11 +675,16 @@ _restore() {
     return 0
 }
 _take_aside
-# copy from temp -> Ikram_Tool/ (engine flat; DROP/RESULT already in place)
-if ! cp -r "$TMPX"/. "$TARGET"/ 2>/dev/null; then
+# the user's folders are rebuilt every install so a missing subfolder is fixed
+mkdir -p "$TARGET/DROP/pak" "$TARGET/DROP/lua" "$TARGET/DROP/inject" \
+         "$TARGET/RESULT/extracted" "$TARGET/RESULT/injected" "$TARGET/RESULT/lua" \
+         "$TARGET/RESULT/processed" "$TARGET/RESULT/CostomPak" "$TARGET/RESULT/Repacked"
+# copy from temp -> Ikram_Tool/.engine/ (runtime only; DROP/RESULT stay put)
+mkdir -p "$ENG"
+if ! cp -r "$TMPX"/. "$ENG"/ 2>/dev/null; then
     _restore
     fail "Install failed while copying — your previous version was restored."
-    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    rm -rf "$TMPX" "$STAGE" "$DLZIP"
     exit 1
 fi
 # A restrictive umask (Android/Termux commonly 0077) leaves the copied binaries
@@ -675,28 +693,26 @@ fi
 # explicitly so the install does not depend on the caller's umask.
 for _x in lua_patched luac_patched unluac_rs repak \
           run.sh install.sh update.sh; do
-    [ -f "$TARGET/$_x" ] && chmod 755 "$TARGET/$_x"
+    [ -f "$ENG/$_x" ] && chmod 755 "$ENG/$_x"
 done
 # verify the copy really landed before declaring victory
 _vmissing=""
 for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
              run.sh update.py; do
-    [ -f "$TARGET/$_need" ] || _vmissing="$_vmissing $_need"
+    [ -f "$ENG/$_need" ] || _vmissing="$_vmissing $_need"
 done
 if [ -n "$_vmissing" ]; then
     _restore
     fail "Install incomplete — missing:$_vmissing"
     printf "${C_GOLD}             your previous version was restored.${C_RESET}\n"
-    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    rm -rf "$TMPX" "$STAGE" "$DLZIP"
     exit 1
 fi
 # The new runtime is verified and live. Only now is the old one discarded.
-# That also clears out a legacy .engine/ folder and the DROP/RESULT symlinks
-# it carried, since the whole thing went into $OLDRT above.
 rm -rf "$OLDRT"
 # TMPX may have been re-pointed at the unwrapped inner directory, so the
 # outer extraction dir is named explicitly here.
-rm -rf "$TMPX" "$TARGET/.ikram_tmp" "$TARGET/IkramTool.zip"
+rm -rf "$TMPX" "$STAGE" "$DLZIP"
 # DROP/RESULT skeleton — always created (fresh install starts empty)
 # V114 Fixed-Path System: DROP/{pak,lua,inject} + RESULT branches
 # (Section G frozen — original mixed-case spellings).
@@ -706,7 +722,7 @@ mkdir -p "$TARGET/DROP/pak" "$TARGET/DROP/lua" "$TARGET/DROP/inject" \
          "$TARGET/RESULT/extracted" "$TARGET/RESULT/injected" \
          "$TARGET/RESULT/lua" "$TARGET/RESULT/processed" \
          "$TARGET/RESULT/CostomPak" "$TARGET/RESULT/Repacked"
-if [ -f "$TARGET/ikram.pyc" ] && [ -f "$TARGET/ikram_patch.py" ]; then
+if [ -f "$ENG/ikram.pyc" ] && [ -f "$ENG/ikram_patch.py" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else
@@ -742,17 +758,28 @@ if [ ! -f "@@ENG@@/ikram_patch.py" ]; then
     echo ""
     echo "  ⚠ Tool files missing — self-repairing..."
     mkdir -p "@@ENG@@"
-    cd "$TARGET"
+    cd "@@ENG@@"
     curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
-    TMPX="@@ENG@@/.repair"
-    rm -rf "$TMPX" && mkdir -p "$TMPX"
-    if (cd "$TMPX" && unzip -q -o "@@ENG@@/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
-        cp -r "$TMPX"/. "@@ENG@@"/ 2>/dev/null
-        chmod +x "@@ENG@@/run.sh" "@@ROOT@/run.sh" 2>/dev/null
-        echo "  ✓ Repair done! Tool khul raha hai..."
-        exec python3 "@@ENG@@/ikram_patch.py" "$@"
+    REPAIR_ROOT="@@ENG@@/.repair"
+    rm -rf "$REPAIR_ROOT" && mkdir -p "$REPAIR_ROOT"
+    if (cd "$REPAIR_ROOT" && unzip -q -o "@@ENG@@/repair.zip"); then
+        # The release wraps its payload in a single Ikram_Tool/ directory, so
+        # the entry point is one level down. Descend into it, or the check
+        # below never finds ikram.pyc and repair always fails.
+        SRC="$REPAIR_ROOT"
+        if [ ! -f "$SRC/ikram.pyc" ] && [ -f "$SRC/Ikram_Tool/ikram.pyc" ]; then
+            SRC="$SRC/Ikram_Tool"
+        fi
+        if [ -f "$SRC/ikram.pyc" ]; then
+            cp -r "$SRC"/. "@@ENG@@"/ 2>/dev/null
+            chmod +x "@@ENG@@/run.sh" "@@ENG@@/luac_patched" "@@ENG@@/lua_patched" \
+                     "@@ENG@@/repak" "@@ENG@@/unluac_rs" 2>/dev/null
+            rm -rf "$REPAIR_ROOT" "@@ENG@@/repair.zip"
+            echo "  ✓ Repair done! Tool khul raha hai..."
+            exec python3 "@@ENG@@/ikram_patch.py" "$@"
+        fi
     fi
-    rm -rf "$TMPX" "@@ENG@@/repair.zip"
+    rm -rf "$REPAIR_ROOT" "@@ENG@@/repair.zip"
     echo "  ✗ Repair failed. Reinstall with:"
     echo "    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash"
     echo ""
@@ -785,19 +812,35 @@ EOF
 # A quoted heredoc expands nothing, so the install path is baked
 # in after the write. The installer knows where it put the engine;
 # the generated launchers must not have to guess at it.
-sed -i "s#@@ENG@@#$TARGET#g; s#@@ROOT@#$TARGET#g" \
+sed -i "s#@@ENG@@#$ENG#g; s#@@ROOT@#$ENG#g" \
     "$RC" "$PREFIX/bin/ikram" 2>/dev/null
 chmod +x "$PREFIX/bin/ikram"
-printf "\n"
-ok "'ikram' command ready (new version)"
+# The launcher is generated from a quoted heredoc and patched afterwards, so it
+# can silently come out wrong: an unexpanded $TARGET, a leftover @@ENG@@, or a
+# path pointing at a folder this install does not use. None of that is visible
+# from the install log, and the user only finds out when `ikram` fails. Verify
+# the artefact instead of assuming it.
+_lb_bad=""
+[ -f "$PREFIX/bin/ikram" ] || _lb_bad="missing"
+[ -x "$PREFIX/bin/ikram" ] || _lb_bad="${_lb_bad:+$_lb_bad,}not-executable"
+grep -q '@@ENG@@\|@@ROOT@' "$PREFIX/bin/ikram" 2>/dev/null && _lb_bad="${_lb_bad:+$_lb_bad,}unexpanded-placeholder"
+grep -q '\$TARGET' "$PREFIX/bin/ikram" 2>/dev/null && _lb_bad="${_lb_bad:+$_lb_bad,}undefined-var"
+grep -qF "$ENG/ikram_patch.py" "$PREFIX/bin/ikram" 2>/dev/null || _lb_bad="${_lb_bad:+$_lb_bad,}wrong-engine-dir"
+# the launcher must never point the tool at the user-data folders
+grep -qF "$ENG/DROP" "$PREFIX/bin/ikram" 2>/dev/null && _lb_bad="${_lb_bad:+$_lb_bad,}drop-inside-engine"
+if [ -n "$_lb_bad" ]; then
+    warn "'ikram' launcher looks wrong ($_lb_bad)"
+else
+    ok "'ikram' command ready (new version)"
+fi
 
-chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
-chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
-chmod +x "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
+chmod +x "$ENG/run.sh" "$ENG/install.sh" 2>/dev/null || true
+chmod +x "$ENG/luac_patched" "$ENG/lua_patched" 2>/dev/null || true
+chmod +x "$ENG/repak" "$ENG/unluac_rs" 2>/dev/null || true
 
 # 7B) post-install boot test (shows key prompt + main menu once)
-if [ -f "$TARGET/ikram_patch.py" ]; then
-    boot_test "$TARGET/ikram_patch.py"
+if [ -f "$ENG/ikram_patch.py" ]; then
+    boot_test "$ENG/ikram_patch.py"
 else
     warn "Boot test skipped (ikram_patch.py not found)"
 fi
@@ -807,7 +850,7 @@ advance 100 "Setup complete"
 if [ ! -d "$HOME/storage/shared" ]; then
     warn "Storage share not found yet — run later: termux-setup-storage"
 fi
-V_VER=$(cat "$TARGET/VERSION" 2>/dev/null || cat "$TARGET/.engine/VERSION" 2>/dev/null || echo "latest")
+V_VER=$(cat "$ENG/VERSION" 2>/dev/null || echo "latest")
 BW=$((W - 2))
 # right-pad each line so the box closes flush (tool-style VIP finish)
 pad_line() { local txt="$1"; local L="${#txt}"; local P=$((BW - L)); [ $P -lt 1 ] && P=1; printf '%s%s%s' "$txt" "$(printf '%*s' $P '')" "${C_GREEN}│${C_RESET}"; }
