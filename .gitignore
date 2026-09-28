@@ -25,3 +25,7 @@ tests/_corpus_tmp/
 # decompile test scratch dirs
 tests/.sandbox_baki/
 tests/.sandbox*/
+
+# owner credentials — never commit these
+telegram.json
+.ikramtool/

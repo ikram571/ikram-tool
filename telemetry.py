@@ -21,13 +21,26 @@ history, which is every user's device name plus every error string the
 tool has ever reported. Reading a constant out of a public archive takes
 no skill at all.
 
-V121 reads both from the environment instead:
+V121 reads both from the environment, and from an optional owner-only
+credentials file:
 
     IKRAM_TG_TOKEN   bot token
     IKRAM_TG_CHAT    owner chat id
+    ~/.ikramtool/telegram.json   {"token": "...", "chat_id": "..."}
 
-With neither set, every send is a silent no-op. The tool therefore has no
-network dependency and no credential in the release, and the owner's
+The file exists because a token pasted into a shell profile is a token that
+ends up in .bash_history, and "set an env var" is a worse answer than a real
+one to a non-technical user. Precedence is file then environment, so a
+machine that exports the variable overrides the file without editing it.
+
+The file is read at CALL time, not import time, for the same reason
+paths.read_version() replaced the module-level version constants: a value
+baked in at import is a value that silently goes stale, and here stale means
+either telemetry pointing at a revoked token or the owner editing the file
+and watching nothing change until restart.
+
+With none of the three set, every send is a silent no-op. The tool therefore
+has no network dependency and no credential in the release, and the owner's
 alerts are the owner's business alone.
 
 The old token must still be REVOKED at @BotFather. Editing this file does
@@ -47,22 +60,61 @@ import urllib.request
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
-
-# No defaults. An unset variable is the normal case for a public build.
-BOT_TOKEN = (os.environ.get("IKRAM_TG_TOKEN") or "").strip()
-CHAT_ID = (os.environ.get("IKRAM_TG_CHAT") or "").strip()
+CRED_FILE = Path.home() / ".ikramtool" / "telegram.json"
 
 API_BASE = "https://api.telegram.org/bot"
 TIMEOUT = 10
 
-# Logo thread me chalti hai, isliye ye chhota rakha gaya hai. Ek hung
-# socket daemon thread ko zinda nahi rakhti, par UI pe dikhegi.
-API = (API_BASE + BOT_TOKEN + "/sendMessage") if BOT_TOKEN else ""
+_creds_cache = (None, None)
+
+
+def _read_cred_file():
+    """(token, chat_id) from ~/.ikramtool/telegram.json, or (None, None).
+
+    Accepts the keys "token"/"chat_id" and tolerates "chat"/"id", because
+    hand-editing a JSON file should not require knowing my exact naming.
+    Malformed JSON, a missing file, or a file the user cannot read all
+    return empty: telemetry is a courtesy channel and has no business being
+    the thing that crashes the tool.
+    """
+    try:
+        data = json.loads(CRED_FILE.read_text())
+    except Exception:
+        return None, None
+    if not isinstance(data, dict):
+        return None, None
+    token = data.get("token") or data.get("bot_token") or ""
+    chat = data.get("chat_id") or data.get("chat") or data.get("id") or ""
+    return str(token).strip() or None, str(chat).strip() or None
+
+
+def credentials(refresh=False):
+    """Return (token, chat_id) as strings, possibly empty.
+
+    File first, environment second. Cached after the first read because this
+    runs on every send and the file does not change mid-session -- but
+    refresh=True exists so a test, or an owner who just revoked and replaced
+    the token, can pick up the new value without restarting the tool.
+    """
+    global _creds_cache
+    if refresh or _creds_cache == (None, None):
+        tok, chat = _read_cred_file()
+        tok = tok or (os.environ.get("IKRAM_TG_TOKEN") or "").strip() or None
+        chat = chat or (os.environ.get("IKRAM_TG_CHAT") or "").strip() or None
+        _creds_cache = (tok, chat)
+    return _creds_cache
 
 
 def _enabled():
-    """True only when both credentials are present."""
-    return bool(BOT_TOKEN and CHAT_ID)
+    """True only when both credentials are available from either source."""
+    tok, chat = credentials()
+    return bool(tok and chat)
+
+
+def api_url(token=None):
+    """sendMessage endpoint for the active token, or '' when disabled."""
+    tok = token or (credentials()[0] or "")
+    return (API_BASE + tok + "/sendMessage") if tok else ""
 
 
 def device_name():
@@ -104,16 +156,17 @@ def _post(text):
     Every failure path is swallowed by design: telemetry is a courtesy
     channel and must never become a failure mode of the tool.
     """
-    if not _enabled():
+    tok, chat = credentials()
+    if not (tok and chat):
         return False
     try:
         payload = json.dumps({
-            "chat_id": CHAT_ID,
+            "chat_id": chat,
             "text": text,
             "parse_mode": "HTML",
         }).encode("utf-8")
         req = urllib.request.Request(
-            API,
+            api_url(tok),
             data=payload,
             headers={
                 "Content-Type": "application/json",
@@ -177,9 +230,21 @@ def send_error(exc, extra=""):
         pass
 
 
+def status():
+    """Non-secret one-line summary, safe to print or log."""
+    tok, chat = credentials()
+    if tok and chat:
+        src = "file" if _read_cred_file()[0] else "env"
+        return "enabled via {} (bot {})".format(src, tok.split(":")[0])
+    if tok or chat:
+        return "incomplete: need BOTH token and chat id ({} set)".format(
+            "token" if tok else "chat id")
+    return "disabled (no token, no-op)"
+
+
 if __name__ == "__main__":
-    print("telemetry enabled :", _enabled())
-    print("token source      :", "IKRAM_TG_TOKEN env" if BOT_TOKEN else "unset (no-op)")
-    print("chat id           :", CHAT_ID or "unset (no-op)")
+    print("telemetry         :", status())
+    print("cred file         :", CRED_FILE,
+          "(present)" if CRED_FILE.exists() else "(absent)")
     print("device            :", device_name())
     print("version           :", app_version())
