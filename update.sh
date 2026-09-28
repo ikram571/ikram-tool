@@ -6,7 +6,7 @@
 # =============================================
 set -e
 TOOL_DIR="${IKRAM_TOOL_DIR:-$HOME/Ikram_Tool}"
-PY="$TOOL_DIR/.engine/update.py"
+PY="$TOOL_DIR/update.py"
 if [ ! -f "$PY" ]; then
   # fallback: engine missing -> fresh install via canonical one-liner
   echo "[!] update.py not found — doing a fresh install..."

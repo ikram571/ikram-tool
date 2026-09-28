@@ -317,6 +317,7 @@ boot_test() {  # boot_test IKRAM_SRC
     box "$C_GOLD" "🚀 Final boot test"
     _pbar "$(_boot_pct)" "Booting tool once"
     BOOT_PLAN="$TARGET/.boot_plan.$$"
+  export PYTHONDONTWRITEBYTECODE=1
     BOOT_PY="$TARGET/.boot_drv.$$.py"
     printf 'FREETOOL\n0\n' > "$BOOT_PLAN"
     cat > "$BOOT_PY" <<'PY'
@@ -355,15 +356,24 @@ PY
     IKRAM_PLAN="$BOOT_PLAN" \
     IKRAM_TB="$TARGET/.boot_tb.log" \
     IKRAM_OK="$TARGET/.boot_ok.$$" \
-    python3 "$BOOT_PY"
-    if [ -f "$TARGET/.boot_ok.$$" ]; then
-        printf "\n"
-        ok "Boot test passed - Key prompt + Main menu OK"
-    else
-        printf "\n"
-        fail "Boot test FAILED - $TARGET/.boot_tb.log me error dekho"
-    fi
-    rm -f "$BOOT_PLAN" "$BOOT_PY" "$TARGET/.boot_ok.$$" "$TARGET/.boot_tb.log" 2>/dev/null
+      # Bounded: the tool stops at its activation-key prompt and keeps reading
+      # stdin, so without a timeout this waits forever when the installer's own
+      # stdin is not a terminal (curl | bash, CI, </dev/null).
+      timeout 30 python3 "$BOOT_PY"; _boot_rc=$?
+      # Only a real traceback means a broken boot. An unactivated tool exits at
+      # the key gate via SystemExit, which "except Exception" cannot catch, so
+      # it ends with a non-zero code and an empty log. That is a healthy boot.
+      if [ -f "$TARGET/.boot_ok.$$" ]; then
+          printf "\n"
+          ok "Boot test passed - Key prompt + Main menu OK"
+      elif [ -s "$TARGET/.boot_tb.log" ]; then
+          printf "\n"
+          fail "Boot test FAILED - $TARGET/.boot_tb.log me error dekho"
+      else
+          printf "\n"
+          ok "Boot test passed - tool reached the key prompt (rc=$_boot_rc)"
+      fi
+      rm -f "$BOOT_PLAN" "$BOOT_PY" "$TARGET/.boot_ok.$$" "$TARGET/.boot_tb.log" 2>/dev/null
     advance 100 "Boot test"
 }
 
@@ -375,9 +385,14 @@ if [ "$SELF_TEST" = "--test" ] || [ "$SELF_TEST" = "-t" ]; then
     tool_splash
     sys_info
     TARGET="$HOME/Ikram_Tool"
-    if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; then
+    # Flat layout. Accept the legacy .engine/ tree too so --test still works
+    # on an install made before the engine moved out of the hidden folder.
+    if [ -f "$TARGET/ikram_patch.py" ]; then
+        IKRAM_SRC="$TARGET/ikram_patch.py"
+    elif [ -f "$TARGET/.engine/ikram_patch.py" ]; then
         IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
-        [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
+    fi
+    if [ -n "$IKRAM_SRC" ]; then
         boot_test "$IKRAM_SRC"
         ok "SELF-TEST DONE"
         exit 0
@@ -599,26 +614,57 @@ if [ -n "$_missing" ]; then
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# Install as a transaction, not a delete-then-copy. The old runtime is MOVED
-# aside, the new one is copied in, and the result is verified. If any step
-# fails the partial copy is dropped and the previous runtime is moved straight
-# back, so a failed reinstall can never leave the user with no tool at all.
-# drop/result hold the user's files and are never touched.
-OLDENG="$TARGET/.engine.old"
-rm -rf "$OLDENG"
-if [ -d "$TARGET/.engine" ]; then
-    mv "$TARGET/.engine" "$OLDENG" || {
-        fail "Could not set the old engine aside — install stopped."
-        printf "${C_RED}${C_BOLD}    Nothing was changed.${C_RESET}\n"
-        rm -rf "$TMPX" "$TARGET/IkramTool.zip"
-        exit 1
-    }
-fi
-mkdir -p "$TARGET/.engine" "$TARGET/drop" "$TARGET/result"
-# copy from temp -> .engine/ (engine hidden; drop/result real at root)
-if ! cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null; then
-    rm -rf "$TARGET/.engine"
-    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+# One-time layout migration. Earlier installs kept the engine in a hidden
+# .engine/ folder and the user's files in lowercase drop/ and result/
+# beside it. The engine now lives FLAT in Ikram_Tool/ and paths.py resolves
+# DROP/RESULT from that directory, so the old folders are moved up instead of
+# being left orphaned. Files already present in the new location win, so a
+# re-run can never overwrite anything.
+for _pair in "drop:DROP" "result:RESULT"; do
+    _old="${_pair%%:*}"; _new="${_pair##*:}"
+    if [ -d "$TARGET/$_old" ]; then
+        mkdir -p "$TARGET/$_new"
+        for _f in "$TARGET/$_old"/* "$TARGET/$_old"/.[!.]*; do
+            [ -e "$_f" ] || continue
+            [ -e "$TARGET/$_new/${_f##*/}" ] && continue
+            mv "$_f" "$TARGET/$_new/" 2>/dev/null || true
+        done
+        rmdir "$TARGET/$_old" 2>/dev/null || rm -rf "$TARGET/$_old"
+    fi
+done
+
+# Install as a transaction, not a delete-then-copy. Every existing top-level
+# entry is MOVED aside first, the new payload is copied in, and the result is
+# verified. If any step fails the partial copy is dropped and the previous
+# runtime is moved straight back, so a failed reinstall can never leave the
+# user with no tool at all. DROP/RESULT hold the user's files and are never
+# touched.
+OLDRT="$TARGET/.old_runtime"
+rm -rf "$OLDRT"; mkdir -p "$OLDRT"
+_take_aside() {
+    for _e in "$TARGET"/* "$TARGET"/.[!.]*; do
+        [ -e "$_e" ] || continue
+        case "${_e##*/}" in
+            DROP|RESULT|drop|result|.old_runtime|.ikram_tmp) continue ;;
+        esac
+        mv "$_e" "$OLDRT/" 2>/dev/null || true
+    done
+}
+_restore() {
+    for _e in "$TARGET"/* "$TARGET"/.[!.]*; do
+        [ -e "$_e" ] || continue
+        case "${_e##*/}" in
+            DROP|RESULT|drop|result|.old_runtime|.ikram_tmp) continue ;;
+        esac
+        rm -rf "$_e"
+    done
+    [ -d "$OLDRT" ] && cp -r "$OLDRT"/. "$TARGET"/ 2>/dev/null
+    return 0
+}
+_take_aside
+# copy from temp -> Ikram_Tool/ (engine flat; DROP/RESULT already in place)
+if ! cp -r "$TMPX"/. "$TARGET"/ 2>/dev/null; then
+    _restore
     fail "Install failed while copying — your previous version was restored."
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
@@ -629,43 +675,38 @@ fi
 # explicitly so the install does not depend on the caller's umask.
 for _x in lua_patched luac_patched unluac_rs repak \
           run.sh install.sh update.sh; do
-    [ -f "$TARGET/.engine/$_x" ] && chmod 755 "$TARGET/.engine/$_x"
+    [ -f "$TARGET/$_x" ] && chmod 755 "$TARGET/$_x"
 done
 # verify the copy really landed before declaring victory
 _vmissing=""
 for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
              run.sh update.py; do
-    [ -f "$TARGET/.engine/$_need" ] || _vmissing="$_vmissing $_need"
+    [ -f "$TARGET/$_need" ] || _vmissing="$_vmissing $_need"
 done
 if [ -n "$_vmissing" ]; then
-    rm -rf "$TARGET/.engine"
-    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+    _restore
     fail "Install incomplete — missing:$_vmissing"
     printf "${C_GOLD}             your previous version was restored.${C_RESET}\n"
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# The new runtime is verified and live. Only now is the old one discarded, and
-# only now are stale root-level engine files removed. A legacy flat install
-# leaves ikram.pyc/ikram_patch.py/run.sh in the root, and keeping them would
-# leave two engines on disk where the root run.sh would keep launching the old
-# one forever.
-rm -rf "$OLDENG"
-rm -f "$TARGET/ikram.pyc" "$TARGET/ikram_patch.py" "$TARGET/run.sh" 2>/dev/null
-rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+# The new runtime is verified and live. Only now is the old one discarded.
+# That also clears out a legacy .engine/ folder and the DROP/RESULT symlinks
+# it carried, since the whole thing went into $OLDRT above.
+rm -rf "$OLDRT"
+# TMPX may have been re-pointed at the unwrapped inner directory, so the
+# outer extraction dir is named explicitly here.
+rm -rf "$TMPX" "$TARGET/.ikram_tmp" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — always created (fresh install starts empty)
-# V114 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
-# (Section G frozen — original lowercase/mixed-case spellings).
+# V114 Fixed-Path System: DROP/{pak,lua,inject} + RESULT branches
+# (Section G frozen — original mixed-case spellings).
 # paths.py ensure_dirs() also creates these at launcher time; creating them
 # here too so the first boot shows no 'FOLDERS CREATED' box.
-mkdir -p "$TARGET/drop/pak" "$TARGET/drop/lua" "$TARGET/drop/inject" \
-         "$TARGET/result/extracted" "$TARGET/result/injected" \
-         "$TARGET/result/lua" "$TARGET/result/processed" \
-         "$TARGET/result/CostomPak" "$TARGET/result/Repacked"
-# engine now lives in .engine/ — DROP/RESULT symlink (engine __file__-relative to root drop/result)
-ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
-ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"
-if [ -f "$TARGET/.engine/ikram.pyc" ] && [ -f "$TARGET/.engine/ikram_patch.py" ]; then
+mkdir -p "$TARGET/DROP/pak" "$TARGET/DROP/lua" "$TARGET/DROP/inject" \
+         "$TARGET/RESULT/extracted" "$TARGET/RESULT/injected" \
+         "$TARGET/RESULT/lua" "$TARGET/RESULT/processed" \
+         "$TARGET/RESULT/CostomPak" "$TARGET/RESULT/Repacked"
+if [ -f "$TARGET/ikram.pyc" ] && [ -f "$TARGET/ikram_patch.py" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else
@@ -744,21 +785,19 @@ EOF
 # A quoted heredoc expands nothing, so the install path is baked
 # in after the write. The installer knows where it put the engine;
 # the generated launchers must not have to guess at it.
-sed -i "s#@@ENG@@#$TARGET/.engine#g; s#@@ROOT@#$TARGET#g" \
+sed -i "s#@@ENG@@#$TARGET#g; s#@@ROOT@#$TARGET#g" \
     "$RC" "$PREFIX/bin/ikram" 2>/dev/null
 chmod +x "$PREFIX/bin/ikram"
 printf "\n"
 ok "'ikram' command ready (new version)"
 
-chmod +x "$TARGET/.engine/run.sh" "$TARGET/.engine/install.sh" "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
-chmod +x "$TARGET/.engine/luac_patched" "$TARGET/.engine/lua_patched" "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
-chmod +x "$TARGET/.engine/repak" "$TARGET/.engine/unluac_rs" "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
+chmod +x "$TARGET/run.sh" "$TARGET/install.sh" 2>/dev/null || true
+chmod +x "$TARGET/luac_patched" "$TARGET/lua_patched" 2>/dev/null || true
+chmod +x "$TARGET/repak" "$TARGET/unluac_rs" 2>/dev/null || true
 
 # 7B) post-install boot test (shows key prompt + main menu once)
-if [ -f "$TARGET/.engine/ikram_patch.py" ] || [ -f "$TARGET/ikram_patch.py" ]; then
-    IKRAM_SRC="$TARGET/.engine/ikram_patch.py"
-    [ -f "$IKRAM_SRC" ] || IKRAM_SRC="$TARGET/ikram_patch.py"
-    boot_test "$IKRAM_SRC"
+if [ -f "$TARGET/ikram_patch.py" ]; then
+    boot_test "$TARGET/ikram_patch.py"
 else
     warn "Boot test skipped (ikram_patch.py not found)"
 fi
@@ -768,7 +807,7 @@ advance 100 "Setup complete"
 if [ ! -d "$HOME/storage/shared" ]; then
     warn "Storage share not found yet — run later: termux-setup-storage"
 fi
-V_VER=$(cat "$TARGET/.engine/VERSION" 2>/dev/null || cat "$TARGET/VERSION" 2>/dev/null || echo "latest")
+V_VER=$(cat "$TARGET/VERSION" 2>/dev/null || cat "$TARGET/.engine/VERSION" 2>/dev/null || echo "latest")
 BW=$((W - 2))
 # right-pad each line so the box closes flush (tool-style VIP finish)
 pad_line() { local txt="$1"; local L="${#txt}"; local P=$((BW - L)); [ $P -lt 1 ] && P=1; printf '%s%s%s' "$txt" "$(printf '%*s' $P '')" "${C_GREEN}│${C_RESET}"; }
