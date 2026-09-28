@@ -25,7 +25,7 @@ engines kept intact (delegated 1:1, verified byte-exact).
 Paste this one command into Termux (new terminal / fresh Termux):
 
 ```
-curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash
+curl -fL https://raw.githubusercontent.com/ikram571/ikram-tool/main/install.sh | bash
 ```
 
 This installs: python, git, curl, unzip, openjdk-17, lua53,

@@ -314,66 +314,86 @@ python_repair() {
 # boot test — key prompt + main menu once (shared by install finish + --test)
 boot_test() {  # boot_test IKRAM_SRC
     local IKRAM_SRC="$1"
-    box "$C_GOLD" "🚀 Final boot test"
+    local BOOT_TB="$TARGET/.boot_tb.log"
+    local BOOT_OK="$TARGET/.boot_ok.$$"
+    local BOOT_PY="$TARGET/.boot_drv.$$.py"
+    box "$C_GOLD" "\U0001F680 Final boot test"
     _pbar "$(_boot_pct)" "Booting tool once"
-    BOOT_PLAN="$TARGET/.boot_plan.$$"
-  export PYTHONDONTWRITEBYTECODE=1
-    BOOT_PY="$TARGET/.boot_drv.$$.py"
-    printf 'FREETOOL\n0\n' > "$BOOT_PLAN"
+    rm -f "$BOOT_TB" "$BOOT_OK"
+    printf 'FREETOOL\n0\n' > "$TARGET/.boot_plan.$$"
     cat > "$BOOT_PY" <<'PY'
-import os, builtins, traceback
-path = os.environ["IKRAM_PATCH"]
-src = open(path, encoding="utf-8").read()
-g = {"__name__": "ikram_patch_boot", "__file__": path}
-exec(compile(src, path, "exec"), g)
-plan = [ln.rstrip("\n") for ln in open(os.environ["IKRAM_PLAN"])]
-idx = {"i": 0}
-def _inp(p=""):
-    if idx["i"] < len(plan):
-        a = plan[idx["i"]]; idx["i"] += 1
-    else:
-        a = ""
-    return a
-builtins.input = _inp
-try:
-    g["ikram"].main()
-except SystemExit:
-    pass
-except Exception:
-    tb = os.environ.get("IKRAM_TB")
-    if tb:
-        try:
-            open(tb, "a").write(traceback.format_exc())
-        except Exception:
-            pass
-else:
+import os, sys, builtins, traceback
+
+TB = os.environ.get("IKRAM_TB")
+OK = os.environ.get("IKRAM_OK")
+
+def _boom(tag, exc):
     try:
-        open(os.environ.get("IKRAM_OK", ""), "a").close()
+        with open(TB, "a") as fh:
+            fh.write("[%s] %s\n" % (tag, traceback.format_exc()))
     except Exception:
         pass
+
+# The whole driver is guarded. A driver that cannot even read its own env must
+# never look like a healthy boot: the installer reads this log to decide, and an
+# unguarded crash here used to be reported as "reached the key prompt".
+try:
+    path = os.environ["IKRAM_PATCH"]
+    src = open(path, encoding="utf-8").read()
+    g = {"__name__": "ikram_patch_boot", "__file__": path}
+    exec(compile(src, path, "exec"), g)
+    plan = [ln.rstrip("\n") for ln in open(os.environ["IKRAM_PLAN"])]
+    idx = {"i": 0}
+
+    def _inp(p=""):
+        if idx["i"] < len(plan):
+            a = plan[idx["i"]]; idx["i"] += 1
+        else:
+            a = ""
+        return a
+
+    builtins.input = _inp
+    try:
+        g["ikram"].main()
+    except SystemExit:
+        # Unactivated tool stops at its activation-key gate. Expected, healthy.
+        pass
+    except BaseException:
+        _boom("main", sys.exc_info()[1])
+    else:
+        try:
+            open(OK, "a").close()
+        except Exception:
+            pass
+except BaseException:
+    _boom("driver", sys.exc_info()[1])
+    sys.exit(3)
 PY
-    IKRAM_PATCH="$IKRAM_SRC" \
-    IKRAM_PLAN="$BOOT_PLAN" \
-    IKRAM_TB="$TARGET/.boot_tb.log" \
-    IKRAM_OK="$TARGET/.boot_ok.$$" \
-      # Bounded: the tool stops at its activation-key prompt and keeps reading
-      # stdin, so without a timeout this waits forever when the installer's own
-      # stdin is not a terminal (curl | bash, CI, </dev/null).
-      timeout 30 python3 "$BOOT_PY"; _boot_rc=$?
-      # Only a real traceback means a broken boot. An unactivated tool exits at
-      # the key gate via SystemExit, which "except Exception" cannot catch, so
-      # it ends with a non-zero code and an empty log. That is a healthy boot.
-      if [ -f "$TARGET/.boot_ok.$$" ]; then
-          printf "\n"
-          ok "Boot test passed - Key prompt + Main menu OK"
-      elif [ -s "$TARGET/.boot_tb.log" ]; then
-          printf "\n"
-          fail "Boot test FAILED - $TARGET/.boot_tb.log me error dekho"
-      else
-          printf "\n"
-          ok "Boot test passed - tool reached the key prompt (rc=$_boot_rc)"
-      fi
-      rm -f "$BOOT_PLAN" "$BOOT_PY" "$TARGET/.boot_ok.$$" "$TARGET/.boot_tb.log" 2>/dev/null
+    # Bounded: the tool parks at the activation-key prompt and keeps reading
+    # stdin, so without a timeout this waits forever when the installer's own
+    # stdin is not a terminal (curl | bash, CI, </dev/null). The env prefix must
+    # be immediately followed by the command - a comment between them ends the
+    # assignment and the driver then runs with IKRAM_PATCH unset.
+    PYTHONDONTWRITEBYTECODE=1 IKRAM_PATCH="$IKRAM_SRC" \
+    IKRAM_PLAN="$TARGET/.boot_plan.$$" \
+    IKRAM_TB="$BOOT_TB" \
+    IKRAM_OK="$BOOT_OK" \
+    timeout 30 python3 "$BOOT_PY"
+    _boot_rc=$?
+    if [ -f "$BOOT_OK" ]; then
+        printf "\n"
+        ok "Boot test passed - Key prompt + Main menu OK"
+    elif [ -s "$BOOT_TB" ]; then
+        printf "\n"
+        fail "Boot test FAILED:"
+        sed 's/^/      /' "$BOOT_TB"
+        _restore
+        return 1
+    else
+        printf "\n"
+        ok "Boot test passed - tool reached the key prompt (rc=$_boot_rc)"
+    fi
+    rm -f "$TARGET/.boot_plan.$$" "$BOOT_PY" "$BOOT_OK" "$BOOT_TB" 2>/dev/null
     advance 100 "Boot test"
 }
 
@@ -638,6 +658,34 @@ if [ -n "$_missing" ]; then
     rm -rf "$TMPX" "$DLZIP"
     exit 1
 fi
+
+# ---- stale-installer hand-off --------------------------------------------
+# A cached copy of this script (CDN, proxy, an old one-liner someone saved)
+# paired with a NEW zip produces a broken hybrid: the old installer lays the
+# new payload out the old way, writes an old-style launcher, and the tool
+# then fails at runtime with no clue why. The zip carries its own installer,
+# so make that the authority: if the script now running is not the one inside
+# the payload we just verified, hand over to it and let it do the install.
+#
+# This is what makes a stale one-liner safe on any phone - the fix arrives
+# with the download instead of depending on the caller's cache.
+_self="$TARGET/.ikram_selfcheck.$$"
+if command -v sha256sum >/dev/null 2>&1; then
+    _h1=$(sha256sum "$0" 2>/dev/null | cut -d' ' -f1)
+    _h2=$(sha256sum "$TMPX/install.sh" 2>/dev/null | cut -d' ' -f1)
+    if [ -n "$_h1" ] && [ -n "$_h2" ] && [ "$_h1" != "$_h2" ] && [ -f "$TMPX/install.sh" ]; then
+        printf "\n"
+        printf "  \033[1;33m>> Stale installer detected (cached copy).\033[0m\n"
+        printf "     \033[0;33mHanding over to the installer inside this release...\033[0m\n"
+        printf "     \033[0;90mwas %s / release %s\033[0m\n" "${_h1:0:12}" "${_h2:0:12}"
+        _argv=""
+        for _a in "$@"; do _argv="$_argv $(printf '%q' "$_a")"; done
+        TOOL_URL="$TOOL_URL" bash "$TMPX/install.sh" $_argv
+        _rc=$?
+        rm -f "$_self" "$TMPX" "$DLZIP"
+        exit $_rc
+    fi
+fi
 # One-time layout migration. Early installs kept the user's folders in
 # lowercase drop/ and result/ next to a hidden .engine/. Move their contents
 # into the uppercase DROP/ and RESULT/ the tool uses now. Files already present
@@ -653,6 +701,28 @@ for _pair in "drop:DROP" "result:RESULT"; do
         done
         rmdir "$TARGET/$_old" 2>/dev/null || rm -rf "$TARGET/$_old"
     fi
+done
+
+# Very old releases kept the user's folders flat, as siblings of the runtime:
+# pak/ lua/ inject/ extracted/ processed/ ... directly in Ikram_Tool/. The
+# transaction below moves every top-level entry it does not recognise into
+# .old_runtime and discards it, so those folders have to be rescued HERE or the
+# user's paks silently vanish on the next install. Same rule as above: a file
+# already present in the destination wins, nothing is ever overwritten.
+for _root in pak lua inject injected extracted processed CostomPak Repacked; do
+    _src="$TARGET/$_root"
+    [ -d "$_src" ] || continue
+    case "$_root" in
+        pak|lua|inject) _dest="$TARGET/DROP" ;;
+        *)             _dest="$TARGET/RESULT" ;;
+    esac
+    mkdir -p "$_dest/$_root"
+    for _f in "$_src"/* "$_src"/.[!.]*; do
+        [ -e "$_f" ] || continue
+        [ -e "$_dest/$_root/${_f##*/}" ] && continue
+        mv "$_f" "$_dest/$_root/" 2>/dev/null || true
+    done
+    rmdir "$_src" 2>/dev/null || rm -rf "$_src"
 done
 
 # Install as a transaction, not a delete-then-copy. Every existing top-level
@@ -865,6 +935,54 @@ BW=$((W - 2))
 # right-pad each line so the box closes flush (tool-style VIP finish)
 pad_line() { local txt="$1"; local L="${#txt}"; local P=$((BW - L)); [ $P -lt 1 ] && P=1; printf '%s%s%s' "$txt" "$(printf '%*s' $P '')" "${C_GREEN}│${C_RESET}"; }
 printf "\n${C_GREEN}╭$(printf '─%.0s' $(seq 1 $BW))╮${C_RESET}\n"
+# Assert the layout this release promises before claiming success. The install
+# can produce a working tool and still not be the layout the launcher expects,
+# and that mismatch is what makes "installed!" a lie.
+_layout_ok=1
+for _need in "$ENG/ikram_patch.py" "$ENG/ikram.pyc" "$TARGET/DROP" "$TARGET/RESULT"; do
+    [ -e "$_need" ] || { _layout_ok=0; printf "  missing: %s\n" "$_need"; }
+done
+# A stray engine that still holds user data is a migration bug, not cosmetic.
+for _stray in "$ENG/DROP" "$ENG/RESULT"; do
+    if [ -d "$_stray" ] && [ -z "$(find "$_stray" -type f -print -quit 2>/dev/null)" ]; then
+        rm -rf "$_stray"
+    elif [ -d "$_stray" ]; then
+        printf "  %s still holds files - move them into DROP/ or RESULT/\n" "$_stray"
+    fi
+done
+# find's -name matches the BASENAME, so it has to be given the basename of $ENG,
+# not the full path - passing the full path silently counted .engine itself as
+# an unexpected entry and rolled back every good install.
+_engname=$(basename "$ENG")
+_extra=$(find "$TARGET" -mindepth 1 -maxdepth 1 \
+            ! -name "$_engname" ! -name 'DROP' ! -name 'RESULT' -print 2>/dev/null | head -5)
+if [ -n "$_extra" ]; then
+    _layout_ok=0
+    printf "  unexpected entries in Ikram_Tool: %s\n" "$(printf '%s' "$_extra" | tr '\n' ' ')"
+fi
+
+# The bashrc function shadows the real launcher in an interactive shell, so a
+# broken launcher is what a user actually hits. Do not parse those scripts with a
+# regex - their paths go through "~", quotes and variables, and a wrong guess
+# here rolls back a perfectly good install. Check the things that are exact:
+# the launcher exists, is a real file, and is executable.
+if [ ! -f "$RC" ]; then
+    _layout_ok=0
+    printf "  launcher not generated at %s\n" "$RC"
+elif [ ! -s "$RC" ] || ! grep -q 'ikram_patch' "$RC" 2>/dev/null; then
+    _layout_ok=0
+    printf "  launcher at %s does not reference ikram_patch\n" "$RC"
+elif [ ! -x "$RC" ]; then
+    chmod +x "$RC" 2>/dev/null || {
+        _layout_ok=0
+        printf "  launcher at %s is not executable\n" "$RC"
+    }
+fi
+if [ "$_layout_ok" -ne 1 ]; then
+    fail "Install did not produce the expected three-folder layout - rolled back."
+    _restore
+    exit 1
+fi
 printf "${C_GREEN}│${C_RESET}%s\n" "$(pad_line "  ${C_GREEN}${C_BOLD}✅ IKRAM TOOL INSTALLED!${C_RESET}")"
 printf "${C_GREEN}│${C_RESET}%s\n" "$(pad_line "  ${C_GOLD}${C_BOLD}Now wait for key...${C_RESET}")"
 printf "${C_GREEN}│${C_RESET}%s\n" "$(pad_line "  ${C_DIM}(KEY REQUIRED - owner se lo)${C_RESET}")"
