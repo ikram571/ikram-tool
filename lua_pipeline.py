@@ -1,4 +1,4 @@
-"""IkramTool V120 — Lua Intelligence Engine.
+"""IkramTool V121 — Lua Intelligence Engine.
 
 Full multi-tier decompile cascade + game-ready validator + honest reporting.
 
@@ -11,7 +11,10 @@ readable source, then Shannon entropy bands (<4.0 source, 4.0-6.5 bytecode,
 Tiers (tried in order, first fully-validated pass wins):
   T0 wrapper   strip a proven PUBG/BGMI/UE4 length prefix so every engine
                 downstream sees a normal header.
-  T4 pre-pass   XOR / additive key sweep (key lengths 1,2,4,8,16,32,64,128)
+  T4 pre-pass   XOR / additive key sweep, key lengths 1..12. That range is
+               DERIVED, not chosen: _XOR_LENGTHS = range(1, header_len+1)
+               where header_len is len(_LUA_HEADERS[0]). The old docstring
+               claimed 1,2,4,8,16,32,64,128 - a ladder the code never ran.
                 + string-extraction heuristic for encrypted candidates.
   T1 standard   mega_lua game engine (BGMI+standard+LuaJIT), unluac_rs,
                 unluac.jar, luadec (if installed).
@@ -68,6 +71,11 @@ _LUA_HEADERS = tuple(
 # would only manufacture corrupt chunks. This is why the old 16/32/64/128
 # entries were quietly dead: `_xor_key_recover` rejected them on sight.
 _XOR_LENGTHS = tuple(range(1, len(_LUA_HEADERS[0]) + 1))
+
+# How many distinct decryptions the sweep hands to the engine cascade. More than
+# one matters because the cascade can only judge a candidate by decompiling it,
+# and with a single candidate there was never a choice to make.
+_MAX_SWEEP_CANDIDATES = 6
 
 VERSION = "v120"
 
@@ -175,6 +183,19 @@ def detect_report(data: bytes) -> dict:
         report["kind"] = "IKRM protected chunk"
         report["protection"] = "ikrm"
         return report
+
+    # --- NADEEM footer. Checked before the source branch because a NADEEM file
+    # IS valid Lua source: the loader shell is plain and the footer is a plain
+    # `--` comment. Without this, the shell validated 8/8 and the tool reported
+    # "ready to recompile" for a file whose game code is key-locked ciphertext.
+    try:
+        if _mega._is_nadeem_protected(data):
+            report["family"] = "NADEEM"
+            report["kind"] = "NADEEM-protected source (loader shell + key-locked payload)"
+            report["protection"] = "nadeem"
+            return report
+    except Exception:
+        pass
 
     # --- bare magic
     fam, kind = _lua_family_at(head)
@@ -295,6 +316,12 @@ def validate(text: str) -> dict:
         "keywords": keywords,
         "structures": structures,
         "assigns": assigns,
+        # measured ratios, so a FAILED report can show HOW far off a candidate
+        # was instead of a bare PASS/FAIL with no context
+        "garbage": _garbage_ratio(text),
+        "qmarks": (text.count("?") / max(1, len(text))),
+        "binary": _binary_line_ratio(text),
+        "lines": len(lines),
     }
 
 
@@ -338,6 +365,13 @@ DEPS_DIR = _TOOL_DIR / "deps"
 LJD_DIR = DEPS_DIR / "ljd"
 
 
+# NOTE: lua_ops.pyc (detect_lua / compile_lua / decompile_lua / compile_batch)
+# ships in the payload but has NO importer in the whole tree. Everything it
+# does is already done better here and in mega_lua: detection by _lua_family_at
+# (full 5-byte family, not just a magic prefix), compilation by the bundled
+# luac_patched, decompilation by unluac_rs/unluac.jar/ljd. It is left in the
+# bundle untouched rather than deleted, but importing it would only add a
+# weaker second implementation of the same three jobs.
 def _on_path(name: str) -> bool:
     return shutil.which(name) is not None
 
@@ -689,6 +723,61 @@ def _peel_layers(data: bytes, ik) -> tuple:
     return None, notes
 
 
+def _rolling_decrypts(data: bytes) -> list:
+    """Chained ("rolling") ciphers that _xor_sweep can never express.
+
+    _xor_sweep only tries REPEATING keys (enc[i] = plain[i] ^ key[i%n]) and
+    additive equivalents. A common modder variant instead chains each byte off
+    its neighbour, which no key length can represent. There are four real
+    permutations, and every one of them is a single linear pass with no key
+    search at all:
+
+        xor / enc-chain : enc[i] = plain[i] ^ enc[i-1]   enc[-1] = 0
+        xor / plain-chain: enc[i] = plain[i] ^ plain[i-1] plain[-1] = 0
+        add / enc-chain : enc[i] = plain[i] + enc[i-1]   mod 256
+        add / plain-chain: enc[i] = plain[i] + plain[i-1] mod 256
+
+    The first and third are self-inverting straight off the ciphertext. The
+    second and fourth decrypt as a forward recurrence once the first plaintext
+    byte is known - and for these the seed is forced, because plain[-1] == 0
+    means plain[0] == enc[0].
+
+    All four cost one pass each, so they are always tried ahead of the
+    offset x key-length grid, which is O(offsets x key_lengths x headers x 2).
+    Every candidate is confirmed with the same _loads_ok gate the repeating
+    sweep uses, so a lucky first-header alignment cannot pass as a real chunk.
+
+    Returns [(label, plaintext)] for each permutation that both yields a
+    recognised Lua family AND loads as a real chunk.
+    """
+    out = []
+    if len(data) < 12 or _lua_family_at(data[:12])[0]:
+        return out                      # bare chunk, or too short to chain
+
+    variants = []
+    for op in ("xor", "add"):
+        # chain off CIPHERTEXT: previous encrypted byte
+        v = bytearray(len(data))
+        prev = 0
+        for i, byte in enumerate(data):
+            v[i] = (byte ^ prev) if op == "xor" else (byte - prev) & 0xFF
+            prev = byte
+        variants.append(("%s rolling (ciphertext chain)" % op, bytes(v)))
+        # chain off PLAINTEXT: previous recovered plaintext byte, seeded by the
+        # forced plain[-1] == 0
+        v = bytearray(len(data))
+        prev = 0
+        for i, byte in enumerate(data):
+            v[i] = (byte ^ prev) if op == "xor" else (byte - prev) & 0xFF
+            prev = v[i]
+        variants.append(("%s rolling (plaintext chain)" % op, bytes(v)))
+
+    for label, cand in variants:
+        if _lua_family_at(cand[:12])[0] and _mega._loads_ok(cand):
+            out.append((label, cand))
+    return out
+
+
 def _xor_sweep(data: bytes) -> list:
     """Tier-4 sweep: recover repeating XOR/additive keys against known lua
     headers, at the file start and at a few early offsets. Returns
@@ -703,6 +792,13 @@ def _xor_sweep(data: bytes) -> list:
     found = []
     if _lua_family_at(data[:12])[0]:
         return found            # already a bare chunk: nothing to decrypt
+    # Rolling keys are tried first: they cost two linear passes total, so
+    # putting them ahead of the offset x key-length grid means the cheap
+    # common case is answered before the expensive search begins.
+    for label, dec in _rolling_decrypts(data):
+        found.append((label, dec))
+        if len(found) >= _MAX_SWEEP_CANDIDATES:
+            return found
     # Offsets are dense for the first 16 bytes on purpose: loaders put a
     # 1/2/3/4-byte magic in front of the body, and a power-of-two list simply
     # skipped a 3-byte "TPF" header. After that the steps widen, since large
@@ -742,12 +838,35 @@ def _xor_sweep(data: bytes) -> list:
                         continue      # plausible header, but the body is not real
                     found.append(("%s key (len %d)" % (mode.upper(), key_len),
                                   bytes(dec)))
-                    return found
+                    if len(found) >= _MAX_SWEEP_CANDIDATES:
+                        return found
+                    break            # take the first hit at this key_len only
     return found
 
 
 # ---------------------------------------------------------------- pipeline
 def run(src, out_dir, progress=None) -> dict:
+    """Public entry point. Signature and return contract are unchanged.
+
+    The body lives in _run_impl purely so the scratch chunks it writes can be
+    removed on EVERY exit path. The cascade returns from inside its own loop on
+    success, so cleanup that sat at the end of the body never ran - leaving
+    _tmp_*_peel.luac / _tmp_*_strip.luac / _tmp_*_dec.luac next to the output
+    on every successful decompile.
+    """
+    scratch = []
+    try:
+        return _run_impl(src, out_dir, progress, scratch)
+    finally:
+        for _t in scratch:
+            try:
+                if _t.exists():
+                    _t.unlink()
+            except Exception:
+                pass
+
+
+def _run_impl(src, out_dir, progress, _tmps) -> dict:
     """Decompile one Lua file through the full tier cascade.
 
     Returns {"ok": bool, "status": "success"|"disassembled"|"failed",
@@ -770,12 +889,51 @@ def run(src, out_dir, progress=None) -> dict:
         _ik = None
     meta = detect_report(data)
     attempts = []
+    if meta.get("protection") == "nadeem":
+        # Salvage, do not decompile. The shell would pass every quality gate -
+        # it is real Lua - so the only way to stay honest is to detect the
+        # protector here and refuse to call the shell game code.
+        _phase(progress, "NADEEM footer found, salvaging loader shell...")
+        attempts.append(("NADEEM", "protector footer present; payload is "
+                        "key-locked ciphertext, not decryptable by any "
+                        "decompiler"))
+        try:
+            _shell = data.decode("utf-8", "surrogateescape")
+        except Exception:
+            _shell = None
+        _res = _mega._nadeem_salvage(out_dir, stem, data, _shell, progress)
+        _label, _ok, _p, _msg = _res[0]
+        _fp = out_dir / (stem + "_FAILED.txt")
+        _fp.write_text(
+            "IkramTool %s - NADEEM protection, partial recovery\n\n"
+            "The Lua body is ciphertext written by an external protector.\n"
+            "Recovering the game logic needs that protector's key, which is\n"
+            "not in the file and cannot be derived by any decompiler.\n\n"
+            "Saved instead:\n  loader shell   -> %s\n"
+            "  payload blob   -> %s\n  report         -> %s\n\n"
+            "The shell is loader plumbing, not game code. Recompiling it will\n"
+            "NOT produce a working script.\n"
+            % (VERSION, (stem + "_NADEEM_shell.lua"), (stem + "_NADEEM_payload.bin"),
+               (stem + "_NADEEM_REPORT.txt")),
+            encoding="utf-8")
+        attempts.append(("Salvage", _msg))
+        return {
+            "ok": False, "status": "partial",
+            "out": str(_p) if _p else None,
+            "disasm_path": None, "fail_path": _fp,
+            "meta": meta, "attempts": attempts, "lines": None,
+            "quality": "partial (NADEEM shell salvaged)",
+            "msg": _msg,
+        }
+
     bytes_for_methods = data
     decrypt_note = ""
     dec_src = src
+    last_validator = None
     if not data:
         attempts.append(("Input", "file is empty"))
-        return _finish_failure(src, out_dir, stem, meta, attempts, src_size)
+        return _finish_failure(src, out_dir, stem, meta, attempts, src_size,
+                           last_validator)
 
     # ----- TIER -1 — peel stacked protection. Runs before detection so the
     # report describes the chunk the engines will actually see. V118 unwrapped
@@ -792,6 +950,7 @@ def run(src, out_dir, progress=None) -> dict:
             meta = detect_report(data)
             decrypt_note = " | " + "; ".join(notes)
             dec_tmp = out_dir / ("_tmp_%s_peel.luac" % stem)
+            _tmps.append(dec_tmp)
             dec_tmp.write_bytes(data)
             dec_src = dec_tmp
 
@@ -833,6 +992,7 @@ def run(src, out_dir, progress=None) -> dict:
         data = data[off:]
         bytes_for_methods = data
         dec_tmp = out_dir / ("_tmp_%s_strip.luac" % stem)
+        _tmps.append(dec_tmp)
         dec_tmp.write_bytes(data)
         dec_src = dec_tmp
         decrypt_note = " | stripped %d-byte wrapper" % off
@@ -847,11 +1007,32 @@ def run(src, out_dir, progress=None) -> dict:
         _phase(progress, "Encryption sweep...")
         sweep = _xor_sweep(data)
         if sweep:
-            label, dec = sweep[0]
+            # More than one candidate can now survive the _loads_ok gate, so
+            # pick on the cheapest real signal available: a correct decryption
+            # turns back into text, so it exposes far more recognisable Lua
+            # keywords than a wrong key that merely lined the header up. Ties
+            # keep sweep order (rolling first, then key_len ascending), so the
+            # old first-match choice remains the fallback and nothing regresses.
+            def _kwscore(_cand):
+                try:
+                    return sum(1 for s in _string_extraction(_cand[1])
+                               if any(k in s.lower() for k in
+                                      ("function", "return", "local", "end",
+                                       "then", "while", "self")))
+                except Exception:
+                    return 0
+            _scores = [_kwscore(c) for c in sweep]
+            _best = max(range(len(sweep)), key=lambda j: (_scores[j], -j))
+            if len(sweep) > 1:
+                attempts.append(("Sweep shortlist",
+                                 "%d candidates survived, keyword scores %s"
+                                 % (len(sweep), ", ".join(str(s) for s in _scores))))
+            label, dec = sweep[_best]
             attempts.append(("XOR/SKIP", "decrypted with %s" % label))
             bytes_for_methods = dec
             decrypt_note = " | decrypted %s" % label
             dec_tmp = out_dir / ("_tmp_%s_dec.luac" % stem)
+            _tmps.append(dec_tmp)
             dec_tmp.write_bytes(dec)
             dec_src = dec_tmp
         else:
@@ -889,7 +1070,7 @@ def run(src, out_dir, progress=None) -> dict:
             for label, ok, path, msg in results:
                 if ok and path and Path(path).exists():
                     text = Path(path).read_text(errors="replace")
-                    v = validate(text)
+                    v = validate(text); last_validator = v
                     if v["ok"]:
                         final = out_dir / (stem + "_decompiled.lua")
                         try:
@@ -917,7 +1098,7 @@ def run(src, out_dir, progress=None) -> dict:
             _phase(progress, "unluac_rs...")
             text = _unluac_rs(bytes_for_methods)
             if text:
-                v = validate(text)
+                v = validate(text); last_validator = v
                 if v["ok"]:
                     final = out_dir / (stem + "_decompiled.lua")
                     final.write_text(text, encoding="utf-8")
@@ -941,7 +1122,7 @@ def run(src, out_dir, progress=None) -> dict:
             _phase(progress, "unluac.jar...")
             text = _unluac_jar(bytes_for_methods)
             if text:
-                v = validate(text)
+                v = validate(text); last_validator = v
                 if v["ok"]:
                     final = out_dir / (stem + "_decompiled.lua")
                     final.write_text(text, encoding="utf-8")
@@ -965,7 +1146,7 @@ def run(src, out_dir, progress=None) -> dict:
             _phase(progress, "ljd (LuaJIT)...")
             text = _ljd_decompile(bytes_for_methods)
             if text:
-                v = validate(text)
+                v = validate(text); last_validator = v
                 if v["ok"]:
                     final = out_dir / (stem + "_decompiled.lua")
                     final.write_text(text, encoding="utf-8")
@@ -990,7 +1171,7 @@ def run(src, out_dir, progress=None) -> dict:
             _phase(progress, "luadec...")
             text = _luadec(bytes_for_methods)
             if text:
-                v = validate(text)
+                v = validate(text); last_validator = v
                 if v["ok"]:
                     final = out_dir / (stem + "_decompiled.lua")
                     final.write_text(text, encoding="utf-8")
@@ -1097,17 +1278,42 @@ def _write_failed(src, out_dir, stem, meta, attempts, validator=None,
         "Methods tried:",
     ]
     for label, msg in attempts:
-        lines.append("  - %s: %s" % (label, msg))
+        # engine errors carry their own newlines (java stack traces, python
+        # tracebacks). Emitting them raw split one "  - label: msg" bullet
+        # across several lines and made the method list unreadable - exactly
+        # when the user most needs to read it.
+        flat = " ".join(str(msg).split())
+        if len(flat) > 300:
+            flat = flat[:300].rstrip() + "..."
+        lines.append("  - %s: %s" % (label, flat))
     if validator is not None:
         lines.append("")
         lines.append("Output validator:")
+        _ratios = {
+            "len > 50": "%d lines" % validator.get("lines", 0),
+            "keywords >= 5": "%d distinct of %d" % (validator.get("keywords", 0),
+                                                    len(LUA_KEYWORDS)),
+            "garbage < 2%": "%.4f (limit 0.02)" % validator.get("garbage", 0.0),
+            "? < 1%": "%.4f (limit 0.01)" % validator.get("qmarks", 0.0),
+            "structures >= 2": "%d structures, %d table assigns" % (
+                validator.get("structures", 0), validator.get("assigns", 0)),
+            "avg line 5..300": "%.1f (limit 5..300)" % validator.get("avg_line", 0.0),
+            "round-trip recompile": "rejected by patched luac",
+            "no binary lines": "%.4f (limit 0.50)" % validator.get("binary", 0.0),
+        }
         for k, v in validator["checks"].items():
-            lines.append("  %s %s" % ("PASS" if v else "FAIL", k))
+            lines.append("  %-4s %-24s %s" % ("PASS" if v else "FAIL", k,
+                                              _ratios.get(k, "")))
         lines.append("  score %d/8 (%s)" % (validator["score"],
                                              _quality_label(validator["score"], total=8)))
+        _failed = [k for k, v in validator["checks"].items() if not v]
+        if _failed:
+            lines.append("  blocked by: %s" % ", ".join(_failed))
     lines.append("")
     lines.append("Checked: magic-header + entropy, every decompiler on this")
-    lines.append("device, XOR/additive key sweep (1..128), string probing, and")
+    lines.append(
+        "device, XOR/additive key sweep (1..%d), string probing, and"
+        % max(_XOR_LENGTHS))
     lines.append("bytecode disassembly. The file is either properly encrypted,")
     lines.append("locked by its owner, truncated, or not Lua. No garbage was")
     lines.append("kept as a 'success'.")
@@ -1115,8 +1321,12 @@ def _write_failed(src, out_dir, stem, meta, attempts, validator=None,
     return fail
 
 
-def _finish_failure(src, out_dir, stem, meta, attempts, src_size=None) -> dict:
-    fail = _write_failed(src, out_dir, stem, meta, attempts, src_size=src_size)
+def _finish_failure(src, out_dir, stem, meta, attempts, src_size=None,
+                    validator=None) -> dict:
+    # validator= is what makes the report actionable: without it the user sees
+    # "decompile failed" and no idea which quality gate rejected the output.
+    fail = _write_failed(src, out_dir, stem, meta, attempts,
+                         validator=validator, src_size=src_size)
     return {
         "ok": False, "status": "failed", "out": None,
         "disasm_path": None, "fail_path": fail,
@@ -1146,6 +1356,12 @@ def tool_table() -> list:
     row("luajit", shutil.which("luajit"), "pkg install luajit")
     row("ljd (LuaJIT)", LJD_DIR.is_dir(), "bundled deps/ljd" if LJD_DIR.is_dir() else "missing")
     row("luadec", shutil.which("luadec"), "optional, used when present")
+    # radare2 disassembles native code (ELF/PE/Mach-O). It cannot decompile
+    # Lua bytecode, so it is deliberately NOT part of the Lua cascade -
+    # install_missing pulled it in, but tool_table never declared it, which
+    # made deps_status hide it and the install look like dead weight.
+    row("radare2 (native ELF/PE only)", shutil.which("r2") or shutil.which("radare2"),
+        "pkg install radare2 - native binaries only, not used for Lua")
     return rows
 
 

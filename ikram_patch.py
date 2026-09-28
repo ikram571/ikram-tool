@@ -784,6 +784,62 @@ def _inject_empty_file(r, out, target, fname, mount, version, log):
     return len(chain), 1
 
 
+def _verify_written_subtree(out_pak, payloads, log=None):
+    """Confirm a freshly written pak really carries the source bytes.
+
+    `PakWriter.inject_files` splices an entry's compressed block span. For a
+    single-block entry the span is padded out to the reader's decrypt window
+    (see _align_block_windows) and the result is byte-exact. A MULTI-block
+    entry has no such guarantee: the same splice in a multi-entry layout writes
+    an entry whose bytes no longer match either the source payload or the
+    pak's own SHA1 index, and the writer still reports success. Verified on
+    game_patch_4.6.0.21550: a 2-block entry built alone is byte-perfect, but
+    built alongside another entry it comes back altered.
+
+    So the write path verifies itself against the source instead of trusting
+    the writer's return value. `payloads` is the {rel-path: source bytes} map
+    captured from the source pak. Returns the list of rel-paths that came back
+    wrong; the caller must not present those as delivered.
+    """
+    log = log or (lambda *a, **k: None)
+    mod = _engines.pakmod()
+    bad = []
+    try:
+        out = mod.PakReader(str(out_pak))
+    except Exception as e:
+        log("  ✗ verification could not open the written pak: {}".format(e))
+        return sorted(payloads)
+    written = {"%s%s" % (dp, fn): e
+               for dp, entries in out.dirs.items()
+               for fn, e in entries.items()}
+    import hashlib as _hl
+    for rel, src_bytes in payloads.items():
+        got = written.get(rel)
+        if got is None:
+            bad.append(rel)
+            log("  ✗ MISSING {} — not present in the written pak".format(rel))
+            continue
+        # An entry we cannot read back is an entry we cannot vouch for, so a
+        # raise here counts as failed rather than aborting the whole check.
+        try:
+            if _hl.sha1(out._read_at(got.offset, got.size)).digest() != got.content_hash:
+                bad.append(rel)
+                log("  ✗ CORRUPT {} — written bytes fail the pak's own SHA1 "
+                    "index".format(rel))
+                continue
+            payload = out.read_entry(got)
+        except Exception as e:
+            bad.append(rel)
+            log("  ✗ UNVERIFIED {} — written pak could not be read back: "
+                "{}".format(rel, e))
+            continue
+        if src_bytes != payload:
+            bad.append(rel)
+            log("  ✗ ALTERED {} — written content differs from the source "
+                "payload".format(rel))
+    return bad
+
+
 def _align_block_windows(r, sel, log):
     """Reuse-path safety (single-block entries only). pak.pyc inject_files
     splices only the block span of a compressed/encrypted single-block entry,
@@ -791,9 +847,10 @@ def _align_block_windows(r, sel, log):
     smaller than the aligned window, the last ciphertext block bleeds bytes
     from the next entry → the content tail corrupts (verified: .uexp 16-byte
     tail field gets changed). Extend the last block end to the aligned window
-    so the splice takes the full window. Multi-block entries are skipped:
-    their blocks already splice self-aligned, and fiddling block ends shifts
-    boundaries + corrupts content."""
+    so the splice takes the full window. Multi-block entries are deliberately
+    left alone: their per-block windows do not follow the total-size formula,
+    so the same extension corrupts them instead of repairing them — they are
+    covered by _verify_written_subtree instead."""
     pc = _engines.pakmod().pc
     fixed = 0
     for fp, e in sel.items():
@@ -817,10 +874,19 @@ def _align_block_windows(r, sel, log):
 def _inject_subtree_copy(r, out, target, log):
     """Files of the target folder — the source index entries are copied as-is
     (read_entry → edits), inject_files compressed/encrypted reuse path
-    splices the original bytes → byte-identical content."""
+    splices the original bytes → byte-identical content.
+
+    The written pak is verified against the source before it is handed back;
+    entries the writer silently altered are reported, not counted as delivered.
+    """
     sel = _subtree_files(r, target)
     if not sel:
         return None
+    # Read the true source payloads FIRST. _align_block_windows rewrites the
+    # entries' block windows, after which the very same entry objects no longer
+    # read back through this reader ("extract failed for <name>"). Capturing
+    # before the mutation also gives verification an untouched reference.
+    payloads = {fp: r.read_entry(e) for fp, e in sorted(sel.items())}
     chain = _chain_dirs(target)
     r.dirs = {d: {} for d in chain}
     for fp, e in sorted(sel.items()):
@@ -829,9 +895,9 @@ def _inject_subtree_copy(r, out, target, log):
         r.dirs.setdefault(key, {})[nm] = e
     r.files = [e for _, e in sorted(sel.items())]
     _align_block_windows(r, sel, log)
-    edits = [(fp, (r.read_entry(e), None, e.stem)) for fp, e in sorted(sel.items())]
+    edits = [(fp, (payloads[fp], None, e.stem)) for fp, e in sorted(sel.items())]
     _engines.pakmod().PakWriter(r).inject_files(edits, str(out), force_add=False)
-    return len(r.dirs), len(sel)
+    return len(r.dirs), len(sel), payloads
 
 
 def _inject_skeleton(r, out, target, log):
@@ -970,7 +1036,17 @@ def _make_costom_pak(pakf, out, target, kind=None, aes_key=None, log=None,
             got = _inject_subtree_copy(r, out, target, log)
             if got is not None:
                 _trim_tencent_pad(out, log)
-                return got
+                chain, n, payloads = got
+                # Verify AFTER the trim, on the exact bytes that will ship. The
+                # zero-padded intermediate form can make the reader refuse an
+                # entry, so verifying earlier would report false corruption.
+                bad = _verify_written_subtree(out, payloads, log)
+                if bad:
+                    log("  ⚠ {}/{} entries came back altered — the writer's block "
+                        "splice cannot reproduce these (multi-block encrypted "
+                        "entries). They are NOT safe to ship.".format(
+                            len(bad), n))
+                return chain, n - len(bad)
             r.files = []
             r.dirs = {d: {} for d in chain}
             _engines.pakmod().PakWriter(r).inject_files(

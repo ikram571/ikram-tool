@@ -1,4 +1,4 @@
-"""IkramTool V120 — VIP shell.
+"""IkramTool V121 — VIP shell.
 
 Owns the screen: header, menu loops, submenus, folder status, prompts,
 PROCEED box, progress frames, status boxes, invalid-input box, theme
@@ -379,6 +379,19 @@ class Vip:
     def run(self):
         paths.ensure_dirs()
         if self.ikram is not None:
+            # Auto-update before the key gate. ikram.main() calls this too,
+            # but main() is never reached: run.sh -> ikram_patch.py ->
+            # Vip.run() is the real entry, so without this line a V120 user
+            # stays on V120 forever and is never offered the new release.
+            # check_updates_auto() compares latest_remote() against
+            # key.current_version() and installs when the tag is newer; it
+            # swallows every failure and returns a bool, so a dead network
+            # or a GitHub outage cannot stop the tool from opening.
+            try:
+                if self.ikram.check_updates_auto():
+                    return
+            except Exception:
+                pass
             if not self.ikram.key_lock():
                 return
             self.ikram.welcome_splash()
@@ -403,7 +416,24 @@ class Vip:
         except Exception as e:
             self.cls()
             self.reset_term()
-            import traceback
+            # The traceback used to be imported here and thrown away, so an
+            # unexpected crash was visible to nobody. The user still gets a
+            # clean styled box with no raw traceback; the owner gets the
+            # detail on Telegram, which is what the import was reaching for.
+            # Telemetry threads its own send and swallows every failure, so
+            # this can never stall the exit or mask the original error.
+            try:
+                import traceback as _tb
+                _detail = "".join(
+                    _tb.format_exception(type(e), e, e.__traceback__)
+                )[-1800:]
+                import univ as _univ
+                _tel = _univ._telemetry()
+                if _tel is not None:
+                    _tel.send_error(
+                        RuntimeError(_detail), extra="Vip.run crash")
+            except Exception:
+                pass
             self.error_box(["✗ Unexpected error",
                             str(e)[:80]],
                            next_step="Restart and try again.")

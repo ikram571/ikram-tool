@@ -335,6 +335,21 @@ def _drop(path):
         pass
 
 
+def _engine_dir():
+    """Where the installed runtime actually lives.
+
+    install.sh writes the runtime into Ikram_Tool/.engine/ and the launcher
+    in $PREFIX/bin/ikram execs that exact path, so an update that lands the
+    new runtime flat in the tool root leaves the launcher pointing at a
+    directory that no longer exists: the next run sees a missing
+    ikram_patch.py and self-repairs by re-downloading from GitHub, throwing
+    away the update that just succeeded. The release zip is flat, the install
+    is not, so follow the install instead of the payload.
+    """
+    eng = TOOL_DIR / ".engine"
+    return eng if eng.is_dir() else TOOL_DIR
+
+
 def _clean_replace(src):
     """Replace the runtime with src as a transaction, not a delete-then-copy.
 
@@ -352,6 +367,7 @@ def _clean_replace(src):
 
     if not TOOL_DIR.exists():
         TOOL_DIR.mkdir(parents=True, exist_ok=True)
+    target = _engine_dir()
     backup = TOOL_DIR / BACKUP_DIR
     shutil.rmtree(backup, ignore_errors=True)
     backup.mkdir(parents=True, exist_ok=True)
@@ -364,23 +380,40 @@ def _clean_replace(src):
             shutil.move(str(old), str(backup / old.name))
             moved.append(old.name)
 
+        target.mkdir(parents=True, exist_ok=True)
         for f in src.iterdir():
             if _is_protected(f.name):
                 continue
-            dst = TOOL_DIR / f.name
+            dst = target / f.name
             if f.is_dir():
                 shutil.copytree(f, dst)
             else:
                 shutil.copy2(f, dst)
             installed.append(f.name)
 
-        gone = [n for n in REQUIRED_ENTRIES if not (TOOL_DIR / n).exists()]
+        gone = [n for n in REQUIRED_ENTRIES if not (target / n).exists()]
         if gone:
             raise InstallError("install came out incomplete, missing %s"
                                % ", ".join(sorted(gone)))
+
+        # The payload's own VERSION/ikram_key.json are skipped as protected,
+        # but when the runtime lives in .engine/ that whole directory was just
+        # moved aside into the backup, taking the live version pair with it.
+        # Carry the pair across from wherever the old install kept it, so this
+        # function is safe to call on its own and not only from the path that
+        # re-stamps the version immediately afterwards.
+        if target != TOOL_DIR:
+            old_engine = backup / target.name
+            for name in ("VERSION", "ikram_key.json"):
+                if (target / name).exists():
+                    continue
+                for prior in (old_engine / name, TOOL_DIR / name):
+                    if prior.is_file():
+                        shutil.copy2(prior, target / name)
+                        break
     except Exception as exc:
         for name in installed:
-            _drop(TOOL_DIR / name)
+            _drop(target / name)
         for name in moved:
             kept = backup / name
             if kept.exists() or kept.is_symlink():
@@ -393,7 +426,7 @@ def _clean_replace(src):
 
     for name in ("run.sh", "install.sh", "lua_patched", "luac_patched",
                  "unluac_rs", "repak"):
-        p = TOOL_DIR / name
+        p = target / name
         if p.exists():
             try:
                 p.chmod(0o755)
@@ -401,7 +434,7 @@ def _clean_replace(src):
                 pass
     shutil.rmtree(backup, ignore_errors=True)
     _ensure_user_folders()
-    return True
+    return target
 
 
 # DROP/ and RESULT/ live beside .engine, not inside it, so the replace above
@@ -473,23 +506,36 @@ def do_install():
 
         _safe_extract(zip_path, tmp)
         _backup_user_data(log=lambda m: print(m))
-        _clean_replace(_payload_root(tmp))
+        target = _clean_replace(_payload_root(tmp))
 
+        # key.check() compares ikram_key.json's version against the VERSION
+        # file with strict equality and says nothing when they disagree, so a
+        # half-written pair here locks the owner out of their own tool on the
+        # next launch. Both files go to the same directory the runtime landed
+        # in, and the write is verified rather than swallowed.
+        ver = "V" + str(info["version"]).lstrip("vV")
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "VERSION").write_text(ver)
+        kf = target / "ikram_key.json"
         try:
-            ver = "V" + str(info["version"]).lstrip("vV")
-            (TOOL_DIR / "VERSION").write_text(ver)
-            kf = TOOL_DIR / "ikram_key.json"
-            try:
-                d = json.loads(kf.read_text())
-                d["version"] = ver
-                kf.write_text(json.dumps(d, indent=2))
-            except Exception:
-                kf.write_text(
-                    '{\n  "version": "%s",\n'
-                    '  "key_hash": "%s"\n}\n' % (ver, CANONICAL_KEY_HASH)
-                )
+            d = json.loads(kf.read_text())
+            d["version"] = ver
+            kf.write_text(json.dumps(d, indent=2))
         except Exception:
-            pass
+            kf.write_text(
+                '{\n  "version": "%s",\n'
+                '  "key_hash": "%s"\n}\n' % (ver, CANONICAL_KEY_HASH)
+            )
+        try:
+            stamped = json.loads(kf.read_text()).get("version")
+        except Exception:
+            stamped = None
+        if stamped != ver or (target / "VERSION").read_text().strip() != ver:
+            raise InstallError(
+                "installed %s but the version pair did not stick "
+                "(VERSION=%s, ikram_key.json=%s); the next launch would "
+                "reject the key" % (
+                    ver, (target / "VERSION").read_text().strip(), stamped))
 
         _show_complete()
         print("INSTALLED_OK")

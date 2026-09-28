@@ -14,6 +14,7 @@ from paktoolproject.txt behind the three PAK TOOL options:
 Works in the shipped flat runtime (ikram_patch.py entry) with no
 .pyc recompile needed -- engines.py ships as source.
 """
+import hashlib
 import importlib.util
 import os
 import shutil
@@ -77,12 +78,39 @@ def _patch_ue4module(mod):
     2. Same method joined paths as dir_name.strip('/') + fname,
        wiping the trailing '/' -> 'ContentLuagame.lua'. Mirror
        repak: prefix-strip only, keep the separator.
+
+    WHY THIS STAYS A MONKEYPATCH INSTEAD OF A REBUILD
+    ue4.pyc ships as a compiled payload artifact. Rebuilding it from
+    source re-marshals the module and changes its bytecode, and every
+    sibling .pyc in the release is marshalled against the same Python
+    3.14 header - so the fix is cheaper to maintain as a guarded
+    override than as a recompile the release cannot reproduce. The cost
+    is coupling to ue4.pyc internals, which is what the attribute checks
+    above exist to police.
     """
-    try:
-        aes_ecb_decrypt = mod.aes_ecb_decrypt
-        orig = mod.Ue4Pak._parse_full_directory_index
-    except Exception:
+    # Idempotence: ue4mod() may be called many times per session.
+    if getattr(mod, "_ikram_fdi_patched", False):
         return
+
+    # The closure below captures these off `mod`. The old code wrapped
+    # everything in a bare `except: return`, so if a future rebuild of
+    # ue4.pyc renamed any of them the override failed SILENTLY and every
+    # encrypted pak went back to crashing with no hint the fix was gone.
+    for _needed in ("aes_ecb_decrypt", "Reader", "read_encoded_entry", "Ue4Pak"):
+        if not hasattr(mod, _needed):
+            mod._ikram_fdi_patch_error = (
+                "ue4.pyc no longer exposes %r; FDI override skipped - a rebuilt"
+                " ue4.pyc needs this fix merged into its own"
+                " _parse_full_directory_index" % _needed)
+            return
+    try:
+        orig = mod.Ue4Pak._parse_full_directory_index
+    except AttributeError:
+        mod._ikram_fdi_patch_error = (
+            "ue4.pyc Ue4Pak has no _parse_full_directory_index;"
+            " the FDI override target moved")
+        return
+    aes_ecb_decrypt = mod.aes_ecb_decrypt
     import struct as _st
 
     def _parse_full_directory_index(self, fdi_off, fdi_size, non_encoded, encoded_blob):
@@ -115,6 +143,7 @@ def _patch_ue4module(mod):
 
     mod.Reader_original_fdi = orig
     mod.Ue4Pak._parse_full_directory_index = _parse_full_directory_index
+    mod._ikram_fdi_patched = True
 
 
 def _which_try(first, *extra):
@@ -341,6 +370,87 @@ def _oodle_stats(pakf, aes_key=None):
         return -1
 
 
+def verify_tencent_unpack(pakf, out_dir, log=None):
+    """Check an extracted Tencent tree against the pak's own SHA1 index.
+
+    Every Tencent entry stores `content_hash` = SHA1 of its raw stored bytes
+    (verified empirically: sha1(raw[offset:offset+size]) == content_hash, for
+    both compressed and empty entries). That makes a faithful, self-describing
+    integrity check available without trusting the decompressor.
+
+    Two distinct faults get named instead of being passed off as a good unpack:
+      CORRUPT - the pak's own stored bytes no longer match its index, so the
+                data on disk is provably not what the archive declares.
+      MISSING - the index is clean but nothing landed at that path, i.e. the
+                extract dropped an entry.
+
+    Returns (good, bad) as lists of pak-relative paths.
+    """
+    log = log or (lambda *a, **k: None)
+    out_dir = Path(out_dir)
+    reader = pakmod().PakReader(str(pakf))
+    good, bad = [], []
+    root = _extracted_root(out_dir, reader, log)
+    for dirpath, files in reader.dirs.items():
+        for fname, entry in files.items():
+            rel = "{}{}".format(dirpath, fname)
+            try:
+                stored = reader._read_at(entry.offset, entry.size)
+            except Exception as e:
+                bad.append(rel)
+                log("  ✗ UNREADABLE {} — index read failed: {}".format(rel, e))
+                continue
+            if hashlib.sha1(stored).digest() != entry.content_hash:
+                bad.append(rel)
+                log("  ✗ CORRUPT {} — pak bytes fail the archive's own SHA1 "
+                    "index (the pak is damaged, not the tool)".format(rel))
+                continue
+            if not (out_dir / root / rel).is_file():
+                bad.append(rel)
+                log("  ✗ MISSING {} — index verified but the file was not "
+                    "extracted".format(rel))
+                continue
+            good.append(rel)
+    return good, bad
+
+
+def _extracted_root(out_dir, reader, log=None):
+    """Locate the directory the compiled unpacker actually wrote into.
+
+    The index and the writer disagree about the root on most of the real
+    corpus: `ShadowTrackerExtra/`-prefixed paks are extracted under that
+    folder while their index paths are root-relative, and small paks put the
+    prefix inside the index instead. Assuming either layout makes a clean
+    unpack look like 0 of N files extracted.
+
+    Picks the candidate prefix (including the empty one) that satisfies the
+    most index entries, so the check tracks the real tree either way.
+    """
+    log = log or (lambda *a, **k: None)
+    out_dir = Path(out_dir)
+    rels = ["{}{}".format(dp, fn)
+            for dp, files in reader.dirs.items() for fn in files]
+    if not rels or not out_dir.is_dir():
+        return Path("")
+    candidates = [Path("")]
+    try:
+        for child in out_dir.iterdir():
+            if child.is_dir():
+                candidates.append(Path(child.name))
+    except OSError:
+        pass
+    best, best_hits = Path(""), -1
+    for cand in candidates:
+        hits = sum(1 for rel in rels if (out_dir / cand / rel).is_file())
+        if hits > best_hits:
+            best, best_hits = cand, hits
+    if best_hits <= 0:
+        return Path("")
+    if str(best) and best.name:
+        log("  (extracted tree sits under {}/)".format(best.name))
+    return best
+
+
 def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
     """Unpack any pak -> out_dir. Returns file count."""
     log = log or (lambda *a, **k: None)
@@ -351,7 +461,18 @@ def unpack_pak(pakf, out_dir, kind=None, aes_key=None, log=None):
         log("  engine: ikram-custom (tencent)")
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        return pakmod().unpack_pak(pakf, out_dir, log=log)
+        pakmod().unpack_pak(pakf, out_dir, log=log)
+        # The compiled unpacker is happy to write out bytes that no longer match
+        # the archive's own index, and it still reports the full file count. Left
+        # unchecked, a damaged pak comes back looking like a clean success and the
+        # user edits garbage. Verify, name the bad entries, and hand back only the
+        # count we can actually vouch for.
+        good, bad = verify_tencent_unpack(pakf, out_dir, log)
+        if bad:
+            log("  ⚠ {}/{} entries FAILED verification — the pak itself is "
+                "damaged. Only the unlisted files are trustworthy.".format(
+                    len(bad), len(good) + len(bad)))
+        return len(good)
 
     if kind == "ue4":
         aes_key = _resolve_ue4_key(pakf, aes_key or None, log)

@@ -29,6 +29,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import zlib
 from pathlib import Path
 
@@ -691,41 +692,106 @@ _STD_OPCODES_51 = (
 )
 
 
+def _lua51_body_offsets(data: bytes):
+    """Plausible instruction-stream start offsets for a Lua 5.1 chunk.
+
+    The old code hardcoded 18 ("the instruction stream begins right after the
+    18-byte Lua 5.1 header"). There is no such fixed header size. A 5.1 Header
+    is a fixed 11-byte field block followed by a luac_int of sizeof(lua_Integer)
+    and a luac_num of sizeof(lua_Number), and those two widths come from the
+    header ITSELF - so the offset varies per compiler build. On the luac5.1
+    shipped here the real offset is 19 (byte 19 is the main chunk's 0
+    upvalues, byte 20 is the 0x40 source-name length, bytes 21+ are the path).
+    At 18 the scan was reading one byte into the upvalues field and shifted
+    every instruction by a byte, which garbles the opcode histogram and makes
+    the remap guess worse than useless.
+
+    So: read the declared sizes out of the header, and also sweep a short
+    window around them, returning the offsets worth trying rather than one
+    magic number. Which one is correct is decided downstream by _loads_ok.
+    """
+    n = len(data)
+    if n < 24:
+        return []
+    # 0-3 signature, 4 version, 5 format, 6 endian,
+    # 7 sizeof(int), 8 sizeof(size_t), 9 sizeof(Instruction),
+    # 10 sizeof(lua_Number); 5.1 has no explicit sizeof(lua_Integer) field,
+    # so the integer width is inferred from where a plausible chunk starts.
+    size_number = data[10] if 0 < data[10] <= 16 else 8
+    size_int = data[7] if 0 < data[7] <= 16 else 4
+    size_t = data[8] if 0 < data[8] <= 16 else 8
+    # Most builds: 11 fixed + int + number. 4-byte-wide integer builds put
+    # the number first, so try both orderings plus the observed 19.
+    seeds = {11 + size_int + size_number, 11 + size_t + size_number, 19, 18, 11 + size_number}
+    out = []
+    for s in sorted(seeds):
+        for cand in (s, s + 1, s - 1):
+            if 12 <= cand < n and cand not in out:
+                out.append(cand)
+    return out
+
+
 def _opcode_remap_candidates(data: bytes, dialect: str):
     """Yield (label, remapped) candidates for a shuffled-opcode Lua 5.1 chunk.
 
-    Only attempted when `data` is a Lua 5.1 header with a plausible bit-size
-    layout for instruction extraction (offset 13, 4-byte little-endian insns
-    after header).  Standard Lua 5.1: opcode = insn & 0x3F.  When the observed
-    top opcodes look like a permutation, emit a remap guess; validation by
-    `_loads_ok` decides.  Best-effort — a failed/misaligned guess just yields
-    nothing and the pipeline falls back to the honest error path."""
-    if dialect != "lua51" or len(data) < 32:
+    Only attempted when `data` is a Lua 5.1 chunk. Standard Lua 5.1 encodes the
+    opcode in the low 6 bits of a 4-byte little-endian instruction, so a modder
+    that shuffles opcodes is a straight permutation of those 6-bit fields.
+
+    The reliable part of that permutation is its extremes: RETURN (0x1E) and
+    MOVE (0x00) dominate any real function body no matter how the rest is
+    shuffled, so the two hottest observed opcodes are almost always those two.
+    Which of them is which is genuinely ambiguous from frequency alone, so both
+    assignments are emitted, along with the single-opcode variants for a modder
+    that shuffled only one. Guessing the other ~36 slots from a 200-instruction
+    histogram is not possible, and inventing a static table for it would only
+    ever fit one modder - so it is deliberately not done.
+
+    Every candidate is a guess; _loads_ok downstream decides which (if any) is
+    real. A failed guess costs one validation and falls through to the honest
+    error path.
+    """
+    if dialect != "lua51" or len(data) < 64:
         return
-    # instruction stream begins right after the 18-byte Lua 5.1 header
-    body = data[18:]
-    body = body[: len(body) - len(body) % 4]
-    if len(body) < 256:
-        return
-    freq = {}
-    for i in range(0, len(body), 4):
-        insn = int.from_bytes(body[i : i + 4], "little")
-        op = insn & 0x3F
-        freq[op] = freq.get(op, 0) + 1
-    if not freq:
-        return
-    ranked = sorted(freq, key=freq.get, reverse=True)
-    # reference profile: RETURN/MOVE/JMP are the hottest; rely on the
-    # universal fact that RETURN (0x1E) and MOVE (0x00) dominate any real
-    # Lua 5.1 function body.
-    mk = {ranked[0]: 0x1E, ranked[1]: 0x00}  # RETURN = 0x1E, MOVE = 0x00
-    mapped = bytearray(body)
-    for i in range(0, len(mapped) - 3, 4):
-        old = int.from_bytes(mapped[i : i + 4], "little")
-        op = old & 0x3F
-        if op in mk:
-            mapped[i : i + 4] = ((old & ~0x3F) | mk[op]).to_bytes(4, "little")
-    yield ("opcode-remap", data[:18] + bytes(mapped))
+    if _loads_ok(data):
+        return          # already loads: a shuffle here would only break it
+    for off in _lua51_body_offsets(data):
+        # Do NOT truncate the tail to a 4-byte multiple. The instruction stream
+        # is followed by the constant pool (strings, numbers), so chopping the
+        # remainder silently deleted real chunk data - 2 bytes on an 865-byte
+        # 5.1 file - and every candidate came back corrupt. Iterate on
+        # 4-byte boundaries but keep every trailing byte.
+        body = data[off:]
+        if len(body) < 64:
+            continue
+        freq = {}
+        for i in range(0, len(body), 4):
+            op = int.from_bytes(body[i : i + 4], "little") & 0x3F
+            freq[op] = freq.get(op, 0) + 1
+        if not freq:
+            continue
+        ranked = sorted(freq, key=freq.get, reverse=True)
+        hot0, hot1 = ranked[0], ranked[1]
+        plans = [
+            ("opcode-remap r->RET/m->MOV", {hot0: 0x1E, hot1: 0x00}),
+            ("opcode-remap r->MOV/m->RET", {hot0: 0x00, hot1: 0x1E}),
+            ("opcode-remap hot0->RET", {hot0: 0x1E}),
+            ("opcode-remap hot0->MOV", {hot0: 0x00}),
+        ]
+        for label, mk in plans:
+            mapped = bytearray(body)
+            hit = False
+            for i in range(0, len(mapped) - 3, 4):
+                old = int.from_bytes(mapped[i : i + 4], "little")
+                op = old & 0x3F
+                if op in mk:
+                    mapped[i : i + 4] = ((old & ~0x3F) | mk[op]).to_bytes(4, "little")
+                    hit = True
+            if not hit:
+                continue
+            yield ("%s @%d" % (label, off), data[:off] + bytes(mapped))
+
+
 LUA_MAGIC_TAIL = bytes([0x19, 0x93, 0x0D, 0x0A, 0x1A, 0x0A])  # \x19\x93\r\n\x1a\n
 LUAJIT_MAGIC_TAIL = bytes([0x0D, 0x0A, 0x1A, 0x0A])
 
@@ -838,6 +904,118 @@ def _is_nadeem_shell(text: str) -> bool:
     if len(_NADEEM_SHELL_RE.findall(text)) < 3:
         return False
     return len(_NADEEM_ANTI_RE.findall(text)) >= 1
+
+
+def _nadeem_salvage(out_root, stem, data, shell_text, progress=None):
+    """Salvage a NADEEM-protected file instead of refusing it outright.
+
+    The protector's payload really is ciphertext - no decompiler can turn that
+    back into game code without the owner's key, and saying otherwise would be a
+    lie. But the file is NOT valueless: it is a Lua source whose loader shell is
+    plain and whose footer is a plaintext comment, and the ciphertext body is
+    still sitting there in the clear as a string literal. Throwing that away
+    made the tool useless against the whole NADEEM family, where the loader is
+    often the only readable artifact and is frequently where the decrypt call,
+    the key derivation and the anti-tamper checks all live.
+
+    So this keeps three artifacts instead of none:
+      <stem>_NADEEM_shell.lua    the loader shell, if one was decompiled
+      <stem>_NADEEM_payload.bin  the raw ciphertext body, always
+      <stem>_NADEEM_REPORT.txt   what was found and what is still locked
+
+    Returns the decompile_bgmi result list, so the caller's return format
+    [(label, ok, path, msg)] is unchanged.
+    """
+    out_root = Path(out_root)
+    stem = Path(stem).stem
+    written = []
+
+    if shell_text and shell_text.strip():
+        shell_path = out_root / (stem + "_NADEEM_shell.lua")
+        shell_path.write_text(shell_text, encoding="utf-8")
+        written.append(shell_path)
+
+    # the payload is whatever large printable/quoted run the shell carries;
+    # fall back to the whole file minus a recognised footer when the shell was
+    # not decompilable at all
+    payload_path = out_root / (stem + "_NADEEM_payload.bin")
+    body = None
+    if shell_text:
+        spans = re.findall(r'"([^"\]{256,})"|\'([^\'\']{256,})\'',
+                           shell_text)
+        blobs = [a or b for a, b in spans]
+        if blobs:
+            body = max(blobs, key=len).encode("utf-8", "surrogateescape")
+    if body is None and data:
+        tail_at = len(data)
+        for m in _NADEEM_MARKS:
+            i = data.find(m)
+            if i != -1:
+                tail_at = min(tail_at, i)
+        body = data[:tail_at] if tail_at > 0 else data
+    if body:
+        payload_path.write_bytes(body)
+        written.append(payload_path)
+
+    report = out_root / (stem + "_NADEEM_REPORT.txt")
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    # mega_lua is imported BY lua_pipeline, so a module-level import back into
+    # it would be circular. Resolve the version lazily instead of adding a
+    # fourth hardcoded "v120" literal to a file that already has two others.
+    try:
+        from lua_pipeline import VERSION as _VER
+    except Exception:
+        _VER = "v120"
+    lines = [
+        "IkramTool %s - NADEEM protection, partial recovery" % _VER,
+        "Timestamp : %s" % now,
+        # deliberately not "<stem>.luac": NADEEM files are Lua SOURCE, and
+        # naming them .luac in a report meant to be trustworthy was a lie
+        "File      : %s (NADEEM footer, source form)" % stem,
+        "Footer    : %s" % ", ".join(
+            m.decode("ascii", "replace") for m in _NADEEM_MARKS
+            if m in (data or b"")),
+        "",
+        "RECOVERED",
+    ]
+    if shell_text and shell_text.strip():
+        lines.append("  loader shell   : %d bytes -> %s"
+                     % (len(shell_text), written[0].name))
+    if body:
+        lines.append("  payload blob   : %d bytes -> %s"
+                     % (len(body), payload_path.name))
+    if not written:
+        lines.append("  nothing        : the shell did not decompile and no "
+                     "payload could be isolated")
+    lines += [
+        "",
+        "STILL LOCKED",
+        "  The Lua body is ciphertext produced by an external protector.",
+        "  Recovering the game logic needs the protector's key, which is not",
+        "  present in the file and cannot be derived by any decompiler. The",
+        "  shell above is loader/plumbing, not game code - do not recompile it",
+        "  expecting a working script.",
+        "",
+        "The footer is a PLAINTEXT comment, which is why the file was still",
+        "readable enough to salvage a shell from. If a key is obtained",
+        "separately, decrypt the payload blob and prepend the Lua header",
+        "before running a decompiler.",
+    ]
+    report.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    written.append(report)
+
+    if shell_text and shell_text.strip():
+        msg = ("NADEEM-protected: payload is key-locked ciphertext, so no "
+               "game-ready source exists. Saved the loader shell "
+               "(%s), the payload blob (%s) and a report (%s) instead of "
+               "discarding the file."
+               % (written[0].name, payload_path.name, report.name))
+    else:
+        msg = ("NADEEM-protected: payload is key-locked ciphertext and the "
+               "loader shell would not decompile. Saved the payload blob "
+               "(%s) and a report (%s)." % (payload_path.name, report.name))
+    return [("Decompile (partial - key-locked)", False, written[0] if written
+             else out_root / (stem + "_GAME.lua"), msg)]
 
 
 def _xor_key_recover(data: bytes, plain: bytes, key_len: int):
@@ -1475,6 +1653,86 @@ def _strip_dead_after_returns(text: str) -> str:
     return result
 
 
+# Register/temp naming emitted by the decompilers that cannot recover real
+# identifiers. unluac-rs writes r0_0 / p1_0, unluac.jar degrades to L0_1, and
+# the internal emitter uses bare slot numbers. Source that keeps its own names
+# never looks like this, so it is the single most reliable editability tell.
+_REGNAME_RE = re.compile(r"\b(?:[rp]\d+_\d+|L\d+_\d+|v\d+|R\d+_\d+)\b")
+
+
+def _decompile_score(text: str) -> float:
+    """Rank one decompiler's output. Higher is better; a negative score means
+    the text is unusable and must not be chosen.
+
+    The old picker chose by a hardcoded preference order - unluac.jar unless it
+    produced a flat L-var dump, then unluac-rs, then the internal engine. The
+    point of scoring is to let engines compete, but the FIRST attempt at this
+    scored rs 91 vs jar 63 on identical input and picked the worse answer, for
+    a reason worth recording:
+
+        jar  ->  local M = {}  /  function M.add(a, b) / table.concat(out, ",")
+        rs   ->  local r0_0 = {}  /  function r0_0.add(p1_0, p1_1)
+
+    Counting keyword occurrences rewarded the register emitter, because it
+    repeats `local`/`function` once per statement while the clean output is
+    denser, and the recompile bonus went to whichever engine happened to emit
+    valid syntax. The tool's promise is "readable + editable + game-ready", and
+    r0_0/p1_0 is neither readable nor editable. So editability is scored
+    explicitly and weighted above raw structure:
+
+      register naming  : heavily penalised - machine names are not editable
+      identifier spread: reward DISTINCT real-looking names, not repetition
+      comment density  : rs prefixes file/dialect/proto metadata to every block
+      block structure  : real control flow, now a smaller term
+      recompiles        : ground truth, but not enough on its own to outrank
+                          readable output
+
+    Every signal is cheap and the function is linear in output size; it runs
+    once per engine attempt on files that can reach megabytes.
+    """
+    if not text or not text.strip():
+        return -1.0
+    lines = [l for l in text.splitlines() if l.strip()]
+    if not lines:
+        return -1.0
+    body = "\n".join(lines)
+    low = body.lower()
+    score = 0.0
+
+    if _is_flat_lvar(body):
+        score -= 40.0
+
+    # --- editability, the dominant term
+    reg = len(_REGNAME_RE.findall(body))
+    if reg:
+        # scaled by share of the file, so a huge register dump is punished in
+        # proportion to how much of it is machine naming
+        score -= 25.0 + min(40.0 * reg / max(1, len(lines)), 60.0)
+    distinct = len(set(re.findall(r"\b[A-Za-z_][A-Za-z0-9_]{2,}\b", body)))
+    score += min(distinct * 0.8, 45.0)          # real names, breadth not volume
+
+    commented = sum(1 for l in lines if l.strip().startswith("--"))
+    score -= 12.0 * commented / max(1, len(lines))  # engine metadata noise
+
+    # --- structure, deliberately a smaller term than editability
+    for kw in ("function", "local", "if", "for", "while", "then",
+               "return", "end", "else", "repeat"):
+        score += 1.0 * min(low.count(kw), 120)
+    score -= 1.0 * min(len(_NADEEM_SHELL_RE.findall(body)), 40)
+
+    avg = sum(len(l) for l in lines) / len(lines)
+    if avg < 3 or avg > 300:
+        score -= 10.0
+    score -= min((body.count("?") / max(1, len(body))) * 100.0, 25.0)
+
+    try:
+        if _compiles_as_lua(body):
+            score += 12.0
+    except Exception:
+        pass
+    return score
+
+
 def _decompile_readable(std_path: Path) -> str:
     """Choose the best readable decompile for `std_path`.
 
@@ -1516,20 +1774,28 @@ def _decompile_readable(std_path: Path) -> str:
                 rs_out = p.stdout.decode("utf-8", errors="replace")
             rs_err = (p.stderr or b"").decode("utf-8", errors="replace")
 
-    # unluac.jar only wins when it is NOT a flat L-var dump (it keeps names).
+    # Score every engine's output and let the best one win, instead of
+    # choosing by a hardcoded preference order. Ties keep the original order
+    # (jar, then rs) via the -rank term, so behaviour is unchanged whenever
+    # jar genuinely is the better answer.
+    scored = []
+    if jar_out and jar_out.strip():
+        scored.append((_decompile_score(jar_out), 0, "jar", jar_out))
+    if rs_out and rs_out.strip():
+        scored.append((_decompile_score(rs_out), 1, "rs", rs_out))
     outcome = None
     outcome_src = None
-    if jar_out and jar_out.strip() and not _is_flat_lvar(jar_out):
-        outcome = jar_out
-        outcome_src = "jar"
-    # otherwise prefer the structured unluac-rs output when available.
-    if outcome is None and rs_out and rs_out.strip():
-        outcome = rs_out
-        outcome_src = "rs"
-    if outcome is None and jar_out and jar_out.strip():
-        outcome = jar_out
-        outcome_src = "jar"
-
+    if scored:
+        _best = max(scored, key=lambda s: (s[0], -s[1]))
+        # Take the best non-empty candidate even when its score is negative.
+        # The score is a RANKING, not a pass/fail gate: on a LuaJIT chunk
+        # unluac.jar cannot read it at all (-1.0) and unluac-rs returns
+        # register-style output that the editability penalty drags to -12.8.
+        # Gating on >= 0 rejected BOTH and dropped the run into the internal
+        # pseudo_decompiler, which is strictly worse than the rs output the
+        # penalty was complaining about. Candidates are already filtered to
+        # non-empty text at collection time, so no extra gate is needed.
+        outcome, outcome_src = _best[3], _best[2]
     # guaranteed readable fallback via the tool's own Lua VM decompiler
     if outcome is None:
         try:
@@ -2872,12 +3138,18 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
                           "written."))]
 
     if _is_nadeem_protected(data):
-        _phase(progress, "Encrypted file detected")
-        return [("Decompile", False, out_root / (stem + "_GAME.lua"),
-                 ("This file is encrypted and can't be decompiled by this "
-                  "tool. The Lua code was packed by an external protector and "
-                  "only a loader shell is present — no decompilable code was "
-                  "recovered, so no *_GAME.lua was written."))]
+        _phase(progress, "NADEEM footer found, salvaging loader shell...")
+        # A NADEEM file is Lua SOURCE, not bytecode: the footer it is detected
+        # by is a plaintext `--` comment, which is the only reason the protector
+        # was readable at all. So the shell does not need a decompiler - the
+        # file text IS the shell. Salvaging straight from the bytes skips a
+        # pointless trip through the bytecode cascade that could only reject
+        # it at the _loads_ok gate.
+        try:
+            _shell = data.decode("utf-8", "surrogateescape")
+        except Exception:
+            _shell = None
+        return _nadeem_salvage(out_root, stem, data, _shell, progress)
 
     if _looks_like_zlib_container(data):
         _phase(progress, "Multi-section container detected, reconstructing...")
@@ -2993,13 +3265,10 @@ def decompile_bgmi(src, out_root, progress=None) -> list:
             game_text = _promote_readable(game_text)
         game_text = _auto_close_blocks(game_text)
         if _is_nadeem_shell(game_text):
-            _phase(progress, "Encrypted file detected")
-            _cleanup((readable_path, clean_path, tmp_std))
-            return [("Decompile", False, out_root / (stem + "_GAME.lua"),
-                     ("This file is encrypted and can't be decompiled by this "
-                      "tool. The Lua code was packed by an external protector "
-                      "and only a loader shell is present — no decompilable "
-                      "code was recovered, so no *_GAME.lua was written."))]
+            _phase(progress, "NADEEM loader shell recovered, salvaging...")
+            # The engine already produced the shell - do not clean the working
+            # files before salvaging, the salvage path needs the text intact.
+            return _nadeem_salvage(out_root, stem, data, game_text, progress)
         game_path = out_root / (stem + "_GAME.lua")
         game_path.write_text(game_text, encoding="utf-8")
 

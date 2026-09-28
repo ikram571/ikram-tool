@@ -6,6 +6,7 @@ Exits non-zero if any case fails. Covers the two V120 repair classes
 """
 import io
 import contextlib
+import json
 import os
 import subprocess
 import sys
@@ -245,15 +246,27 @@ record("protect_compile shim round-trips",
        iu.is_protected(prot) and unwrapped is not None and unwrapped[:4] == b"\x1bLua",
        f"{len(prot)}B, is_protected={iu.is_protected(prot)}")
 
-print("=== V120 VERSION STRINGS ===")
-vers_ok = True
-for f in ("vip_ui.py", "lua_pipeline.py", "update.py"):
-    p = Path(__file__).resolve().parent / f
-    if p.exists():
-        t = p.read_text(errors="replace")
-        if "V120" not in t and "120" not in t:
-            vers_ok = False
-record("version strings bumped to V120", vers_ok)
+print("=== VERSION STRINGS ===")
+# The live invariant is that every place the tool states its own version
+# agrees with the VERSION file. key.check() compares ikram_key.json's version
+# against that file with strict equality and reports nothing when they differ,
+# so a one-sided bump locks the owner out of their own tool silently. Check the
+# identifiers themselves rather than hunting for a literal "V120" anywhere in
+# the tree, which historical comments and this suite both satisfy by accident.
+_root = Path(__file__).resolve().parent
+_declared = (_root / "VERSION").read_text().strip()
+vers_ok = _declared.startswith("V") and _declared[1:].isdigit()
+for f in ("vip_ui.py", "lua_pipeline.py", "theme_engine.py"):
+    t = (_root / f).read_text(errors="replace")
+    if _declared not in t:
+        vers_ok = False
+        record("version string missing from %s" % f, False)
+_key = json.loads((_root / "ikram_key.json").read_text())
+if _key.get("version") != _declared:
+    vers_ok = False
+    record("ikram_key.json version %r != VERSION %r" % (_key.get("version"), _declared),
+           False)
+record("live version identifiers agree on %s" % _declared, vers_ok)
 
 bad = [n for n, ok, _ in results if not ok]
 print()
