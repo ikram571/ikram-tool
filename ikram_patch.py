@@ -36,9 +36,38 @@ for _d in (
     ikram.DROP_PAK,
     ikram.RESULT,
 ):
-    _d.mkdir(parents=True, exist_ok=True)
+      _d.mkdir(parents=True, exist_ok=True)
 for _sub in ("injected", "extracted", "lua", "processed", "CostomPak", "Repacked"):
     (ikram.RESULT / _sub).mkdir(parents=True, exist_ok=True)
+
+
+def _purge_stray_engine_data_folders():
+    """ikram.pyc's own module-level code builds DROP/RESULT from its own
+    __file__ dir, so the exec_module() above creates Ikram_Tool/.engine/DROP
+    and .engine/RESULT *before* the override above can redirect them. Those two
+    folders stay empty forever once the override is in place - every real read
+    and write goes to the install root - but leaving them behind ships the
+    tool with five folders instead of the three it promises.
+
+    Only runs in the .engine layout: in the dev tree the tool dir IS the data
+    dir, so these paths are the real ones and must never be touched. Anything
+    still holding a file is left alone as well - that is user data, and
+    install.sh is what migrates it.
+    """
+    if _TOOL_DIR.name != ".engine":
+        return
+    for name in ("DROP", "RESULT"):
+        stray = _TOOL_DIR / name
+        if stray.is_symlink() or not stray.is_dir():
+            continue
+        if any(p.is_file() or p.is_symlink() for p in stray.rglob("*")):
+            print("[!] %s still holds files - left in place." % stray)
+            continue
+        shutil.rmtree(stray, ignore_errors=True)
+
+
+_purge_stray_engine_data_folders()
+
 
 
 def _purge_legacy_repacked_folders():
