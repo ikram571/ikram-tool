@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # =============================================
-#  Ikram Tool - Manual Update (V116)
+#  Ikram Tool - Manual Update
 #  Manual fallback if auto-update fails.
 #  Use: bash update.sh   (or:  python3 update.py)
 # =============================================
 set -e
-# Resolve the tool dir from this script's own location. The previous default
-# was a hardcoded $HOME/Ikram_Tool, which is wrong whenever the tool is
-# installed anywhere else (and wrong for the canonical repo layout).
-TOOL_DIR="${IKRAM_TOOL_DIR:-$(cd "$(dirname "$0")" && pwd)}"
-PY="$TOOL_DIR/update.py"
+TOOL_DIR="${IKRAM_TOOL_DIR:-$HOME/Ikram_Tool}"
+PY="$TOOL_DIR/.engine/update.py"
 if [ ! -f "$PY" ]; then
   # fallback: engine missing -> fresh install via canonical one-liner
   echo "[!] update.py not found — doing a fresh install..."

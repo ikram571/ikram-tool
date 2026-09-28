@@ -570,9 +570,11 @@ else
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# Release zips may ship either FLAT (payload at zip root) or WRAPPED in a
-# single top-level directory (Ikram_Tool/). Descend into the wrapper when
-# present so both layouts install identically. update.py already does this.
+# Release zips may ship either FLAT (payload at the zip root, V119 and older)
+# or WRAPPED in a single top-level directory (Ikram_Tool/, V120+). Descend into
+# the wrapper before anything else looks at the tree, so the ikram.pyc probe
+# and the whole-payload validation below both see the real payload root.
+# update.py already unwraps the same way before it swaps the runtime.
 if [ ! -f "$TMPX/ikram.pyc" ]; then
     for _cand in "$TMPX"/*/; do
         [ -f "${_cand}ikram.pyc" ] && { TMPX="${_cand%/}"; break; }
@@ -583,22 +585,73 @@ if [ ! -f "$TMPX/ikram.pyc" ]; then
     rm -rf "$TMPX" "$TARGET/IkramTool.zip"
     exit 1
 fi
-# clean old files (safe now — the new unzip has finished)
-rm -rf "$TARGET/.engine"
-# drop/result are always real — NEVER deleted (they hold user files)
-mkdir -p "$TARGET/drop" "$TARGET/result"
-# copy from temp -> .engine/ (engine hidden; drop/result real at root)
-cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null
-# A restrictive umask (Android/Termux commonly 0077) would leave the bundled
-# binaries and scripts owner-only. Re-apply the execute bits explicitly so the
-# install works no matter what umask the user's shell has.
-for _x in "$TARGET/.engine/lua_patched" "$TARGET/.engine/luac_patched" \
-          "$TARGET/.engine/unluac_rs" "$TARGET/.engine/repak" \
-          "$TARGET/.engine/run.sh" "$TARGET/.engine/install.sh" \
-          "$TARGET/.engine/update.sh" "$TARGET/.engine/release.sh"; do
-    [ -f "$_x" ] && chmod 755 "$_x"
+# Validate the WHOLE payload before a single existing file is touched. A
+# payload missing the tool's own entry points is not an update, it is a broken
+# or truncated download.
+_missing=""
+for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
+             run.sh update.py; do
+    [ -f "$TMPX/$_need" ] || _missing="$_missing $_need"
 done
-[ -f "$TARGET/run.sh" ] && chmod 755 "$TARGET/run.sh"
+if [ -n "$_missing" ]; then
+    fail "Downloaded package is incomplete — missing:$_missing"
+    printf "${C_RED}${C_BOLD}    Nothing was changed. Try again with a better connection.${C_RESET}\n"
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# Install as a transaction, not a delete-then-copy. The old runtime is MOVED
+# aside, the new one is copied in, and the result is verified. If any step
+# fails the partial copy is dropped and the previous runtime is moved straight
+# back, so a failed reinstall can never leave the user with no tool at all.
+# drop/result hold the user's files and are never touched.
+OLDENG="$TARGET/.engine.old"
+rm -rf "$OLDENG"
+if [ -d "$TARGET/.engine" ]; then
+    mv "$TARGET/.engine" "$OLDENG" || {
+        fail "Could not set the old engine aside — install stopped."
+        printf "${C_RED}${C_BOLD}    Nothing was changed.${C_RESET}\n"
+        rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+        exit 1
+    }
+fi
+mkdir -p "$TARGET/.engine" "$TARGET/drop" "$TARGET/result"
+# copy from temp -> .engine/ (engine hidden; drop/result real at root)
+if ! cp -r "$TMPX"/. "$TARGET/.engine"/ 2>/dev/null; then
+    rm -rf "$TARGET/.engine"
+    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+    fail "Install failed while copying — your previous version was restored."
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# A restrictive umask (Android/Termux commonly 0077) leaves the copied binaries
+# and scripts owner-only, which breaks the tool the moment it is run as any
+# other user or from a wrapper that drops privileges. Re-apply the execute bit
+# explicitly so the install does not depend on the caller's umask.
+for _x in lua_patched luac_patched unluac_rs repak \
+          run.sh install.sh update.sh; do
+    [ -f "$TARGET/.engine/$_x" ] && chmod 755 "$TARGET/.engine/$_x"
+done
+# verify the copy really landed before declaring victory
+_vmissing=""
+for _need in ikram.pyc ikram_patch.py menus.py engines.py paths.py vip_ui.py \
+             run.sh update.py; do
+    [ -f "$TARGET/.engine/$_need" ] || _vmissing="$_vmissing $_need"
+done
+if [ -n "$_vmissing" ]; then
+    rm -rf "$TARGET/.engine"
+    [ -d "$OLDENG" ] && mv "$OLDENG" "$TARGET/.engine"
+    fail "Install incomplete — missing:$_vmissing"
+    printf "${C_GOLD}             your previous version was restored.${C_RESET}\n"
+    rm -rf "$TMPX" "$TARGET/IkramTool.zip"
+    exit 1
+fi
+# The new runtime is verified and live. Only now is the old one discarded, and
+# only now are stale root-level engine files removed. A legacy flat install
+# leaves ikram.pyc/ikram_patch.py/run.sh in the root, and keeping them would
+# leave two engines on disk where the root run.sh would keep launching the old
+# one forever.
+rm -rf "$OLDENG"
+rm -f "$TARGET/ikram.pyc" "$TARGET/ikram_patch.py" "$TARGET/run.sh" 2>/dev/null
 rm -rf "$TMPX" "$TARGET/IkramTool.zip"
 # DROP/RESULT skeleton — always created (fresh install starts empty)
 # V114 Fixed-Path System: lowercase DROP/{pak,lua,inject} + RESULT branches
@@ -612,7 +665,7 @@ mkdir -p "$TARGET/drop/pak" "$TARGET/drop/lua" "$TARGET/drop/inject" \
 # engine now lives in .engine/ — DROP/RESULT symlink (engine __file__-relative to root drop/result)
 ln -sfn "$TARGET/drop" "$TARGET/.engine/DROP"
 ln -sfn "$TARGET/result" "$TARGET/.engine/RESULT"
-if [ -f "$TARGET/.engine/ikram.pyc" ] || [ -f "$TARGET/ikram.pyc" ]; then
+if [ -f "$TARGET/.engine/ikram.pyc" ] && [ -f "$TARGET/.engine/ikram_patch.py" ]; then
     ok "Tool installed"
     advance "$((DL_BASE + PW_DL + PW_EXTRACT))" "Tool installed"
 else
@@ -630,7 +683,7 @@ sed -i "/Ikram_Tool\/ikram\.py/d" "$RC" 2>/dev/null
 cat >> "$RC" <<'EOF'
 
 # Ikram Tool launcher (ikram_patch.py = full A-to-Z file load)
-ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"; }
+ikram() { PYTHONDONTWRITEBYTECODE=1 python3 "@@ENG@@/ikram_patch.py" "$@"; }
 EOF
 # real executable - won't reload from bashrc function, always ready in PATH
 cat > "$PREFIX/bin/ikram" <<'EOF'
@@ -644,21 +697,21 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 1
 fi
 # if the patch is missing, self-repair (fresh full zip download)
-if [ ! -f "$HOME/Ikram_Tool/.engine/ikram_patch.py" ]; then
+if [ ! -f "@@ENG@@/ikram_patch.py" ]; then
     echo ""
     echo "  ⚠ Tool files missing — self-repairing..."
-    mkdir -p "$HOME/Ikram_Tool/.engine"
-    cd "$HOME/Ikram_Tool"
+    mkdir -p "@@ENG@@"
+    cd "$TARGET"
     curl -sL -o repair.zip "https://github.com/ikram571/ikram-tool/releases/latest/download/IkramTool.zip"
-    TMPX="$HOME/Ikram_Tool/.engine/.repair"
+    TMPX="@@ENG@@/.repair"
     rm -rf "$TMPX" && mkdir -p "$TMPX"
-    if (cd "$TMPX" && unzip -q -o "$HOME/Ikram_Tool/.engine/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
-        cp -r "$TMPX"/. "$HOME/Ikram_Tool/.engine"/ 2>/dev/null
-        chmod +x "$HOME/Ikram_Tool/.engine/run.sh" "$HOME/Ikram_Tool/run.sh" 2>/dev/null
+    if (cd "$TMPX" && unzip -q -o "@@ENG@@/repair.zip") && [ -f "$TMPX/ikram.pyc" ]; then
+        cp -r "$TMPX"/. "@@ENG@@"/ 2>/dev/null
+        chmod +x "@@ENG@@/run.sh" "@@ROOT@/run.sh" 2>/dev/null
         echo "  ✓ Repair done! Tool khul raha hai..."
-        exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+        exec python3 "@@ENG@@/ikram_patch.py" "$@"
     fi
-    rm -rf "$TMPX" "$HOME/Ikram_Tool/.engine/repair.zip"
+    rm -rf "$TMPX" "@@ENG@@/repair.zip"
     echo "  ✗ Repair failed. Reinstall with:"
     echo "    curl -fL https://cdn.jsdelivr.net/gh/ikram571/ikram-tool@main/install.sh | bash"
     echo ""
@@ -668,7 +721,7 @@ fi
 MAGIC_NEEDED=$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)
 MAGIC_HAVE=$(python3 -c "
 import struct
-p = open('$HOME/Ikram_Tool/.engine/ikram.pyc','rb').read(4)
+p = open('@@ENG@@/ikram.pyc','rb').read(4)
 print(p.hex())
 " 2>/dev/null)
 if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
@@ -678,7 +731,7 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     DEBIAN_FRONTEND=noninteractive pkg upgrade -y python 2>&1 </dev/null | tail -3
     if [ "$(python3 -c "import importlib.util;print(importlib.util.MAGIC_NUMBER.hex())" 2>/dev/null)" = "$MAGIC_NEEDED" ]; then
         echo "  ✓ Python upgraded! The tool is starting..."
-        exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+        exec python3 "@@ENG@@/ikram_patch.py" "$@"
     fi
     echo "  ✗ Python upgrade failed. Run these:"
     echo "    pkg update -y && pkg upgrade -y"
@@ -686,8 +739,13 @@ if [ -n "$MAGIC_HAVE" ] && [ "$MAGIC_HAVE" != "$MAGIC_NEEDED" ]; then
     echo ""
     exit 1
 fi
-    exec python3 "$HOME/Ikram_Tool/.engine/ikram_patch.py" "$@"
+    exec python3 "@@ENG@@/ikram_patch.py" "$@"
 EOF
+# A quoted heredoc expands nothing, so the install path is baked
+# in after the write. The installer knows where it put the engine;
+# the generated launchers must not have to guess at it.
+sed -i "s#@@ENG@@#$TARGET/.engine#g; s#@@ROOT@#$TARGET#g" \
+    "$RC" "$PREFIX/bin/ikram" 2>/dev/null
 chmod +x "$PREFIX/bin/ikram"
 printf "\n"
 ok "'ikram' command ready (new version)"
