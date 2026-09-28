@@ -226,7 +226,7 @@ Static checks: Python AST parse on every changed module, `bash -n` on
    encryption option, so an encrypted-input fixture could not be built. The
    unencrypted path is covered.
 4. **The UE4 non-ENTER Baki branch builds an empty shell**, not a copy of the
-   targeted folder, while `pak_costom_pak`'s docstring promises full content
-   (Phase 4). Pre-existing, now pinned by a test that asserts the real
-   behaviour. Behaviour or docstring needs a follow-up decision.
+   targeted folder (Phase 4). Pre-existing, now pinned by a test that asserts
+   the real behaviour, and the overstated docstring was corrected in **V124**.
+   Changing the *behaviour* to match the old claim is still an open decision.
 5. The `test_decompile_safety` 39/1 flake in Phase 5 remains unreproduced.
