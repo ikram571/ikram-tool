@@ -530,6 +530,16 @@ human() {
     STAGE="$HOME/.ikram_stage"
     DLZIP="$STAGE/IkramTool.zip"
     rm -rf "$STAGE"; mkdir -p "$STAGE"
+    # Every exit path - success, download failure, corrupt zip, Ctrl-C - must
+    # take the staging dir with it, and must not leave a hollow Ikram_Tool
+    # behind. rmdir only succeeds on an empty dir, so an existing install is
+    # never touched here.
+    _cleanup_stage() {
+        [ -n "${STAGE:-}" ] && rm -rf "$STAGE"
+        [ -n "${TARGET:-}" ] && [ -d "$TARGET" ] && rmdir "$TARGET" 2>/dev/null
+        return 0
+    }
+    trap _cleanup_stage EXIT INT TERM
     box "$C_CYAN" "⬇ Downloading tool"
     mkdir -p "$TARGET"
 # TOOL_URL env override = local/testing builds. Default = GitHub latest.
